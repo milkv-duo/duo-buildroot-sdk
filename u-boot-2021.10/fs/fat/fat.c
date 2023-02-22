@@ -148,7 +148,7 @@ static void get_name(dir_entry *dirent, char *s_name)
 
 static int flush_dirty_fat_buffer(fsdata *mydata);
 
-#if !CONFIG_IS_ENABLED(FAT_WRITE)
+#if !defined(CONFIG_FAT_WRITE)
 /* Stub for read only operation */
 int flush_dirty_fat_buffer(fsdata *mydata)
 {

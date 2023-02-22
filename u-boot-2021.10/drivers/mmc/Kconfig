@@ -527,6 +527,32 @@ config MMC_SDHCI_BCMSTB
 
 	  If unsure, say N.
 
+config MMC_SDHCI_CVITEK
+	bool "SDHCI support for the CVITEK SD/SDIO/eMMC controller"
+	depends on BLK && DM_MMC
+	depends on MMC_SDHCI
+	depends on OF_CONTROL
+	help
+	  This selects the CVITEK SD/SDIO/eMMC driver.
+
+	  If you have a controller with this interface,
+	  say Y here.
+
+	  If unsure, say N.
+
+config MMC_SDHCI_CVITEK_WIFI
+	bool "Support for the Wifi over SDIO"
+	depends on MMC_SDHCI_CVITEK
+	help
+	  This enable pinmux to support Wifi over SDIO. While one
+	  select Yes. Then pinmux will be seleted to use WIFI SDIO.
+	  If one select No, then pinmux will be used to other
+	  funciton.
+
+	  If you want to support Wifi over SDIO, say Y here.
+
+	  If unsure, say N.
+
 config MMC_SDHCI_CADENCE
 	bool "SDHCI support for the Cadence SD/SDIO/eMMC controller"
 	depends on BLK && DM_MMC

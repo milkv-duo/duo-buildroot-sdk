@@ -36,6 +36,7 @@ int	arch_misc_init(void);
 
 /* board/.../... */
 int	board_init(void);
+void	board_save_time_record(uintptr_t saveaddr);
 
 /* calls to c from vectors.S */
 struct pt_regs;

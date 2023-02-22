@@ -43,6 +43,15 @@ const uchar default_environment[] = {
 #ifdef	CONFIG_NFSBOOTCOMMAND
 	"nfsboot="	CONFIG_NFSBOOTCOMMAND		"\0"
 #endif
+#ifdef	CONFIG_NANDBOOTCOMMAND
+	"nandboot="	CONFIG_NANDBOOTCOMMAND		"\0"
+#endif
+#ifdef	CONFIG_EMMCBOOTCOMMAND
+	"emmcboot="	CONFIG_EMMCBOOTCOMMAND		"\0"
+#endif
+#ifdef	CONFIG_NORBOOTCOMMAND
+	"norboot="	CONFIG_NORBOOTCOMMAND		"\0"
+#endif
 #if defined(CONFIG_BOOTDELAY)
 	"bootdelay="	__stringify(CONFIG_BOOTDELAY)	"\0"
 #endif

@@ -11,6 +11,15 @@ config ADC
 	  - support supply's phandle with auto-enable
 	  - supply polarity setting in fdt
 
+config ADC_CVITEK
+	bool "Enable cvitek ADC driver"
+	help
+	  This enables basic driver for cvitek ADC compatible with cvitek soc.
+	  It provides:
+	  - 3 analog input channels
+	  - 12-bit resolution
+	  - 320 KSPS of sample rate
+
 config ADC_EXYNOS
 	bool "Enable Exynos 54xx ADC driver"
 	help

@@ -1661,6 +1661,7 @@ static int check_device_config(int dev)
 		if (mtdinfo.type != MTD_NORFLASH &&
 		    mtdinfo.type != MTD_NANDFLASH &&
 		    mtdinfo.type != MTD_DATAFLASH &&
+			mtdinfo.type != MTD_MLCNANDFLASH &&
 		    mtdinfo.type != MTD_UBIVOLUME) {
 			fprintf(stderr, "Unsupported flash type %u on %s\n",
 				mtdinfo.type, DEVNAME(dev));

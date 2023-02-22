@@ -1,0 +1,44 @@
+if TARGET_CVITEK_CV1835
+
+choice
+	prompt "Cvitek CV1835 verification platform type select"
+
+config TARGET_CVITEK_CV1835_ASIC
+	bool "ASIC"
+	help
+	  This enables support for Cvitek's CV1835 SoC on ASIC platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV1835_PALLADIUM
+	bool "Palladium"
+	help
+	  This enables support for Cvitek's CV1835 SoC on PALLADIUM platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV1835_FPGA
+	bool "FPGA"
+	help
+	  This enables support for Cvitek's CV1835 SoC on FPGA platform.
+
+	  If unsure, say N.
+
+endchoice
+
+config SYS_BOARD
+	default "cv1835"
+
+config SYS_VENDOR
+	default "cvitek"
+
+config SYS_CONFIG_NAME
+	default "cv1835-asic" if TARGET_CVITEK_CV1835_ASIC
+	default "cv1835-palladium" if TARGET_CVITEK_CV1835_PALLADIUM
+	default "cv1835-fpga" if TARGET_CVITEK_CV1835_FPGA
+
+config SYS_BOOTMAPSZ
+	hex "Maximum size of memory mapped"
+	default "0x10000000"
+
+endif

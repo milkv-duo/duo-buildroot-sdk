@@ -486,6 +486,7 @@ void autoboot_command(const char *s)
 		if (lock)
 			prev = disable_ctrlc(1); /* disable Ctrl-C checking */
 
+		board_save_time_record(TIME_RECORDS_FIELD_BOOTCMD_START);
 		run_command_list(s, -1, 0);
 
 		if (lock)

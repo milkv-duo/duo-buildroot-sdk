@@ -70,7 +70,7 @@ int print_buffer(ulong addr, const void *data, uint width, uint count,
  *
  */
 int hexdump_line(ulong addr, const void *data, uint width, uint count,
-		 uint linelen, char *out, int size);
+		 uint linelen, char *out, size_t size);
 
 /**
  * display_options() - display the version string / build tag

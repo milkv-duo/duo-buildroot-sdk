@@ -661,9 +661,6 @@ static init_fnc_t init_sequence_r[] = {
 	stdio_init_tables,
 	serial_initialize,
 	initr_announce,
-#if CONFIG_IS_ENABLED(WDT)
-	initr_watchdog,
-#endif
 	INIT_FUNC_WATCHDOG_RESET
 #if defined(CONFIG_NEEDS_MANUAL_RELOC) && defined(CONFIG_BLOCK_CACHE)
 	blkcache_init,
@@ -689,6 +686,9 @@ static init_fnc_t init_sequence_r[] = {
 #endif
 #ifdef CONFIG_ARCH_EARLY_INIT_R
 	arch_early_init_r,
+#endif
+#if CONFIG_IS_ENABLED(WDT)
+	initr_watchdog,
 #endif
 	power_init_board,
 #ifdef CONFIG_MTD_NOR_FLASH

@@ -20,6 +20,7 @@
 #include <spi.h>
 #include <spi.h>
 #include <spi-mem.h>
+#include <linux/mtd/spi-nor.h>
 #include <dm/device_compat.h>
 #endif
 
@@ -411,19 +412,33 @@ int spi_mem_exec_op(struct spi_slave *slave, const struct spi_mem_op *op)
 	flag = SPI_XFER_BEGIN;
 	/* Make sure to set END bit if no tx or rx data messages follow */
 	if (!tx_buf && !rx_buf)
-		flag |= SPI_XFER_END;
+		flag |= (SPI_XFER_END | SPI_XFER_CMD_DATA);
 
 	ret = spi_xfer(slave, op_len * 8, op_buf, NULL, flag);
 	if (ret)
 		return ret;
 
 	/* 2nd transfer: rx or tx data path */
-	if (tx_buf || rx_buf) {
+	if (!tx_buf || rx_buf) {
 		ret = spi_xfer(slave, op->data.nbytes * 8, tx_buf,
-			       rx_buf, SPI_XFER_END);
-		if (ret)
-			return ret;
+			       rx_buf, SPI_XFER_END | SPI_XFER_CMD_DATA);
+	} else if (tx_buf || !rx_buf) {
+		/* if it's not PP cmd */
+		if (op->cmd.opcode == SPINOR_OP_PP ||
+		    op->cmd.opcode == SPINOR_OP_PP_1_1_4 ||
+		    op->cmd.opcode == SPINOR_OP_PP_1_4_4 ||
+		    op->cmd.opcode == SPINOR_OP_PP_4B ||
+		    op->cmd.opcode == SPINOR_OP_PP_1_1_4_4B ||
+		    op->cmd.opcode == SPINOR_OP_PP_1_4_4_4B) {
+			ret = spi_xfer(slave, op->data.nbytes * 8, tx_buf,
+				       rx_buf, SPI_XFER_END | SPI_XFER_USER_DATA);
+		} else { /* if it's not PP cmd */
+			ret = spi_xfer(slave, op->data.nbytes * 8, tx_buf,
+				       rx_buf, SPI_XFER_END);
+		}
 	}
+	if (ret)
+		return ret;
 
 	spi_release_bus(slave);
 

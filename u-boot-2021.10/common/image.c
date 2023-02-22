@@ -17,6 +17,7 @@
 #include <asm/cache.h>
 #include <u-boot/crc.h>
 #include <watchdog.h>
+#include <time.h>
 
 #ifdef CONFIG_SHOW_BOOT_PROGRESS
 #include <status_led.h>
@@ -444,9 +445,18 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 		 uint unc_len, ulong *load_end)
 {
 	int ret = 0;
+#ifndef USE_HOSTCC
+	ulong start;
+#endif
 
 	*load_end = load;
 	print_decomp_msg(comp, type, load == image_start);
+
+#ifndef USE_HOSTCC
+	// Save decompression start time
+	board_save_time_record(TIME_RECORDS_FIELD_DECOMPRESS_KERNEL_START);
+	start = get_timer(0);
+#endif
 
 	/*
 	 * Load the image to the right place, decompressing if needed. After
@@ -580,6 +590,10 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 	}
 
 	*load_end = load + image_len;
+
+#ifndef USE_HOSTCC
+	printf("   Decompressing %lu bytes used %lums\n", image_len, get_timer(start));
+#endif
 
 	return ret;
 }

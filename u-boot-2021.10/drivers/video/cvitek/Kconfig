@@ -1,0 +1,69 @@
+#
+# Video drivers selection for cvitek soc.
+#
+
+menuconfig VIDEO_CVITEK
+	bool "Enable Cvitek Video Support"
+	depends on DM_VIDEO || BOOTLOGO
+	default y if DM_VIDEO || BOOTLOGO
+	help
+	  Cvitek SoCs provide video output capabilities for Low-voltage
+	  Differential Signalling (LVDS), and Display Serial Interface (DSI).
+
+	  This driver supports the on-chip video output device, and targets the
+	  Cvitek CV1835.
+
+config VIDEO_CVITEK_MAX_XRES
+        int "Maximum horizontal resolution (for memory allocation purposes)"
+	depends on VIDEO_CVITEK
+	default 1920
+	help
+	  The maximum horizontal resolution to support for the framebuffer.
+	  This configuration is used for reserving/allocating memory for the
+	  framebuffer during device-model binding/probing.
+
+config VIDEO_CVITEK_MAX_YRES
+        int "Maximum vertical resolution (for memory allocation purposes)"
+	depends on VIDEO_CVITEK
+	default 1080
+	help
+	  The maximum vertical resolution to support for the framebuffer.
+	  This configuration is used for reserving/allocating memory for the
+	  framebuffer during device-model binding/probing.
+
+if VIDEO_CVITEK
+
+choice
+	prompt "Display port selection"
+	default DISPLAY_CVITEK_MIPI
+	depends on VIDEO_CVITEK
+	help
+	  Select one kind of display port.
+
+config DISPLAY_CVITEK_LVDS
+	bool "LVDS Port"
+	help
+	  This enables Low-voltage Differential Signaling(LVDS) display support.
+	  LVDS is a high-speed, long-distance digital interface for serial
+	  communication (sending one bit at time) over two copper wires
+	  (differential) that are placed at 180 degrees from each other.
+
+config DISPLAY_CVITEK_I80
+	bool "I80 Port"
+	help
+	  This enables Intel 8080(I80) display support.
+	  Intel 8080 (I80) is one kind of the most common LCD MPU parallel
+	  interfaces, LCD controller signals are divided into two types:
+	  data signals and control signals.
+
+config DISPLAY_CVITEK_MIPI
+	bool "DSI Port"
+	help
+	  This enables Display Serial Interface(DSI) display support.
+	  The MIPI Display Serial Interface (MIPI DSI) defines a
+	  high-speed serial interface between a host processor and
+	  a display module.
+
+endchoice
+
+endif

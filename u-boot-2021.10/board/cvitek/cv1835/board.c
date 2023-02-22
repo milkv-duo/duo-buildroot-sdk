@@ -1,0 +1,492 @@
+/*
+ * (C) Copyright 2013
+ * David Feng <fenghua@phytium.com.cn>
+ * Sharma Bhupesh <bhupesh.sharma@freescale.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
+#include <common.h>
+#include <dm.h>
+#include <malloc.h>
+#include <errno.h>
+#include <netdev.h>
+#include <asm/io.h>
+#include <linux/compiler.h>
+#include <dm/platform_data/serial_pl01x.h>
+#include <asm/armv8/mmu.h>
+#include <asm/arch-armv8/mmio.h>
+#include "cv1835_reg.h"
+#include "cv1835_reg_fmux_gpio.h"
+#include "cv1835_pinlist_swconfig.h"
+
+
+DECLARE_GLOBAL_DATA_PTR;
+
+#ifdef CONFIG_PL011_SERIAL
+static const struct pl01x_serial_platdata serial_platdata = {
+	.base = V2M_UART0,
+	.type = TYPE_PL011,
+	.clock = CONFIG_PL011_CLOCK,
+};
+
+U_BOOT_DEVICE(vexpress_serials) = {
+	.name = "serial_pl01x",
+	.platdata = &serial_platdata,
+};
+#endif
+
+static struct mm_region vexpress64_mem_map[] = {
+	{
+		.virt = 0x0UL,
+		.phys = 0x0UL,
+		.size = 0x80000000UL,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_DEVICE_NGNRNE) |
+			 PTE_BLOCK_NON_SHARE |
+			 PTE_BLOCK_PXN | PTE_BLOCK_UXN
+	}, {
+		.virt = PHYS_SDRAM_1,
+		.phys = PHYS_SDRAM_1,
+		.size = PHYS_SDRAM_1_SIZE,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+			 PTE_BLOCK_INNER_SHARE
+#ifdef BM_UPDATE_FW_START_ADDR
+	}, {
+		.virt = BM_UPDATE_FW_START_ADDR,
+		.phys = BM_UPDATE_FW_START_ADDR,
+		/*
+		 * this area is for bmtest under uboot. -- added by Xun Li
+		 * [0x110000000, 0x190000000] size = 2G
+		 */
+		.size = BM_UPDATE_FW_SIZE,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+			 PTE_BLOCK_INNER_SHARE
+#else
+	}, {
+		/*
+		 * be aware we'll need 256MB more other than PHYS_SDRAM_1_SIZE for the fake flash area
+		 * of itb file during ram boot, and MMC's DMA buffer (BM_UPDATE_ALIGNED_BUFFER).
+		 * so either cover it here or in video's region.
+		 * also be carefull with BM_SPIF_BUFFER_ADDR and BM_UPDATE_FW_START_ADDR...
+		 */
+		.virt = PHYS_SDRAM_1 + PHYS_SDRAM_1_SIZE,
+		.phys = PHYS_SDRAM_1 + PHYS_SDRAM_1_SIZE,
+		.size = 0x10000000,
+		.attrs = PTE_BLOCK_MEMTYPE(MT_NORMAL) |
+			 PTE_BLOCK_INNER_SHARE
+#endif
+	}, {
+		/* List terminator */
+		0,
+	}
+};
+
+struct mm_region *mem_map = vexpress64_mem_map;
+
+static void pinmux_config(int io_type)
+{
+		switch (io_type) {
+		case PINMUX_UART0:
+			PINMUX_CONFIG(UART0_RX, UART0_RX);
+			PINMUX_CONFIG(UART0_TX, UART0_TX);
+		break;
+		case PINMUX_UART1:
+			PINMUX_CONFIG(UART1_RX, UART1_RX);
+			PINMUX_CONFIG(UART1_TX, UART1_TX);
+		break;
+		case PINMUX_UART2:
+			PINMUX_CONFIG(UART2_RX, UART2_RX);
+			PINMUX_CONFIG(UART2_TX, UART2_TX);
+		break;
+		case PINMUX_UART3:
+			PINMUX_CONFIG(PWM2, UART3_RX);
+			PINMUX_CONFIG(PWM3, UART3_TX);
+		break;
+		case PINMUX_I2C0:
+			PINMUX_CONFIG(IIC0_SCL, IIC0_SCL);
+			PINMUX_CONFIG(IIC0_SDA, IIC0_SDA);
+		break;
+		case PINMUX_I2C1:
+			PINMUX_CONFIG(IIC1_SCL, IIC1_SCL);
+			PINMUX_CONFIG(IIC1_SDA, IIC1_SDA);
+		break;
+		case PINMUX_I2C2:
+			PINMUX_CONFIG(IIC2_SCL, IIC2_SCL);
+			PINMUX_CONFIG(IIC2_SDA, IIC2_SDA);
+		break;
+		case PINMUX_I2C3:
+			PINMUX_CONFIG(IIC3_SCL, IIC3_SCL);
+			PINMUX_CONFIG(IIC3_SDA, IIC3_SDA);
+		break;
+		case PINMUX_SPI0:
+			PINMUX_CONFIG(SPI0_SCK, SPI0_SCK);
+			PINMUX_CONFIG(SPI0_CS_X, SPI0_CS_X);
+			PINMUX_CONFIG(SPI0_SDI, SPI0_SDI);
+			PINMUX_CONFIG(SPI0_SDO, SPI0_SDO);
+		break;
+		case PINMUX_SPI1:
+			PINMUX_CONFIG(XGPIO_A_25, SPI1_SCK);
+			PINMUX_CONFIG(XGPIO_A_29, SPI1_CS_X);
+			PINMUX_CONFIG(XGPIO_A_23, SPI1_SDI);
+			PINMUX_CONFIG(XGPIO_A_24, SPI1_SDO);
+		break;
+		case PINMUX_SPI2:
+			PINMUX_CONFIG(IIC3_SCL, SPI2_SCK);
+			PINMUX_CONFIG(IIC3_SDA, SPI2_CS_X);
+			PINMUX_CONFIG(IIC0_SCL, SPI2_SDI);
+			PINMUX_CONFIG(IIC0_SDA, SPI2_SDO);
+		break;
+		case PINMUX_SPI3:
+			printf("fix me: PINMUX_SPI3\n");
+		break;
+		case PINMUX_I2S1:
+			PINMUX_CONFIG(UART1_RTS, IIS1_DI);
+			PINMUX_CONFIG(UART2_RTS, IIS1_MCLK);
+			PINMUX_CONFIG(UART1_CTS, IIS1_DO);
+			PINMUX_CONFIG(UART1_TX, IIS1_BCLK);
+			PINMUX_CONFIG(UART1_RX, IIS1_LRCK);
+		break;
+		case PINMUX_I2S2:
+			PINMUX_CONFIG(XGPIO_A_20, IIS2_DI);
+			PINMUX_CONFIG(EMMC_RSTN, IIS2_MCLK);
+			PINMUX_CONFIG(XGPIO_A_21, IIS2_DO);
+			PINMUX_CONFIG(XGPIO_A_26, IIS2_BCLK);
+			PINMUX_CONFIG(XGPIO_A_22, IIS2_LRCK);
+		break;
+		case PINMUX_SDIO0:
+			PINMUX_CONFIG(SDIO0_CD, SDIO0_CD);
+			PINMUX_CONFIG(SDIO0_PWR_EN, SDIO0_PWR_EN);
+			PINMUX_CONFIG(SDIO0_CMD, SDIO0_CMD);
+			PINMUX_CONFIG(SDIO0_CLK, SDIO0_CLK);
+			PINMUX_CONFIG(SDIO0_D0, SDIO0_D_0);
+			PINMUX_CONFIG(SDIO0_D1, SDIO0_D_1);
+			PINMUX_CONFIG(SDIO0_D2, SDIO0_D_2);
+			PINMUX_CONFIG(SDIO0_D3, SDIO0_D_3);
+		break;
+		case PINMUX_SDIO1:
+			PINMUX_CONFIG(XGPIO_A_24, SDIO1_CMD);
+			PINMUX_CONFIG(XGPIO_A_25, SDIO1_CLK);
+			PINMUX_CONFIG(XGPIO_A_23, SDIO1_D_0);
+			PINMUX_CONFIG(XGPIO_A_28, SDIO1_D_1);
+			PINMUX_CONFIG(XGPIO_A_27, SDIO1_D_2);
+			PINMUX_CONFIG(XGPIO_A_29, SDIO1_D_3);
+			PINMUX_CONFIG(XGPIO_A_22, XGPIOA_22);
+		break;
+		case PINMUX_EMMC:
+			PINMUX_CONFIG(EMMC_CLK, EMMC_CLK);
+			PINMUX_CONFIG(EMMC_RSTN, EMMC_RSTN);
+			PINMUX_CONFIG(EMMC_CMD, EMMC_CMD);
+			PINMUX_CONFIG(EMMC_DAT1, EMMC_DAT_1);
+			PINMUX_CONFIG(EMMC_DAT0, EMMC_DAT_0);
+			PINMUX_CONFIG(EMMC_DAT2, EMMC_DAT_2);
+			PINMUX_CONFIG(EMMC_DAT3, EMMC_DAT_3);
+		break;
+		case PINMUX_SPI_NOR:
+			PINMUX_CONFIG(EMMC_CLK, SPINOR_SCK);
+			PINMUX_CONFIG(EMMC_CMD, SPINOR_SDI);
+			PINMUX_CONFIG(EMMC_DAT1, SPINOR_CS_X);
+			PINMUX_CONFIG(EMMC_DAT0, SPINOR_SDO);
+			PINMUX_CONFIG(EMMC_DAT2, SPINOR_HOLD_X);
+			PINMUX_CONFIG(EMMC_DAT3, SPINOR_WP_X);
+		break;
+		case PINMUX_SPI_NAND:
+			PINMUX_CONFIG(EMMC_CLK, SPINAND_CLK);
+			PINMUX_CONFIG(EMMC_CMD, SPINAND_DI);
+			PINMUX_CONFIG(EMMC_DAT1, SPINAND_CS);
+			PINMUX_CONFIG(EMMC_DAT0, SPINAND_DO);
+			PINMUX_CONFIG(EMMC_DAT2, SPINAND_HOLD);
+			PINMUX_CONFIG(EMMC_DAT3, SPINAND_WP);
+		break;
+		case PINMUX_CAM0:
+			PINMUX_CONFIG(CAM_PD0, CAM_MCLK1);
+			PINMUX_CONFIG(CAM_MCLK0, CAM_MCLK0);
+		break;
+		case PINMUX_VI0:
+			printf("fix me: PINMUX_VI0\n");
+		break;
+		case PINMUX_VO:
+			printf("fix me: PINMUX_VO\n");
+		break;
+		case PINMUX_DSI:
+			PINMUX_CONFIG(PWM1, XGPIOB_4);
+			PINMUX_CONFIG(PWM2, XGPIOB_3);
+			PINMUX_CONFIG(PWM3, XGPIOB_5);
+
+			PINMUX_CONFIG(PAD_MIPI_TXM4, MIPI_TXM4);
+			PINMUX_CONFIG(PAD_MIPI_TXP4, MIPI_TXP4);
+			PINMUX_CONFIG(PAD_MIPI_TXM3, MIPI_TXM3);
+			PINMUX_CONFIG(PAD_MIPI_TXP3, MIPI_TXP3);
+			PINMUX_CONFIG(PAD_MIPI_TXM2, MIPI_TXM2);
+			PINMUX_CONFIG(PAD_MIPI_TXP2, MIPI_TXP2);
+			PINMUX_CONFIG(PAD_MIPI_TXM1, MIPI_TXM1);
+			PINMUX_CONFIG(PAD_MIPI_TXP1, MIPI_TXP1);
+			PINMUX_CONFIG(PAD_MIPI_TXM0, MIPI_TXM0);
+			PINMUX_CONFIG(PAD_MIPI_TXP0, MIPI_TXP0);
+			break;
+		case PINMUX_RMII1:
+			PINMUX_CONFIG(SPI0_SDI, RMII1_TXD3);
+			PINMUX_CONFIG(SPI0_SDO, RMII1_RXD3);
+			PINMUX_CONFIG(SPI0_SCK, RMII1_TXD2);
+			PINMUX_CONFIG(SPI0_CS_X, RMII1_RXD2);
+			PINMUX_CONFIG(IIC2_SCL, RMII1_MDIO);
+			PINMUX_CONFIG(IIC1_SCL, RMII1_RXD1);
+			PINMUX_CONFIG(IIC1_SDA, RMII1_REFCLKI);
+			PINMUX_CONFIG(UART2_TX, RMII1_RXD0);
+			PINMUX_CONFIG(IIC2_SDA, RMII1_MDC);
+			PINMUX_CONFIG(UART1_RTS, RMII1_TXD0);
+			PINMUX_CONFIG(UART2_RTS, RMII1_TXD1);
+			PINMUX_CONFIG(UART2_RX, RMII1_RXDV);
+			PINMUX_CONFIG(UART1_TX, RMII1_TXCLK);
+			PINMUX_CONFIG(UART1_CTS, XGPIOB_20);
+			PINMUX_CONFIG(UART2_CTS, RMII1_TXEN);
+			break;
+		case PINMUX_EPHY_LED:
+			PINMUX_CONFIG(XGPIO_A_26, EPHY_LNK_LED);
+			PINMUX_CONFIG(XGPIO_A_22, EPHY_SPD_LED);
+			break;
+		case PINMUX_I80:
+			PINMUX_CONFIG(VO_DATA1, VO_DATA_1);
+			PINMUX_CONFIG(VO_DATA0, VO_DATA_0);
+			PINMUX_CONFIG(PAD_MIPI_TXM4, VO_DATA_10);
+			PINMUX_CONFIG(PAD_MIPI_TXP4, VO_DATA_9);
+			PINMUX_CONFIG(PAD_MIPI_TXM3, VO_DATA_8);
+			PINMUX_CONFIG(PAD_MIPI_TXP3, VO_DATA_7);
+			PINMUX_CONFIG(PAD_MIPI_TXM2, VO_DATA_6);
+			PINMUX_CONFIG(PAD_MIPI_TXP2, VO_DATA_5);
+			PINMUX_CONFIG(PAD_MIPI_TXM1, VO_DATA_4);
+			PINMUX_CONFIG(PAD_MIPI_TXP1, VO_DATA_3);
+			PINMUX_CONFIG(PAD_MIPI_TXM0, VO_DATA_2);
+			PINMUX_CONFIG(PAD_MIPI_TXP0, VO_CLK);
+			break;
+		default:
+		break;
+	}
+}
+
+#define _reg_read(addr) readl((void __iomem *)addr)
+#define _reg_write(addr, data) writel(data, (void __iomem *)addr)
+
+static void cvsnfc_setup_internal_clk(void)
+{
+/*
+ * Set clk_spi_nand to 150Mhz
+ * write(0x3002088) = read(0x3002088)|0x10
+ * write(0x3002088) = 0x000A0019
+ * write(0x3002088) = 0x000A0009
+ */
+	#define TOP_CLK_REG_BASE		0x3002000
+	#define REG_SPI_NAND_CLK_SETTING	(TOP_CLK_REG_BASE + 0x88)
+	_reg_write(REG_SPI_NAND_CLK_SETTING, _reg_read(REG_SPI_NAND_CLK_SETTING) | 0x10);
+	mdelay(1);
+	_reg_write(REG_SPI_NAND_CLK_SETTING, 0x000A0019);
+	mdelay(1);
+	_reg_write(REG_SPI_NAND_CLK_SETTING, 0x000A0009);
+}
+
+#include "../cvi_board_init.c"
+
+int board_init(void)
+{
+#if defined(CONFIG_TARGET_CVITEK_CV1835_ASIC) /* config eth internal phy on ASIC board */
+	unsigned int val;
+
+	//writel(0x00000000, 0x03002030);
+	//writel(0x00000000, 0x03002034);
+
+	val = readl(0x03009000) & ETH_PHY_INIT_MASK;
+	writel((val | ETH_PHY_SHUTDOWN) & ETH_PHY_RESET, 0x03009000);
+	mdelay(1);
+	writel(val & ETH_PHY_POWERUP & ETH_PHY_RESET, 0x03009000);
+	mdelay(20);
+	writel((val & ETH_PHY_POWERUP) | ETH_PHY_RESET_N, 0x03009000);
+	mdelay(1);
+
+	val = readl(0x03009000);
+	writel(readl(0x03009000) | ETH_PHY_LED_LOW_ACTIVE, 0x03009000);
+
+#endif
+
+/* Set ethernet clock resource */
+#if defined(CONFIG_TARGET_CVITEK_CV1835_FPGA)
+	writel(0x000000C1, 0x03000034); /* Set eth0 RGMII, eth1 RMII clk resource and interface type*/
+#elif defined(CONFIG_TARGET_CVITEK_CV1835_ASIC)
+	writel(0x0000001C, 0x03000034); /* Set eth0 RMII, eth1 RGMII clk resource and interface type*/
+
+	writel(0x00000020, 0x03001940);	 /* set TX driving strength of ASIC EVB RGMII interface */
+	writel(0x00000020, 0x03001918);
+	writel(0x00000020, 0x03001934);
+	writel(0x00000020, 0x03001938);
+	writel(0x00000020, 0x0300194c);
+	writel(0x00000020, 0x03001910);
+
+	writel(0x00000020, 0x03001928);	 /* Remove RX pull down */
+	writel(0x00000020, 0x0300193c);
+	writel(0x00000020, 0x0300192c);
+	writel(0x00000020, 0x03001924);
+	writel(0x00000020, 0x0300191c);
+	writel(0x00000020, 0x03001914);
+
+	writel(0x01070000, 0x030001CC); /* RGMII TX/RX delayline select config */
+
+
+#elif defined(CONFIG_TARGET_CVITEK_CV1835_PALLADIUM)
+	writel(0x0000001C, 0x03000034); /* Set eth0 RMII, eth1 RGMII clk resource and interface type*/
+#endif
+#if defined(CONFIG_NAND_SUPPORT)
+	pinmux_config(PINMUX_SPI_NAND); // TODO, use gpio to decide storage pinmux
+#elif defined(CONFIG_SPI_FLASH)
+	pinmux_config(PINMUX_SPI_NOR);
+#elif defined(CONFIG_EMMC_SUPPORT)
+	pinmux_config(PINMUX_EMMC);
+#endif
+
+#ifdef CONFIG_DISPLAY_CVITEK_MIPI
+	pinmux_config(PINMUX_DSI);
+#elif defined(CONFIG_DISPLAY_CVITEK_I80)
+	pinmux_config(PINMUX_I80);
+#endif
+
+#if defined(CV1835_WDMB_0001A_SPINAND)
+	PINMUX_CONFIG(UART1_RX, UART1_RX); //UART_RX,TX,CTS
+	PINMUX_CONFIG(UART1_TX, UART1_TX);
+	PINMUX_CONFIG(UART1_CTS, UART1_CTS);
+#elif defined(CV1835_WDMB_0002A_SPINAND)
+	PINMUX_CONFIG(JTAG_CPU_TCK, XGPIOA_0); //IIC2_SHDN
+	PINMUX_CONFIG(IIC2_SCL, IIC2_SCL); //IIC2
+	PINMUX_CONFIG(IIC2_SDA, IIC2_SDA);
+	PINMUX_CONFIG(JTAG_CPU_TMS, XGPIOA_6);//AMP_MUTE
+#elif defined(CV1832_WDMB_0002B_SPINAND)
+	PINMUX_CONFIG(PWM3, XGPIOB_5); //LED_PWM
+	PINMUX_CONFIG(UART1_CTS, XGPIOB_20); //ALARM_OUT
+	PINMUX_CONFIG(ADC1, XGPIOB_24); //IR_IN
+	PINMUX_CONFIG(VI_DATA19, XGPIOD_2); //ALARM_IN
+	PINMUX_CONFIG(VI_DATA20, XGPIOC_31); //KEY_SET
+	PINMUX_CONFIG(VI_DATA21, XGPIOD_0); //IR_CUT1
+	PINMUX_CONFIG(VI_DATA22, XGPIOC_30); //IR_CUT2
+#elif defined(CV1835_WDMB_0003A)
+	pinmux_config(PINMUX_SDIO1);//wifi
+	PINMUX_CONFIG(ADC1, XGPIOB_24); //Light_INT
+	PINMUX_CONFIG(UART1_CTS, XGPIOB_20); //REMOVE_BUT
+	PINMUX_CONFIG(UART1_RTS, XGPIOB_16); //RELAY_C
+	PINMUX_CONFIG(JTAG_CPU_TCK, XGPIOA_0); //CAM1_PWDN
+	PINMUX_CONFIG(JTAG_CPU_TMS, XGPIOA_6); //CAM0_PWDN
+	PINMUX_CONFIG(SDIO0_D1, XGPIOA_17); //VO_IN
+	PINMUX_CONFIG(SDIO0_D2, XGPIOA_18); //NFC_IRQ
+	PINMUX_CONFIG(SPI0_SCK, SPI0_SCK); //NFC_SCK
+	PINMUX_CONFIG(SPI0_CS_X, XGPIOB_9); //NFC_CS_X
+	PINMUX_CONFIG(SPI0_SDI, SPI0_SDI); //NFC_SDI
+	PINMUX_CONFIG(SPI0_SDO, SPI0_SDO); //NFC_SDO
+	PINMUX_CONFIG(IIC1_SCL, IIC1_SCL); //RTC
+	PINMUX_CONFIG(IIC1_SDA, IIC1_SDA); //RTC
+	PINMUX_CONFIG(UART1_TX, UART1_TX); //RS485_A
+	PINMUX_CONFIG(UART1_RX, UART1_RX); //RS485_B
+	PINMUX_CONFIG(SDIO0_D3, XGPIOA_19); //RS485_RE_DE
+	PINMUX_CONFIG(XGPIO_A_26, EPHY_LNK_LED); //EPHY_SPD_LED
+	PINMUX_CONFIG(XGPIO_A_22, EPHY_SPD_LED); //EPHY_LNK_LED
+	PINMUX_CONFIG(PWM3, PWM_3); //white_led
+#elif defined(CV9520_WEVB_0002A_V02_NVR)
+#elif defined(CV9520_WDMB_0004A_V02_NVR)
+	pinmux_config(PINMUX_SDIO1);   //WIFI
+	PINMUX_CONFIG(XGPIO_A_26, EPHY_LNK_LED);  //EPHY_SPD_LED
+	PINMUX_CONFIG(XGPIO_A_22, EPHY_SPD_LED); //EPHY_LNK_LED
+	pinmux_config(PINMUX_RMII1);   //ETH1
+	PINMUX_CONFIG(USB_VBUS_DET, USB_VBUS_DET); //USB_VBUS_DET
+	PINMUX_CONFIG(PWM1, PWM_1);    //LCD Brightness PWM
+	PINMUX_CONFIG(MIPIRX0_PAD0N, XGPIOC_28); //TOUCHPAD
+	PINMUX_CONFIG(MIPIRX0_PAD0P, XGPIOC_29); //TOUCHPAD
+#elif defined(CV9520_WEVB_0002A_V02_NVR_SPINAND)
+#elif defined(CV9520_WDMB_0004A_V02_NVR_SPINAND)
+	pinmux_config(PINMUX_SDIO1);   //WIFI
+	PINMUX_CONFIG(XGPIO_A_26, EPHY_LNK_LED);  //EPHY_SPD_LED
+	PINMUX_CONFIG(XGPIO_A_22, EPHY_SPD_LED); //EPHY_LNK_LED
+	pinmux_config(PINMUX_RMII1);   //ETH1
+	PINMUX_CONFIG(USB_VBUS_DET, USB_VBUS_DET); //USB_VBUS_DET
+	PINMUX_CONFIG(PWM1, PWM_1);    //LCD Brightness PWM
+	PINMUX_CONFIG(MIPIRX0_PAD0N, XGPIOC_28); //TOUCHPAD
+	PINMUX_CONFIG(MIPIRX0_PAD0P, XGPIOC_29); //TOUCHPAD
+#elif defined(CV1835_WEVB_0002A_I80)
+	pinmux_config(PINMUX_SDIO1);
+	pinmux_config(PINMUX_I2C1);
+	pinmux_config(PINMUX_I2C2);
+	pinmux_config(PINMUX_I2C3);
+	pinmux_config(PINMUX_UART1);
+	pinmux_config(PINMUX_UART2);
+	PINMUX_CONFIG(UART2_RTS, UART2_RTS);
+	PINMUX_CONFIG(UART2_CTS, UART2_CTS);
+	PINMUX_CONFIG(VI_DATA21, UART3_RX);//uart3
+	PINMUX_CONFIG(VI_DATA22, UART3_TX);
+	PINMUX_CONFIG(UART1_CTS, UART4_RX);//uart4
+	PINMUX_CONFIG(UART1_RTS, UART4_TX);
+	PINMUX_CONFIG(SPI0_SDI, SPI0_SDI);//spi0
+	PINMUX_CONFIG(SPI0_SDO, SPI0_SDO);
+	PINMUX_CONFIG(SPI0_SCK, SPI0_SCK);
+	PINMUX_CONFIG(SPI0_CS_X, XGPIOB_9);
+	PINMUX_CONFIG(SDIO0_PWR_EN, XGPIOA_4);//gpio
+	PINMUX_CONFIG(SDIO0_CMD, XGPIOA_14);
+	PINMUX_CONFIG(SDIO0_CLK, XGPIOA_15);
+	PINMUX_CONFIG(SDIO0_D0, XGPIOA_16);
+	PINMUX_CONFIG(SDIO0_D1, XGPIOA_17);
+	PINMUX_CONFIG(SDIO0_D2, XGPIOA_18);
+	PINMUX_CONFIG(SDIO0_D3, XGPIOA_19);
+	PINMUX_CONFIG(CAM_PD0, CAM_MCLK1); //cam_pd
+	PINMUX_CONFIG(JTAG_CPU_TRST, XGPIOA_2);
+	PINMUX_CONFIG(JTAG_CPU_TMS, XGPIOA_6);
+#endif
+
+	cvsnfc_setup_internal_clk();
+
+	return cvi_board_init();
+}
+
+int dram_init(void)
+{
+	unsigned int ddr_size;
+
+	ddr_size = readl(GP_REG8);
+	gd->ram_size = ddr_size ? ddr_size : PHYS_SDRAM_1_SIZE;
+	return 0;
+}
+
+int dram_init_banksize(void)
+{
+	unsigned int ddr_size;
+
+	ddr_size = readl(GP_REG8);
+	gd->bd->bi_dram[0].start = PHYS_SDRAM_1;
+	gd->bd->bi_dram[0].size = ddr_size ? ddr_size : PHYS_SDRAM_1_SIZE;
+
+	return 0;
+}
+
+/*
+ * Board specific reset that is system reset.
+ */
+void reset_cpu(ulong addr)
+{
+}
+
+void software_root_reset(void)
+{
+	unsigned int val;
+
+	writel(0x4, (RTC_BASE + RTC_DB_REQ_WARM_RST));
+	writel(0x1, (RTC_BASE + RTC_EN_WARM_RST_REQ));
+	writel(0xAB18, (RTCFC_BASE + RTC_CTRL0_UNLOCKKEY));
+
+	val = readl((RTCFC_BASE + RTC_CTRL0)) | 0xFFFF0000 | (0x1 << 4);
+	writel(val, (RTCFC_BASE + RTC_CTRL0));
+}
+
+/*
+ * Board specific ethernet initialization routine.
+ */
+int board_eth_init(bd_t *bis)
+{
+	int rc = 0;
+#ifdef CONFIG_SMC91111
+	rc = smc91111_initialize(0, CONFIG_SMC91111_BASE);
+#endif
+#ifdef CONFIG_SMC911X
+	rc = smc911x_initialize(0, CONFIG_SMC911X_BASE);
+#endif
+	return rc;
+}

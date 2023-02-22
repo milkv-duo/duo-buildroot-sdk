@@ -30,7 +30,7 @@ static int spi_set_speed_mode(struct udevice *bus, int speed, int mode)
 
 	ops = spi_get_ops(bus);
 	if (ops->set_speed)
-		ret = ops->set_speed(bus, speed);
+		ret = ops->set_speed(bus, (unsigned int)speed);
 	else
 		ret = -EINVAL;
 	if (ret) {
@@ -39,7 +39,7 @@ static int spi_set_speed_mode(struct udevice *bus, int speed, int mode)
 	}
 
 	if (ops->set_mode)
-		ret = ops->set_mode(bus, mode);
+		ret = ops->set_mode(bus, (unsigned int)mode);
 	else
 		ret = -EINVAL;
 	if (ret) {

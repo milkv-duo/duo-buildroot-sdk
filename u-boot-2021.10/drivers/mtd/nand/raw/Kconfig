@@ -459,4 +459,12 @@ config SPL_NAND_SIMPLE
 	  expose the cmd_ctrl() interface.
 endif
 
+config NAND_FLASH_CVSNFC_V3
+	bool "Use cvitek nand flash driver version 3"
+	help
+	  CVITEK nand flash cvsnfc version 3 does not store system vector in
+	  nand flash block 0 and block 1.
+	  This version is optimized from the driver of cv182x.
+	  And it should speed up power on time while booting.
+
 endif   # if NAND

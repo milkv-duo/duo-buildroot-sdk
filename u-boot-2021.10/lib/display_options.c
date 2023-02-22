@@ -140,7 +140,7 @@ void print_size(uint64_t size, const char *s)
 #define DEFAULT_LINE_LENGTH_BYTES	16
 
 int hexdump_line(ulong addr, const void *data, uint width, uint count,
-		 uint linelen, char *out, int size)
+		 uint linelen, char *out, size_t size)
 {
 	/* linebuf as a union causes proper alignment */
 	union linebuf {
@@ -213,7 +213,7 @@ int print_buffer(ulong addr, const void *data, uint width, uint count,
 		linelen = DEFAULT_LINE_LENGTH_BYTES / width;
 
 	while (count) {
-		uint thislinelen;
+		int thislinelen;
 		char buf[HEXDUMP_MAX_BUF_LENGTH(width * linelen)];
 
 		thislinelen = hexdump_line(addr, data, width, count, linelen,

@@ -9,6 +9,17 @@ config DM_PWM
 	  frequency/period can be controlled along with the proportion of that
 	  time that the signal is high.
 
+config PWM_CVITEK
+	bool "Enable support for cvitek PWM"
+	depends on DM_PWM
+	help
+	  This PWM is found cvitek SoCs.
+	  Internal 30-BIT counter, output cycle and high/low level beats can be matched.
+	  Supports up to 50MHz or 74.25mhz output, and down to about 0.093Hz.
+	  Support continuous output and fixed number of pulse output two modes.
+	  Support 4 channel PWM synchronous output, 4 channel PWM output
+	  can be adjusted by configuring the register.
+
 config PWM_CROS_EC
 	bool "Enable support for the Chrome OS EC PWM"
 	depends on DM_PWM

@@ -14,7 +14,16 @@
 #include <asm/io.h>
 #include <mmc.h>
 #include <asm/gpio.h>
-
+#include <mmio.h>
+#if defined(CONFIG_TARGET_CVITEK_CV1835)
+#include <../../board/cvitek/cv1835/sdhci_reg.h>
+#elif defined(CONFIG_TARGET_CVITEK_CV1822)
+#include <../../board/cvitek/cv1822/sdhci_reg.h>
+#elif defined(CONFIG_TARGET_CVITEK_CV181X)
+#include <../../board/cvitek/cv181x/sdhci_reg.h>
+#elif defined(CONFIG_TARGET_CVITEK_CV180X)
+#include <../../board/cvitek/cv180x/sdhci_reg.h>
+#endif
 /*
  * Controller registers
  */
@@ -111,7 +120,9 @@
 #define  SDHCI_RESET_DATA	0x04
 
 #define SDHCI_INT_STATUS	0x30
+#define SDHCI_ERR_INT_STATUS	0x32
 #define SDHCI_INT_ENABLE	0x34
+#define SDHCI_ERR_INT_STATUS_EN  0x36
 #define SDHCI_SIGNAL_ENABLE	0x38
 #define  SDHCI_INT_RESPONSE	BIT(0)
 #define  SDHCI_INT_DATA_END	BIT(1)
@@ -147,6 +158,9 @@
 #define SDHCI_ACMD12_ERR	0x3C
 
 #define SDHCI_HOST_CONTROL2	0x3E
+#define SDHCI_HOST_VER4_ENABLE  BIT(12)
+#define SDHCI_HOST_ADDRESSING   BIT(13)
+#define SDHCI_HOST_ADMA2_LEN_MODE       BIT(10)
 #define  SDHCI_CTRL_UHS_MASK	0x0007
 #define  SDHCI_CTRL_UHS_SDR12	0x0000
 #define  SDHCI_CTRL_UHS_SDR25	0x0001
@@ -270,6 +284,8 @@ struct sdhci_ops {
 	int (*platform_execute_tuning)(struct mmc *host, u8 opcode);
 	int (*set_delay)(struct sdhci_host *host);
 	int	(*deferred_probe)(struct sdhci_host *host);
+	void (*reset)(struct sdhci_host *host, u8 mask);
+	void (*voltage_switch)(struct mmc *mmc);
 };
 
 #define ADMA_MAX_LEN	65532
@@ -492,15 +508,6 @@ void sdhci_set_uhs_timing(struct sdhci_host *host);
 int sdhci_probe(struct udevice *dev);
 int sdhci_set_clock(struct mmc *mmc, unsigned int clock);
 
-/**
- * sdhci_set_control_reg - Set control registers
- *
- * This is used set up control registers for voltage level and UHS speed
- * mode.
- *
- * @host: SDHCI host structure
- */
-void sdhci_set_control_reg(struct sdhci_host *host);
 extern const struct dm_mmc_ops sdhci_ops;
 #else
 #endif

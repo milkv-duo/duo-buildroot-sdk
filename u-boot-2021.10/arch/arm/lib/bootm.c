@@ -125,6 +125,9 @@ static void announce_and_cleanup(int fake)
 	dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
 
 	cleanup_before_linux();
+
+	// Save kernel start time
+	board_save_time_record(TIME_RECORDS_FIELD_KERNEL_START);
 }
 
 static void setup_start_tag (struct bd_info *bd)

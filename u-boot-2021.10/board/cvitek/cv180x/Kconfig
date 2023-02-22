@@ -1,0 +1,76 @@
+if TARGET_CVITEK_CV180X
+
+choice
+	prompt "Cvitek CV180X verification platform type select"
+	help
+	  Select the board version of the shc board.
+
+config TARGET_CVITEK_CV180X_ASIC
+	bool "ASIC"
+	help
+	  This enables support for Cvitek's CV180X SoC on ASIC platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV180X_PALLADIUM
+	bool "Palladium"
+	help
+	  This enables support for Cvitek's CV180X SoC on PALLADIUM platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV180X_FPGA
+	bool "FPGA"
+	help
+	  This enables support for Cvitek's CV180X SoC on FPGA platform.
+
+	  If unsure, say N.
+
+endchoice
+
+config SYS_BOARD
+	default "cv180x"
+
+config SYS_VENDOR
+	default "cvitek"
+
+config SYS_CPU
+	default "generic"
+
+config SYS_CONFIG_NAME
+	default "cv180x-asic" if TARGET_CVITEK_CV180X_ASIC
+	default "cv180x-palladium" if TARGET_CVITEK_CV180X_PALLADIUM
+	default "cv180x-fpga" if TARGET_CVITEK_CV180X_FPGA
+
+config CVITEK_SPI_FLASH
+    bool
+	prompt "Support CVITEK SPINOR"
+    select SPI_FLASH
+	select DM
+	select DM_SPI
+	select DM_SPI_FLASH
+	select SPI_MEM
+	select CMD_SF
+    select CVI_SPIF
+    select ENV_IS_IN_SPI_FLASH
+
+config ENV_SIZE
+    default 0x10000 if ENV_IS_IN_SPI_FLASH
+    default 0x20000 if ENV_IS_IN_MMC
+	default 0x20000 if ENV_IS_IN_NAND
+
+config ENV_SECT_SIZE
+	default 0x10000 if ENV_IS_IN_SPI_FLASH
+	default 0x40000 if ENV_IS_IN_MMC
+	default 0x20000 if ENV_IS_IN_NAND
+
+config ENV_OFFSET
+    default 0x3A0000 if ENV_IS_IN_SPI_FLASH
+    default 0x880000 if ENV_IS_IN_MMC
+	default 0xae0000 if ENV_IS_IN_NAND
+
+config ENV_OFFSET_REDUND
+    default 0x3B0000 if ENV_IS_IN_SPI_FLASH
+	default 0xb00000 if ENV_IS_IN_NAND
+
+endif

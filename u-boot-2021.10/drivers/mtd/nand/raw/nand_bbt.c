@@ -79,6 +79,38 @@
 
 static int nand_update_bbt(struct mtd_info *mtd, loff_t offs);
 
+void bbt_dump_buf(char *s, void *buf, int len)
+{
+	int i;
+	int line_counter = 0;
+	int sep_flag = 0;
+	int addr = 0;
+
+	printf("%s 0x%p\n", s, buf);
+
+	printf("%07x:\t", addr);
+
+	for (i = 0; i < len; i++) {
+		if (line_counter++ > 15) {
+			line_counter = 0;
+			sep_flag = 0;
+			addr += 16;
+			i--;
+			printf("\n%07x:\t", addr);
+			continue;
+		}
+
+		if (sep_flag++ > 1) {
+			sep_flag = 1;
+			printf(" ");
+		}
+
+		printf("%02x", *((char *)buf++));
+	}
+
+	printf("\n");
+}
+
 static inline uint8_t bbt_get_entry(struct nand_chip *chip, int block)
 {
 	uint8_t entry = chip->bbt[block >> BBT_ENTRY_SHIFT];
@@ -248,6 +280,10 @@ static int read_bbt(struct mtd_info *mtd, uint8_t *buf, int page, int num,
 		totlen -= len;
 		from += len;
 	}
+
+	if (mtd->ecc_stats.badblocks)
+		pr_warn("bad block cnt %d\n", mtd->ecc_stats.badblocks);
+
 	return ret;
 }
 

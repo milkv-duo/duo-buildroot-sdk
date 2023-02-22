@@ -21,9 +21,11 @@ endif
 ifdef CONFIG_64BIT
 KBUILD_LDFLAGS		+= -m $(64bit-emul)
 EFI_LDS			:= elf_riscv64_efi.lds
+PLATFORM_ELFFLAGS	+= -B riscv:rv64 -O elf64-littleriscv
 endif
 
 CONFIG_STANDALONE_LOAD_ADDR ?= 0x00000000
+
 
 PLATFORM_CPPFLAGS	+= -ffixed-gp -fpic
 PLATFORM_RELFLAGS	+= -fno-common -gdwarf-2 -ffunction-sections \

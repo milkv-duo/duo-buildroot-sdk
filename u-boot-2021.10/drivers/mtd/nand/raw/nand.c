@@ -16,7 +16,7 @@
 
 int nand_curr_device = -1;
 
-static struct mtd_info *nand_info[CONFIG_SYS_MAX_NAND_DEVICE];
+struct mtd_info *nand_info[CONFIG_SYS_MAX_NAND_DEVICE];
 
 #ifndef CONFIG_SYS_NAND_SELF_INIT
 static struct nand_chip nand_chip[CONFIG_SYS_MAX_NAND_DEVICE];

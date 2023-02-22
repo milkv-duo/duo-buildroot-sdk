@@ -43,6 +43,7 @@ extern int board_nand_init(struct nand_chip *nand);
 #endif
 
 extern int nand_curr_device;
+extern struct mtd_info *nand_info[];
 
 static inline int nand_read(struct mtd_info *info, loff_t ofs, size_t *len,
 			    u_char *buf)
@@ -97,6 +98,7 @@ struct nand_erase_options {
 
 typedef struct nand_erase_options nand_erase_options_t;
 
+int nand_read_device_id(struct mtd_info *mtd);
 int nand_read_skip_bad(struct mtd_info *mtd, loff_t offset, size_t *length,
 		       size_t *actual, loff_t lim, u_char *buffer);
 
@@ -152,5 +154,7 @@ void sunxi_nand_init(void);
  * returns pointer to the nand device info structure or NULL on failure.
  */
 struct mtd_info *get_nand_dev_by_index(int dev);
+
+void bbt_dump_buf(char *s, void *buf, int len);
 
 #endif /* _NAND_H_ */

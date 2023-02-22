@@ -1,0 +1,44 @@
+if TARGET_CVITEK_CV1822
+
+choice
+	prompt "Cvitek CV1822 verification platform type select"
+
+config TARGET_CVITEK_CV1822_ASIC
+	bool "ASIC"
+	help
+	  This enables support for Cvitek's CV1822 SoC on ASIC platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV1822_PALLADIUM
+	bool "Palladium"
+	help
+	  This enables support for Cvitek's CV1822 SoC on PALLADIUM platform.
+
+	  If unsure, say N.
+
+config TARGET_CVITEK_CV1822_FPGA
+	bool "FPGA"
+	help
+	  This enables support for Cvitek's CV1822 SoC on FPGA platform.
+
+	  If unsure, say N.
+
+endchoice
+
+config SYS_BOARD
+	default "cv1822"
+
+config SYS_VENDOR
+	default "cvitek"
+
+config SYS_CONFIG_NAME
+	default "cv1822-asic" if TARGET_CVITEK_CV1822_ASIC
+	default "cv1822-palladium" if TARGET_CVITEK_CV1822_PALLADIUM
+	default "cv1822-fpga" if TARGET_CVITEK_CV1822_FPGA
+
+config SYS_BOOTMAPSZ
+	hex "Maximum size of memory mapped"
+	default "0x8000000"
+
+endif

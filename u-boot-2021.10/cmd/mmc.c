@@ -13,6 +13,8 @@
 #include <part.h>
 #include <sparse_format.h>
 #include <image-sparse.h>
+#include <div64.h>
+#include <linux/math64.h>
 
 static int curr_device = -1;
 
@@ -341,6 +343,7 @@ static int do_mmc_read(struct cmd_tbl *cmdtp, int flag,
 	struct mmc *mmc;
 	u32 blk, cnt, n;
 	void *addr;
+	ulong start_time, delta;
 
 	if (argc != 4)
 		return CMD_RET_USAGE;
@@ -355,9 +358,17 @@ static int do_mmc_read(struct cmd_tbl *cmdtp, int flag,
 
 	printf("\nMMC read: dev # %d, block # %d, count %d ... ",
 	       curr_device, blk, cnt);
-
+	start_time = get_timer(0);
 	n = blk_dread(mmc_get_blk_desc(mmc), blk, cnt, addr);
-	printf("%d blocks read: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+	delta = get_timer(start_time);
+	printf("%d blocks read: %s in %lu ms", n, (n == cnt) ? "OK" : "ERROR", delta);
+
+	if (delta > 0) {
+		puts(" (");
+		print_size(div_u64(n * 512, delta) * 1000, "/s");
+		puts(")");
+	}
+	puts("\n");
 
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
@@ -434,6 +445,7 @@ static int do_mmc_write(struct cmd_tbl *cmdtp, int flag,
 	struct mmc *mmc;
 	u32 blk, cnt, n;
 	void *addr;
+	ulong start_time, delta;
 
 	if (argc != 4)
 		return CMD_RET_USAGE;
@@ -453,8 +465,16 @@ static int do_mmc_write(struct cmd_tbl *cmdtp, int flag,
 		printf("Error: card is write protected!\n");
 		return CMD_RET_FAILURE;
 	}
+	start_time = get_timer(0);
 	n = blk_dwrite(mmc_get_blk_desc(mmc), blk, cnt, addr);
-	printf("%d blocks written: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+	delta = get_timer(start_time);
+	printf("%d blocks written: %s in %lu ms", n, (n == cnt) ? "OK" : "ERROR", delta);
+	if (delta > 0) {
+		puts(" (");
+		print_size(div_u64(n * 512, delta) * 1000, "/s");
+		puts(")");
+	}
+	puts("\n");
 
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
@@ -464,6 +484,7 @@ static int do_mmc_erase(struct cmd_tbl *cmdtp, int flag,
 {
 	struct mmc *mmc;
 	u32 blk, cnt, n;
+	ulong start_time, delta;
 
 	if (argc != 3)
 		return CMD_RET_USAGE;
@@ -482,8 +503,16 @@ static int do_mmc_erase(struct cmd_tbl *cmdtp, int flag,
 		printf("Error: card is write protected!\n");
 		return CMD_RET_FAILURE;
 	}
+	start_time = get_timer(0);
 	n = blk_derase(mmc_get_blk_desc(mmc), blk, cnt);
-	printf("%d blocks erased: %s\n", n, (n == cnt) ? "OK" : "ERROR");
+	delta = get_timer(start_time);
+	printf("%d blocks erased: %s in %lu ms ", n, (n == cnt) ? "OK" : "ERROR", delta);
+	if (delta > 0) {
+		puts(" (");
+		print_size(div_u64(n * 512, delta) * 1000, "/s");
+		puts(")");
+	}
+	puts("\n");
 
 	return (n == cnt) ? CMD_RET_SUCCESS : CMD_RET_FAILURE;
 }
@@ -581,6 +610,30 @@ static int do_mmc_dev(struct cmd_tbl *cmdtp, int flag,
 	else
 		printf("mmc%d(part %d) is current device\n",
 		       curr_device, mmc_get_blk_desc(mmc)->hwpart);
+
+	return CMD_RET_SUCCESS;
+}
+
+static int do_mmc_fuse_rstn(struct cmd_tbl *cmdtp, int flag,
+			    int argc, char *const argv[])
+{
+	int dev, ret;
+	struct mmc *mmc;
+
+	if (argc == 2) {
+		dev = (int)dectoul(argv[1], NULL);
+		mmc = init_mmc_device(dev, true);
+	} else {
+		return CMD_RET_USAGE;
+	}
+
+	if (!mmc)
+		return CMD_RET_FAILURE;
+
+	ret = mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_RST_N_FUNCTION, 0x1);
+	printf("Set RST_N = 0x1 ret: %d\n", ret);
+	if (ret)
+		return 1;
 
 	return CMD_RET_SUCCESS;
 }
@@ -1019,6 +1072,7 @@ static struct cmd_tbl cmd_mmc[] = {
 	U_BOOT_CMD_MKENT(rescan, 2, 1, do_mmc_rescan, "", ""),
 	U_BOOT_CMD_MKENT(part, 1, 1, do_mmc_part, "", ""),
 	U_BOOT_CMD_MKENT(dev, 4, 0, do_mmc_dev, "", ""),
+	U_BOOT_CMD_MKENT(fuse_rstn, 2, 0, do_mmc_fuse_rstn, "", ""),
 	U_BOOT_CMD_MKENT(list, 1, 1, do_mmc_list, "", ""),
 #if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
 	U_BOOT_CMD_MKENT(hwpartition, 28, 0, do_mmc_hwpartition, "", ""),

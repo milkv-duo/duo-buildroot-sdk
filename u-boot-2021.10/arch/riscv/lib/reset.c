@@ -7,12 +7,13 @@
 #include <command.h>
 #include <hang.h>
 
+extern void cv_system_reset(void);
+
 int do_reset(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	printf("resetting ...\n");
 
-	printf("reset not supported yet\n");
-	hang();
+	cv_system_reset();
 
 	return 0;
 }

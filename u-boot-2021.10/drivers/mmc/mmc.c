@@ -26,6 +26,13 @@
 #include <div64.h>
 #include "mmc_private.h"
 
+#ifdef DEBUG
+#define debug(fmt, args...)			\
+	printf("%s,%d"fmt, __func__, __LINE__, ##args)
+#define pr_debug(fmt, ...) \
+	printf(fmt, ##__VA_ARGS__)
+#endif
+
 #define DEFAULT_CMD6_TIMEOUT_MS  500
 
 static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage);
@@ -166,12 +173,18 @@ static uint mmc_mode2freq(struct mmc *mmc, enum bus_mode mode)
 	      [SD_HS]		= 50000000,
 	      [MMC_HS_52]	= 52000000,
 	      [MMC_DDR_52]	= 52000000,
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	      [UHS_SDR12]	= 25000000,
 	      [UHS_SDR25]	= 50000000,
 	      [UHS_SDR50]	= 100000000,
 	      [UHS_DDR50]	= 50000000,
-	      [UHS_SDR104]	= 208000000,
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
+	      [UHS_SDR104]	= 200000000,
+#endif
+#endif
+#ifdef CONFIG_MMC_HS200_SUPPORT
 	      [MMC_HS_200]	= 200000000,
+#endif
 	      [MMC_HS_400]	= 200000000,
 	      [MMC_HS_400_ES]	= 200000000,
 	};
@@ -193,6 +206,24 @@ static int mmc_select_mode(struct mmc *mmc, enum bus_mode mode)
 		 mmc->tran_speed / 1000000);
 	return 0;
 }
+
+#ifdef CONFIG_MMC_UHS_SUPPORT
+int dm_mmc_set_voltage(struct udevice *dev)
+{
+	struct dm_mmc_ops *ops = mmc_get_ops(dev);
+
+	if (!ops->set_voltage)
+		return -EIO;
+
+	ops->set_voltage(dev);
+	return 0;
+}
+
+int mmc_set_voltage(struct mmc *mmc)
+{
+	return dm_mmc_set_voltage(mmc->dev);
+}
+#endif
 
 #if !CONFIG_IS_ENABLED(DM_MMC)
 int mmc_send_cmd(struct mmc *mmc, struct mmc_cmd *cmd, struct mmc_data *data)
@@ -325,7 +356,7 @@ int mmc_set_blocklen(struct mmc *mmc, int len)
 				   MMC_QUIRK_RETRY_SET_BLOCKLEN, 4);
 }
 
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 static const u8 tuning_blk_pattern_4bit[] = {
 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
 	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
@@ -526,7 +557,7 @@ static int mmc_go_idle(struct mmc *mmc)
 	return 0;
 }
 
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 {
 	struct mmc_cmd cmd;
@@ -555,7 +586,7 @@ static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 	 * after the response of cmd11, but wait 100 us to be sure
 	 */
 	err = mmc_wait_dat0(mmc, 0, 100);
-	if (err == -ENOSYS)
+	if (err == -EIO)
 		udelay(100);
 	else if (err)
 		return -ETIMEDOUT;
@@ -565,6 +596,9 @@ static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 	 * for 5 ms according to the SD spec
 	 */
 	mmc_set_clock(mmc, mmc->clock, MMC_CLK_DISABLE);
+
+	//wait 1ms
+	mdelay(1);
 
 	err = mmc_set_signal_voltage(mmc, signal_voltage);
 	if (err)
@@ -579,7 +613,7 @@ static int mmc_switch_voltage(struct mmc *mmc, int signal_voltage)
 	 * dat[0:3] low. Wait for at least 1 ms according to spec
 	 */
 	err = mmc_wait_dat0(mmc, 1, 1000);
-	if (err == -ENOSYS)
+	if (err == -EIO)
 		udelay(1000);
 	else if (err)
 		return -ETIMEDOUT;
@@ -653,12 +687,13 @@ static int sd_send_op_cond(struct mmc *mmc, bool uhs_en)
 
 	mmc->ocr = cmd.response[0];
 
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	if (uhs_en && !(mmc_host_is_spi(mmc)) && (cmd.response[0] & 0x41000000)
 	    == 0x41000000) {
 		err = mmc_switch_voltage(mmc, MMC_SIGNAL_VOLTAGE_180);
 		if (err)
 			return err;
+
 	}
 #endif
 
@@ -875,7 +910,7 @@ static int mmc_set_card_speed(struct mmc *mmc, enum bus_mode mode,
 	case MMC_DDR_52:
 		speed_bits = EXT_CSD_TIMING_HS;
 		break;
-#if CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)
+#ifdef CONFIG_MMC_HS200_SUPPORT
 	case MMC_HS_200:
 		speed_bits = EXT_CSD_TIMING_HS200;
 		break;
@@ -954,7 +989,7 @@ static int mmc_get_capabilities(struct mmc *mmc)
 	cardtype = ext_csd[EXT_CSD_CARD_TYPE];
 	mmc->cardtype = cardtype;
 
-#if CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)
+#ifdef CONFIG_MMC_HS200_SUPPORT
 	if (cardtype & (EXT_CSD_CARD_TYPE_HS200_1_2V |
 			EXT_CSD_CARD_TYPE_HS200_1_8V)) {
 		mmc->card_caps |= MMC_MODE_HS200;
@@ -1283,7 +1318,7 @@ static int sd_get_capabilities(struct mmc *mmc)
 	ALLOC_CACHE_ALIGN_BUFFER(__be32, switch_status, 16);
 	struct mmc_data data;
 	int timeout;
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	u32 sd3_bus_mode;
 #endif
 
@@ -1360,7 +1395,7 @@ static int sd_get_capabilities(struct mmc *mmc)
 	if (__be32_to_cpu(switch_status[3]) & SD_HIGHSPEED_SUPPORTED)
 		mmc->card_caps |= MMC_CAP(SD_HS);
 
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	/* Version before 3.0 don't support UHS modes */
 	if (mmc->version < SD_VERSION_3)
 		return 0;
@@ -1399,7 +1434,7 @@ static int sd_set_card_speed(struct mmc *mmc, enum bus_mode mode)
 	case SD_HS:
 		speed = HIGH_SPEED_BUS_SPEED;
 		break;
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	case UHS_SDR12:
 		speed = UHS_SDR12_BUS_SPEED;
 		break;
@@ -1563,7 +1598,7 @@ static inline int bus_width(uint cap)
 }
 
 #if !CONFIG_IS_ENABLED(DM_MMC)
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 static int mmc_execute_tuning(struct mmc *mmc, uint opcode)
 {
 	return -ENOTSUPP;
@@ -1644,12 +1679,12 @@ void mmc_dump_capabilities(const char *text, uint caps)
 struct mode_width_tuning {
 	enum bus_mode mode;
 	uint widths;
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 	uint tuning;
 #endif
 };
 
-#if CONFIG_IS_ENABLED(MMC_IO_VOLTAGE)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 int mmc_voltage_to_mv(enum mmc_voltage voltage)
 {
 	switch (voltage) {
@@ -1669,6 +1704,8 @@ static int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage)
 		return 0;
 
 	mmc->signal_voltage = signal_voltage;
+
+	err = mmc_set_voltage(mmc);
 	err = mmc_set_ios(mmc);
 	if (err)
 		pr_debug("unable to set voltage (err %d)\n", err);
@@ -1684,8 +1721,8 @@ static inline int mmc_set_signal_voltage(struct mmc *mmc, uint signal_voltage)
 
 #if !CONFIG_IS_ENABLED(MMC_TINY)
 static const struct mode_width_tuning sd_modes_by_pref[] = {
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_UHS_SUPPORT
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 	{
 		.mode = UHS_SDR104,
 		.widths = MMC_MODE_4BIT | MMC_MODE_1BIT,
@@ -1709,7 +1746,7 @@ static const struct mode_width_tuning sd_modes_by_pref[] = {
 		.mode = SD_HS,
 		.widths = MMC_MODE_4BIT | MMC_MODE_1BIT,
 	},
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	{
 		.mode = UHS_SDR12,
 		.widths = MMC_MODE_4BIT | MMC_MODE_1BIT,
@@ -1732,7 +1769,7 @@ static int sd_select_mode_and_width(struct mmc *mmc, uint card_caps)
 	int err;
 	uint widths[] = {MMC_MODE_4BIT, MMC_MODE_1BIT};
 	const struct mode_width_tuning *mwt;
-#if CONFIG_IS_ENABLED(MMC_UHS_SUPPORT)
+#ifdef CONFIG_MMC_UHS_SUPPORT
 	bool uhs_en = (mmc->ocr & OCR_S18R) ? true : false;
 #else
 	bool uhs_en = false;
@@ -1757,8 +1794,8 @@ static int sd_select_mode_and_width(struct mmc *mmc, uint card_caps)
 	}
 
 	/* Restrict card's capabilities by what the host can do */
-	caps = card_caps & mmc->host_caps;
-
+	//caps = card_caps & mmc->host_caps;
+	caps = mmc->host_caps;
 	if (!uhs_en)
 		caps &= ~UHS_CAPS;
 
@@ -1788,7 +1825,7 @@ static int sd_select_mode_and_width(struct mmc *mmc, uint card_caps)
 				mmc_set_clock(mmc, mmc->tran_speed,
 						MMC_CLK_ENABLE);
 
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 				/* execute tuning if needed */
 				if (mwt->tuning && !mmc_host_is_spi(mmc)) {
 					err = mmc_execute_tuning(mmc,
@@ -1918,12 +1955,14 @@ static const struct mode_width_tuning mmc_modes_by_pref[] = {
 		.tuning = MMC_CMD_SEND_TUNING_BLOCK_HS200
 	},
 #endif
-#if CONFIG_IS_ENABLED(MMC_HS200_SUPPORT)
+#ifdef CONFIG_MMC_HS200_SUPPORT
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 	{
 		.mode = MMC_HS_200,
 		.widths = MMC_MODE_8BIT | MMC_MODE_4BIT,
 		.tuning = MMC_CMD_SEND_TUNING_BLOCK_HS200
 	},
+#endif
 #endif
 	{
 		.mode = MMC_DDR_52,
@@ -2166,7 +2205,7 @@ static int mmc_select_mode_and_width(struct mmc *mmc, uint card_caps)
 				mmc_select_mode(mmc, mwt->mode);
 				mmc_set_clock(mmc, mmc->tran_speed,
 					      MMC_CLK_ENABLE);
-#ifdef MMC_SUPPORTS_TUNING
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
 
 				/* execute tuning if needed */
 				if (mwt->tuning) {

@@ -1627,7 +1627,7 @@
 #define MACH_TYPE_MX35EVB              1643
 #define MACH_TYPE_AML_M8050            1644
 #define MACH_TYPE_MX35_3DS             1645
-#define MACH_TYPE_MARS                 1646
+#define MACH_TYPE_CV181X                 1646
 #define MACH_TYPE_NEUROS_OSD2          1647
 #define MACH_TYPE_BADGER               1648
 #define MACH_TYPE_TRIZEPS4WL           1649
@@ -4840,7 +4840,7 @@
 #define MACH_TYPE_MX6S_HAWTHORNE       4901
 #define MACH_TYPE_SEAH                 4902
 #define MACH_TYPE_AM335X_EC3           4903
-#define MACH_TYPE_EMBEST_MARS          4904
+#define MACH_TYPE_EMBEST_CV181X          4904
 #define MACH_TYPE_MX6DL_VIKITOUCH      4905
 #define MACH_TYPE_IX2_NG               4906
 #define MACH_TYPE_PEKQSD               4907

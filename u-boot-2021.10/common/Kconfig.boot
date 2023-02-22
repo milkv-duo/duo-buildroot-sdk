@@ -329,7 +329,7 @@ config HAVE_SYS_TEXT_BASE
 	bool
 	depends on !NIOS2 && !XTENSA
 	depends on !EFI_APP
-	default y
+	default n
 
 config SYS_TEXT_BASE
 	depends on HAVE_SYS_TEXT_BASE

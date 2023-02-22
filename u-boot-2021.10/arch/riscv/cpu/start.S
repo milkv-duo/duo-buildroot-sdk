@@ -39,6 +39,8 @@ secondary_harts_relocation_error:
 .section .text
 .globl _start
 _start:
+#include <asm/boot0.h>
+_start_real:
 #if CONFIG_IS_ENABLED(RISCV_MMODE)
 	csrr	a0, CSR_MHARTID
 #endif

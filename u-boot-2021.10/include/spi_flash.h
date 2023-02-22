@@ -13,6 +13,14 @@
 #include <linux/mtd/spi-nor.h>
 
 struct udevice;
+#define CONFIG_ENV_SPI_BUS	0
+#define CONFIG_ENV_SPI_CS	0
+#define CONFIG_ENV_SPI_MAX_HZ	75000000
+#define CONFIG_ENV_SPI_MODE	0x0
+
+/* Alec Todo: should move to spinor defconfig */
+#define CONFIG_SF_DEFAULT_CS 0
+#define CONFIG_SF_DEFAULT_BUS 0
 
 /* by default ENV use the same parameters than SF command */
 #ifndef CONFIG_ENV_SPI_BUS

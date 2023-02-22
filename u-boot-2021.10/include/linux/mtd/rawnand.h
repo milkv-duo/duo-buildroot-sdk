@@ -184,6 +184,8 @@ enum nand_ecc_algo {
  * Option constants for bizarre disfunctionality and real
  * features.
  */
+/* Chip can not auto increment pages */
+#define NAND_NO_AUTOINCR    0x00000001
 /* Buswidth is 16 bit */
 #define NAND_BUSWIDTH_16	0x00000002
 /* Device supports partial programming without padding */
@@ -250,6 +252,11 @@ enum nand_ecc_algo {
  * kmap'ed, vmalloc'ed highmem buffers being passed from upper layers
  */
 #define NAND_USE_BOUNCE_BUFFER	0x00100000
+
+/*
+ * Some devices only support 1 bit transfer mode
+ */
+#define NAND_ONLY_ONE_BIT_MODE	0x10000000
 
 /* Options set by nand scan */
 /* bbt has already been read */
@@ -945,7 +952,7 @@ struct nand_chip {
 	int jedec_version;
 	struct nand_onfi_params	onfi_params;
 	struct nand_jedec_params jedec_params;
- 
+
 	struct nand_data_interface *data_interface;
 
 	int read_retries;

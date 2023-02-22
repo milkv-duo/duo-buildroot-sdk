@@ -17,7 +17,9 @@
 #include <net/udp.h>
 #include <net/sntp.h>
 
-static int netboot_common(enum proto_t, struct cmd_tbl *, int, char * const []);
+static int __attribute__((unused)) netboot_common(enum proto_t,
+						  struct cmd_tbl *,
+						  int, char * const []);
 
 #ifdef CONFIG_CMD_BOOTP
 static int do_bootp(struct cmd_tbl *cmdtp, int flag, int argc,
@@ -191,8 +193,9 @@ static void netboot_update_env(void)
 #endif
 }
 
-static int netboot_common(enum proto_t proto, struct cmd_tbl *cmdtp, int argc,
-			  char *const argv[])
+static int __attribute__((unused)) netboot_common(enum proto_t proto,
+						  struct cmd_tbl *cmdtp,
+						  int argc, char *const argv[])
 {
 	char *s;
 	char *end;

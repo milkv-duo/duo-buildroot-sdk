@@ -19,7 +19,7 @@
  * Sometimes these are the same as CFI IDs, but sometimes they aren't.
  */
 #define SNOR_MFR_ATMEL		CFI_MFR_ATMEL
-#define SNOR_MFR_GIGADEVICE	0xc8
+#define SNOR_MFR_GIGADEVICE	CFI_MFR_GIGADEVICE
 #define SNOR_MFR_INTEL		CFI_MFR_INTEL
 #define SNOR_MFR_ST		CFI_MFR_ST /* ST Micro <--> Micron */
 #define SNOR_MFR_MICRON		CFI_MFR_MICRON /* ST Micro <--> Micron */
@@ -27,8 +27,16 @@
 #define SNOR_MFR_MACRONIX	CFI_MFR_MACRONIX
 #define SNOR_MFR_SPANSION	CFI_MFR_AMD
 #define SNOR_MFR_SST		CFI_MFR_SST
-#define SNOR_MFR_WINBOND	0xef /* Also used by some Spansion */
+#define SNOR_MFR_WINBOND	0xEF /* Also used by some Spansion */
 #define SNOR_MFR_CYPRESS	0x34
+#define SNOR_MFR_XMC		CFI_MFR_XMC
+#define SNOR_MFR_EON		CFI_MFR_EON
+#define SNOR_MFR_ZBIT		CFI_MFR_ZBIT
+#define SNOR_MFR_XTX		CFI_MFR_XTX
+#define SNOR_MFR_FM		CFI_MFR_FM
+#define SNOR_MFR_JUYANG		CFI_MFR_JUYANG
+#define SNOR_MFR_BOYA		CFI_MFR_BOYA
+#define SNOR_MFR_PY		0x85
 
 /*
  * Note on opcode nomenclature: some opcodes have a format like
@@ -43,7 +51,7 @@
 #define SPINOR_OP_RDSR		0x05	/* Read status register */
 #define SPINOR_OP_WRSR		0x01	/* Write status register 1 byte */
 #define SPINOR_OP_RDSR2		0x3f	/* Read status register 2 */
-#define SPINOR_OP_WRSR2		0x3e	/* Write status register 2 */
+#define SPINOR_OP_WRSR2		0x31	/* Write status register 2 */
 #define SPINOR_OP_READ		0x03	/* Read data bytes (low frequency) */
 #define SPINOR_OP_READ_FAST	0x0b	/* Read data bytes (high frequency) */
 #define SPINOR_OP_READ_1_1_2	0x3b	/* Read data bytes (Dual Output SPI) */

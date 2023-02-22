@@ -2,8 +2,8 @@ menu "SPI Flash Support"
 
 config DM_SPI_FLASH
 	bool "Enable Driver Model for SPI flash"
-	depends on DM && DM_SPI
-	imply SPI_FLASH
+# 	depends on DM && DM_SPI
+#	imply SPI_FLASH
 	help
 	  Enable driver model for SPI flash. This SPI flash interface
 	  (spi_flash_probe(), spi_flash_write(), etc.) is then
@@ -28,6 +28,9 @@ config SPI_FLASH_SANDBOX
 
 config SPI_FLASH
 	bool "SPI Flash Core Interface support"
+	select DM
+	select DM_SPI
+	select DM_SPI_FLASH
 	select SPI_MEM
 	help
 	  Enable the SPI flash Core support. This will include basic
@@ -139,36 +142,43 @@ config SF_DUAL_FLASH
 
 config SPI_FLASH_ATMEL
 	bool "Atmel SPI flash support"
+	default y
 	help
 	  Add support for various Atmel SPI flash chips (AT45xxx and AT25xxx)
 
 config SPI_FLASH_EON
 	bool "EON SPI flash support"
+	default y
 	help
 	  Add support for various EON SPI flash chips (EN25xxx)
 
 config SPI_FLASH_GIGADEVICE
 	bool "GigaDevice SPI flash support"
+	default y
 	help
 	  Add support for various GigaDevice SPI flash chips (GD25xxx)
 
 config SPI_FLASH_ISSI
 	bool "ISSI SPI flash support"
+	default y
 	help
 	  Add support for various ISSI SPI flash chips (ISxxx)
 
 config SPI_FLASH_MACRONIX
 	bool "Macronix SPI flash support"
+	default y
 	help
 	  Add support for various Macronix SPI flash chips (MX25Lxxx)
 
 config SPI_FLASH_SPANSION
 	bool "Spansion SPI flash support"
+	default y
 	help
 	  Add support for various Spansion SPI flash chips (S25FLxxx)
 
 config SPI_FLASH_S28HS512T
 	bool "Cypress S28HS512T chip support"
+	default y
 	depends on SPI_FLASH_SPANSION
 	help
 	 Add support for the Cypress S28HS512T chip. This is a separate config
@@ -177,11 +187,13 @@ config SPI_FLASH_S28HS512T
 
 config SPI_FLASH_STMICRO
 	bool "STMicro SPI flash support"
+	default y
 	help
 	  Add support for various STMicro SPI flash chips (M25Pxxx and N25Qxxx)
 
 config SPI_FLASH_MT35XU
 	bool "Micron MT35XU chip support"
+	default y
 	depends on SPI_FLASH_STMICRO
 	help
 	 Add support for the Micron MT35XU chip. This is a separate config
@@ -190,22 +202,26 @@ config SPI_FLASH_MT35XU
 
 config SPI_FLASH_SST
 	bool "SST SPI flash support"
+	default y
 	help
 	  Add support for various SST SPI flash chips (SST25xxx)
 
 config SPI_FLASH_WINBOND
 	bool "Winbond SPI flash support"
+	default y
 	help
 	  Add support for various Winbond SPI flash chips (W25xxx)
 
 config SPI_FLASH_XMC
 	bool "XMC SPI flash support"
+	default y
 	help
 	  Add support for various XMC (Wuhan Xinxin Semiconductor
 	  Manufacturing Corp.) SPI flash chips (XM25xxx)
 
 config SPI_FLASH_XTX
 	bool "XTX SPI flash support"
+	default y
 	help
 	  Add support for various XTX (XTX Technology Limited)
 	  SPI flash chips (XT25xxx).
@@ -215,7 +231,7 @@ endif
 config SPI_FLASH_USE_4K_SECTORS
 	bool "Use small 4096 B erase sectors"
 	depends on SPI_FLASH
-	default y
+	default n
 	help
 	  Many flash memories support erasing small (4096 B) sectors. Depending
 	  on the usage this feature may provide performance gain in comparison

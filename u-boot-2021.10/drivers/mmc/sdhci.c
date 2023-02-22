@@ -22,6 +22,13 @@
 #include <phys2bus.h>
 #include <power/regulator.h>
 
+#ifdef DEBUG
+#define debug(fmt, args...)			\
+	printf("%s,%d"fmt, __func__, __LINE__, ##args)
+#define pr_debug(fmt, ...) \
+	printf(fmt, ##__VA_ARGS__)
+#endif
+
 static void sdhci_reset(struct sdhci_host *host, u8 mask)
 {
 	unsigned long timeout;
@@ -38,6 +45,9 @@ static void sdhci_reset(struct sdhci_host *host, u8 mask)
 		timeout--;
 		udelay(1000);
 	}
+
+	if (host->ops && host->ops->reset)
+		host->ops->reset(host, mask);
 }
 
 static void sdhci_cmd_done(struct sdhci_host *host, struct mmc_cmd *cmd)
@@ -106,7 +116,15 @@ static void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data,
 
 	if (host->flags & USE_SDMA) {
 		dma_addr = dev_phys_to_bus(mmc_to_dev(host->mmc), host->start_addr);
-		sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+		if (sdhci_readw(host, SDHCI_HOST_CONTROL2) & SDHCI_HOST_VER4_ENABLE) {
+			sdhci_writel(host, dma_addr, SDHCI_ADMA_ADDRESS);
+			sdhci_writel(host, (dma_addr >> 32), SDHCI_ADMA_ADDRESS_HI);
+			sdhci_writel(host, data->blocks, SDHCI_DMA_ADDRESS);
+			sdhci_writew(host, 0, SDHCI_BLOCK_COUNT);
+		} else {
+			sdhci_writel(host, dma_addr, SDHCI_DMA_ADDRESS);
+			sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+		}
 	}
 #if CONFIG_IS_ENABLED(MMC_SDHCI_ADMA)
 	else if (host->flags & (USE_ADMA | USE_ADMA64)) {
@@ -166,7 +184,12 @@ static int sdhci_transfer_data(struct sdhci_host *host, struct mmc_data *data)
 				start_addr += SDHCI_DEFAULT_BOUNDARY_SIZE;
 				start_addr = dev_phys_to_bus(mmc_to_dev(host->mmc),
 							     start_addr);
-				sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+				if (sdhci_readw(host, SDHCI_HOST_CONTROL2) & SDHCI_HOST_VER4_ENABLE) {
+					sdhci_writel(host, start_addr, SDHCI_ADMA_ADDRESS);
+					sdhci_writel(host, (start_addr >> 32), SDHCI_ADMA_ADDRESS_HI);
+				} else {
+					sdhci_writel(host, start_addr, SDHCI_DMA_ADDRESS);
+				}
 			}
 		}
 		if (timeout-- > 0)
@@ -184,7 +207,6 @@ static int sdhci_transfer_data(struct sdhci_host *host, struct mmc_data *data)
 
 	return 0;
 }
-
 /*
  * No command will be sent by driver if card is busy, so driver must wait
  * for card ready state.
@@ -195,6 +217,12 @@ static int sdhci_transfer_data(struct sdhci_host *host, struct mmc_data *data)
 #define SDHCI_CMD_MAX_TIMEOUT			3200
 #define SDHCI_CMD_DEFAULT_TIMEOUT		100
 #define SDHCI_READ_STATUS_TIMEOUT		1000
+
+#if defined(CONFIG_FIXED_SDHCI_ALIGNED_BUFFER)
+void *aligned_buffer = (void *)CONFIG_FIXED_SDHCI_ALIGNED_BUFFER;
+#else
+void *aligned_buffer;
+#endif
 
 #ifdef CONFIG_DM_MMC
 static int sdhci_send_command(struct udevice *dev, struct mmc_cmd *cmd,
@@ -289,12 +317,10 @@ static int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
 		sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
 				data->blocksize),
 				SDHCI_BLOCK_SIZE);
-		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
 		sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
 	} else if (cmd->resp_type & MMC_RSP_BUSY) {
 		sdhci_writeb(host, 0xe, SDHCI_TIMEOUT_CONTROL);
 	}
-
 	sdhci_writel(host, cmd->cmdarg, SDHCI_ARGUMENT);
 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->cmdidx, flags), SDHCI_COMMAND);
 	start = get_timer(0);
@@ -320,8 +346,9 @@ static int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
 	} else
 		ret = -1;
 
-	if (!ret && data)
+	if (!ret && data) {
 		ret = sdhci_transfer_data(host, data);
+	}
 
 	if (host->quirks & SDHCI_QUIRK_WAIT_SEND_CMD)
 		udelay(1000);
@@ -343,7 +370,7 @@ static int sdhci_send_command(struct mmc *mmc, struct mmc_cmd *cmd,
 		return -ECOMM;
 }
 
-#if defined(CONFIG_DM_MMC) && defined(MMC_SUPPORTS_TUNING)
+#if defined(CONFIG_DM_MMC) && defined(CONFIG_MMC_SUPPORTS_TUNING)
 static int sdhci_execute_tuning(struct udevice *dev, uint opcode)
 {
 	int err;
@@ -367,6 +394,7 @@ int sdhci_set_clock(struct mmc *mmc, unsigned int clock)
 	unsigned int div, clk = 0, timeout;
 	int ret;
 
+	pr_debug("mmc%d : Set clock %d, host->max_clk %d\n", host->index, clock, host->max_clk);
 	/* Wait max 20 ms */
 	timeout = 200;
 	while (sdhci_readl(host, SDHCI_PRESENT_STATE) &
@@ -437,10 +465,15 @@ int sdhci_set_clock(struct mmc *mmc, unsigned int clock)
 	if (host->ops && host->ops->set_clock)
 		host->ops->set_clock(host, div);
 
+	pr_debug("mmc%d : clk div 0x%x\n", host->index, div);
+
 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
 		<< SDHCI_DIVIDER_HI_SHIFT;
 	clk |= SDHCI_CLOCK_INT_EN;
+
+	pr_debug("mmc%d : 0x2c clk reg 0x%x\n", host->index, clk);
+
 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 
 	/* Wait max 20 ms */
@@ -522,99 +555,116 @@ void sdhci_set_uhs_timing(struct sdhci_host *host)
 	sdhci_writew(host, reg, SDHCI_HOST_CONTROL2);
 }
 
-static void sdhci_set_voltage(struct sdhci_host *host)
+static int sdhci_card_busy(struct udevice *dev, int state, int timeout_us)
 {
-	if (IS_ENABLED(CONFIG_MMC_IO_VOLTAGE)) {
-		struct mmc *mmc = (struct mmc *)host->mmc;
-		u32 ctrl;
+	struct mmc *mmc = mmc_get_mmc_dev(dev);
+	struct sdhci_host *host = mmc->priv;
+	int ret = -ETIMEDOUT;
+	bool dat0_high;
+	bool target_dat0_high = !!state;
 
-		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-
-		switch (mmc->signal_voltage) {
-		case MMC_SIGNAL_VOLTAGE_330:
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
-			if (mmc->vqmmc_supply) {
-				if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, false)) {
-					pr_err("failed to disable vqmmc-supply\n");
-					return;
-				}
-
-				if (regulator_set_value(mmc->vqmmc_supply, 3300000)) {
-					pr_err("failed to set vqmmc-voltage to 3.3V\n");
-					return;
-				}
-
-				if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, true)) {
-					pr_err("failed to enable vqmmc-supply\n");
-					return;
-				}
-			}
-#endif
-			if (IS_SD(mmc)) {
-				ctrl &= ~SDHCI_CTRL_VDD_180;
-				sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-			}
-
-			/* Wait for 5ms */
-			mdelay(5);
-
-			/* 3.3V regulator output should be stable within 5 ms */
-			if (IS_SD(mmc)) {
-				if (ctrl & SDHCI_CTRL_VDD_180) {
-					pr_err("3.3V regulator output did not become stable\n");
-					return;
-				}
-			}
-
+	timeout_us = DIV_ROUND_UP(timeout_us, 10); /* check every 10 us. */
+	while (timeout_us--) {
+		dat0_high = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & BIT(20));
+		if (dat0_high == target_dat0_high) {
+			ret = 0;
 			break;
-		case MMC_SIGNAL_VOLTAGE_180:
-#if CONFIG_IS_ENABLED(DM_REGULATOR)
-			if (mmc->vqmmc_supply) {
-				if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, false)) {
-					pr_err("failed to disable vqmmc-supply\n");
-					return;
-				}
-
-				if (regulator_set_value(mmc->vqmmc_supply, 1800000)) {
-					pr_err("failed to set vqmmc-voltage to 1.8V\n");
-					return;
-				}
-
-				if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, true)) {
-					pr_err("failed to enable vqmmc-supply\n");
-					return;
-				}
-			}
-#endif
-			if (IS_SD(mmc)) {
-				ctrl |= SDHCI_CTRL_VDD_180;
-				sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-			}
-
-			/* Wait for 5 ms */
-			mdelay(5);
-
-			/* 1.8V regulator output has to be stable within 5 ms */
-			if (IS_SD(mmc)) {
-				if (!(ctrl & SDHCI_CTRL_VDD_180)) {
-					pr_err("1.8V regulator output did not become stable\n");
-					return;
-				}
-			}
-
-			break;
-		default:
-			/* No signal voltage switch required */
-			return;
 		}
+		udelay(10);
 	}
+	return ret;
 }
 
-void sdhci_set_control_reg(struct sdhci_host *host)
+#ifdef CONFIG_MMC_UHS_SUPPORT
+static void sdhci_set_voltage(struct udevice *dev)
 {
-	sdhci_set_voltage(host);
+	struct mmc *mmc = mmc_get_mmc_dev(dev);
+	struct sdhci_host *host = mmc->priv;
+	u32 ctrl;
+
+	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+
+	switch (mmc->signal_voltage) {
+	case MMC_SIGNAL_VOLTAGE_330:
+#if CONFIG_IS_ENABLED(DM_REGULATOR)
+		if (mmc->vqmmc_supply) {
+			if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, false)) {
+				pr_debug("failed to disable vqmmc-supply\n");
+				return;
+			}
+
+			if (regulator_set_value(mmc->vqmmc_supply, 3300000)) {
+				pr_debug("failed to set vqmmc-voltage to 3.3V\n");
+				return;
+			}
+
+			if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, true)) {
+				pr_debug("failed to enable vqmmc-supply\n");
+				return;
+			}
+		}
+#endif
+		if (IS_SD(mmc)) {
+			ctrl &= ~SDHCI_CTRL_VDD_180;
+			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+		}
+
+		/* Wait for 5ms */
+		mdelay(5);
+
+		/* 3.3V regulator output should be stable within 5 ms */
+		if (IS_SD(mmc)) {
+			if (ctrl & SDHCI_CTRL_VDD_180) {
+				pr_debug("3.3V regulator output did not become stable\n");
+				return;
+			}
+		}
+
+		break;
+	case MMC_SIGNAL_VOLTAGE_180:
+#if CONFIG_IS_ENABLED(DM_REGULATOR)
+		if (mmc->vqmmc_supply) {
+			if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, false)) {
+				pr_debug("failed to disable vqmmc-supply\n");
+				return;
+			}
+
+			if (regulator_set_value(mmc->vqmmc_supply, 1800000)) {
+				pr_debug("failed to set vqmmc-voltage to 1.8V\n");
+				return;
+			}
+
+			if (regulator_set_enable_if_allowed(mmc->vqmmc_supply, true)) {
+				pr_debug("failed to enable vqmmc-supply\n");
+				return;
+			}
+		}
+#endif
+		if (IS_SD(mmc)) {
+			ctrl |= SDHCI_CTRL_VDD_180;
+			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+		}
+
+		if (host->ops && host->ops->voltage_switch)
+			host->ops->voltage_switch(mmc);
+
+		/* 1.8V regulator output has to be stable within 5 ms */
+		if (IS_SD(mmc)) {
+			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+			if (!(ctrl & SDHCI_CTRL_VDD_180)) {
+				pr_debug("1.8V regulator output did not become stable\n");
+				return;
+			}
+		}
+
+		break;
+	default:
+		/* No signal voltage switch required */
+		return;
+	}
 	sdhci_set_uhs_timing(host);
 }
+#endif
 
 #ifdef CONFIG_DM_MMC
 static int sdhci_set_ios(struct udevice *dev)
@@ -628,14 +678,10 @@ static int sdhci_set_ios(struct mmc *mmc)
 	struct sdhci_host *host = mmc->priv;
 	bool no_hispd_bit = false;
 
-	if (host->ops && host->ops->set_control_reg)
-		host->ops->set_control_reg(host);
-
-	if (mmc->clock != host->clock)
-		sdhci_set_clock(mmc, mmc->clock);
-
 	if (mmc->clk_disable)
 		sdhci_set_clock(mmc, 0);
+	else if (mmc->clock != host->clock)
+		sdhci_set_clock(mmc, mmc->clock);
 
 	/* Set bus width */
 	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
@@ -714,10 +760,20 @@ static int sdhci_init(struct mmc *mmc)
 	}
 #endif
 
-	sdhci_set_power(host, fls(mmc->cfg->voltages) - 1);
+	if (host->ops && host->ops->get_cd) {
+		int present = host->ops->get_cd(host);
 
-	if (host->ops && host->ops->get_cd)
-		host->ops->get_cd(host);
+		if (present == 1) {
+			sdhci_set_power(host, fls(mmc->cfg->voltages) - 1);
+			mdelay(5);
+		} else if (present == 0) {
+			sdhci_set_power(host, (unsigned short)-1);
+			mdelay(30);
+		}
+	} else {
+		sdhci_set_power(host, fls(mmc->cfg->voltages) - 1);
+		mdelay(5);
+	}
 
 	/* Enable only interrupts served by the SD controller */
 	sdhci_writel(host, SDHCI_INT_DATA_MASK | SDHCI_INT_CMD_MASK,
@@ -785,8 +841,12 @@ const struct dm_mmc_ops sdhci_ops = {
 	.set_ios	= sdhci_set_ios,
 	.get_cd		= sdhci_get_cd,
 	.deferred_probe	= sdhci_deferred_probe,
-#ifdef MMC_SUPPORTS_TUNING
-	.execute_tuning	= sdhci_execute_tuning,
+#ifdef CONFIG_MMC_SUPPORTS_TUNING
+	.execute_tuning = sdhci_execute_tuning,
+#endif
+	.wait_dat0 = sdhci_card_busy,
+#ifdef CONFIG_MMC_UHS_SUPPORT
+	.set_voltage = sdhci_set_voltage,
 #endif
 };
 #else
@@ -803,11 +863,11 @@ int sdhci_setup_cfg(struct mmc_config *cfg, struct sdhci_host *host,
 	u32 caps, caps_1 = 0;
 #if CONFIG_IS_ENABLED(DM_MMC)
 	u64 dt_caps, dt_caps_mask;
-
 	dt_caps_mask = dev_read_u64_default(host->mmc->dev,
 					    "sdhci-caps-mask", 0);
 	dt_caps = dev_read_u64_default(host->mmc->dev,
 				       "sdhci-caps", 0);
+
 	caps = ~lower_32_bits(dt_caps_mask) &
 	       sdhci_readl(host, SDHCI_CAPABILITIES);
 	caps |= lower_32_bits(dt_caps);
@@ -921,6 +981,10 @@ int sdhci_setup_cfg(struct mmc_config *cfg, struct sdhci_host *host,
 
 	if (!(cfg->voltages & MMC_VDD_165_195) ||
 	    (host->quirks & SDHCI_QUIRK_NO_1_8_V))
+		caps_1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+			    SDHCI_SUPPORT_DDR50);
+
+	if (host->quirks & SDHCI_QUIRK_NO_1_8_V)
 		caps_1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
 			    SDHCI_SUPPORT_DDR50);
 

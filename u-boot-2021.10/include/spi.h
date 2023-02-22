@@ -156,6 +156,10 @@ struct spi_slave {
 #define SPI_XFER_BEGIN		BIT(0)	/* Assert CS before transfer */
 #define SPI_XFER_END		BIT(1)	/* Deassert CS after transfer */
 #define SPI_XFER_ONCE		(SPI_XFER_BEGIN | SPI_XFER_END)
+#define SPI_XFER_MMAP           BIT(2)  /* Memory Mapped start */
+#define SPI_XFER_MMAP_END       BIT(3)  /* Memory Mapped End */
+#define SPI_XFER_USER_DATA      BIT(4)  /* only xfer user data */
+#define SPI_XFER_CMD_DATA       BIT(5)  /* indicates that the data is not user data it could be 'cmd' or 'addr' */
 };
 
 /**

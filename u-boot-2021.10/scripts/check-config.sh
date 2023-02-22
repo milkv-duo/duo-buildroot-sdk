@@ -34,6 +34,7 @@ srctree="$3"
 configs="${path}.configs"
 suspects="${path}.suspects"
 ok="${path}.ok"
+sep="${path}.sep"
 new_adhoc="${path}.adhoc"
 
 export LC_ALL=C
@@ -44,10 +45,11 @@ cat ${path} |sed -nr 's/^#define (CONFIG_[A-Za-z0-9_]*).*/\1/p' |sort |uniq \
 
 comm -23 ${configs} ${whitelist} > ${suspects}
 
-cat `find ${srctree} -name "Kconfig*"` |sed -nr \
-	-e 's/^[[:blank:]]*config *([A-Za-z0-9_]*).*$/CONFIG_\1/p' \
+echo > ${sep}
+find ${srctree} -name "Kconfig*" -exec cat '{}' ${sep} ';' | sed -nE \
+	-e 's/^[[:blank:]]*config[[:blank:]]*([A-Za-z0-9_]*).*$/CONFIG_\1/p' \
 	-e 's/^[[:blank:]]*menuconfig ([A-Za-z0-9_]*).*$/CONFIG_\1/p' \
-	|sort |uniq > ${ok}
+	| sort |uniq > ${ok}
 comm -23 ${suspects} ${ok} >${new_adhoc}
 if [ -s ${new_adhoc} ]; then
 	echo >&2 "Error: You must add new CONFIG options using Kconfig"

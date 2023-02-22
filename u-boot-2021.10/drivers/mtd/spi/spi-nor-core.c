@@ -523,6 +523,16 @@ static int write_sr(struct spi_nor *nor, u8 val)
 }
 
 /*
+ * Write status register 1 byte
+ * Returns negative if error occurred.
+ */
+static int write_sr2(struct spi_nor *nor, u8 val)
+{
+	nor->cmd_buf[0] = val;
+	return nor->write_reg(nor, SPINOR_OP_WRSR2, nor->cmd_buf, 1);
+}
+
+/*
  * Set write enable latch with Write Enable command.
  * Returns negative if error occurred.
  */
@@ -1315,6 +1325,8 @@ static const struct flash_info *spi_nor_read_id(struct spi_nor *nor)
 		return ERR_PTR(tmp);
 	}
 
+	printf("spinor id = %X %X %X\n", id[0], id[1], id[2]);
+
 	info = spi_nor_ids;
 	for (; info->name; info++) {
 		if (info->id_len) {
@@ -1714,44 +1726,77 @@ write_err:
 	return ret;
 }
 
-#if defined(CONFIG_SPI_FLASH_MACRONIX) || defined(CONFIG_SPI_FLASH_ISSI)
-/**
- * macronix_quad_enable() - set QE bit in Status Register.
- * @nor:	pointer to a 'struct spi_nor'
- *
- * Set the Quad Enable (QE) bit in the Status Register.
- *
- * bit 6 of the Status Register is the QE bit for Macronix like QSPI memories.
- *
- * Return: 0 on success, -errno otherwise.
+/*  read        : 0x05
+ *  write       : 0x01
+ *  write length: 1 byte
+ *  QE          : BIT(6)
  */
-static int macronix_quad_enable(struct spi_nor *nor)
+static int quad_enable_SR_bit6(struct spi_nor *nor)
 {
 	int ret, val;
 
 	val = read_sr(nor);
 	if (val < 0)
 		return val;
-	if (val & SR_QUAD_EN_MX)
+
+	/* return if QE has been set already */
+	if (val & BIT(6)) {
+		// TODO: check_and_update_fip_toc_header(flash);
 		return 0;
+	}
 
 	write_enable(nor);
-
-	write_sr(nor, val | SR_QUAD_EN_MX);
-
+	write_sr(nor, val | BIT(6));
 	ret = spi_nor_wait_till_ready(nor);
 	if (ret)
 		return ret;
 
+	/* read SR and check it */
 	ret = read_sr(nor);
-	if (!(ret > 0 && (ret & SR_QUAD_EN_MX))) {
-		dev_err(nor->dev, "Macronix Quad bit not set\n");
+	if (!(ret > 0 && (ret & BIT(6)))) {
+		dev_err(nor->dev, "SPINOR: SR1[6] QE bit was set failed!\n");
 		return -EINVAL;
 	}
+	// TODO: add else? check_and_update_fip_toc_header(flash);
 
 	return 0;
 }
-#endif
+
+/*  read        : 0x35
+ *  write       : 0x31(write 1 byte)
+ *  write length: 1 bytes
+ *  QE          : BIT(1)
+ */
+static int quad_enable_SR2_bit1(struct spi_nor *nor)
+{
+	int ret;
+
+	ret = read_cr(nor);
+	if (ret < 0)
+		return ret;
+
+	/* return if QE has been set already */
+	if (ret & BIT(1)) {
+		// TODO: check_and_update_fip_toc_header(flash);
+		return 0;
+	}
+
+	write_enable(nor);
+	write_sr2(nor, ret | BIT(1));
+	ret = spi_nor_wait_till_ready(nor);
+	if (ret)
+		return ret;
+
+	/* read CR and check it */
+	ret = read_cr(nor);
+	if (!(ret >= 0 && (ret & BIT(1)))) {
+		dev_err(nor->dev, "SPINOR: SR2[1] QE bit was set failed!\n");
+		return -EINVAL;
+	}
+	// TODO: add else? check_and_update_fip_toc_header(flash);
+
+	return 0;
+}
 
 #ifdef CONFIG_SPI_FLASH_SPANSION
 /**
@@ -1966,11 +2011,16 @@ spi_nor_set_pp_settings(struct spi_nor_pp_command *pp,
  * Return: 0 on success, -errno otherwise.
  */
 static int spi_nor_read_sfdp(struct spi_nor *nor, u32 addr,
-			     size_t len, void *buf)
+				size_t len, void *buf)
+
 {
 	u8 addr_width, read_opcode, read_dummy;
 	int ret;
-
+#ifdef CONFIG_CVITEK_SPI_FLASH
+	u8 pos, i;
+	u32 flag = 0;
+	char cmd[6] = {0};
+#endif
 	read_opcode = nor->read_opcode;
 	addr_width = nor->addr_width;
 	read_dummy = nor->read_dummy;
@@ -1979,6 +2029,7 @@ static int spi_nor_read_sfdp(struct spi_nor *nor, u32 addr,
 	nor->addr_width = 3;
 	nor->read_dummy = 8;
 
+#ifndef CONFIG_CVITEK_SPI_FLASH
 	while (len) {
 		ret = nor->read(nor, addr, len, (u8 *)buf);
 		if (!ret || ret > len) {
@@ -1993,6 +2044,24 @@ static int spi_nor_read_sfdp(struct spi_nor *nor, u32 addr,
 		len -= ret;
 	}
 	ret = 0;
+#else
+	pos = 0;
+	cmd[pos++] = nor->read_opcode;
+	for (i = 0; i < nor->addr_width; i++)
+		cmd[pos + i] = addr >> (8 * (nor->addr_width - i - 1));
+
+	pos += nor->addr_width;
+	/* handle dummy clk, always 1 byte dummy clk */
+	pos += 1;
+
+	ret = spi_xfer(nor->spi, pos * 8, cmd, NULL, flag | SPI_XFER_BEGIN);
+	if (ret)
+		goto read_err;
+
+	ret = spi_xfer(nor->spi, len * 8, NULL, buf, flag | SPI_XFER_END | SPI_XFER_CMD_DATA);
+	if (ret)
+		goto read_err;
+#endif
 
 read_err:
 	nor->read_opcode = read_opcode;
@@ -2013,6 +2082,7 @@ spi_nor_set_read_settings_from_bfpt(struct spi_nor_read_command *read,
 	read->num_wait_states = (half >> 0) & 0x1f;
 	read->opcode = (half >> 8) & 0xff;
 	read->proto = proto;
+	debug("opcode:%#x, dummy:%u\n", read->opcode, (read->num_mode_clocks + read->num_wait_states));
 }
 
 struct sfdp_bfpt_read {
@@ -2080,12 +2150,12 @@ static const struct sfdp_bfpt_read sfdp_bfpt_reads[] = {
 	},
 
 	/* Fast Read 4-4-4 */
-	{
-		SNOR_HWCAPS_READ_4_4_4,
-		BFPT_DWORD(5), BIT(4),	/* Supported bit */
-		BFPT_DWORD(7), 16,	/* Settings */
-		SNOR_PROTO_4_4_4,
-	},
+	//{
+	//	SNOR_HWCAPS_READ_4_4_4,
+	//	BFPT_DWORD(5), BIT(4),	/* Supported bit */
+	//	BFPT_DWORD(7), 16,	/* Settings */
+	//	SNOR_PROTO_4_4_4,
+	//},
 };
 
 struct sfdp_bfpt_erase {
@@ -2285,7 +2355,7 @@ static int spi_nor_parse_bfpt(struct spi_nor *nor,
 #endif
 #if defined(CONFIG_SPI_FLASH_MACRONIX) || defined(CONFIG_SPI_FLASH_ISSI)
 	case BFPT_DWORD15_QER_SR1_BIT6:
-		params->quad_enable = macronix_quad_enable;
+		params->quad_enable = quad_enable_SR_bit6;
 		break;
 #endif
 #if defined(CONFIG_SPI_FLASH_SPANSION) || defined(CONFIG_SPI_FLASH_WINBOND)
@@ -2468,7 +2538,6 @@ static int spi_nor_parse_sfdp(struct spi_nor *nor,
 	if (le32_to_cpu(header.signature) != SFDP_SIGNATURE ||
 	    header.major != SFDP_JESD216_MAJOR)
 		return -EINVAL;
-
 	/*
 	 * Verify that the first and only mandatory parameter header is a
 	 * Basic Flash Parameter Table header as specified in JESD216.
@@ -2477,7 +2546,6 @@ static int spi_nor_parse_sfdp(struct spi_nor *nor,
 	if (SFDP_PARAM_HEADER_ID(bfpt_header) != SFDP_BFPT_ID ||
 	    bfpt_header->major != SFDP_JESD216_MAJOR)
 		return -EINVAL;
-
 	/*
 	 * Allocate memory then read all parameter headers with a single
 	 * Read SFDP command. These parameter headers will actually be parsed
@@ -2659,8 +2727,11 @@ static int spi_nor_init_params(struct spi_nor *nor,
 
 	/* Page Program settings. */
 	params->hwcaps.mask |= SNOR_HWCAPS_PP;
+	params->hwcaps.mask |= SNOR_HWCAPS_PP_1_1_4;
 	spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP],
 				SPINOR_OP_PP, SNOR_PROTO_1_1_1);
+	spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP_1_1_4],
+				SPINOR_OP_PP_1_1_4, SNOR_PROTO_1_1_4);
 
 	/*
 	 * Since xSPI Page Program opcode is backward compatible with
@@ -2669,23 +2740,28 @@ static int spi_nor_init_params(struct spi_nor *nor,
 	spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP_8_8_8_DTR],
 				SPINOR_OP_PP, SNOR_PROTO_8_8_8_DTR);
 
-	if (info->flags & SPI_NOR_QUAD_READ) {
-		params->hwcaps.mask |= SNOR_HWCAPS_PP_1_1_4;
-		spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP_1_1_4],
-					SPINOR_OP_PP_1_1_4, SNOR_PROTO_1_1_4);
-	}
-
 	/* Select the procedure to set the Quad Enable bit. */
 	if (params->hwcaps.mask & (SNOR_HWCAPS_READ_QUAD |
 				   SNOR_HWCAPS_PP_QUAD)) {
 		switch (JEDEC_MFR(info)) {
-#if defined(CONFIG_SPI_FLASH_MACRONIX) || defined(CONFIG_SPI_FLASH_ISSI)
 		case SNOR_MFR_MACRONIX:
 		case SNOR_MFR_ISSI:
-			params->quad_enable = macronix_quad_enable;
+			params->quad_enable = quad_enable_SR_bit6;
 			break;
-#endif
-		case SNOR_MFR_ST:
+		case SNOR_MFR_EON:
+		case SNOR_MFR_GIGADEVICE:
+		case SNOR_MFR_WINBOND:
+		case SNOR_MFR_JUYANG:
+		case SNOR_MFR_ZBIT:
+		case SNOR_MFR_XMC:
+		case SNOR_MFR_XTX:
+		case SNOR_MFR_FM:
+		case SNOR_MFR_SPANSION:
+		case SNOR_MFR_BOYA:
+		case SNOR_MFR_PY:
+			params->quad_enable = quad_enable_SR2_bit1;
+			break;
+
 		case SNOR_MFR_MICRON:
 			break;
 
@@ -3776,6 +3852,12 @@ int spi_nor_scan(struct spi_nor *nor)
 
 	nor->page_size = params.page_size;
 	mtd->writebufsize = nor->page_size;
+
+	/* Set spi mode according to hwcaps */
+	if ((params.hwcaps.mask & SNOR_HWCAPS_READ_1_1_4) || (params.hwcaps.mask & SNOR_HWCAPS_READ_1_4_4))
+		spi->mode |= SPI_RX_QUAD;
+	if ((params.hwcaps.mask & SNOR_HWCAPS_PP_1_1_4) || (params.hwcaps.mask & SNOR_HWCAPS_PP_1_4_4))
+		spi->mode |= SPI_TX_QUAD;
 
 	/* Some devices cannot do fast-read, no matter what DT tells us */
 	if ((info->flags & SPI_NOR_NO_FR) || (spi->mode & SPI_RX_SLOW))

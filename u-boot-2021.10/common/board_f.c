@@ -359,6 +359,15 @@ static int setup_dest_addr(void)
 	return 0;
 }
 
+#if (CONFIG_SYS_RESVIONSZ != 0)
+static int reserve_ion(void)
+{
+	gd->relocaddr -= CONFIG_SYS_RESVIONSZ;
+	debug("Reserving %dk for ion buffer at %08lx\n", (CONFIG_SYS_RESVIONSZ >> 16), gd->relocaddr);
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_PRAM
 /* reserve protected RAM */
 static int reserve_pram(void)
@@ -472,8 +481,8 @@ static int reserve_noncached(void)
 		MMU_SECTION_SIZE;
 	gd->start_addr_sp -= ALIGN(CONFIG_SYS_NONCACHED_MEMORY,
 				   MMU_SECTION_SIZE);
-	debug("Reserving %dM for noncached_alloc() at: %08lx\n",
-	      CONFIG_SYS_NONCACHED_MEMORY >> 20, gd->start_addr_sp);
+	debug("Reserving %lldM for noncached_alloc() at: %08lx\n",
+	      (long long)(CONFIG_SYS_NONCACHED_MEMORY >> 20), gd->start_addr_sp);
 
 	return 0;
 }
@@ -734,6 +743,7 @@ static int jump_to_copy(void)
 	arch_setup_gd(gd->new_gd);
 	board_init_f_r_trampoline(gd->start_addr_sp);
 #else
+	printf("gd->relocaddr=0x%lx. offset=0x%lx\n", gd->relocaddr, gd->relocaddr - CONFIG_SYS_TEXT_BASE);
 	relocate_code(gd->start_addr_sp, gd->new_gd, gd->relocaddr);
 #endif
 
@@ -905,6 +915,10 @@ static const init_fnc_t init_sequence_f[] = {
 	 *  - board info struct
 	 */
 	setup_dest_addr,
+#if (CONFIG_SYS_RESVIONSZ != 0)
+	reserve_ion,
+#endif
+
 #ifdef CONFIG_OF_BOARD_FIXUP
 	fix_fdt,
 #endif

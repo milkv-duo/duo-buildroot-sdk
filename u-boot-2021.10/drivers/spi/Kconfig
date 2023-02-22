@@ -452,6 +452,15 @@ config XILINX_SPI
 	  For more info on Xilinx SPI Register Definitions and Overview
 	  see driver file - drivers/spi/xilinx_spi.c
 
+config CVI_SPIF
+	bool "Cvitek SPI driver"
+	depends on SPI_MEM
+	help
+		Enable the Cvitek SPIF driver. This driver can be used to
+		access the SPI NOR flash on platforms embedding this Cvitek
+		SPIF IP core.
+		see driver file - drivers/spi/cvi-spif.c
+
 config ZYNQ_SPI
 	bool "Zynq SPI driver"
 	help

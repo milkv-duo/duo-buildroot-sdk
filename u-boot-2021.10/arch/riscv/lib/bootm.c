@@ -60,6 +60,9 @@ static void announce_and_cleanup(int fake)
 	dm_remove_devices_flags(DM_REMOVE_ACTIVE_ALL);
 
 	cleanup_before_linux();
+
+	// Save kernel start time
+	board_save_time_record(TIME_RECORDS_FIELD_KERNEL_START);
 }
 
 static void boot_prep_linux(bootm_headers_t *images)
@@ -134,4 +137,17 @@ int do_bootm_vxworks(int flag, int argc, char *const argv[],
 		     bootm_headers_t *images)
 {
 	return do_bootm_linux(flag, argc, argv, images);
+}
+
+static ulong get_sp(void)
+{
+	ulong ret;
+
+	asm("mv %0, sp" : "=r"(ret) : );
+	return ret;
+}
+
+void arch_lmb_reserve(struct lmb *lmb)
+{
+	arch_lmb_reserve_generic(lmb, get_sp(), gd->ram_top, 4096);
 }

@@ -1,0 +1,35 @@
+if TARGET_CVITEK_ARM || TARGET_CVITEK_RISCV
+
+config TARGET_CVITEK
+	def_bool n
+	select ARM64 if TARGET_CVITEK_ARM
+	select GENERIC_RISCV if TARGET_CVITEK_RISCV
+	select ENABLE_ARM_SOC_BOOT0_HOOK if TARGET_CVITEK_ARM
+
+choice
+	prompt "Cvitek target"
+
+config TARGET_CVITEK_CV1835
+	bool "Support CVITEK CV1835"
+	select TARGET_CVITEK
+
+config TARGET_CVITEK_CV1822
+	bool "Support CVITEK CV1822"
+	select TARGET_CVITEK
+
+config TARGET_CVITEK_CV181X
+	bool "Support CVITEK CV181X"
+	select TARGET_CVITEK
+
+config TARGET_CVITEK_CV180X
+	bool "Support CVITEK CV180X"
+	select TARGET_CVITEK
+
+endchoice
+
+source "board/cvitek/cv1835/Kconfig"
+source "board/cvitek/cv1822/Kconfig"
+source "board/cvitek/cv181x/Kconfig"
+source "board/cvitek/cv180x/Kconfig"
+
+endif

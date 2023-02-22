@@ -190,7 +190,8 @@ dtc_cpp_flags  = -Wp,-MD,$(depfile).pre.tmp -nostdinc                    \
 		 -I$(srctree)/arch/$(ARCH)/include                       \
 		 -include $(srctree)/include/linux/kconfig.h             \
 		 -D__ASSEMBLY__                                          \
-		 -undef -D__DTS__
+		 -undef -D__DTS__                                        \
+		 -D__UBOOT__
 
 # Finds the multi-part object the current object will be linked into
 modname-multi = $(sort $(foreach m,$(multi-used),\

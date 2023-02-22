@@ -28,7 +28,7 @@
  * negative error code if they can't all be copied.  Useful when
  * assembling descriptors for an associated set of interfaces used
  * as part of configuring a composite device; or in other cases where
- * sets of descriptors need to be marshaled.
+ * sets of descriptors need to be cv181xhaled.
  */
 int
 usb_descriptor_fillbuf(void *buf, unsigned buflen,

@@ -517,7 +517,10 @@ config ARM64_SUPPORT_AARCH32
 
 choice
 	prompt "Target select"
-	default TARGET_HIKEY
+	default TARGET_CVITEK_ARM
+
+config TARGET_CVITEK_ARM
+	prompt "Cvitek target for ARM"
 
 config ARCH_AT91
 	bool "Atmel AT91"
@@ -2039,7 +2042,6 @@ source "arch/arm/mach-zynqmp-r5/Kconfig"
 source "arch/arm/cpu/armv7/Kconfig"
 
 source "arch/arm/cpu/armv8/Kconfig"
-
 source "arch/arm/mach-imx/Kconfig"
 
 source "arch/arm/mach-nexell/Kconfig"

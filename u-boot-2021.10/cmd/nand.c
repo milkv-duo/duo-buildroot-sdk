@@ -393,6 +393,11 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 	int dev = nand_curr_device;
 	int repeat = flag & CMD_FLAG_REPEAT;
 
+	ulong start;
+	int temp;
+
+	start = get_timer(0);
+
 	/* at least two arguments please */
 	if (argc < 2)
 		goto usage;
@@ -621,7 +626,7 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 				ret = nand_write_skip_bad(mtd, off, &rwsize,
 							  NULL, maxsize,
 							  (u_char *)addr,
-							  WITH_WR_VERIFY);
+							  0);
 #ifdef CONFIG_CMD_NAND_TRIMFFS
 		} else if (!strcmp(s, ".trimffs")) {
 			if (read) {
@@ -654,6 +659,9 @@ static int do_nand(struct cmd_tbl *cmdtp, int flag, int argc,
 
 		printf(" %zu bytes %s: %s\n", rwsize,
 		       read ? "read" : "written", ret ? "ERROR" : "OK");
+
+		temp = rwsize / get_timer(start);
+		printf("nand %s speed %d.%d MB/s\n", argv[0], temp / 1000, (temp - (temp / 1000) * 1000));
 
 		return ret == 0 ? 0 : 1;
 	}

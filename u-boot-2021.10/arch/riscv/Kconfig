@@ -6,7 +6,10 @@ config SYS_ARCH
 
 choice
 	prompt "Target select"
-	optional
+	default TARGET_CVITEK_RISCV
+
+config TARGET_CVITEK_RISCV
+	prompt "Cvitek target for RISCV"
 
 config TARGET_AX25_AE350
 	bool "Support ax25-ae350"

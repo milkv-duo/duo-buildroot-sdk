@@ -2389,6 +2389,13 @@ config CMD_UBIFS
 	help
 	  UBIFS is a file system for flash devices which works on top of UBI.
 
+config CMD_CVI_UPDATE
+	bool "cvitek update command"
+	default y
+	help
+	uboot will check flag in SRAM and thendecide if it's sd,usb,usb drive or Ethernet upgrade.
+	User can run cvi_update [usb/sd/eth] for force update without check flag.
+
 config MMC_SPEED_MODE_SET
 	bool "set speed mode using mmc command"
 	depends on CMD_MMC

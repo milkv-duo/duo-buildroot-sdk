@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0+
+dtb-$(CONFIG_TARGET_CVITEK) += $(CHIP)_$(CVIBOARD).dtb
 
 dtb-$(CONFIG_TARGET_SMARTWEB) += at91sam9260-smartweb.dtb
 dtb-$(CONFIG_TARGET_TAURUS) += at91sam9g20-taurus.dtb
@@ -497,7 +498,7 @@ dtb-$(CONFIG_MACH_SUN4I) += \
 	sun4i-a10-inet9f-rev03.dtb \
 	sun4i-a10-itead-iteaduino-plus.dtb \
 	sun4i-a10-jesurun-q5.dtb \
-	sun4i-a10-marsboard.dtb \
+	sun4i-a10-cv181xboard.dtb \
 	sun4i-a10-mini-xplus.dtb \
 	sun4i-a10-mk802.dtb \
 	sun4i-a10-mk802ii.dtb \
@@ -772,7 +773,7 @@ dtb-y += \
 	imx6q-icore-rqs.dtb \
 	imx6q-kp.dtb \
 	imx6q-logicpd.dtb \
-	imx6q-marsboard.dtb \
+	imx6q-cv181xboard.dtb \
 	imx6q-mba6a.dtb \
 	imx6q-mba6b.dtb \
 	imx6q-mccmon6.dtb\
