@@ -1,0 +1,29 @@
+SHELL = /bin/bash
+
+ifeq ($(PARAM_FILE), )
+PARAM_FILE=../../../../../$(shell echo $(MW_VER))/Makefile.param
+include $(PARAM_FILE)
+endif
+include ../../sensor.mk
+
+SRCS = $(shell find $(sensor-y) -name '*.c')
+OBJS = $(SRCS:.c=.o)
+
+TARGET_A = $(MW_LIB)/libsns_full.a
+TARGET_SO = $(MW_LIB)/libsns_full.so
+
+EXTRA_LDFLAGS =
+
+.PHONY : clean all
+all : $(TARGET_A) $(TARGET_SO)
+
+$(TARGET_A): $(OBJS)
+	@$(AR) $(ARFLAGS) $@ $(OBJS)
+	@echo -e $(YELLOW)[LINK]$(END)[$(notdir $(AR))] $(notdir $@)
+
+$(TARGET_SO): $(OBJS_PATH)
+	@$(LD) $(LDFLAGS) $(EXTRA_LDFLAGS) -o $@ --start-group $(OBJS) --end-group
+	@echo -e $(GREEN)[LINK]$(END)[$(notdir $(LD))] $(notdir $@)
+
+clean:
+	@rm -f $(TARGET_A) $(TARGET_SO)

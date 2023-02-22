@@ -1,0 +1,11 @@
+mw_dir=middleware
+includedir=${mw_dir}/include
+libdir=${mw_dir}/lib
+3rd_lib_dir=${libdir}/3rd
+
+Name: CVITEK System lib
+Description: VDEC libs
+Version: 2.0
+Cflags: -I${includedir}/
+Libs: -L${libdir} -lsys -lvdec
+

@@ -1,0 +1,27 @@
+[Setup]
+Make sure libusb is installed.
+On Linux, type "sudo apt-get install libusb-1.0-0-dev".
+On Windows, in step3 of the test flow, use zadig to install the winUSB (libusb).
+
+[Test Flow]
+* Follow below steps to do the Cvitek USB Gadget Test.
+1. Boot into kernel. Connect the USB cable to PC and cv1835.
+2. Type "/etc/uhubon.sh device" to setup the USB device.
+3. Type "/etc/run_usb.sh probe cvg" and "/etc/run_usb.sh start".
+4. Type "mdev -s" and make sure "/dev/cvi_gadget" exist.
+5. Type "/usr/bin/sample_cvg [test case]" to run the test application.
+   [test case]: 0 blocking read/write, use mmap as data buffer
+                1 blocking read/write, use copy from user.
+                2 streaming read/write, use mmap as data buffer.
+                3 streaming read/write, use copy from user.
+                4 blind test. Do TX and RX concurrently.
+                5 blocking read/write, use ion data buffer.
+                6 streaming read/write, use ion data buffer.
+6. On host PC, type "gen_patterns.sh" to generate test patterns.
+7. To run test case except for [4] blind test, run "sudo python cv1835_cvg.py" on PC.
+   Check the test result.
+8. To run test case [4] blind test, run "sudo python cv1835_cvg_blind.py" on PC.
+   Check the test result.
+9. Type "Ctrl-C" to leave the test application on cv1835. Type "/etc/run_usb.sh stop"
+   to disconnect the usb connection.
+10.Jump to step 3 for another test case.

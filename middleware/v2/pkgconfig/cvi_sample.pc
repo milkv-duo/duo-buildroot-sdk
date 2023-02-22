@@ -1,0 +1,10 @@
+mw_dir=middleware
+includedir=${mw_dir}/sample
+libdir=${mw_dir}/lib
+
+Name: CVITEK System lib
+Description: SAMPLE libs
+Version: 2.0
+Cflags: -I${includedir}/common -I${mw_dir}/3rdparty/inih
+Requires: cvi_common cvi_audio cvi_vdec cvi_misc
+Libs: -L${libdir} -lsample -L${libdir}/3rd -lini

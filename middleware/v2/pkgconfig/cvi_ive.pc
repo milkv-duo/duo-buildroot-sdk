@@ -1,0 +1,9 @@
+mw_dir=middleware
+includedir=${mw_dir}/include
+libdir=${mw_dir}/lib
+
+Name: CVITEK System lib
+Description: IVE libs
+Version: 2.0
+Cflags: -I${includedir}/
+Libs: -L${libdir} -lsys -lcvi_ive -latomic

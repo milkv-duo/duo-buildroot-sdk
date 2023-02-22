@@ -1,0 +1,199 @@
+SHELL = /bin/bash
+
+include $(BUILD_PATH)/.config
+
+## setup path ##
+ROOT_DIR:=$(shell dirname $(realpath $(PARAM_FILE)))
+export MW_PATH:= $(ROOT_DIR)
+export MW_INC := $(MW_PATH)/include
+export MW_LIB := $(MW_PATH)/lib
+export MW_3RD_LIB := $(MW_PATH)/lib/3rd
+
+ifeq ($(KERNEL_DIR), )
+KERNEL_PATH ?= $(ROOT_DIR)/../../$(KERNEL_SRC)
+ifeq ($(PROJECT_FULLNAME), )
+  $(error PROJECT_FULLNAME not defined! Please check!)
+else
+  KERNEL_DIR = $(KERNEL_PATH)/build/$(PROJECT_FULLNAME)
+endif
+endif
+
+ifeq ($(SDK_VER), 32bit)
+  export CROSS_COMPILE = $(CROSS_COMPILE_32)
+  SYSROOT := $(ROOT_DIR)/../../ramdisk/sysroot/sysroot-glibc-linaro-2.23-2017.05-arm-linux-gnueabihf/
+  KERNEL_INC := $(KERNEL_DIR)/arm/usr/include
+  OPT_LEVEL := -O3
+else ifeq ($(SDK_VER), 64bit)
+  export CROSS_COMPILE = $(CROSS_COMPILE_64)
+  SYSROOT := $(ROOT_DIR)/../../ramdisk/sysroot/sysroot-glibc-linaro-2.23-2017.05-aarch64-linux-gnu/
+  KERNEL_INC := $(KERNEL_DIR)/arm64/usr/include
+  OPT_LEVEL := -O3
+else ifeq ($(SDK_VER), uclibc)
+  export CROSS_COMPILE = $(CROSS_COMPILE_UCLIBC)
+  SYSROOT := $(ROOT_DIR)/../../ramdisk/sysroot/sysroot-uclibc/
+  KERNEL_INC := $(KERNEL_DIR)/arm/usr/include
+  OPT_LEVEL := -Os
+else ifeq ($(SDK_VER), glibc_riscv64)
+  export CROSS_COMPILE = $(CROSS_COMPILE_GLIBC_RISCV64)
+  SYSROOT := $(ROOT_DIR)/../../host-tools/gcc/riscv64-linux-x86_64/sysroot
+  KERNEL_INC := $(KERNEL_DIR)/riscv/usr/include
+  OPT_LEVEL := -Os
+  OPT_LEVEL += -march=rv64imafdcvxthead -mcmodel=medany -mabi=lp64dv
+else ifeq ($(SDK_VER), musl_riscv64)
+  export CROSS_COMPILE = $(CROSS_COMPILE_MUSL_RISCV64)
+  SYSROOT := $(ROOT_DIR)/../../host-tools/gcc/riscv64-linux-musl-x86_64/sysroot
+  KERNEL_INC := $(KERNEL_DIR)/riscv/usr/include
+  OPT_LEVEL := -Os
+  OPT_LEVEL += -march=rv64imafdcvxthead -mcmodel=medany -mabi=lp64d
+endif
+
+## INCLUDE PATH ##
+COMMON_INC = $(MW_PATH)/sample/common/include
+SYS_INC = $(MW_PATH)/modules/sys/include
+VPU_INC = $(MW_PATH)/modules/vpu/include
+AUD_INC = $(MW_PATH)/modules/audio/include
+OSDC_INC = $(MW_PATH)/modules/osdc/include
+BIN_INC = $(MW_PATH)/modules/bin/include
+
+MODULES_DIR = $(shell if [ -d $(MW_PATH)/modules ]; then echo "exist"; else echo "noexist"; fi)
+
+ifeq ("$(MODULES_DIR)" , "noexist")
+ISP_INC = $(MW_INC)/isp/$(shell echo $(CHIP_ARCH) | tr A-Z a-z)
+else
+ISP_INC = $(MW_PATH)/modules/isp/include/$(shell echo $(CHIP_ARCH) | tr A-Z a-z)
+endif
+
+## LIBRARY ##
+ISP_LIB := -lisp -lawb -lae -laf
+ISP_OBJ := $(MW_LIB)/libisp.a $(MW_LIB)/libae.a $(MW_LIB)/libawb.a $(MW_LIB)/libaf.a
+
+ifeq ($(CHIP_ARCH), CV183X)
+else ifeq ($(CHIP_ARCH), $(filter $(CHIP_ARCH), CV182X MARS PHOBOS CV181X CV180X))
+ISP_LIB += -lisp_algo
+ISP_OBJ += $(MW_LIB)/libisp_algo.a
+else
+ifeq ($(SUBTYPE), fpga)
+ISP_LIB += -lisp_algo
+ISP_OBJ += $(MW_LIB)/libisp_algo.a
+else
+$(error UNKNOWN chip architecture - $(CHIP_ARCH))
+endif
+endif
+
+## DEFINES ##
+export PROJ_CFLAGS = -DF10
+
+ifeq ($(SUBTYPE), fpga)
+export FPGA_PORTING := true
+else
+export FPGA_PORTING := false
+endif
+
+MW_GLIBC_DEPENDENT := $(SYSROOT)/lib
+
+## GCC COMPILER ##
+CC = $(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+AR = $(CROSS_COMPILE)ar
+LD = $(CROSS_COMPILE)ld
+NM = $(CROSS_COMPILE)nm
+RANLIB = $(CROSS_COMPILE)ranlib
+STRIP = $(CROSS_COMPILE)strip
+OBJCOPY = $(CROSS_COMPILE)objcopy
+
+### COMMON COMPILER FLAGS ###
+#
+# export TARGET_PACKAGES_INCLUDE and TARGET_PACKAGES_LIBDIR from build/Makefile
+#
+WARNING_LEVEL=-Wall -Wextra -Werror
+
+#Generate object files by CC
+CFLAGS   = $(OPT_LEVEL) -std=gnu11 -g $(WARNING_LEVEL) -fPIC -ffunction-sections -fdata-sections -Wl,--gc-sections $(CVI_TARGET_PACKAGES_INCLUDE)
+#Generate object files by CXX
+CXXFLAGS = $(OPT_LEVEL) -std=gnu++11 -g $(WARNING_LEVEL) -fPIC -ffunction-sections -fdata-sections -Wl,--gc-sections $(CVI_TARGET_PACKAGES_INCLUDE)
+#Generate dependencies files by CC and CXX
+DEPFLAGS = -MMD
+
+### COMMON AR and LD FLAGS ###
+#Generate archive file by AR
+ARFLAGS  = rcs
+#Generate shared library by LD
+LDFLAGS  = -shared -fPIC --gc-sections -export-dynamic -L$(MW_LIB) -L$(MW_3RD_LIB) --sysroot $(SYSROOT) $(CVI_TARGET_PACKAGES_LIBDIR)
+
+### COMMON ELF FLAGS ###
+#Generate ELF files by CC and CXX
+ELFFLAGS = $(OPT_LEVEL) -Wl,--gc-sections -rdynamic -L$(MW_LIB) -L$(MW_3RD_LIB) $(CVI_TARGET_PACKAGES_LIBDIR)
+
+ifeq ($(SDK_VER), glibc_riscv64)
+CFLAGS += -mno-ldd
+CXXFLAGS += -mno-ldd
+else ifeq ($(SDK_VER), musl_riscv64)
+CFLAGS += -mno-ldd
+CXXFLAGS += -mno-ldd
+endif
+
+ifeq ($(CONFIG_DEBUG_INFO), y)
+ifeq ($(CONFIG_DEBUG_INFO_SPLIT), y)
+CFLAGS += -gsplit-dwarf
+CXXFLAGS += -gsplit-dwarf
+else ifeq ($(CONFIG_DEBUG_INFO_DWARF4), y)
+CFLAGS += -gdwarf-4
+CXXFLAGS += -gdwarf-4
+else ifeq ($(CONFIG_DEBUG_INFO_REDUCED), y)
+CFLAGS += -femit-struct-debug-baseonly -fno-var-tracking
+CXXFLAGS += -femit-struct-debug-baseonly -fno-var-tracking
+else
+CFLAGS += -Og
+CXXFLAGS += -Og
+endif
+endif
+
+ifeq ($(MTRACE), y)
+ifneq ($(SDK_VER),uclibc)
+CFLAGS += -DMTRACE
+endif
+endif
+
+ifeq ($(FPGA_PORTING), true)
+CFLAGS += -DFPGA_PORTING
+endif
+
+ifeq ($(CONFIG_DDR_64MB_SIZE), y)
+CFLAGS += -DDDR_64MB_SIZE
+endif
+
+SAMPLE_STATIC ?= 1
+SELF_TEST_STATIC ?= 1
+SAMPLE_TPU_ENABLE ?= 0
+ENABLE_ISP_C906L = 0
+
+ifeq ($(CONFIG_ENABLE_SDK_ASAN), y)
+CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+ELFFLAGS += -fsanitize=address -fno-omit-frame-pointer -g
+LDFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-common -g
+SAMPLE_STATIC = 0
+SELF_TEST_STATIC = 0
+endif
+
+CFLAGS += -DARCH_$(CHIP_ARCH)
+
+ifeq ("$(CVIARCH)", "CV181X")
+CFLAGS += -D__CV181X__
+endif
+ifeq ("$(CVIARCH)", "CV180X")
+CFLAGS += -D__CV180X__
+endif
+
+## COLOR ##
+BLACK = "\e[30;1m"
+RED  =  "\e[31;1m"
+GREEN = "\e[32;1m"
+YELLOW = "\e[33;1m"
+BLUE  = "\e[34;1m"
+PURPLE = "\e[35;1m"
+CYAN  = "\e[36;1m"
+WHITE = "\e[37;1m"
+
+END= "\e[0m"
+

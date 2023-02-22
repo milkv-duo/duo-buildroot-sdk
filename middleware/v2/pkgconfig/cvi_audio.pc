@@ -1,0 +1,10 @@
+mw_dir=middleware
+includedir=${mw_dir}/include
+libdir=${mw_dir}/lib
+3rd_lib_dir=${libdir}/3rd
+
+Name: CVITEK System lib
+Description: AUDIO libs
+Version: 2.0
+Cflags: -I${includedir}/
+Libs: -L${libdir} -ldl  -lcvi_audio -lcvi_vqe -lcvi_VoiceEngine -lcvi_RES1 -L${3rd_lib_dir} -ltinyalsa -lrt -lpthread -lcvi_ssp -lcli

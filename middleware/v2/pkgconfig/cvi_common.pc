@@ -1,0 +1,9 @@
+mw_dir=middleware
+includedir=${mw_dir}/include
+libdir=${mw_dir}/lib
+
+Name: CVITEK System lib
+Description: SYS / VPU / ISP / VENC / BIN libs
+Version: 2.0
+Cflags: -I${includedir} -I${includedir}/isp/cv181x
+Libs: -L${libdir} -lsys -lvpu -lvenc -lcvi_bin -lcvi_bin_isp -lisp -lisp_algo -lae -laf -lawb -lsns_full -latomic
