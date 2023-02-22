@@ -1,0 +1,110 @@
+# CHANGE LOG FOR BIGDIGITS
+
+## Changes in Version 2.6
+
+_Version 2.6.1 (Released 31 March 2016)_  
+
+*   Added new functions to perform modular arithmetic operations, particularly useful for doing computations in a prime field for elliptic curves:
+    *   `mpModSquare`, `bdModSquare` to compute `a = x^2 (mod m)`
+    *   `mpModSqrt`, `bdModSqrt` to compute a square root modulo a prime p
+    *   `mpModHalve`, `bdModHalve` to compute `a = x / 2 (mod p)`
+    *   `mpModAdd`, `bdModAdd` and `mpModSub`, `bdModSub` to compute `w = u ± v (mod m)` quickly for u and v in the range `[0, m-1]`.
+    *   The function `mpModSpecial` to compute `u = v (mod m)` in the special case where v is known to be in the range `[0, km]` for k a small integer. This is faster than `mpModulo`.
+*   Added functions `mpToShort`, `bdToShort` to convert a multiprecision integer to a single digit.
+*   Added functions `mpShortIsEqual`, `bdmpShortIsEqual` to check if a multiprecision integer is equal to a single digit.
+*   Added the explicit constant-time comparison functions.
+    *   `mpEqual_ct()`, `bdIsEqual_ct()`
+    *   `mpIsZero_ct()`, `bdIsZero_ct()`
+    *   `mpCompare_ct()`, `bdCompare_ct()`
+*   Reversed the change in v2.5 to make the comparison functions constant-time by default. The original comparison functions are now _not_ constant-time, as they were before v2.5\. The user must explicitly select the constant-time variant (ending **_ct**). To summarize: the functions `mpEqual`, `bdIsEqual`, `mpIsZero`, `bdIsZero`, `mpCompare` and `bdCompare` are _not_ constant-time in v2.6.
+
+    > _Comment:_ We realised after we made the change in v2.5 that the majority of comparison operations in our own code were simple checks for special cases and were not comparing secret values, so they did not need the more expensive constant-time operations. There were only a few occasions where we did comparisons on secret values and these were easily found and explicitly changed to do a constant-time comparison. So, sorry, we shouldn't have changed the default behaviour in v2.5\. It's back now to how it was before.
+
+*   Added the functions `mpCompileTime`, `bdCompileTime` to show the time and date of compilation.
+*   Added the function `mpPrintBits` to print the value in 0/1 bit format.
+*   Added the option to specify the global preprocessor definition, say, `MAX_FIXED_BIT_LENGTH=640` when using the `NO_ALLOCS` option for the "mp" functions. This allows you to change the maximum fixed length of arrays without editing the core source code.
+*   Increased the size of the fixed-length buffers in the `mpPrint*()` functions to avoid buffer overflows
+*   Fixed an issue with the `mpPrint*()` functions when displaying zero values.
+*   Added the `bdNewVars` and `bdFreeVars` functions to allow "bulk" creation and destruction of "bd" variables in a single line of code.
+
+## Changes in Version 2.5
+
+_Version 2.5 (Released 22 October 2015)_  
+
+*   Changed license conditions to Mozilla Public License, v. 2.0.
+*   Fixed `bdShortMult` to catch empty `u` parameter.
+*   Fixed `bdPrintBits` to print "0" if bit length is zero.
+*   Changed comparison functions to be constant-time by default. Retained the old, quicker functions as `_q` variants.
+    *   `mpEqual` `bdIsEqual` `mpEqual_q` `bdIsEqual_q`
+    *   `mpIsZero` `bdIsZero` `mpIsZero_q` `bdIsZero_q`
+    *   `mpCompare` `bdCompare` `mpCompare_q` `bdCompare_q`
+*   Added constant-time modular exponentiation functions `bdModExp_ct` and `mpModExp_ct`.
+*   Added `mpPrintDecimalSigned` function to display negative numbers ("**mp**" only).
+
+
+## Changes in Version 2.4
+
+_Version 2.4 (Released 27 April 2013)_  
+
+*   Added markup for Doxygen documentation to produce a manual in CHM and HTML formats.
+*   Updated the "pretty-good" internal RNG functions in `bigdRand` and `bigdigitsRand` to improve the seeding of the ANSI X9.31 PRNG algorithm.
+*   Fixed the `NO_ALLOCS` option so it does not use malloc with the `mpConv` functions (thanks to Kevin Kramb for pointing this out).
+*   Added the new functions `bdRandomOctets`, `bdRandomNumber` and `bdQuickRandBits`, which do various contortions you might want to do with random numbers.
+*   Updated the test source code modules.
+
+
+## Changes in Version 2.3
+
+_Version 2.3 (Released 11 November 2011)_  
+
+*   Added new functions to compute the integer cube root: `bdCubeRoot` and `mpCubeRoot`.
+*   Updated and improved the integer square root functions: `bdSqrt` and `mpSqrt`.
+*   Added the more useful print functions with an optional prefix and suffix:
+    *   `bdPrintHex` prints a bigdigit number in hex format.
+    *   `bdPrintDecimal` prints a bigdigit number in decimal format.and the equivalent mp functions `mpPrintHex` and `mpPrintDecimal`.
+*   Added the new function `bdPower` to compute the n-th power of a number `y = g^n`. Use this with caution as you can quickly run out of memory. It's meant for small exponents like n=3.
+*   Improved the efficiency of the greatest common divisor functions, `bdGcd` and `mpGcd`.
+*   Fixed the bug in `mpChs` (thanks to Valery Blazhnov).
+*   Fixed the bug in `mpAlloc` which would fail if you called `bdSetDigit(b, 0)` (thanks to "Radistao").
+
+
+## Changes in Version 2.2
+
+_Version 2.2 (Released 31 July 2008)_  
+
+*   Added sliding-window exponentiation to speed up the ModExp functions.
+*   Added new bd functions:
+    *   `bdJacobi` computes the Jacobi (Legendre) symbol.
+    *   `bdGetBit` returns the value of a bit at a given position in a number.
+    *   `bdSetBit` sets the bit at a given position in a number.
+    *   `bdNotBits` computes bitwise a = NOT a.
+*   Added the new functions `mpIsNegative`, `mpChs` and `mpAbs` in anticipation of adding full signed integer functionality in a later version.
+*   Added the `NO_ALLOCS` option to compile the "mp" library without using any memory allocation.
+*   Added the `USE_64WITH32` option to use the 64-bit integer types (`long long`) if available on a 32-bit machine.
+*   Improved the zeroisation and destroy macros.
+*   Moved the type declarations for the exact-width types to a separate include file.
+*   Re-organised and re-named the ancillary source and include files (yet again!).
+*   Deprecated the `bd*Ex` functions in favour of re-named "safe" `bd*_s` functions.
+
+
+## Changes in Version 2.1
+
+_Version 2.1 (Released 23 August 2006)_  
+
+*   Added support for 64-bit compilers.
+*   Added fudge so opaque pointers will work with C++ compilers.
+*   Added new functions:
+    *   `bdSqrt` computes the `integer' square root, s = floor(sqrt(x)).
+    *   `bdModPowerOf2` computes a = a (mod 2^L).
+    *   `bdXorBits` computes bitwise a = b XOR c.
+    *   `bdOrBits` computes bitwise a = b OR c.
+    *   `bdAndBits` computes bitwise a = b AND c.
+    *   `bdVersion` returns version number as an integer = major*1000+minor*100+release*10+uses_asm(0|1).
+    *   `bdRandomBits` generates a random BIGD number up to n bits long (i.e. r = [0, 2^n]) using the internal RNG.
+*   Removed the shift limit on `bdShiftLeft` and `bdShiftRight`. This was previously limited to a maximum of 32 bits. It will now shift by any value - well, any value up to `SIZE_MAX`.
+*   Re-organised the source and include files for the internal random number generator functions to avoid having to include the `spRandom` modules when they are not needed.
+*   Fixed up inconsistencies in the documentation for the `bdConv*` functions.
+*   Made minor change to `mpIsPrime` to comply with ANSI X.42-2003 Annex F.1.1 "Range of bases in Miller-Rabin test".
+*   Made minor improvements to the `spBetterRand` function.
+*   Fixed bugs in `bdConvertHex`, `bdGetBit` and `bdSetBit`.
+*   Made various minor changes in the code to avoid warning messages when compiling with the `-Wall -pedantic` options.

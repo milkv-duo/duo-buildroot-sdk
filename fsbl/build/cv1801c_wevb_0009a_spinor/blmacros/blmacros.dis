@@ -1,0 +1,24 @@
+
+/root/.jenkins/workspace/cv180x_v4.0.0_release_build/fsbl/build/cv1801c_wevb_0009a_spinor/blmacros/blmacros.elf:     file format elf64-littleriscv
+/root/.jenkins/workspace/cv180x_v4.0.0_release_build/fsbl/build/cv1801c_wevb_0009a_spinor/blmacros/blmacros.elf
+architecture: riscv:rv64, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0x0000000000000000
+
+Program Header:
+    LOAD off    0x0000000000001000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**12
+         filesz 0x0000000000000004 memsz 0x0000000000000004 flags r--
+   STACK off    0x0000000000000000 vaddr 0x0000000000000000 paddr 0x0000000000000000 align 2**4
+         filesz 0x0000000000000000 memsz 0x0000000000000000 flags rw-
+
+Sections:
+Idx Name          Size      VMA               LMA               File off  Algn
+  0 .text         00000004  0000000000000000  0000000000000000  00001000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+SYMBOL TABLE:
+0000000000000000 l    d  .text	0000000000000000 .text
+0000000087e00000 g       *ABS*	0000000000000000 DEF_BLCP_2ND_RUNADDR
+0000000080000000 g       *ABS*	0000000000000000 DEF_MONITOR_RUNADDR
+0000000080000000 g       *ABS*	0000000000000000 DEF_DRAM_BASE
+
+
