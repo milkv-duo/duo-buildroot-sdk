@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBIPERF
+	bool "Target package libiperf"
+	default n
+	help
+	  target package libiperf

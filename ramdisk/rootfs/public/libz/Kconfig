@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBZ
+	bool "Target package libz"
+	default y
+	help
+	  target package libz

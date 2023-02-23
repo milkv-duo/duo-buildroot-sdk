@@ -1,0 +1,141 @@
+#AP6201BM_NVRAM_V1.0.1_20191213
+# Sample variables file for BCM943012 BU board
+NVRAMRev=$Rev: 351687 $
+sromrev=11
+etmode=0x11
+cckdigfilttype=4
+bphyscale=0x28
+boardflags3=0x40000101
+vendid=0x14e4
+devid=0xA804
+manfid=0x2d0
+prodid=0x052e
+macaddr=00:90:4c:c5:12:38
+nocrc=1
+boardtype=0x080e
+boardrev=0x1103
+lpflags=0x00000020
+xtalfreq=37400
+boardflags2=0xc0800000
+boardflags=0x00400101
+extpagain2g=2
+extpagain5g=2
+ccode=0 
+regrev=0 
+antswitch = 0
+rxgains2gelnagaina0=0
+rxgains2gtrisoa0=15
+rxgains2gtrelnabypa0=0
+rxgains5gelnagaina0=0
+rxgains5gtrisoa0=9
+rxgains5gtrelnabypa0=0
+pdgain5g=0
+pdgain2g=0
+tworangetssi2g=0
+tworangetssi5g=0
+rxchain=1
+txchain=1
+aa2g=1
+aa5g=1
+tssipos5g=0
+tssipos2g=0
+tssisleep_en=0x5
+femctrl=17
+subband5gver=4
+
+#pa2ga0=-124,5709,-656
+
+#pa2ga0=-115,5009,-599
+
+#pa2ga0=-141,5139,-630
+
+#pa2ga0=-129,5160,-618
+
+#pa2ga0=-129,5108,-615
+
+#pa2ga0=-158,5353,-643
+
+#pa2ga0=-135,5052,-616
+
+pa2ga0=-166,5339,-645
+
+pa5ga0=-70,6529,-711,-71,6480,-706,-57,6475,-695,-59,6406,-695
+cckpwroffset0=2
+pdoffset40ma0=0
+pdoffset80ma0=0
+lowpowerrange2g=0
+lowpowerrange5g=0
+ed_thresh2g=-63
+ed_thresh5g=-63
+#swctrlmap_2g=0x00000000,0x00400040, 0x00400040,0x000000,0x3e7
+#swctrlmapext_2g=0x00020002,0x00000000, 0x00000000,0x000000,0x003
+#swctrlmap_5g=0x00000000,0x00000000,0x00000000,0x000000,0x3a7
+#swctrlmapext_5g=0x00000000,0x00010001, 0x00010001,0x000000,0x001
+swctrlmap_2g=0x00000000,0x00400040, 0x00400040,0x204040,0x3e7
+swctrlmapext_2g=0x00020002,0x00000000, 0x00000000,0x000000,0x003
+swctrlmap_5g=0x00000000,0x00800080,0x00800080,0x000000,0x387
+swctrlmapext_5g=0x00010001,0x00000000, 0x00000000,0x000000,0x003
+ulpnap=0
+ulpadc=1
+ssagc_en=0
+ds1_nap=0
+epacal2g=0
+epacal5g=0
+epacal2g_mask=0x3fff
+
+maxp2ga0=82
+cckbw202gpo=0x2222
+ofdmlrbw202gpo=0x2222
+dot11agofdmhrbw202gpo=0x2222
+mcsbw202gpo=0x99444444
+
+mac_clkgating=1
+#mcsbw402gpo=0x99555533
+maxp5ga0=74,74,74,74
+mcsbw205glpo=0x99666441
+mcsbw205gmpo=0x99666441
+mcsbw205ghpo=0x99666441
+#mcsbw405glpo=0x99555000
+#mcsbw405gmpo=0x99555000
+#mcsbw405ghpo=0x99555000
+#mcsbw805glpo=0x99555000
+#mcsbw805gmpo=0x99555000
+#mcsbw805ghpo=0x99555000
+
+txwbpapden=1
+femctrlwar=0
+use5gpllfor2g=1
+
+#tx papd cal params
+#params are - 0x5g2g 
+wb_rxattn=0x0303
+wb_txattn=0x0203
+wb_papdcalidx=0x1C05
+wb_eps_offset=0x01c101ad
+wb_bbmult=0x3C50
+wb_calref_db=0x1926
+wb_tia_gain_mode=0x0606
+wb_txbuf_offset=0x2020
+wb_frac_del=0x60b4
+wb_g_frac_bits=0xBA
+
+nb_rxattn=0x0403
+nb_txattn=0x0402
+nb_papdcalidx= 0x1405
+nb_eps_offset= 0x01d701ca
+nb_bbmult= 0x5A50
+nb_tia_gain_mode=0x0006
+AvVmid_c0=6,104,7,80,7,80,7,80,7,80
+
+lpo_select=4
+
+csml=0x10
+pt5db_gaintbl=0
+
+papdcck=0
+phycal_tempdelta=15
+ofdmfilttype_2gbe=1
+
+#deadman_to=1
+btc_mode=1
+muxenab=0x1

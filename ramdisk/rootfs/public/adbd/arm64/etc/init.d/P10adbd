@@ -1,0 +1,24 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    printf "Starting adbd: "
+    /etc/uhubon.sh device
+    /etc/run_usb.sh probe adb
+    /etc/run_usb.sh start
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+  stop)
+    printf "Stopping adbd: "
+    echo "OK"
+    ;;
+  restart|reload)
+    "$0" stop
+    "$0" start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

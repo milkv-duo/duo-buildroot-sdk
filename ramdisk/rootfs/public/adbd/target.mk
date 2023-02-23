@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_ADBD),y)
+TARGET_PACKAGES += adbd
+endif

@@ -1,0 +1,28 @@
+#! /bin/sh
+
+NAME=thttpd
+
+case "$1" in
+  start)
+    printf "Starting $NAME: "
+    start-stop-daemon -S -q -b -x /usr/bin/thttpd -- -d /usr/www -c cgi-bin/\*.cgi -u root
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+  stop)
+    printf "Stopping $NAME: "
+    start-stop-daemon -K -q -n $NAME
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+  restart|reload)
+    echo "Restarting $NAME: "
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

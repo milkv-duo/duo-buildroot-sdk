@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_NANOMSG
+	bool "Target package nanomsg"
+	default n
+	help
+	  target nanomsg

@@ -1,0 +1,33 @@
+
+#####################
+# files to boot a real root system
+
+file /init ../target/init.sh.sqsh 775 0 0
+file /init_recovery ../target/init.sh.recoverysh 775 0 0
+
+dir /dev 755 0 0
+dir /etc 755 0 0
+dir /proc 755 0 0
+dir /sys 755 0 0
+dir /mnt 755 0 0
+
+nod /dev/console 644 0 0 c 5 1
+
+dir /root 755 0 0
+dir /home 755 0 0
+dir /home/cvitek 755 1000 1000
+file /root/cmdline.sh ../target/cmdline.sh 775 0 0
+
+dir /bin 755 1000 1000
+dir /usr 755 1000 1000
+dir /usr/sbin 755 1000 1000
+file /bin/busybox ../target/bin/busybox 755 0 0
+file /usr/sbin/blkid ../target/usr/sbin/blkid 755 0 0
+slink /bin/sh /bin/busybox 755 0 0
+slink /bin/su /bin/busybox 755 0 0
+slink /bin/mount /bin/busybox 755 0 0
+slink /bin/umount /bin/busybox 755 0 0
+slink /bin/findfs /bin/busybox 755 0 0
+slink /bin/chown /bin/busybox 755 0 0
+slink /bin/chmod /bin/busybox 755 0 0
+slink /bin/switch_root /bin/busybox 755 0 0

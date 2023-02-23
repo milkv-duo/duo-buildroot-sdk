@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBNFS
+	bool "Target package libnfs"
+	default n
+	help
+	  target package libnfs

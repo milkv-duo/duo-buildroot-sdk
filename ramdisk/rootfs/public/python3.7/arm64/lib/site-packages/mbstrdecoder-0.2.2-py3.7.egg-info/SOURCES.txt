@@ -1,0 +1,16 @@
+LICENSE
+MANIFEST.in
+README.rst
+setup.cfg
+setup.py
+tox.ini
+mbstrdecoder/__init__.py
+mbstrdecoder/_mbstrdecoder.py
+mbstrdecoder.egg-info/PKG-INFO
+mbstrdecoder.egg-info/SOURCES.txt
+mbstrdecoder.egg-info/dependency_links.txt
+mbstrdecoder.egg-info/requires.txt
+mbstrdecoder.egg-info/top_level.txt
+requirements/requirements.txt
+requirements/test_requirements.txt
+test/test_mbstrdecoder.py

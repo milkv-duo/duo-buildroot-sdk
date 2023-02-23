@@ -1,0 +1,73 @@
+#!/bin/sh
+${CVI_SHOPTS}
+
+# Copyright (c) 2015, ARM Limited and Contributors. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# Neither the name of ARM nor the names of its contributors may be used
+# to endorse or promote products derived from this software without specific
+# prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+#Mount filesystems needed by mount and mdev
+UPDATE_SCRIPT=/mnt/data/.ota/utils/update-script.sh
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+busybox ln -sf /proc/self/mounts /etc/mtab
+
+#Create all the symlinks to /bin/busybox
+busybox mkdir -p /sbin
+busybox mkdir -p /usr/sbin
+busybox mkdir -p /usr/bin
+/bin/busybox --install -s
+
+#Create things under /dev
+mdev -s
+
+echo "Enter Recovery Mode"
+
+echo "Mounting data partition"
+LAST_EMMC_DEV=`ls -r /dev/mmcblk0p* 2>/dev/null | head -n 1 `
+
+mkdir -p /mnt/data
+if [ ! -z $LAST_EMMC_DEV ] && [ -e $LAST_EMMC_DEV ];then
+  mount $LAST_EMMC_DEV /mnt/data
+elif [ -c /dev/ubi0_0 ];then
+  mount -t ubifs -o sync /dev/ubi0_0 /mnt/data
+fi
+
+if [ -f $UPDATE_SCRIPT ];then
+  # Create tmp folder
+  mkdir -p /tmp
+  LD_LIBRARY_PATH=/mnt/data/.ota/utils/
+  sh $UPDATE_SCRIPT
+  sync
+else
+  echo "No up $UPDATE_SCRIPT, enter shell"
+  sh
+fi
+
+# Clean recovery flags
+devmem 0x03005D00 32 0x50524F47
+# Reboot
+reboot -f

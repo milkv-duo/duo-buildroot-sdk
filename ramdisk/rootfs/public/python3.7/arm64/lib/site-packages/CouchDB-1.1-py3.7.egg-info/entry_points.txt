@@ -1,0 +1,7 @@
+[console_scripts]
+couchdb-dump = couchdb.tools.dump:main
+couchdb-load = couchdb.tools.load:main
+couchdb-load-design-doc = couchdb.loader:main
+couchdb-replicate = couchdb.tools.replicate:main
+couchpy = couchdb.view:main
+

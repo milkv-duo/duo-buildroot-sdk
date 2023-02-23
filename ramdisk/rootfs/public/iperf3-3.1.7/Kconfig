@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_IPERF3
+	bool "Target package iperf3 tools"
+	default n
+	help
+	  target package iperf3-3.1.7

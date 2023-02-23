@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBEVENT
+	bool "Target package libevent"
+	default n
+	help
+	  target package libevent

@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_PROCRANK
+	bool "Target package procrank"
+	default n
+	help
+	  target procrank

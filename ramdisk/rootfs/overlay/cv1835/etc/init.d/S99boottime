@@ -1,0 +1,15 @@
+BLD_TIME=$(awk "BEGIN{printf `devmem 0x03005E00`/1000}")
+BL2_TIME=$(awk "BEGIN{printf `devmem 0x03005E04`/1000}")
+BL31_TIME=$(awk "BEGIN{printf `devmem 0x03005E08`/1000}")
+BL32_TIME=$(awk "BEGIN{printf `devmem 0x03005E0C`/1000}")
+BL33_TIME=$(awk "BEGIN{printf `devmem 0x03005E10`/1000}")
+KERNEL_TIME=$(awk '{print $1}' /proc/uptime)
+BOOTTIME=$(awk "BEGIN{printf $BLD_TIME+$BL2_TIME+$BL31_TIME+$BL32_TIME+$BL33_TIME+$KERNEL_TIME}")
+uname -a > /tmp/boottime
+echo "BLD boottime: $BLD_TIME sec" >> /tmp/boottime
+echo "BL2 boottime: $BL2_TIME sec"  >> /tmp/boottime
+echo "BL31 boottime: $BL31_TIME sec" >> /tmp/boottime
+echo "BL32 boottime: $BL32_TIME sec" >> /tmp/boottime
+echo "BL33 boottime: $BL33_TIME sec" >> /tmp/boottime
+echo "Kernel boottime: $KERNEL_TIME sec" >> /tmp/boottime
+echo "Total boottime: $BOOTTIME sec" >> /tmp/boottime

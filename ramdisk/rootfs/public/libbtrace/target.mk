@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBBTRACE),y)
+TARGET_PACKAGES += libbtrace
+endif

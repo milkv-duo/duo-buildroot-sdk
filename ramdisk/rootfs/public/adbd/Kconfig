@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_ADBD
+	bool "Target adbd"
+	default n
+	help
+	  target adbd

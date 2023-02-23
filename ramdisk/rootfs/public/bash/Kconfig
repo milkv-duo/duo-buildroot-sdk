@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_BASH
+	bool "Target package bash"
+	default n
+	help
+	  target bash

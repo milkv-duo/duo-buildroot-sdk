@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_OTASERVER
+	bool "Target package ota server"
+    default y
+	help
+	  target package ota server

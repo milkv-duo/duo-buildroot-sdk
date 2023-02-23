@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBBTRACE
+	bool "Target package libbtrace"
+	default n
+	help
+	  target package libbtrace

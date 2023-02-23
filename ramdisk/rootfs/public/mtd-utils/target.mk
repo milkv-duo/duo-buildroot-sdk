@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_MTD-UTILS),y)
+TARGET_PACKAGES += mtd-utils
+endif

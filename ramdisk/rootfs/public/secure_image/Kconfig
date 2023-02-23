@@ -1,0 +1,7 @@
+config TARGET_PACKAGE_SECURE_IMAGE
+	bool "Target package secure_image"
+	default "y" if TOOLCHAIN_GLIBC_ARM64
+	default "n" if TOOLCHAIN_GLIBC_ARM
+	default "n" if TOOLCHAIN_UCLIBC_ARM
+	help
+	  target package secure_image

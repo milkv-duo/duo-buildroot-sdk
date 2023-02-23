@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_I2CTOOL
+	bool "Target package i2ctool"
+	default n
+	help
+	source code:ramdisk/tools/i2c_tool

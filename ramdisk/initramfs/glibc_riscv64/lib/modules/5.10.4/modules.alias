@@ -1,0 +1,5 @@
+# Aliases extracted from modules themselves.
+alias nfs-layouttype4-4 nfs_layout_flexfiles
+alias fs-efivarfs efivarfs
+alias usbfunc:printer usb_f_printer
+alias fs-gadgetfs gadgetfs

@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_CRONTABS),y)
+TARGET_PACKAGES += crontabs
+endif

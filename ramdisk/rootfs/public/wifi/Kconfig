@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_WIFI
+	bool "Target package wifi"
+	default n
+	help
+	  target package wifi

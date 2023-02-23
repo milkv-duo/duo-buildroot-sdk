@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_NANOMSG),y)
+TARGET_PACKAGES += nanomsg
+endif

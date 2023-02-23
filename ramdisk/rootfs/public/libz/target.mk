@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBZ),y)
+TARGET_PACKAGES += libz
+endif

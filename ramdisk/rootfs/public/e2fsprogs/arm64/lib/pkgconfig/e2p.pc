@@ -1,0 +1,11 @@
+prefix=/home/kenneth/Project/openSrc/ARM/app/install-e2fsprogs-aarch64
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: e2p
+Description: Ext2fs userspace programs utility library
+Version: 1.46.4
+Requires: 
+Cflags: -I${includedir}/e2p -I${includedir}
+Libs: -L${libdir} -le2p

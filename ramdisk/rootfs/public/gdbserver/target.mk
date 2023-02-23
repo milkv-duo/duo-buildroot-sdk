@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_GDBSERVER),y)
+TARGET_PACKAGES += gdbserver
+endif

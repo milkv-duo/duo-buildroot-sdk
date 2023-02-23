@@ -1,0 +1,28 @@
+# bash.pc.in
+
+prefix=/home/poshiunchen/GIT/t-head/cv_0917/buildroot/thead_9xx_compat_5.10_glibc_br_defconfig/build/bash-5.0/xxxx
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+loadablesdir=${libdir}/bash
+headersdir=${includedir}/bash
+
+LOCAL_CFLAGS = 
+LOCAL_DEFS = -DSHELL
+CCFLAGS = ${LOCAL_DEFS} ${LOCAL_CFLAGS}
+
+CC = riscv64-unknown-linux-gnu-gcc
+SHOBJ_CC = riscv64-unknown-linux-gnu-gcc
+SHOBJ_CFLAGS = -fPIC
+SHOBJ_LD = ${CC}
+SHOBJ_LDFLAGS = -shared -Wl,-soname,$@
+SHOBJ_XLDFLAGS = 
+SHOBJ_LIBS = 
+
+Name: bash
+Description: Bash headers for bash loadable builtins
+Version: 5.0-release
+Url: 
+Libs: ${SHOBJ_LIBS}
+Cflags: ${SHOBJ_CFLAGS} ${CCFLAGS} -I${headersdir} -I${headersdir}/builtins -I${headersdir}/include

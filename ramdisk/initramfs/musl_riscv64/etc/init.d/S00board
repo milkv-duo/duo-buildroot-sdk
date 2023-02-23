@@ -1,0 +1,13 @@
+#! /bin/sh
+
+case $1 in
+  start)
+    # Eanble Hotplug
+    echo /sbin/mdev >/proc/sys/kernel/hotplug
+    mdev -s
+    # Set RR timeslice
+    echo 20 > /proc/sys/kernel/sched_rr_timeslice_ms
+    # Set min_free_kbytes
+    #echo 3072 > /proc/sys/vm/min_free_kbytes
+    ;;
+esac

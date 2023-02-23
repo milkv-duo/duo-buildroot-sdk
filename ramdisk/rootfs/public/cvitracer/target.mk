@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_CVITRACER),y)
+TARGET_PACKAGES += cvitracer
+endif

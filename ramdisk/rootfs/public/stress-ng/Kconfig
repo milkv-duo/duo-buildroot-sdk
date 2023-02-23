@@ -1,0 +1,7 @@
+config TARGET_PACKAGE_STRESS
+	bool "Target package stress-ng"
+	default n
+	help
+		stress-ng Ver: 0.14.00
+		stress-ng will stress test a computer system in various selectable ways.
+		It was designed to exercise various physical subsystems of a computer as well as the various operating system kernel interfaces. 

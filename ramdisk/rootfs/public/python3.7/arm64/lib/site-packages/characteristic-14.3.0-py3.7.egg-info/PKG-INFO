@@ -1,0 +1,81 @@
+Metadata-Version: 1.1
+Name: characteristic
+Version: 14.3.0
+Summary: Python attributes without boilerplate.
+Home-page: https://characteristic.readthedocs.org/
+Author: Hynek Schlawack
+Author-email: hs@ox.cx
+License: MIT
+Description: characteristic: Python attributes without boilerplate.
+        ======================================================
+        
+        .. image:: https://pypip.in/version/characteristic/badge.svg
+           :target: https://pypi.python.org/pypi/characteristic/
+           :alt: Latest Version
+        
+        .. image:: https://travis-ci.org/hynek/characteristic.svg
+           :target: https://travis-ci.org/hynek/characteristic
+           :alt: CI status
+        
+        .. image:: https://coveralls.io/repos/hynek/characteristic/badge.png?branch=master
+           :target: https://coveralls.io/r/hynek/characteristic?branch=master
+           :alt: Current coverage
+        
+        .. begin
+        
+        
+        ``characteristic`` is an `MIT <http://choosealicense.com/licenses/mit/>`_-licensed Python package with class decorators that ease the chores of implementing the most common attribute-related object protocols.
+        
+        You just specify the attributes to work with and ``characteristic`` gives you any or all of:
+        
+        - a nice human-readable ``__repr__``,
+        - a complete set of comparison methods,
+        - immutability for attributes,
+        - and a kwargs-based initializer (that cooperates with your existing one and optionally even checks the types of the arguments)
+        
+        *without* writing dull boilerplate code again and again.
+        
+        This gives you the power to use actual classes with actual types in your code instead of confusing ``tuple``\ s or confusingly behaving ``namedtuple``\ s.
+        
+        So put down that type-less data structures and welcome some class into your life!
+        
+        ``characteristic``\ ’s documentation lives at `Read the Docs <https://characteristic.readthedocs.org/>`_, the code on `GitHub <https://github.com/hynek/characteristic>`_.
+        It’s rigorously tested on Python 2.6, 2.7, 3.3+, and PyPy.
+        
+        
+        Authors
+        -------
+        
+        ``characteristic`` is written and maintained by `Hynek Schlawack <https://hynek.me/>`_.
+        
+        The development is kindly supported by `Variomedia AG <https://www.variomedia.de/>`_.
+        
+        It’s inspired by Twisted’s `FancyEqMixin <http://twistedmatrix.com/documents/current/api/twisted.python.util.FancyEqMixin.html>`_ but is implemented using class decorators because `sub-classing is bad for you <https://www.youtube.com/watch?v=3MNVP9-hglc>`_, m’kay?
+        
+        
+        The following folks helped forming ``characteristic`` into what it is now:
+        
+        - `Adam Dangoor <https://github.com/adamtheturtle>`_
+        - `Glyph <https://github.com/glyph>`_
+        - `Itamar Turner-Trauring <https://github.com/itamarst>`_
+        - `Jean-Paul Calderone <https://github.com/exarkun>`_
+        - `Julian Berman <https://github.com/julian>`_
+        - `Richard Wall <https://github.com/wallrj>`_
+        - `Tom Prince <https://github.com/tomprince>`_
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Software Development :: Libraries :: Python Modules

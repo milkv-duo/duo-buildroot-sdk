@@ -1,0 +1,55 @@
+#!/bin/sh
+${CVI_SHOPTS}
+#
+# Start the network....
+#
+
+#Configure local network
+ifconfig lo 127.0.0.1
+
+#mount network and etc folder under suqashFS systen
+#if [ -d /mnt/data/system/usr/local/etc ] && [ -L /usr/local/etc ]
+#then
+#    if [ ! -e /mnt/data/system/usr/local/etc/sshd_config ]; then
+# echo "[data partition]/usr/local/etc exists, create and copy conf files"
+# cp -rf /usr/local/etc_bak/* /mnt/data/system/usr/local/etc/
+#    fi
+#fi
+#
+#if [ -d /mnt/data/system/etc/network ] && [ -L /etc/network ]
+#then
+#    if [ ! -e /mnt/data/system/etc/network/ifcfg-eth0 ]; then
+# echo "[data partition]/etc/network exists, create and copy conf files"
+# cp -rf /etc/network_bak/* /mnt/data/system/etc/network/
+#    fi
+#fi
+
+# Debian ifupdown needs the /run/network lock directory
+if [ -e "/sys/class/net/eth0" ]; then
+  mkdir -p /run/network
+
+  case "$1" in
+    start)
+      /sbin/ifconfig eth0 up
+      printf "Starting network: "
+      start-stop-daemon -b -q -S -x /sbin/udhcpc -- -b -i eth0 -R
+      [ $? = 0 ] && echo "OK" || echo "FAIL"
+      ;;
+    stop)
+      printf "Stopping network: "
+      /sbin/ifdown -a
+      [ $? = 0 ] && echo "OK" || echo "FAIL"
+      ;;
+    restart|reload)
+      "$0" stop
+      "$0" start
+      ;;
+    *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+  esac
+fi
+
+
+exit $?
+

@@ -1,0 +1,16 @@
+#!/bin/sh
+${CVI_SHOPTS}
+
+IMG_PATH=/mnt/cfg/secure.img
+IMG_MOUNTPOINT=/mnt/cfg/img
+PARAM_MOUNTPOINT=/mnt/cfg/param
+TMP_PATH=/mnt/cfg/tmp_secure
+KEY=`cat /mnt/cfg/testkey`
+
+case $1 in
+  start)
+  ;;
+  stop)
+    sync
+    umount $IMG_MOUNTPOINT
+esac

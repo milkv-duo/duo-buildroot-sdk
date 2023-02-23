@@ -1,0 +1,3 @@
+dhd_master_mode=1
+pkt_filter_delete=100, 102, 103, 104, 105, 106, 107
+magic_pkt_filter_add=141 0 1 12

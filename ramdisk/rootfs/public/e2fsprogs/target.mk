@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_E2FSPROGS),y)
+TARGET_PACKAGES += e2fsprogs
+endif

@@ -1,0 +1,37 @@
+#!/bin/sh
+${CVI_SHOPTS}
+
+IMG_PATH=/mnt/cfg/secure.img
+IMG_MOUNTPOINT=/mnt/cfg/img
+PARAM_MOUNTPOINT=/mnt/cfg/param
+TMP_PATH=/mnt/cfg/tmp_secure
+KEY=`cat /mnt/cfg/testkey`
+
+case $1 in
+  start)
+    e2fsck.static -y $IMG_PATH
+    if [ -d $IMG_MOUNTPOINT ];then
+      mount -t ext4 -o sync,rw $IMG_PATH $IMG_MOUNTPOINT
+      mount $IMG_MOUNTPOINT/param $PARAM_MOUNTPOINT
+      echo $KEY | e4crypt add_key $PARAM_MOUNTPOINT
+      mount -o remount,sync,ro $PARAM_MOUNTPOINT
+    else
+      mkdir -p $IMG_MOUNTPOINT
+      mkdir -p $PARAM_MOUNTPOINT
+      mount -t ext4 -o sync,rw $IMG_PATH $IMG_MOUNTPOINT
+      mkdir -p $IMG_MOUNTPOINT/param
+      rm -rf  $IMG_MOUNTPOINT/param/*
+      mount $IMG_MOUNTPOINT/param $PARAM_MOUNTPOINT
+      echo $KEY | e4crypt add_key $PARAM_MOUNTPOINT
+      echo "Moving secure data"
+      cp -f $TMP_PATH/* $PARAM_MOUNTPOINT
+      find $TMP_PATH -type f -print0 | xargs -0 shred -f -u
+      rm -rf $TMP_PATH
+      sync
+      mount -o remount,sync,ro $PARAM_MOUNTPOINT
+    fi
+  ;;
+  stop)
+    sync
+    umount $IMG_MOUNTPOINT
+esac

@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBIW),y)
+TARGET_PACKAGES += libiw
+endif

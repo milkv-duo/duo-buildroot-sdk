@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_OTASERVER),y)
+TARGET_PACKAGES += otaserver
+endif

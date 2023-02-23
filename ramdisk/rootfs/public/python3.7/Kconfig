@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_PYTHON3.7
+	bool "Target package python3.7"
+	default n
+	help
+	  target package python3.7

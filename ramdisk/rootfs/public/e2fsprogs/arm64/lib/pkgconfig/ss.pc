@@ -1,0 +1,12 @@
+prefix=/home/kenneth/Project/openSrc/ARM/app/install-e2fsprogs-aarch64
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: ss
+Description: Subsystem command parsing library
+Version: 1.46.4
+Requires.private: com_err
+Cflags: -I${includedir}/ss -I${includedir}
+Libs: -L${libdir} -lss
+Libs.private: -ldl

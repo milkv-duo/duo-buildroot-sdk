@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_E2FSPROGS
+	bool "Target package e2fsprogs"
+	default n
+	help
+		"The EXT2 file system utilities."

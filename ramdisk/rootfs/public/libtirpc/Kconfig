@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBTIRPC
+	bool "Target package libtirpc"
+	default n
+	help
+	  target package libtirpc (use libtirpc instead RPC)

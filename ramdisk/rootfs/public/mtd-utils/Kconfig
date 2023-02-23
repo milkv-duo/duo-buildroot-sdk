@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_MTD-UTILS
+	bool "Target package mtd-utils"
+	default n
+	help
+	  target package mtd-utils

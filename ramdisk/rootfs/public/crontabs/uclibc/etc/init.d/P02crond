@@ -1,0 +1,18 @@
+#!/bin/sh
+case $1 in
+  start)
+    printf "Starting crond: "
+    start-stop-daemon -b -p /var/run/crond.pid -S -q --exe crond --  -c /etc/crontabs/
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+  ;;
+  stop)
+    start-stop-daemon -K -p /var/run/crond.pid
+  ;;
+  restart)
+    printf "Restarting crond: "
+    $0 stop
+    sleep 1
+    $0 start
+    echo "OK"
+  ;;
+esac

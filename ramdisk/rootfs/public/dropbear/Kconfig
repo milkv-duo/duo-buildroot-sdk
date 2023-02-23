@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_DROPBEAR
+	bool "Target package dropbear"
+	default n
+	help
+	  target dropbear

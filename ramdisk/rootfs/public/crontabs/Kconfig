@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_CRONTABS
+	bool "Target package crontabs"
+	default y
+	help
+	  target package crontabs

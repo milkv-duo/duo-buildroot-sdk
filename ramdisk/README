@@ -1,0 +1,19 @@
+we have these folders in this repo:
+
+prebuild:
+	to store header files and libraries for cross compling.
+	target:
+		file to build up a root filesystem. there are two subfolders:
+		1. common: for platform independent files
+		2. overlay: for platform dependent files
+		when building rootfs, files in overlay folder will be merged
+		into common folder.
+
+
+tools:
+	bin and scritps for generating rootfs
+
+configs:
+	we have two types of configuration file:
+	1. txt: for file list in ramdisk
+	2. its: for generating itb file

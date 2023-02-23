@@ -1,0 +1,5 @@
+/* GNU ld script
+   Use the shared library, but some functions are only in
+   the static library, so try that secondarily.  */
+OUTPUT_FORMAT(elf64-littleriscv)
+GROUP ( /lib64vxthead/lp64dv/libc.so.6 /usr/lib64vxthead/lp64dv/libc_nonshared.a  AS_NEEDED ( /lib/ld-linux-riscv64vxthead-lp64dv.so.1 ) )

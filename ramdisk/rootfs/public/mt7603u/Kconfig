@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_MT7603U
+	bool "Target package mt7603u conf files"
+	default n
+	help
+	  target package mt7603u conf files

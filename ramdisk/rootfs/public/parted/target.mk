@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_PARTED),y)
+TARGET_PACKAGES += parted
+endif

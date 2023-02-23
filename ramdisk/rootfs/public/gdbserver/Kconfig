@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_GDBSERVER
+	bool "Target package gdbserver"
+    default y
+	help
+	  target package gdbserver

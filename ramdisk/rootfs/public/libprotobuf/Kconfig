@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBPROTOBUF
+	bool "Target package libprotobuf"
+	default n
+	help
+	  target package libprotobuf

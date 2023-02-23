@@ -1,0 +1,22 @@
+#!/bin/sh
+${CVI_SHOPTS}
+clk=`devmem 0x03002000`
+devmem 0x03002000 32 0xffffffff
+BLD_TIME=$(awk "BEGIN{printf `devmem 0x0C03FFE0`/1000}")
+BL2_TIME=$(awk "BEGIN{printf `devmem 0x0C03FFE4`/1000}")
+BL31_TIME=$(awk "BEGIN{printf `devmem 0x0C03FFE8`/1000}")
+BL32_TIME=$(awk "BEGIN{printf `devmem 0x0C03FFEC`/1000}")
+BL33_TIME=$(awk "BEGIN{printf `devmem 0x0C03FFF0`/1000}")
+BL1_TIME=$(awk "BEGIN{printf `devmem 0x0300009C`/1000}")
+devmem 0x03002000 32 $clk
+KERNEL_TIME=$(awk '{print $1}' /proc/uptime)
+BOOTTIME=$(awk "BEGIN{printf $BLD_TIME+$BL2_TIME+$BL31_TIME+$BL32_TIME+$BL33_TIME+$KERNEL_TIME+$BL1_TIME}")
+uname -a > /tmp/boottime
+echo "BL1 boottime: $BL1_TIME sec" >> /tmp/boottime
+echo "BLD boottime: $BLD_TIME sec" >> /tmp/boottime
+echo "BL2 boottime: $BL2_TIME sec"  >> /tmp/boottime
+echo "BL31 boottime: $BL31_TIME sec" >> /tmp/boottime
+echo "BL32 boottime: $BL32_TIME sec" >> /tmp/boottime
+echo "BL33 boottime: $BL33_TIME sec" >> /tmp/boottime
+echo "Kernel boottime: $KERNEL_TIME sec" >> /tmp/boottime
+echo "Total boottime: $BOOTTIME sec" >> /tmp/boottime

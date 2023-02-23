@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_GATORD
+	bool "Target package gatord"
+	default y
+	help
+	  target gatord

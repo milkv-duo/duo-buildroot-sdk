@@ -1,0 +1,3 @@
+NAME=CVITEK Linux
+BUILD_ID=2019.10.01
+PRETTY_NAME="Cvitek Linux rootfs"

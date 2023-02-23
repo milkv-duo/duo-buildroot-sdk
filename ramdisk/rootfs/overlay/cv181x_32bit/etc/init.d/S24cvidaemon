@@ -1,0 +1,9 @@
+#! /bin/sh
+if [ -f /usr/bin/cvidaemon ];then
+    printf "Starting cvidaemon: "
+    start-stop-daemon -S -q -b -x /usr/bin/cvidaemon eth0 8888
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+fi
+
+
+exit 0

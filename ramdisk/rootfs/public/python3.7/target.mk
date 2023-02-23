@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_PYTHON3.7),y)
+TARGET_PACKAGES += python3.7
+endif

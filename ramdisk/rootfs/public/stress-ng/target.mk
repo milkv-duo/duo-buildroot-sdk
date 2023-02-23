@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_STRESS),y)
+TARGET_PACKAGES += stress-ng 
+endif

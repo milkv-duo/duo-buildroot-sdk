@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_OPENSSL),y)
+TARGET_PACKAGES += openssl
+endif

@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_PINMUX
+	bool "Target package pinmux"
+	default n
+	help
+	source code: ramdisk/tools/cvi_pinmux

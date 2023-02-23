@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBCRYPTO
+	bool "Target package libcrypto"
+	default y
+	help
+	  target package libcrypto

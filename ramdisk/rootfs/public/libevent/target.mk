@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBEVENT),y)
+TARGET_PACKAGES += libevent
+endif

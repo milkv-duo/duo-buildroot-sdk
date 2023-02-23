@@ -1,0 +1,22 @@
+setuptools>=20.2.2
+mbstrdecoder>=0.2.2
+python-dateutil>=2.6.1
+pytz>=2017.2
+six>=1.10
+
+[:python_version < "3.3"]
+ipaddress
+
+[:python_version < "3.4"]
+enum34
+
+[docs]
+path.py
+readmemaker>=0.3.0
+sphinx_rtd_theme
+Sphinx
+
+[test]
+pytest-cov
+pytest
+tox

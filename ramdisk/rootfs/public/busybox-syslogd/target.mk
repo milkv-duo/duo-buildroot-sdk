@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_BUSYBOX_SYSLOGD_SCRIPT),y)
+TARGET_PACKAGES += busybox-syslogd
+endif

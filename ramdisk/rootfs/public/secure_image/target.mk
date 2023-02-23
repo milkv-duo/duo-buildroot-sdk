@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_SECURE_IMAGE),y)
+TARGET_PACKAGES += secure_image
+endif

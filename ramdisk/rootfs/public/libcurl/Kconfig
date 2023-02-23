@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_LIBCURL
+	bool "Target package libcurl"
+	default n
+	help
+	  target package libcurl

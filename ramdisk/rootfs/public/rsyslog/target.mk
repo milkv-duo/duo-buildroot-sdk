@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_RSYSLOG),y)
+TARGET_PACKAGES += rsyslog
+endif

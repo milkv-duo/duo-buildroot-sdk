@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_PARTED
+	bool "Target package parted"
+	default n
+	help
+	  target package parted

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+LOOP_NUM=200
+
+function mount_prepare()
+{
+	umount /mnt
+	rm -f /tmp/ntfs.img
+
+	set -e
+
+	dd if=/dev/zero of=/tmp/ntfs.img bs=5242880 count=2
+	mkfs.ntfs /tmp/ntfs.img -F
+	ntfs-3g /tmp/ntfs.img /mnt/
+	touch /mnt/test_abc.gz
+	mount_res=`mount | grep ntfs.img`
+	if [ -z "${mount_res}" ]; then
+		echo "mount fail"
+		exit 1
+	else
+		echo "mount success:"
+		echo ${mount_res}
+	fi
+}
+
+function ntfs3g_worker()
+{
+	nice -n -5 gzip -c -9 $1 > test_$2.gz
+	if [ -f test_$2.gz ]; then
+		MD5SUM_ZIP=`nice -n -5 md5sum test_$2.gz|awk '{print $1}'`
+		if [ ${MD5SUM_ZIP} != ${MD5SUM_SEED_ZIP} ];then
+			echo "zip error: ${MD5SUM_ZIP}"
+			exit 1
+		fi
+		echo "${MD5SUM_ZIP}   zip $2"
+
+		MD5SUM_UNZIP=`nice -n -5 gzip -d -c /mnt/test_$2.gz|md5sum|awk '{print $1}'`
+		if [ ${MD5SUM_UNZIP} != ${MD5SUM_SEED} ]; then
+			echo "unzip error: ${MD5SUM_UNZIP}"
+			exit 1
+		fi
+
+		echo "${MD5SUM_UNZIP} unzip $2"
+	fi
+
+	rm -rf /mnt/test_$2.gz
+}
+
+if [ $# -ge 1 ];then
+	LOOP_NUM=$1
+fi
+
+echo "LOOP_NUM=$LOOP_NUM"
+
+mount_prepare
+
+dd if=/bin/busybox of=/mnt/test.bin bs=256000 count=1
+MD5SUM_SEED=`md5sum /mnt/test.bin|awk '{print $1}'`
+echo "${MD5SUM_SEED} for zip"
+
+gzip -c -9 /mnt/test.bin > /mnt/test_bin.gz
+MD5SUM_SEED_ZIP=`md5sum /mnt/test_bin.gz | awk '{print $1}'`
+echo "${MD5SUM_SEED_ZIP} for unzip"
+
+rm -f /mnt/test_bin.gz
+
+cd /mnt
+
+echo "Testing ntfs-3g"
+
+for j in $(seq 1 $LOOP_NUM)
+do
+	ntfs3g_worker /mnt/test.bin $j &
+
+	while [ `ls /mnt/test_*|wc -w` -ge "6" ]; do
+		echo hello > /dev/null
+	done
+done
+cd -
+echo ""
+echo ""
+echo ""
+echo "ntfs-3g test pass."
+echo ""
+echo ""
+echo ""
+sleep 60

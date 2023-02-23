@@ -1,0 +1,62 @@
+#!/bin/sh
+${CVI_SHOPTS}
+
+# from fsbl/plat/mars/include/platform_def.h
+# struct _time_records { ... }
+
+fields="
+fsbl_start
+ddr_init_start
+ddr_init_end
+release_blcp_2nd
+load_loader_2nd_end
+fsbl_decomp_start
+fsbl_decomp_end
+fsbl_exit
+uboot_start
+bootcmd_start
+decompress_kernel_start
+kernel_start
+kernel_run_init_start
+NONE
+"
+
+fields=$(echo $fields)
+
+TIME_RECORDS_ADDR=0x0e000010
+TIME_RECORDS_SIZE=$((2 * 14))
+
+OUTPUT=/tmp/boottime
+
+echo > "$OUTPUT"
+
+for i in $(seq 0 4 $((TIME_RECORDS_SIZE - 4))); do
+	addr=$((TIME_RECORDS_ADDR + i))
+	ts=$(devmem $addr 32)
+	# printf "0x%08x=0x%08x\n" "$a" "$ts"
+
+	t0=$((ts & 0xffff))
+	t1=$((ts >> 16))
+
+	f0="${fields%% *}"
+	fields="${fields#* }"
+	f1="${fields%% *}"
+	fields="${fields#* }"
+
+	eval "${f0}=${t0}"
+	eval "${f1}=${t1}"
+
+	{
+		echo "${f0}=${t0}ms"
+		echo "${f1}=${t1}ms"
+	} >> "$OUTPUT"
+done
+
+{
+	uname -a
+	echo "ROM elapsed time: ${fsbl_start} milliseconds"
+	echo "DDR init elapsed time: $((ddr_init_end - ddr_init_start)) milliseconds"
+	echo "C906L FreeRTOS start at: ${release_blcp_2nd} milliseconds"
+	echo "Kernel uptime: $(awk '{print $1}' /proc/uptime) seconds"
+	echo "Total boottime: ?"
+} >> "$OUTPUT"

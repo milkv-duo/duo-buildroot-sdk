@@ -1,0 +1,23 @@
+config TARGET_PACKAGE_PROCPS
+	bool "Target package procps"
+	default n
+	help
+	procps Version:3.3.17
+	procps is a set of command line and full-screen utilities that provide
+	information out of the pseudo-filesystem most commonly located at /proc.
+	This filesystem provides a simple interface to the kernel data structures.
+	The programs of procps generally concentrate on the structures that describe
+	the processess running on the system.
+	The following programs are found in procps:
+
+	free - Report the amount of free and used memory in the system
+	kill - Send a signal to a process based on PID
+	pgrep - List processes based on name or other attributes
+	pkill - Send a signal to a process based on name or other attributes
+	pmap - Report memory map of a process
+	ps - Report information of processes
+	pwdx - Report current directory of a process
+	top - Dynamic real-time view of running processes
+	uptime - Display how long the system has been running
+	vmstat - Report virtual memory statistics
+	w - Report logged in users and what they are doing

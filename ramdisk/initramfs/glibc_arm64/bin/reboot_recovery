@@ -1,0 +1,3 @@
+devmem 0x03005D00 32 0x5245434F
+echo "rebooting to recovery mode"
+reboot

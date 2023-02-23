@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_BT
+	bool "Target package bluetooth"
+	default n
+	help
+	  target package bluetooth

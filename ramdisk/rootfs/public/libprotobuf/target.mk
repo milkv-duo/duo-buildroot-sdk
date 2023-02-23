@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBPROTOBUF),y)
+TARGET_PACKAGES += libprotobuf
+endif

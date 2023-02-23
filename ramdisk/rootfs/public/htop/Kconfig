@@ -1,0 +1,6 @@
+config TARGET_PACKAGE_HTOP
+	bool "Target package htop"
+	default n
+	help
+	htop Version: 1.0.3
+	Htop is a free (GPL) NCourses based Linux process viewer. It is similar to top.

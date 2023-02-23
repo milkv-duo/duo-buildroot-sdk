@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_DROPBEAR),y)
+TARGET_PACKAGES += dropbear
+endif

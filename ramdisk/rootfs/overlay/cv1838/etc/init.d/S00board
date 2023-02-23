@@ -1,0 +1,11 @@
+#! /bin/sh
+
+case $1 in
+  start)
+    # Eanble Hotplug
+    echo /sbin/mdev >/proc/sys/kernel/hotplug
+    mdev -s
+    # set SCHED_RR timeslice to 20ms
+    echo 20 > /proc/sys/kernel/sched_rr_timeslice_ms
+    ;;
+esac

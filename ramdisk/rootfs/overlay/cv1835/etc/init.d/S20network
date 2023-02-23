@@ -1,0 +1,53 @@
+#!/bin/sh
+${CVI_SHOPTS}
+#
+# Start the network....
+#
+
+#Configure local network
+ifconfig lo 127.0.0.1
+
+# Debian ifupdown needs the /run/network lock directory
+if [ -e "/sys/class/net/eth0" ]; then
+  mkdir -p /run/network
+
+  case "$1" in
+    start)
+      /sbin/ifconfig eth0 up
+      if [ -f /mnt/data/etc/network/ifcfg-eth0 ];then
+        ifcfg_file=/mnt/data/etc/network/ifcfg-eth0
+      else
+        ifcfg_file=/etc/network/ifcfg-eth0
+      fi
+      echo "Using $ifcfg_file"
+      bootproto=$(cat $ifcfg_file|grep BOOTPROTO=|sed 's/BOOTPROTO=//')
+      printf "Starting network: "
+      if [ $bootproto = static ];then
+        ip=$(cat $ifcfg_file|grep IPADDR=|sed 's/IPADDR=//')
+        netmask=$(cat $ifcfg_file|grep NETMASK=|sed 's/NETMASK=//')
+        gateway=$(cat $ifcfg_file|grep GATEWAY=|sed 's/GATEWAY=//')
+        /sbin/ifconfig eth0 $ip netmask $netmask up
+        /sbin/route add default gw $gateway
+      else
+        start-stop-daemon -b -q -S -x /sbin/udhcpc -- -b -i eth0 -R
+      fi
+      [ $? = 0 ] && echo "OK" || echo "FAIL"
+      ;;
+    stop)
+      printf "Stopping network: "
+      /sbin/ifdown -a
+      [ $? = 0 ] && echo "OK" || echo "FAIL"
+      ;;
+    restart|reload)
+      "$0" stop
+      "$0" start
+      ;;
+    *)
+      echo "Usage: $0 {start|stop|restart}"
+      exit 1
+  esac
+fi
+
+
+exit $?
+

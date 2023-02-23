@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_AP6201BM
+	bool "Target package of AP6201BM fw files"
+	default n
+	help
+	  target package of AP6201BM fw and configuration files

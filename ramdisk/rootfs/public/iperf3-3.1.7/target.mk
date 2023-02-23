@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_IPERF3),y)
+TARGET_PACKAGES += iperf3-3.1.7
+endif

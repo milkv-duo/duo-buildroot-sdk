@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_PINMUX),y)
+TARGET_PACKAGES += pinmux
+endif

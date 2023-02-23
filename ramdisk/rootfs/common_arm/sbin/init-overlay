@@ -1,0 +1,123 @@
+#!/bin/sh
+${CVI_SHOPTS}
+
+#Mount filesystems needed by mount and mdev
+if [ ! -e /proc/filesystems ] ; then
+    mount -n -t proc -o "nodev,noexec,nosuid" proc /proc
+    proc_local_mount=y
+    mount -t sysfs sysfs /sys
+    mdev -s
+fi
+
+if [ -e "/overlay/disable" ] ; then
+    echo "Overlay disabled"
+    exec /init
+fi
+
+if grep -q '\( \|^\)overlay=disable\( \|$\)' /proc/cmdline ; then
+    echo "Overlay disabled by command line argument"
+    if [ -n "$proc_local_mount" ] ; then
+        /bin/umount -n /proc
+    fi
+    exec /init
+fi
+
+# Remeber list of mountpoints to move under new root
+mounts_to_move="$( \
+  /bin/sed -n -e 's/^[^ ]* \([^ ]*\) .*$/\1/p' /proc/mounts |
+  /bin/sed -n -e '/^\/$/d' -e '/^\/overlay/d' \
+              -e '/^\/dev\/pts/d' -e 's/^\/\(.*\)$/\1/p' )"
+
+# For local system rearranged from init
+/bin/mount -n -t tmpfs none /overlay
+/bin/mkdir -p /overlay/rwdata
+/bin/mkdir -p /overlay/robase
+/bin/mkdir -p /overlay/combined
+
+/bin/mount --bind / /overlay/robase
+
+ovr_rwdata=/overlay/rwdata
+ovr_robase=/overlay/robase
+ovr_combined=/overlay/combined
+
+# Prepare filesystem for local data storage...
+/bin/mkdir -p ${ovr_rwdata}
+
+# Prepare system partition as upperdir
+if [ -e /dev/ubiblock0_0 ]; then
+  SYSTEM_MTD_NUM=`busybox cat /proc/mtd | grep SYSTEM | grep -o -e mtd[0-9] | grep -o -e[0-9]`
+  ubiattach /dev/ubi_ctrl -m ${SYSTEM_MTD_NUM} -d 20
+  if [ $? != 0 ];then
+    ubiformat -y /dev/mtd${SYSTEM_MTD_NUM}
+    ubiattach /dev/ubi_ctrl -m ${SYSTEM_MTD_NUM} -d 20
+    ubimkvol /dev/ubi20 -N SYSTEM -m
+  fi
+  mount -t ubifs -o sync ubi20_0 $ovr_rwdata
+  if [ $? != 0 ];then
+    ubimkvol /dev/ubi20 -N SYSTEM -m
+    mount -t ubifs -o sync ubi20_0 $ovr_rwdata
+  fi
+else
+  SYSTEM_DEV=$(/usr/sbin/blkid --label "SYSTEM")
+  e2fsck.static -y $SYSTEM_DEV
+  mount -t ext4 -o sync ${SYSTEM_DEV} $ovr_rwdata
+  if [ $? != 0  ]; then
+    mke2fs -T ext4 $SYSTEM_DEV
+    mount -t ext4 -o sync ${SYSTEM_DEV} $ovr_rwdata
+  fi
+  resize2fs ${SYSTEM_DEV}
+fi
+
+# Mount overlay
+mkdir -p ${ovr_rwdata}/data
+mkdir -p ${ovr_rwdata}/work
+/bin/mount -n -t overlay -o upperdir=${ovr_rwdata}/data,workdir=${ovr_rwdata}/work,lowerdir=${ovr_robase} overlay ${ovr_combined}
+
+# Move rwdata mount under new prepared filesystem to allow access
+# to local rwdata in case of tmpsfs
+/bin/mkdir -p ${ovr_combined}/overlay/rwdata
+/bin/mount -n --move ${ovr_rwdata} ${ovr_combined}/overlay/rwdata
+/bin/mkdir -p ${ovr_combined}/overlay/robase
+/bin/mount -n --move ${ovr_robase} ${ovr_combined}/overlay/robase
+/bin/mkdir -p ${ovr_combined}/overlay/pivot
+# chmod 755 ${ovr_combined} # Disable rw access for non-root users
+
+# Move already mounted filesystems to target location
+for mtm in ${mounts_to_move} ; do
+    if [ -e "/${mtm}" ] ; then
+        if [ -n "$proc_local_mount" -a "${mtm}" = "proc" ] ; then
+            echo "skipping temporarily mounted /proc"
+        elif [ "${mtm}" = "sys" ];then
+            echo "skipping temporarily mounted /sys"
+        else
+            /bin/mkdir -p "${ovr_combined}/${mtm}"
+            /bin/mount -n --move "/${mtm}" "${ovr_combined}/${mtm}"
+        fi
+    fi
+done
+
+# Create standard mount points for virtual filesystems
+/bin/mkdir -p ${ovr_combined}/dev
+/bin/mkdir -p ${ovr_combined}/proc
+/bin/mkdir -p ${ovr_combined}/sys
+/bin/mkdir -p ${ovr_combined}/tmp
+/bin/mkdir -p ${ovr_combined}/run
+if [ ! -L ${ovr_combined}/var/lock ] ; then
+    /bin/mkdir -p ${ovr_combined}/var/lock
+fi
+
+if [ -n "$proc_local_mount" ] ; then
+    /bin/umount -n /proc
+    /bin/umount -n /sys
+fi
+
+unset mounts_to_move mtm proc_local_mount
+
+cd ${ovr_combined}
+
+echo "Ready to proceed by pivot_root"
+#sleep 5
+#/bin/sh
+
+/sbin/pivot_root . overlay/pivot
+exec /usr/sbin/chroot . init

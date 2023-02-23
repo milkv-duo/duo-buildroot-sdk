@@ -1,0 +1,34 @@
+#!/bin/sh
+${CVI_SHOPTS}
+#
+# Start sshd
+#
+
+chmod 666 /dev/null
+chmod 666 /dev/urandom
+chmod 666 /dev/ptmx
+chmod 600 /var/empty
+chown root:root /var/empty
+
+case "$1" in
+  start)
+    printf "Starting sshd: "
+    start-stop-daemon -b -q -S -x /usr/sbin/sshd -- -f /etc/ssh/sshd_config
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+  stop)
+    printf "Stopping sshd: "
+    start-stop-daemon --stop --quiet --oknodo --pidfile /var/run/sshd.pid
+    echo "OK"
+    ;;
+  restart|reload)
+    "$0" stop
+    "$0" start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?
+

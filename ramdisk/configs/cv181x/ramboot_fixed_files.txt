@@ -1,0 +1,67 @@
+
+#####################
+# files to boot a minimal system
+
+file /init ../target/init_ramboot.sh 775 0 0
+
+dir /dev 755 0 0
+dir /dev/shm 755 0 0
+dir /dev/pts 755 0 0
+nod /dev/console 644 0 0 c 5 1
+
+dir /bin 755 1000 1000
+file /bin/busybox ../target/bin/busybox 755 0 0
+file /bin/su ../target/bin/busybox 4755 0 0
+slink /bin/sh /bin/busybox 755 0 0
+slink /linuxrc /bin/busybox 755 0 0
+
+
+
+dir /sbin 755 0 0
+dir /proc 755 0 0
+dir /sys 755 0 0
+dir /mnt 755 0 0
+dir /run 755 0 0
+dir /tmp 755 0 0
+
+dir /var 755 0 0
+dir /var/run 755 0 0
+dir /var/log 755 0 0
+dir /var/empty 755 0 0
+
+dir /usr 755 0 0
+dir /usr/lib 755 0 0
+dir /usr/bin 755 0 0
+dir /usr/sbin 755 0 0
+dir /usr/local 755 0 0
+dir /usr/local/bin 755 0 0
+file /usr/local/bin/autologin ../target/usr/local/bin/autologin 755 1000 1000
+
+dir /root 755 0 0
+dir /home 755 0 0
+dir /home/cvitek 755 1000 1000
+
+dir /etc 755 0 0
+dir /etc/init.d 755 0 0
+dir /etc/network 755 1000 1000
+dir /etc/network/if-pre-up.d 755 1000 1000
+dir /etc/network/if-up.d 755 1000 1000
+dir /etc/network/if-down.d 755 1000 1000
+dir /etc/network/if-post-down.d 755 1000 1000
+file /etc/inittab ../target/etc/inittab 644 0 0
+file /etc/fstab ../target/etc/fstab 644 0 0
+file /etc/group ../target/etc/group 644 0 0
+file /etc/passwd ../target/etc/passwd 644 0 0
+file /etc/shadow ../target/etc/shadow 644 0 0
+file /etc/hostname ../target/etc/hostname 644 0 0
+file /etc/issue ../target/etc/issue 644 0 0
+file /etc/os-release ../target/etc/os-release 644 0 0
+file /etc/run_usb.sh ../target/etc/run_usb.sh 775 1000 1000
+file /etc/uhubon.sh ../target/etc/uhubon.sh 775 1000 1000
+file /etc/init.d/rcK ../target/etc/init.d/rcK 775 1000 1000
+file /etc/init.d/rcS ../target/etc/init.d/rcS 755 0 0
+file /etc/init.d/S00board ../target/etc/init.d/S00board 755 0 0
+file /etc/mdev.conf ../target/etc/mdev.conf 644 0 0
+
+dir /lib 755 0 0
+

@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_LIBCRYPTO),y)
+TARGET_PACKAGES += libcrypto
+endif

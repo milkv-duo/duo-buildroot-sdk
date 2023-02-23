@@ -1,0 +1,27 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    mkdir -p /mnt/data/log
+    mount /mnt/data/log /var/log
+    printf "Starting klogd: "
+    start-stop-daemon -b -S -q -m -p /var/run/klogd.pid --exec /sbin/klogd
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    printf "Starting rsyslogd: "
+    start-stop-daemon -b -S -q --exec /usr/sbin/rsyslogd
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+  ;;
+  stop)
+    printf "Stopping logging: "
+    start-stop-daemon -K -p /var/run/rsyslogd.pid
+    start-stop-daemon -K -p /var/run/klogd.pid
+    echo "OK"
+  ;;
+  restart)
+    printf "Restarting logging: "
+    $0 stop
+    sleep 1
+    $0 start
+    echo "OK"
+  ;;
+esac

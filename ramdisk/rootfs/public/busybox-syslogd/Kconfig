@@ -1,0 +1,5 @@
+config TARGET_PACKAGE_BUSYBOX_SYSLOGD_SCRIPT
+        bool "Target package busybox-syslogd script"
+	default n
+        help
+          target package busybox-syslogd script

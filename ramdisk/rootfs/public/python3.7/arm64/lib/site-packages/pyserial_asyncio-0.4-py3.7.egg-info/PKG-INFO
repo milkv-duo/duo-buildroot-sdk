@@ -1,0 +1,29 @@
+Metadata-Version: 1.1
+Name: pyserial-asyncio
+Version: 0.4
+Summary: Python Serial Port Extension - Asynchronous I/O support
+Home-page: https://github.com/pyserial/pyserial-asyncio
+Author: pySerial-team
+Author-email: UNKNOWN
+License: BSD
+Description: Async I/O extension package for the Python Serial Port Extension for OSX, Linux, BSD
+        
+        - Documentation: http://pyserial-asyncio.readthedocs.io
+        - Project Homepage: https://github.com/pyserial/pyserial-asyncio
+        
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Topic :: Communications
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Terminals :: Serial
