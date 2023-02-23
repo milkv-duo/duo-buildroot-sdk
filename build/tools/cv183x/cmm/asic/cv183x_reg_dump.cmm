@@ -1,0 +1,137 @@
+FILEOpen 23. test_new.txt
+
+FILEWrite 23. "EAXI:0x01810090"
+FILEWrite 23. MREAD("S32", EAXI:0x01810090)
+
+FILEWrite 23. "EAXI:0x01810094"
+FILEWrite 23. MREAD("S32", EAXI:0x01810094)
+
+FILEWrite 23. "EAXI:0x01810098"
+FILEWrite 23. MREAD("S32", EAXI:0x01810098)
+
+FILEWrite 23. "EAXI:0x0181009C"
+FILEWrite 23. MREAD("S32", EAXI:0x0181009C)
+
+FILEWrite 23. "EAXI:0x018100A0"
+FILEWrite 23. MREAD("S32", EAXI:0x018100A0)
+
+FILEWrite 23. "EAXI:0x018100A4"
+FILEWrite 23. MREAD("S32", EAXI:0x018100A4)
+
+FILEWrite 23. "read sys_ctrl debug (32)"
+
+&index=0x0
+&value=0x0
+while (&index<0xA) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810024 0x" &value
+	data.set EAXI:0x01810024 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810054"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810054)
+
+    &index=&index+1
+	&value=&value+0x00000100
+)
+
+&index=0x0
+&value=0x200
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810028 0x" &value
+	data.set EAXI:0x01810028 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810058"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810058)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+&index=0x0
+&value=0x100
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x0181002C 0x" &value
+	data.set EAXI:0x0181002C %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x0181005C"
+	FILEWrite 23. MREAD("S32", EAXI:0x0181005C)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+&index=0x0
+&value=0x100
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810030 0x" &value
+	data.set EAXI:0x01810030 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810060"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810060)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+
+&index=0x0
+&value=0x100
+while (&index<0x30) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810034 0x" &value
+	data.set EAXI:0x01810034 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810064"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810064)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+&index=0x0
+&value=0x0
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810038 0x" &value
+	data.set EAXI:0x01810038 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810068"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810068)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+&index=0x0
+&value=0x100
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x0181003C 0x" &value
+	data.set EAXI:0x0181003C %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x0181006C"
+	FILEWrite 23. MREAD("S32", EAXI:0x0181006C)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+&index=0x0
+&value=0x100
+while (&index<0x20) 
+( 
+    FILEWrite 23. "Write EAXI:0x01810040 0x" &value
+	data.set EAXI:0x01810040 %Long &value
+	
+	FILEWrite 23. "Read EAXI:0x01810070"
+	FILEWrite 23. MREAD("S32", EAXI:0x01810070)
+
+    &index=&index+1
+	&value=&value+0x00000001
+)
+
+FILECLose 23.   
+ENDEXE

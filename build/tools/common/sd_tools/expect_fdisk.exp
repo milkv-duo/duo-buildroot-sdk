@@ -1,0 +1,65 @@
+#!/usr/bin/expect
+
+set timeout 60
+
+if {$argc != 3} {
+	send "usage expect_fdisk \[size\] \n"
+	exit
+}
+
+set device [lindex $argv 0]
+set fat32_size +[lindex $argv 1]
+set ext4_size +[lindex $argv 2]
+
+send_user "args: $device $fat32_size $ext4_size \n"
+
+spawn fdisk $device
+expect -re "Command"
+
+while {1} {
+	send "d\r"
+	expect -re "default" {
+		send "\r"
+		expect -re "deleted"
+	} -re "deleted" {
+		continue
+	} -re "No partition" {
+		expect -re "Command"
+		break
+	}
+}
+
+send "o\r"
+expect -re "Command"
+
+send "n\r"
+expect -re "Partition type"
+
+send "p\r"
+expect -re "Partition number"
+
+send "\r"
+expect -re "First sector"
+
+send "\r"
+expect -re "Last sector"
+send "$fat32_size\r"
+expect -re "Command"
+
+send "n\r"
+expect -re "Partition type"
+
+send "p\r"
+expect -re "Partition number"
+
+send "\r"
+expect -re "First sector"
+
+send "\r"
+expect -re "Last sector"
+send "$ext4_size\r"
+expect -re "Command"
+
+send "w\r"
+expect eof
+

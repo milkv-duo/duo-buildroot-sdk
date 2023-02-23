@@ -1,0 +1,428 @@
+/dts-v1/;
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/memreserve/	0x0000000100000000 0x0000000000020000; // ATF BL31
+
+/ {
+	compatible = "linux,dummy-virt";
+	#size-cells = <0x2>;
+	#address-cells = <0x2>;
+	interrupt-parent = <&gic>;
+
+	itb_encryption {
+		/* TEST REEOS encryption key */
+		reeos_ek = [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af];
+	};
+
+	signature {
+		/* TEST REEOS public key */
+		key-test_reeos {
+			algo = [00];
+			rsa,r-squared =
+				<0x7973b6ad 0x8faeea4f 0x0097fad8 0xeebd7f74
+				0x560a43f4 0xfa8a77dc 0x9ed92fda 0x811e29bf
+				0xb3a4f264 0x6f3d9903 0x260c3e3e 0xad761385
+				0x61f44fc1 0x18ee770e 0x6b774656 0x854ad9aa
+				0xc8c2ecbe 0x9aa24272 0x067bc1cb 0x8d345733
+				0x5e7353f1 0xe5883228 0x72a5cf8f 0xfdcdb395
+				0x8b948649 0x451dfb62 0x9263ef48 0xd7f86d5b
+				0xebf60279 0x4b8223d6 0x6e095af1 0x4d4e4fab
+				0xf036ef15 0xc7e8031d 0xc3639458 0x31394b37
+				0xf3780c8d 0xa756b4b1 0x73eefa3b 0x5ed4b6af
+				0x83df8de2 0xe31d7e9f 0xe5b7e3bb 0x0aa83228
+				0x0b019c33 0xafcc131c 0x64d2b0ac 0x77d89929
+				0x4b4cfb15 0xf74a8148 0x2448fafa 0x340bf514
+				0xb7fcac55 0x540287f2 0xf54a6a0d 0x9b22fec6
+				0x9bcf7fc2 0xe48eef17 0xe1b74c93 0xcbfac354
+				0xb40f9b73 0xd70890c4 0x20a75333 0x332512cb>;
+			rsa,modulus = <0xa6b0523a 0xa701cbdf 0xb4918398 0x17179b23
+				0x94876970 0xab5e188d 0x13bebee3 0x7c416588
+				0x87472850 0x3545049e 0x42abea93 0x98cf40d9
+				0x647139bf 0x0b7007f6 0x2e8b0d7e 0xf413af0e
+				0x13de7809 0xb534bc81 0xa2f9a989 0xf6d24392
+				0x6be941f5 0x879a8061 0x15c73d32 0x3986bcac
+				0xb7861fd6 0xb5c2fe67 0x871a83c2 0x5f6c4c2a
+				0xd9dcd429 0x440d310d 0x61fd6ee6 0x1a9626d5
+				0xe600f693 0x7b0743e5 0xb879a942 0xcafb3126
+				0x2fd1ccad 0x7e1724f6 0x0f43f37c 0xba535bea
+				0x0544137f 0x8d2bf7e8 0xbb9325eb 0x02065bb9
+				0x320a9d24 0x46b01966 0xd0a74211 0xdfa1a3d2
+				0xaaffee20 0xc83e428c 0x4f0a3bd0 0x4f60db8b
+				0x3cecafed 0x45ff4ce6 0x70230cb0 0x4e82fc9a
+				0xece6220f 0x99f27a16 0xb4ed10a9 0xbcbf69df
+				0x2ee0d49e 0x98defbce 0x576522da 0x021f3057>;
+			rsa,exponent = <0x00000000 0x00010001>;
+			rsa,n0-inverse = <0x3a834499>;
+			rsa,num-bits = <0x00000800>;
+			key-name-hint = "test_reeos";
+		};
+	};
+
+	gic: interrupt-controller {
+		compatible = "arm,cortex-a15-gic";
+		ranges;
+		#size-cells = <0x2>;
+		#address-cells = <0x2>;
+		interrupt-controller;
+		#interrupt-cells = <0x3>;
+		reg = <0x0 0x01F01000 0x0 0x1000>,
+		      <0x0 0x01F02000 0x0 0x2000>;
+	};
+
+	psci {
+		migrate = <0xc4000005>;
+		cpu_on = <0xc4000003>;
+		cpu_off = <0x84000002>;
+		cpu_suspend = <0xc4000001>;
+		sys_poweroff = <0x84000008>;
+		sys_reset = <0x84000009>;
+		method = "smc";
+		compatible = "arm,psci-0.2", "arm,psci";
+	};
+
+	cpus {
+		#size-cells = <0x0>;
+		#address-cells = <0x1>;
+
+		cpu@0 {
+			reg = <0x0>;
+			enable-method = "psci";
+			compatible = "arm,cortex-a53";
+			device_type = "cpu";
+		};
+
+		cpu@1 {
+			reg = <0x1>;
+			enable-method = "psci";
+			compatible = "arm,cortex-a53";
+			device_type = "cpu";
+		};
+	};
+
+	timer {
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>;
+		always-on;
+		clock-frequency = <25000000>;
+		compatible = "arm,armv8-timer";
+	};
+
+	rst: reset-controller {
+		compatible = "cvitek,bm-reset";
+		reg = <0x0 0x50010c00 0x0 0x1>;
+		#reset-cells = <1>;
+	 };
+
+	i2c_srcclk: clk100mhz {
+		clock-output-names = "clk100mhz";
+		clock-frequency = <100000000>;
+		#clock-cells = <0x0>;
+		compatible = "fixed-clock";
+	};
+
+	gpio0: gpio@03020000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03020000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		porta: gpio-controller@0 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "porta";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <32>;
+			reg = <0>;
+			interrupt-controller;
+			interrupts = <GIC_SPI 68 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+	gpio1: gpio@03021000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03021000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		portb: gpio-controller@1 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "portb";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <32>;
+			reg = <0>;
+			interrupt-controller;
+			interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+	gpio2: gpio@03022000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03022000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		portc: gpio-controller@2 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "portc";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <32>;
+			reg = <0>;
+			interrupt-controller;
+			interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+
+	gpio3: gpio@03023000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03023000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		portd: gpio-controller@2 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "portd";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <10>;
+			reg = <0>;
+			interrupt-controller;
+			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+
+	uart0: serial@04140000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x0 0x04140000 0x0 0x1000>;
+		clock-frequency = <187500000>;
+		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+
+	uart1: serial@04150000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x0 0x04150000 0x0 0x1000>;
+		clock-frequency = <187500000>;
+		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+
+	uart2: serial@04160000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x0 0x04160000 0x0 0x1000>;
+		clock-frequency = <187500000>;
+		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+
+	uart3: serial@04170000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x0 0x04170000 0x0 0x1000>;
+		clock-frequency = <187500000>;
+		interrupts = <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+
+	i2c0: i2c@0x04000000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&i2c_srcclk>;
+		reg = <0x0 0x04000000 0x0 0x1000>;
+		interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+	};
+
+	i2c1: i2c@0x04010000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&i2c_srcclk>;
+		reg = <0x0 0x04010000 0x0 0x1000>;
+		interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+	};
+
+	i2c2: i2c@0x04020000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&i2c_srcclk>;
+		reg = <0x0 0x04020000 0x0 0x1000>;
+		interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+	};
+
+	i2c3: i2c@0x04030000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&i2c_srcclk>;
+		reg = <0x0 0x04030000 0x0 0x1000>;
+		interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+	};
+
+	i2c4: i2c@0x04040000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&i2c_srcclk>;
+		reg = <0x0 0x04040000 0x0 0x1000>;
+		interrupts = <GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+	};
+
+#if 1
+	/* only support one ethernet in uboot */
+	ethernet0: ethernet@04510000 {
+		compatible = "nvidia,tegra186-eqos", "snps,dwc-qos-ethernet-4.10";
+		reg = <0x0 0x04510000  0x0 0x10000>;
+		reg-names = "mac";
+		phy-mode = "rmii";
+		phy-reset-gpios = <&portb 20 GPIO_ACTIVE_HIGH>;
+	};
+#else
+    ethernet1: ethernet@04520000 {
+		compatible = "nvidia,tegra186-eqos", "snps,dwc-qos-ethernet-4.10";
+		reg = <0x0 0x04520000  0x0 0x10000>;
+		reg-names = "mac";
+		phy-mode = "rgmii";
+		phy-reset-gpios = <&portb 20 GPIO_ACTIVE_HIGH>;
+	};
+#endif
+	emmc: sdhc@4300000 {
+		compatible = "cvitek,synopsys-sdhc";
+		bus-width = <4>;
+		reg = <0x0 0x4300000 0x0 0x1000>;
+		max-frequency = <375000000>;
+		mmc_init_freq = <200000>;
+		mmc_trans_freq = <200000000>;
+		64_addressing;
+		reset_tx_rx_phy;
+		index = <0x0>;
+		pll_index = <0x5>;
+		pll_reg = <0x3002064>;
+		has_phy;
+		status = "okay";
+	};
+
+	sd: sdhc@4310000 {
+		compatible = "cvitek,synopsys-sdhc";
+		bus-width = <4>;
+		reg = <0x0 0x4310000 0x0 0x1000>;
+		max-frequency = <375000000>;
+		mmc_init_freq = <200000>;
+		mmc_trans_freq = <200000000>;
+		64_addressing;
+		reset_tx_rx_phy;
+		index = <0x1>;
+		pll_index = <0x6>;
+		pll_reg = <0x3002070>;
+		resets = <&rst 14>;
+		reset-names = "sdhci";
+		has_phy;
+		status = "okay";
+	};
+
+	wifisd: sdhc@4320000 {
+		compatible = "cvitek,synopsys-sdhc";
+		bus-width = <4>;
+		reg = <0x0 0x4320000 0x0 0x1000>;
+		max-frequency = <375000000>;
+		mmc_init_freq = <200000>;
+		mmc_trans_freq = <50000000>;
+		64_addressing;
+		reset_tx_rx_phy;
+		index = <0x2>;
+		pll_index = <0x7>;
+		pll_reg = <0x300207C>;
+		has_phy;
+		status = "okay";
+	};
+
+	spif:spif@10000000 {
+		compatible = "cvitek,cvi-spif";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		bus-num = <0>;
+		reg = <0x0 0x10000000 0x0 0x4000000>;
+		interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+		sck_div = <3>;
+
+		spiflash@0 {
+			spi-rx-bus-width = <4>;
+			spi-tx-bus-width = <4>;
+			compatible = "spi-flash";
+			memory-map = <0x0 0x10000000 0x0 0x08000000>;
+			reg = <0>;
+			spi-max-frequency = <50000000>;
+		};
+	};
+
+	cvi_vo {
+		u-boot,dm-pre-reloc;
+		compatible = "cvitek,vo";
+		reg = <0x0 0x0a080000 0x0 0xB000>,<0x0 0x0a0c8000 0x0 0xa0>,<0x0 0x0300c000 0x0 0x100>;
+		reg-names = "sc","vip_sys","dphy";
+	};
+
+	cvi_lvds {
+		compatible = "cvitek,lvds";
+		display-timings {
+			timing0 {
+			bits-per-pixel = <24>;
+			clock-frequency = <160000000>;
+			hfront-porch = <120>;
+			hsync-len = <20>;
+			hback-porch = <21>;
+			hactive = <720>;
+			vfront-porch = <21>;
+			vsync-len = <3>;
+			vback-porch = <18>;
+			vactive = <1280>;
+			hsync-active = <0>;
+			vsync-active = <0>;
+			de-active = <1>;
+			pixelclk-active = <0>;
+			};
+		};
+	};
+
+	memory {
+		reg = <0x1 0x00000000 0x0 0x40000000>;
+		device_type = "memory";
+	};
+
+	reserved-memory {
+		#address-cells = <0x2>;
+		#size-cells = <0x2>;
+		ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x1000000>; // 16MB
+			alignment = <0x0 0x2000>; // 8KB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion@120000000 {
+			compatible = "ion-region";
+			reg = <0x1 0x20000000 0x0 0x10000000>; // 256MB
+		};
+	};
+
+	aliases {
+		serial0 = &uart0;
+		spi0 = &spif;
+	};
+
+	chosen {
+		stdout-path = "serial0"; // "serial0:115200n8", no arguments means no re-initialization
+	};
+
+	host0:cvi-usb-host@040D0000 {
+		compatible = "cvitek,xhci-platform";
+		reg = <0x0 0x040D0000 0x0 0x10000>;
+		clock-frequency = <25000000>;
+		ss_disable;
+	};
+};

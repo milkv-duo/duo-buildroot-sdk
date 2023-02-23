@@ -1,0 +1,6 @@
+{
+    "ddr_cfg_list": [
+        "lpddr4_16g_2666"
+    ],
+    "board_information": "SPINAND 256MB + LPDDR4 32bit 2GB"
+}

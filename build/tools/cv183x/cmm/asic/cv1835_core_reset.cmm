@@ -1,0 +1,27 @@
+rsystem.attach
+VectorCatch.RESET ON
+go
+break
+WAIT !ISRUN() ;wait until target stop
+
+IF ISCONNECT()
+   PRINT "Connect to target"
+   break
+ELSE
+   dialog.ok "Not connect"
+
+; Clear ATF multicore mailbox region
+; entry, core[0, 1] state
+Data.Set PM:0xe00f000 %quad 0
+Data.Set PM:0xe00f008 %quad 0
+Data.Set PM:0xe00f010 %quad 0
+Data.Set PM:0xe00f018 %quad 0
+Data.Set PM:0xe00f020 %quad 0
+
+
+Data.Set EAXI:0x3000004  %long 0x00020000
+
+Data.Set EAXI:0x3000008  %long 0x0000012C
+Data.Set EAXI:0x3003008  %long 0xFFFFEFFF
+
+PRINT "cv1835 core reset complete"

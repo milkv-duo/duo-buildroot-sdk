@@ -1,0 +1,696 @@
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/reset/cv181x-resets.h>
+#include <dt-bindings/clock/cv181x-clock.h>
+#include <dt-bindings/dma/cv181x-dmamap.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/dts-v1/;
+
+/ {
+	compatible = "cvitek,cv181x";
+	model = "riscv-c906,fpga";
+
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+
+	rst: reset-controller {
+		#reset-cells = <1>;
+		compatible = "cvitek,reset";
+		reg = <0x0 0x03003000 0x0 0x10>;
+	};
+
+	osc: oscillator {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <25000000>;
+		clock-output-names = "osc";
+	};
+
+	clk: clock-controller {
+		compatible = "cvitek,cv181x-clk";
+		reg = <0x0 0x03002000 0x0 0x1000>;
+		clocks = <&osc>;
+		#clock-cells = <1>;
+	};
+
+	reserved-memory {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x1000000>; // 2MB
+			alignment = <0x0 0x2000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x04000000>; // 71MB
+		};
+
+		vip_reserved: vip {
+			/* <start, length> pair
+			 * and restrict to 4G address range
+			 */
+			size = <0x0 0x02000000>; // 32MB
+			no-map;
+		};
+
+		vcodec_reserved: vcodec {
+			/* <start, length> pair
+			 * and restrict to 512M address range
+			 */
+			alloc-ranges = <0x0 0x80000000 0 0x20000000>;
+			size = <0x0 0x200000>; // 2MB
+			alignment = <0x0 0x1000>; // 4KB
+			no-map;
+		};
+
+	};
+
+	mon {
+		compatible = "cvitek,mon";
+		reg-names = "pcmon", "ddr_ctrl", "ddr_phyd", "ddr_aximon", "ddr_top";
+		reg = <0x0 0x01040000 0x0 0x1000>,
+					<0x0 0x08004000 0x0 0x1000>,
+					<0x0 0x08006000 0x0 0x1000>,
+					<0x0 0x08008000 0x0 0x1000>,
+					<0x0 0x0800A000 0x0 0x1000>;
+		interrupt-names = "mon_irq";
+		interrupt-parent = <&plic0>;
+		interrupts = <93 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	tpu {
+		compatible = "cvitek,tpu";
+		reg-names = "tdma", "tiu";
+		reg = <0x0 0x0C100000 0x0 0x1000>,
+				<0x0 0x0C101000 0x0 0x1000>;
+		interrupt-names = "tiu_irq", "tdma_irq";
+		interrupt-parent = <&plic0>;
+		interrupts = <75 IRQ_TYPE_LEVEL_HIGH>,
+					<76 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	cvitek-ion {
+		compatible = "cvitek,cvitek-ion";
+
+		heap_carveout@0 {
+			compatible = "cvitek,carveout";
+			memory-region = <&ion_reserved>;
+		};
+	};
+
+
+	chosen {
+		bootargs = "console=ttyS0,115200n8 debug loglevel=8,initcall_debug=8 root=/dev/ init=/sbin/init earlycon=sbi";
+		stdout-path = "serial0";
+	};
+
+	uart0: serial@4140000 {
+		interrupt-parent = <&plic0>;
+		interrupts = <44 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <25000000>;
+		current-speed = <115200>;
+		reg = <0x00 0x4140000 0x00 0x100>;
+		compatible = "snps,dw-apb-uart";
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+	cpus {
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		timebase-frequency = <25000000>;
+
+		cpu-map {
+
+			cluster0 {
+
+				core0 {
+					cpu = <0x01>;
+				};
+			};
+		};
+
+		cpu@0 {
+			device_type = "cpu";
+			reg = <0x00>;
+			status = "okay";
+			compatible = "riscv";
+			riscv,isa = "rv64imafdvcsu";
+			mmu-type = "riscv,sv39";
+			clock-frequency = <25000000>;
+
+			cpu0_intc: interrupt-controller {
+				#interrupt-cells = <0x01>;
+				interrupt-controller;
+				compatible = "riscv,cpu-intc";
+			};
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x00 0x80000000 0x00 0x40000000>;
+	};
+
+	soc {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		compatible = "simple-bus";
+		ranges;
+
+		plic0: interrupt-controller@70000000 {
+			riscv,ndev = <101>;
+			riscv,max-priority = <0x07>;
+			reg-names = "control";
+			reg = <0x00 0x70000000 0x00 0x4000000>;
+			interrupts-extended = <&cpu0_intc 0xffffffff &cpu0_intc 0x09>;
+			interrupt-controller;
+			compatible = "riscv,plic0";
+			#interrupt-cells = <0x02>;
+			#address-cells = <0x00>;
+		};
+
+		clint@74000000 {
+			interrupts-extended = <&cpu0_intc 0x03 &cpu0_intc 0x07>;
+			reg = <0x00 0x74000000 0x00 0x10000>;
+			compatible = "riscv,clint0";
+			clint,has-no-64bit-mmio;
+		};
+
+	};
+
+	sysdma_remap {
+		compatible = "cvitek,sysdma_remap";
+		reg = <0x0 0x03000154 0x0 0x10>;
+		ch-remap = <CVI_I2S0_RX CVI_I2S2_TX CVI_I2S1_RX CVI_I2S1_TX
+					CVI_SPI_NAND CVI_SPI_NAND CVI_I2S2_RX CVI_I2S3_TX>;
+		int_mux_base = <0x03000298>;
+		int_mux = <0x7FC00>; /* enable bit [10..18] for CPU1(906B) */
+	};
+
+	dmac: dma@0x4330000 {
+		compatible = "snps,dmac-bm";
+		reg = <0x0 0x04330000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <29 IRQ_TYPE_LEVEL_HIGH>;
+		clock-names = "clk_sdma_axi";
+		clocks = <&clk CV181X_CLK_SDMA_AXI>;
+
+		dma-channels = /bits/ 8 <8>;
+		#dma-cells = <3>;
+		dma-requests = /bits/ 8 <16>;
+		chan_allocation_order = /bits/ 8 <0>;
+		chan_priority = /bits/ 8 <1>;
+		block_size = <1024>;
+		dma-masters = /bits/ 8 <2>;
+		data-width = <4 4>; /* bytes */
+		axi_tr_width = <4>; /* bytes */
+		block-ts = <15>;
+	};
+
+	usb: usb@04340000 {
+		compatible = "cvitek,cv182x-usb";
+		reg = <0x0 0x04340000 0x0 0x10000>, <0x0 0x03006000 0x0 0x58>;
+		interrupt-parent = <&plic0>;
+		interrupts = <30 IRQ_TYPE_LEVEL_HIGH>;
+		dr_mode = "otg";
+		g-use-dma;
+		g-rx-fifo-size = <536>;
+		g-np-tx-fifo-size = <32>;
+		g-tx-fifo-size = <768 512 512 384 128 128>;
+#if 0
+		clocks = <&clk CV182X_CLK_AXI4_USB>,
+				<&clk CV182X_CLK_APB_USB>,
+				<&clk CV182X_CLK_125M_USB>,
+				<&clk CV182X_CLK_33K_USB>,
+				<&clk CV182X_CLK_12M_USB>;
+		clock-names = "clk_axi", "clk_apb", "clk_125m", "clk_33k", "clk_12m";
+		vbus-gpio = <&portb 6 0>;
+#endif
+		status = "okay";
+	};
+
+	spinand:cv-spinf@4060000 {
+		compatible = "cvitek,cv1835-spinf";
+		reg = <0x0 0x4060000 0x0 0x1000>;
+		reg-names = "core_mem";
+		interrupt-parent = <&plic0>;
+		interrupts = <39 IRQ_TYPE_LEVEL_HIGH>;
+		bus-width = <4>;
+		dmas = <&dmac 4 1 1
+			&dmac 5 1 1>;
+		dma-names = "rx","tx";
+	};
+
+	i2c0: i2c@04000000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04000000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <49 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <400000>;
+
+		#size-cells = <0x0>;
+		#address-cells = <0x1>;
+		resets = <&rst RST_I2C0>;
+		reset-names = "i2c0";
+	};
+
+	i2c1: i2c@04010000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04010000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <50 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <400000>;
+
+		#size-cells = <0x0>;
+		#address-cells = <0x1>;
+		resets = <&rst RST_I2C1>;
+		reset-names = "i2c1";
+	};
+
+	i2c2: i2c@04020000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04020000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <51 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+		resets = <&rst RST_I2C2>;
+		reset-names = "i2c2";
+	};
+
+	i2c3: i2c@04030000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04030000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <52 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <400000>;
+		resets = <&rst RST_I2C3>;
+		reset-names = "i2c3";
+	};
+
+	i2c4: i2c@04040000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04040000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <53 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <400000>;
+		resets = <&rst RST_I2C4>;
+		reset-names = "i2c4";
+	};
+
+	spi0:spi0@04180000 {
+		compatible = "snps,dw-apb-ssi";
+		reg = <0x0 0x04180000 0x0 0x10000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <54 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk CV181X_CLK_SPI>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	spi1:spi1@04190000 {
+		compatible = "snps,dw-apb-ssi";
+		reg = <0x0 0x04190000 0x0 0x10000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <55 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk CV181X_CLK_SPI>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	spi2:spi2@041A0000 {
+		compatible = "snps,dw-apb-ssi";
+		reg = <0x0 0x041A0000 0x0 0x10000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <56 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk CV181X_CLK_SPI>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	spi3:spi3@041B0000 {
+		compatible = "snps,dw-apb-ssi";
+		reg = <0x0 0x041B0000 0x0 0x10000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <57 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk CV181X_CLK_SPI>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+#if 0
+		dmas = <&dmac 2 1 1
+			&dmac 3 1 1>;
+		dma-names = "rx", "tx";
+		capability = "txrx";
+#endif
+	};
+
+	eth_csrclk: eth_csrclk {
+		clock-output-names = "eth_csrclk";
+		clock-frequency = <25000000>;
+		#clock-cells = <0x0>;
+		compatible = "fixed-clock";
+	};
+
+	eth_ptpclk: eth_ptpclk {
+		clock-output-names = "eth_ptpclk";
+		clock-frequency = <50000000>;
+		#clock-cells = <0x0>;
+		compatible = "fixed-clock";
+	};
+
+	stmmac_axi_setup: stmmac-axi-config {
+		snps,wr_osr_lmt = <1>;
+		snps,rd_osr_lmt = <2>;
+		snps,blen = <4 8 16 0 0 0 0>;
+	};
+
+	mtl_rx_setup: rx-queues-config {
+		snps,rx-queues-to-use = <1>;
+		queue0 {};
+	};
+
+	mtl_tx_setup: tx-queues-config {
+		snps,tx-queues-to-use = <1>;
+		queue0 {};
+	};
+
+	ethernet0: ethernet@4070000 {
+		compatible = "cvitek,ethernet";
+		reg = <0x0 0x04070000 0x0 0x10000>;
+		interrupt-names = "macirq";
+		interrupt-parent = <&plic0>;
+		interrupts = <31 IRQ_TYPE_LEVEL_HIGH>;
+		clock-names = "stmmaceth", "ptp_ref";
+		clocks = <&eth_csrclk>, <&eth_ptpclk>;
+		//phy-reset-gpios = <&porta 26 0>;
+
+		/* no hash filter and perfect filter support */
+		snps,multicast-filter-bins = <0>;
+		snps,perfect-filter-entries = <1>;
+
+		snps,txpbl = <8>;
+		snps,rxpbl = <8>;
+		snps,aal;
+
+		snps,axi-config = <&stmmac_axi_setup>;
+		snps,mtl-rx-config = <&mtl_rx_setup>;
+		snps,mtl-tx-config = <&mtl_tx_setup>;
+	};
+
+	gpio0: gpio@03020000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03020000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		porta: gpio-controller@0 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "porta";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <32>;
+			reg = <0>;
+			interrupt-controller;
+			interrupt-parent = <&plic0>;
+			interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+
+#if 0
+	emmc:cv-emmc@4300000 {
+		compatible = "cvitek,cv181x-fpga-emmc";
+		reg = <0x0 0x04300000 0x0 0x1000>;
+		reg-names = "core_mem";
+		interrupt-parent = <&plic0>;
+		interrupts = <34 IRQ_TYPE_LEVEL_HIGH>;
+		bus-width = <4>;
+		non-removable;
+		no-sdio;
+		no-sd;
+		src-frequency = <25000000>;
+		min-frequency = <200000>;
+		max-frequency = <20000000>;
+		64_addressing;
+		reset_tx_rx_phy;
+	};
+#endif
+	sd:cv-sd@4310000 {
+		compatible = "cvitek,cv181x-fpga-sd";
+		reg = <0x0 0x04310000 0x0 0x1000>;
+		reg-names = "core_mem";
+		interrupt-parent = <&plic0>;
+		interrupts = <36 IRQ_TYPE_LEVEL_HIGH>;
+		bus-width = <4>;
+		no-sdio;
+		no-mmc;
+		src-frequency = <25000000>;
+		min-frequency = <200000>;
+		max-frequency = <20000000>;
+		64_addressing;
+		reset_tx_rx_phy;
+		reset-names = "sdhci";
+	};
+
+	i2s_mclk: i2s_mclk {
+		clock-output-names = "i2s_mclk";
+		clock-frequency = <24576000>;
+		#clock-cells = <0x0>;
+		compatible = "fixed-clock";
+	};
+
+	i2s_subsys {
+		compatible = "cvitek,i2s_tdm_subsys";
+		reg = <0x0 0x04108000 0x0 0x100>;
+		clocks = <&i2s_mclk>, <&clk CV181X_CLK_A0PLL>,
+			<&clk CV181X_CLK_SDMA_AUD0>, <&clk CV181X_CLK_SDMA_AUD1>,
+			<&clk CV181X_CLK_SDMA_AUD2>, <&clk CV181X_CLK_SDMA_AUD3>;
+		clock-names = "i2sclk", "clk_a0pll",
+			"clk_sdma_aud0", "clk_sdma_aud1",
+			"clk_sdma_aud2", "clk_sdma_aud3";
+		master_base = <0x04110000>; /* I2S1 is master, only useful while using multi I2S IPs work on same IO */
+	};
+
+	i2s0: i2s@04100000 {
+		compatible = "cvitek,cv1835-i2s";
+		reg = <0x0 0x04100000 0x0 0x2000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <40 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		dev-id = <0>;
+		#sound-dai-cells = <0>;
+		dmas = <&dmac 0 1 1>; /* read channel */
+		dma-names = "rx";
+		capability = "rx"; /* I2S0 connect to internal ADC as RX */
+		mclk_out = "false";
+	};
+
+	i2s1: i2s@04110000 {
+		compatible = "cvitek,cv1835-i2s";
+		reg = <0x0 0x04110000 0x0 0x2000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <41 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		dev-id = <1>;
+		#sound-dai-cells = <0>;
+		dmas = <&dmac 2 1 1 /* read channel */
+			&dmac 3 1 1>; /* write channel */
+		dma-names = "rx", "tx";
+		capability = "txrx";
+		mclk_out = "false";
+	};
+
+	i2s2: i2s@04120000 {
+		compatible = "cvitek,cv1835-i2s";
+		reg = <0x0 0x04120000 0x0 0x2000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <42 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		dev-id = <2>;
+		#sound-dai-cells = <0>;
+		dmas = <&dmac 6 1 1 /* read channel */
+			&dmac 1 1 1>; /* write channel */
+		dma-names = "rx", "tx";
+		capability = "txrx";
+		mclk_out = "false";
+
+	};
+
+	i2s3: i2s@04130000 {
+		compatible = "cvitek,cv1835-i2s";
+		reg = <0x0 0x04130000 0x0 0x2000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <43 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		dev-id = <3>;
+		#sound-dai-cells = <0>;
+		dmas = <&dmac 7 1 1>; /* write channel */
+		dma-names = "tx";
+		capability = "tx"; /* I2S3 connect to internal DAC as TX */
+		mclk_out = "true";
+	};
+
+	adc: adc@0300A100 {
+		compatible = "cvitek,cv182xadc";
+		reg = <0x0 0x0300A100 0x0 0x100>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		clk_source = <0x04130000>; /* MCLK source is I2S3 */
+	};
+
+	dac: dac@0300A000 {
+		compatible = "cvitek,cv182xdac";
+		reg = <0x0 0x0300A000 0x0 0x100>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+	};
+
+	pdm: pdm@0x041D0C00 {
+		compatible = "cvitek,cv1835pdm";
+		reg = <0x0 0x041D0C00 0x0 0x100>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+	};
+
+	sound_adc {
+		compatible = "cvitek,cv182x-adc";
+		cvi,model = "CV182X";
+		cvi,card_name = "cv182x_adc";
+	};
+
+	sound_dac {
+		compatible = "cvitek,cv182x-dac";
+		cvi,model = "CV182X";
+		cvi,card_name = "cv182x_dac";
+	};
+
+	sound_PDM {
+		compatible = "cvitek,cv182x-pdm";
+		cvi,model = "CV182X";
+		cvi,card_name = "cv182x_internal_PDM";
+	};
+
+	rtos_cmdqu {
+		compatible = "cvitek,rtos_cmdqu";
+		reg = <0x0 0x01900000 0x0 0x1000>;
+		reg-names = "mailbox";
+		interrupt-parent = <&plic0>;
+		interrupts = <101 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "mailbox";
+	};
+
+	vcodec {
+		compatible = "cvitek,fpga-vcodec";
+		memory-region = <&vcodec_reserved>;
+		reg = <0x0 0x0B020000 0x0 0x10000>,<0x0 0x0B010000 0x0 0x10000>,<0x0 0x0B030000 0x0 0x100>,
+		      <0x0 0x0B058000 0x0 0x100>,<0x0 0x0B050000 0x0 0x400>;
+		reg-names = "h265","h264","vc_ctrl","vc_sbm","vc_addr_remap";
+		interrupt-parent = <&plic0>;
+		interrupts = <22 IRQ_TYPE_LEVEL_HIGH>,
+			     <21 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "h265","h264";
+	};
+
+	jpu {
+		compatible = "cvitek,fpga-jpeg";
+		reg = <0x0 0x0B000000 0x0 0x300>,<0x0 0x0B030000 0x0 0x100>,<0x0 0x0B058000 0x0 0x100>;
+		reg-names = "jpeg","vc_ctrl","vc_sbm";
+		interrupt-parent = <&plic0>;
+		interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "jpeg";
+	};
+
+	mipi_rx: cif {
+		compatible = "cvitek,cif";
+		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0a0d0000 0x0 0x1000>,
+		      <0x0 0x0a0c4000 0x0 0x2000>;
+		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1";
+		interrupt-parent = <&plic0>;
+		interrupts = <26 IRQ_TYPE_LEVEL_HIGH>,
+			     <27 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "csi0", "csi1";
+		snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>;
+		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY1>,
+			 <&rst RST_CSIPHY0RST_APB>, <&rst RST_CSIPHY1RST_APB>;
+		reset-names = "phy0", "phy1", "phy-apb0", "phy-apb1";
+	};
+
+	mipi_tx {
+		compatible = "cvitek,mipi_tx";
+	};
+
+	sys {
+		compatible = "cvitek,sys";
+	};
+
+	base {
+		compatible = "cvitek,base";
+		reg = <0x0 0x0a0c8000 0x0 0x20>;
+		reg-names = "vip_sys";
+	};
+
+	vi {
+		compatible = "cvitek,vi";
+		reg = <0x0 0x0a000000 0x0 0x80000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <24 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "isp";
+	};
+
+	vpss {
+		compatible = "cvitek,vpss";
+		reg = <0x0 0x0a080000 0x0 0x10000>, <0x0 0x0a0d1000 0x0 0x100>;
+		interrupt-parent = <&plic0>;
+		interrupts = <25 IRQ_TYPE_LEVEL_HIGH>;
+		reg-names = "sc","dphy";
+		interrupt-names = "sc";
+	};
+
+	ive {
+		compatible = "cvitek,ive";
+		reg-names = "ive_base";
+		reg = <0x0 0x0A0A0000 0x0 0x3100>;
+		interrupt-names = "ive_irq";
+		interrupt-parent = <&plic0>;
+		interrupts = <97 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	vo {
+		compatible = "cvitek,vo";
+		reg = <0x0 0x0a080000 0x0 0x10000>, <0x0 0x0a0d1000 0x0 0x100>;
+		reg-names = "sc","dphy";
+	};
+
+	dwa {
+		compatible = "cvitek,dwa";
+		reg = <0x0 0x0a0c0000 0x0 0x1000>;
+		interrupt-parent = <&plic0>;
+		interrupts = <28 IRQ_TYPE_LEVEL_HIGH>;
+		reg-names = "dwa";
+		interrupt-names = "dwa";
+	};
+
+	rgn {
+		compatible = "cvitek,rgn";
+	};
+
+
+	aliases {
+		serial0 = &uart0;
+		ethernet0 = &ethernet0;
+	};
+
+};

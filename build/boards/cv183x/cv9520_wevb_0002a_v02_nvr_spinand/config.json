@@ -1,0 +1,7 @@
+{
+    "ddr_cfg_list": [
+        "ddr3_4g_1866_odt",
+        "ddr3_4g_1600_odt"
+    ],
+    "board_information": "SPINAND 256MB + DDR3 1866 CS 1GB"
+}

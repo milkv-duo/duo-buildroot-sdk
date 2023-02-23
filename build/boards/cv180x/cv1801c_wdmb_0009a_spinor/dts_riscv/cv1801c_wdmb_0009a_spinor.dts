@@ -1,0 +1,17 @@
+/dts-v1/;
+#include "cv180x_base_riscv.dtsi"
+#include "cv180x_asic_qfn.dtsi"
+#include "cv180x_asic_spinor.dtsi"
+#include "cv180x_default_memmap.dtsi"
+
+&i2c1 {
+	status = "disabled";
+};
+&mipi_rx{
+	snsr-reset = <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>;
+};
+
+/ {
+
+};
+

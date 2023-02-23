@@ -1,0 +1,39 @@
+{
+	"panel_list" : {
+		"mipi" : [
+			"hx8394",
+			"ili9881c",
+			"ili9881d",
+			"jd9366ab",
+			"nt35521",
+			"ota7290b",
+			"ota7290b_1920",
+			"icn9707",
+			"3aml069lp01g",
+			"st7701"
+		],
+		"lvds" : [
+			"ek79202"
+		],
+		"i80" : [
+			"st7789v",
+			"st7789v3"
+		],
+		"bt" : [
+		],
+		"rgb" : [
+		]
+	},
+
+	"panel_param" : {
+		"lane_num" : [
+			"4_lanes",
+			"2_lanes",
+			"1_lane"
+		],
+
+		"lane_swap" : [
+			"lane_swap"
+		]
+	}
+}

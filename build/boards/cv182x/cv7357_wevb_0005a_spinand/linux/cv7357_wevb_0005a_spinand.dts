@@ -1,0 +1,45 @@
+/dts-v1/;
+#include "cv182x_asic.dtsi"
+
+/ {
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x200000>; // 2MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x0AC00000>; // 172MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+	};
+
+	/delete-node/ cv-emmc@4300000;
+	/delete-node/ wifi-sd@5000000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+	/delete-node/ cvi-spif@10000000;
+	/delete-node/ bt_pin;
+
+	aliases {
+	};
+};
+

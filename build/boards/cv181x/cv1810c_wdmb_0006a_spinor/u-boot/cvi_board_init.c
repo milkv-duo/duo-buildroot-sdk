@@ -1,0 +1,1 @@
+../../cv1811c_wdmb_0006a_spinor/u-boot/cvi_board_init.c

@@ -1,0 +1,7 @@
+<physical_partition type="spinand">
+    <partition label="fip" size_in_kb="2560" file="fip.bin"/>
+    <partition label="BOOT" size_in_kb="8192" file="yoc.bin"/>
+    <partition label="ENV" size_in_kb="128" file="" />
+    <partition label="ENV_BAK" size_in_kb="128" file="" />
+</physical_partition>
+

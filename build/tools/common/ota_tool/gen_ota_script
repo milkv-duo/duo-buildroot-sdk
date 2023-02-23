@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+import logging
+import argparse
+from os import path, chmod
+from XmlParser import XmlParser
+FORMAT = '%(filename)s:%(levelname)s: %(message)s'
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+
+
+def parse_Args():
+    parser = argparse.ArgumentParser(description='Create CVITEK OTA script')
+    parser.add_argument('xml', help='path to partition xml')
+    parser.add_argument(
+        'output',
+        metavar='output',
+        type=str,
+        help='the output folder for saving the updates-script.sh')
+    parser.add_argument("-v",
+                        "--verbose",
+                        help="increase output verbosity",
+                        action="store_true")
+
+    args = parser.parse_args()
+    if args.verbose:
+        logging.debug("Enable more verbose output")
+        logging.getLogger().setLevel(level=logging.DEBUG)
+
+    return args
+
+
+def genScript(out, parts: list, storage):
+    out.write("SCRIPT_PATH=`dirname $0`\n")
+    out.write('TOP="$SCRIPT_PATH/../"\n')
+    for i, p in enumerate(parts):
+        if p["label"] == "fip":
+            continue
+        if not p["file_name"] or p["file_name"] == "":
+            continue
+        out.write("if [ -f $TOP/%s ];then\n" % p["file_name"])
+        out.write("$SCRIPT_PATH/cimg2raw $TOP/%s\n" % p["file_name"])
+        if storage == "emmc":
+            out.write("dd if=$TOP/%s of=/dev/mmcblk0p%d\n" %
+                      (p["file_name"], i + 1))
+        elif storage == "spinand":
+            out.write("$SCRIPT_PATH/nandwrite -m -p /dev/mtd%d $TOP/%s\n" %
+                      (i, p["file_name"]))
+        else:
+            logging.error("Unsupported storage")
+            exit(1)
+        out.write("fi\n")
+
+
+def main():
+    args = parse_Args()
+    xmlParser = XmlParser(args.xml)
+    parts = xmlParser.parse()
+    out_path = path.join(args.output, "update-script.sh")
+    try:
+        out = open(out_path, "w")
+    except OSError:
+        logging.error("Create update-scripty.sh failed!")
+        raise
+    genScript(out, parts, xmlParser.getStorage())
+    out.close()
+    chmod(out_path, 0o755)
+    if args.verbose:
+        with open(out_path) as f:
+            for line in f.readlines():
+                logging.debug(line)
+
+
+if __name__ == "__main__":
+    main()

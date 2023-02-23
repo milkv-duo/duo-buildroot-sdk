@@ -1,0 +1,16 @@
+/dts-v1/;
+#include "cv180x_base_riscv.dtsi"
+#include "cv180x_asic_bga.dtsi"
+#include "cv180x_asic_spinor.dtsi"
+#include "cv180x_default_memmap.dtsi"
+
+/ {
+
+};
+
+&sd {
+	no-1-8-v;
+	src-frequency = <25000000>;
+	min-frequency = <400000>;
+	max-frequency = <12000000>;
+};

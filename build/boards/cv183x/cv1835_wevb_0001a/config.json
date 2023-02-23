@@ -1,0 +1,7 @@
+{
+    "ddr_cfg_list": [
+        "lpddr4_8g_2666",
+        "lpddr4_32g_2133"
+    ],
+    "board_information": "EMMC 8GB + LPDDR4 1GB"
+}

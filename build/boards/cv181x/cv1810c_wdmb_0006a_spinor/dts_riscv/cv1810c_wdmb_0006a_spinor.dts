@@ -1,0 +1,23 @@
+/dts-v1/;
+#include "cv181x_base_riscv.dtsi"
+#include "cv181x_asic_qfn.dtsi"
+#include "cv181x_asic_spinor.dtsi"
+#include "cv181x_default_memmap.dtsi"
+
+/ {
+
+};
+
+&mipi_rx{
+	snsr-reset = <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>;
+};
+
+&mipi_tx {
+	/delete-property/ reset-gpio;
+	/delete-property/ pwm-gpio;
+	/delete-property/ power-ct-gpio;
+};
+
+&dac{
+	mute-gpio-r = <&porta 15 GPIO_ACTIVE_LOW>;
+};

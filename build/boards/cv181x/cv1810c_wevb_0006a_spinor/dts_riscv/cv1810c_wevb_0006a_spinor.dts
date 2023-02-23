@@ -1,0 +1,10 @@
+/dts-v1/;
+#include "cv181x_base_riscv.dtsi"
+#include "cv181x_asic_qfn.dtsi"
+#include "cv181x_asic_spinor.dtsi"
+#include "cv181x_default_memmap.dtsi"
+
+/ {
+
+};
+

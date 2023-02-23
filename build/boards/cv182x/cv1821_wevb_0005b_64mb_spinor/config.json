@@ -1,0 +1,11 @@
+{
+    "ddr_cfg_list": [
+        "ddr3_1866_ddr2_1333_x16_auto",
+        "ddr3_1866_ddr2_1066_x16_auto",
+        "ddr3_2133_ddr2_1333_x16_auto",
+        "ddr3_2133_ddr2_1066_x16_auto",
+        "ddr3_1866_x16_1gb_auto_qfn",
+        "ddr3_2133_x16_1gb_auto_qfn"
+    ],
+    "board_information": "SPINOR 16MB + QFN SIP 64MB"
+}

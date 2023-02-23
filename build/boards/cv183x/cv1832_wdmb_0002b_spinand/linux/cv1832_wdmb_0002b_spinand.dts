@@ -1,0 +1,61 @@
+#include "cv1835_asic.dtsi"
+
+/ {
+	memory {
+		reg = <0x1 0x00000000 0x0 0x10000000>; // 256MB
+		device_type = "memory";
+	};
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x600000>; // 6MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x04600000>; //50MB + vip 40MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x1 0x00000000 0 0xF0000000>;
+			size = <0x0 0x00000000>; // 22MB
+			no-map;
+		};
+	};
+
+	/delete-node/ cvi-spif@10000000;
+	/delete-node/ cv-emmc@4300000;
+	/delete-node/ wifi-sd@4320000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ i2c@04020000;
+	/delete-node/ ethernet@04520000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+	/delete-node/ mipi_tx;
+
+	mipi_rx: cif {
+		compatible = "cvitek,cif";
+		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0300b000 0x0 0x1000>;
+		reg-names = "csi_mac0", "csi_wrap0";
+		interrupts = <GIC_SPI 155 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "csi0";
+		snsr-reset = <&portd 7 GPIO_ACTIVE_HIGH>;
+		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY0RST_APB>;
+		reset-names = "phy0", "phy-apb0";
+	};
+
+	aliases {
+		/delete-property/ ethernet1;
+	};
+};
+

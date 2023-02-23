@@ -1,0 +1,270 @@
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/reset/cv1835-resets.h>
+#include <dt-bindings/sound/cv1835-audio.h>
+
+/dts-v1/;
+
+/memreserve/	0x80000000 0x0000000000080000; // ATF BL31 + BL32
+
+/ {
+	compatible = "linux,dummy-virt";
+	#size-cells = <0x2>;
+	#address-cells = <0x2>;
+	interrupt-parent = <&gic>;
+
+	rst: reset-controller {
+		#reset-cells = <1>;
+		compatible = "cvitek,reset";
+		reg = <0x0 0x03003000 0x0 0x10>;
+	};
+
+	gic: interrupt-controller {
+		compatible = "arm,cortex-a15-gic";
+		ranges;
+		#size-cells = <0x2>;
+		#address-cells = <0x2>;
+		interrupt-controller;
+		#interrupt-cells = <0x3>;
+		reg = <0x0 0x01F01000 0x0 0x1000>,
+		      <0x0 0x01F02000 0x0 0x2000>;
+	};
+
+	psci {
+		migrate = <0xc4000005>;
+		cpu_on = <0xc4000003>;
+		cpu_off = <0x84000002>;
+		cpu_suspend = <0xc4000001>;
+		sys_poweroff = <0x84000008>;
+		sys_reset = <0x84000009>;
+		method = "smc";
+		compatible = "arm,psci-0.2", "arm,psci";
+	};
+
+	cpus {
+		#size-cells = <0x0>;
+		#address-cells = <0x1>;
+
+		A53_0: cpu@0 {
+			reg = <0x0>;
+			enable-method = "psci";
+			compatible = "arm,cortex-a53";
+			device_type = "cpu";
+		};
+	};
+
+	tpu {
+		compatible = "cvitek,tpu";
+		reg-names = "tdma", "tiu";
+		reg = <0x0 0x0C100000 0x0 0x1000>,
+			  <0x0 0x0C101000 0x0 0x1000>;
+		interrupts = <GIC_SPI 59 IRQ_TYPE_EDGE_RISING>,
+			     <GIC_SPI 60 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	mon {
+		compatible = "cvitek,mon";
+		reg-names = "pcmon", "ddr_ctrl", "ddr_phyd", "ddr_aximon", "ddr_top";
+		reg = <0x0 0x01040000 0x0 0x1000>,
+					<0x0 0x08004000 0x0 0x1000>,
+					<0x0 0x08006000 0x0 0x1000>,
+					<0x0 0x08008000 0x0 0x1000>,
+					<0x0 0x0800A000 0x0 0x1000>;
+		interrupts = <GIC_SPI 77 IRQ_TYPE_EDGE_RISING>;
+	};
+
+	cvitek-ion {
+		compatible = "cvitek,cvitek-ion";
+
+		heap_carveout@0 {
+			compatible = "cvitek,carveout";
+			memory-region = <&ion_reserved>;
+		};
+	};
+
+	reserved-memory {
+		#address-cells = <0x2>;
+		#size-cells = <0x2>;
+		ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x1000000>; // 16MB
+			alignment = <0x0 0x2000>; // 8KB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x06000000>; // 96MB
+		};
+
+		vip_reserved: vip {
+			/* <start, length> pair
+			 * and restrict to 4G address range
+			 */
+			size = <0x0 0x02000000>; // 32MB
+			no-map;
+		};
+
+		vcodec_reserved: vcodec {
+			/* <start, length> pair
+			 * and restrict to 4G address range
+			 */
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x06000000>; // 96MB
+			alignment = <0x0 0x1000>; // 4KB
+			no-map;
+		};
+
+		jpu_reserved: jpu {
+			/* <start, length> pair
+			 * and restrict to 4G address range
+			 */
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x01000000>; // 16MB
+			alignment = <0x0 0x1000>; // 4KB
+			no-map;
+		};
+	};
+
+	timer {
+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>,
+			<GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(2) | IRQ_TYPE_LEVEL_LOW)>;
+		always-on;
+		clock-frequency = <1000000000>;
+		compatible = "arm,armv8-timer";
+	};
+
+	watchdog0: cv-wd@0x3010000 {
+		compatible = "snps,dw-wdt";
+		reg = <0x0 0x03010000 0x0 0x1000>;
+		interrupts = <GIC_SPI 42 IRQ_TYPE_LEVEL_HIGH>;
+		resets = <&rst RST_WDT>;
+		clocks = <&pclk>;
+	};
+
+	pclk: pclk {
+		#clock-cells = <0>;
+		compatible = "fixed-clock";
+		clock-frequency = <25000000>;
+	};
+
+	uart0: serial@04140000 {
+		compatible = "snps,dw-apb-uart";
+		reg = <0x0 0x04140000 0x0 0x1000>;
+		clock-frequency = <307200>;
+		interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+		reg-shift = <2>;
+		reg-io-width = <4>;
+	};
+
+	memory {
+		reg = <0x0 0x80000000 0x0 0x80000000>;
+		device_type = "memory";
+	};
+
+	gpio0: gpio@03020000 {
+		compatible = "snps,dw-apb-gpio";
+		reg = <0x0 0x03020000 0x0 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		porta: gpio-controller@0 {
+			compatible = "snps,dw-apb-gpio-port";
+			bank-name = "porta";
+			gpio-controller;
+			#gpio-cells = <2>;
+			snps,nr-gpios = <32>;
+			reg = <0>;
+			interrupt-controller;
+			interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+		};
+	};
+
+	mipi_rx: cif {
+		compatible = "cvitek,cif";
+		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0a0d0000 0x0 0x1000>,
+		      <0x0 0x0a0c4000 0x0 0x2000>;
+		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1";
+		interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "csi0", "csi1";
+		snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>;
+		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY1>,
+			<&rst RST_CSIPHY0RST_APB>, <&rst RST_CSIPHY1RST_APB>;
+		reset-names = "phy0", "phy1", "phy-apb0", "phy-apb1";
+	};
+
+	mipi_tx {
+		compatible = "cvitek,mipi_tx";
+	};
+
+	base {
+		compatible = "cvitek,base";
+	};
+
+	vip {
+		compatible = "cvitek,vip";
+		memory-region = <&vip_reserved>;
+		reg = <0x0 0x0a080000 0x0 0x10000>,<0x0 0x0a0c0000 0x0 0x1000>,
+		      <0x0 0x0a0c8000 0x0 0x20>,<0x0 0x0a000000 0x0 0x80000>,
+		      <0x0 0x0a0d1000 0x0 0x100>;
+		reg-names = "sc","dwa","vip_sys","isp","dphy";
+		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "sc","dwa","isp";
+		cvitek,cif-modules = <&mipi_rx>;
+		snsr-num = <1>;
+		clock-freq-vip-sys1 = <300000000>;
+	};
+
+	vcodec {
+		compatible = "cvitek,cv1822-fpga-vcodec";
+		memory-region = <&vcodec_reserved>;
+		reg = <0x0 0x0B020000 0x0 0x10000>,<0x0 0x0B010000 0x0 0x10000>,<0x0 0x0B030000 0x0 0x100>;
+		reg-names = "h265", "h264","vc_ctrl";
+		interrupts = <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "h265","h264";
+	};
+
+	jpu {
+		compatible = "cvitek,cv1822-fpga-jpeg";
+		memory-region = <&jpu_reserved>;
+		reg = <0x0 0x0B000000 0x0 0x300>;
+		reg-names = "jpeg";
+		interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "jpeg";
+		reset = <&rst RST_JPEG>;
+		reset-names = "jpeg";
+	};
+	
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0"; // "serial0:115200n8", no arguments means no re-initialization
+	};
+
+	pmu_a53 {
+		compatible = "arm,cortex-a53-pmu";
+		interrupts = <GIC_SPI 86 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 87 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-affinity = <&A53_0>;
+	};
+	rtos_cmdqu {
+		compatible = "cvitek,rtos_cmdqu";
+		reg = <0x0 0x01900000 0x0 0x1000>;
+		reg-names = "mailbox";
+		interrupts = <GIC_SPI 85 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "mailbox";
+	};
+
+};
+

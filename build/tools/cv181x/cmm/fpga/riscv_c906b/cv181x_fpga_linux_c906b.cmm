@@ -1,0 +1,59 @@
+;winclear
+system.reset
+translation.reset
+symbol.reset
+map.reset
+
+system.cpu cortexa53
+system.config debugaccessport 0
+system.config apbaccessport 0
+system.config axiaccessport 1
+system.config memoryaccessport 1
+; set corenumber first
+sys.config corenumber 1
+; then set corebase and ctibase
+sys.config corebase 0x81010000
+sys.config ctibase  0x81020000
+sys.jc 10mhz
+
+Wait 10.ms
+system.option enreset on
+system.option trst on
+system.option resetbreak on
+system.option waitreset 500.ms
+OPTION.SerialWire ON
+
+winpos 20% 0% 20% 100%
+AREA
+AREA.Clear
+
+sys.down
+Wait 50.ms
+sys.up
+
+if system.up()
+(
+	; data.list
+)
+else
+(
+	dialog.ok "system.up failed"
+)
+
+winpos 50% 0% 50% 100%
+; register
+
+; Program efuse
+
+; Reset
+break;
+WAIT !ISRUN() ;wait until target stop
+
+DO cv181x_core_reset.cmm
+&SDKPATH="Z:\project\code\2022_0304_bsp"
+LoadBINARY &SDKPATH\build\tools\cv181x\cmm\fpga\riscv_c906b\cv181x_fpga_rom_jump_80000000.bin 0x4418000
+LoadBINARY &SDKPATH\install\soc_cv181x_fpga_c906\fw_payload_uboot.bin 0x80000000
+LoadBINARY &SDKPATH\install\soc_cv181x_fpga_c906\ramboot.itb 0x81500000
+
+; trigger c906b
+Data.set PM:0x3003024 0x31

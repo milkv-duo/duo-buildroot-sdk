@@ -1,0 +1,8 @@
+{
+    "ddr_cfg_list": [
+        "ddr3_4g_1866_odt",
+        "ddr3_4g_1600_odt",
+        "ddr3_8g_1600_odt"
+    ],
+    "board_information": "SPINOR 32MB + DDR3 1GB/2GB"
+}

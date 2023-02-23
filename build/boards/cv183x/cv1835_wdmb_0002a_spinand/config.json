@@ -1,0 +1,6 @@
+{
+    "ddr_cfg_list": [
+        "ddr3_4g_1866_x16_6mil"
+    ],
+    "board_information": "SPI-NAND 256MB + DDR3 16bit 512MB"
+}

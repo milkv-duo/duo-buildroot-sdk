@@ -1,0 +1,11 @@
+print "Program cv181x fpga efuse"
+
+Data.Set PM:0x03050000 %long 0x10
+
+; [Write userconf]
+Data.Set PM:0x03050258 %long 0x0E000002
+;Data.Set PM:0x03050260 %long 0x00123490
+;Data.Set PM:0x03050260 %long 0x000000A0
+
+Data.Set PM:0x03050000 %long 0x30
+print "Program cv181x fpga efuse done"

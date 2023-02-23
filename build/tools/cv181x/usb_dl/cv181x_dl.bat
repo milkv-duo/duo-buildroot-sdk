@@ -1,0 +1,1 @@
+python .\cv181x_dl.py --libusb --image_dir %1

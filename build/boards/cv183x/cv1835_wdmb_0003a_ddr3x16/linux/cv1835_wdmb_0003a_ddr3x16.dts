@@ -1,0 +1,115 @@
+#include "cv1835_asic.dtsi"
+
+/ {
+	memory {
+		reg = <0x1 0x00000000 0x0 0x40000000>; // 1GB
+		device_type = "memory";
+	};
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x600000>; // 6MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x1C400000>; //352MB + vip 100MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x1 0x00000000 0 0xF0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+	};
+
+	/delete-node/ cvi-spif@10000000;
+	/delete-node/ cv-spinf@4060000;
+	// /delete-node/ i2c@04020000;
+	/delete-node/ ethernet@04520000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+
+	mipi_rx: cif {
+		compatible = "cvitek,cif";
+		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0300b000 0x0 0x1000>,
+			<0x0 0x0a0c4000 0x0 0x2000>, <0x0 0x0300d000 0x0 0x1000>;
+		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1", "csi_wrap1";
+		interrupts = <GIC_SPI 155 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 156 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "csi0", "csi1";
+		snsr-reset = <&portc 31 GPIO_ACTIVE_LOW>, <&portd 7 GPIO_ACTIVE_LOW>;
+		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY1>,
+			<&rst RST_CSIPHY0RST_APB>, <&rst RST_CSIPHY1RST_APB>;
+		reset-names = "phy0", "phy1", "phy-apb0", "phy-apb1";
+		clocks = <&clk CV1835_CLK_CAM0>, <&clk CV1835_CLK_CAM1>, <&clk CV1835_CLK_SRC_VIP_SYS_2>,
+			<&clk CV1835_CLK_DIV_0_SRC_VIP_SYS_2>, <&clk CV1835_CLK_DIV_1_SRC_VIP_SYS_2>;
+		clock-names = "clk_cam0", "clk_cam1", "clk_sys_2", "clk_div_0_src_vip_sys_2",
+				"clk_div_1_src_vip_sys_2";
+	};
+
+	mipi_tx {
+		compatible = "cvitek,mipi_tx";
+		clocks = <&clk CV1835_CLK_DSI_MAC_VIP>, <&clk CV1835_CLK_DISP_VIP>;
+		clock-names = "clk_dsi", "clk_disp";
+		reset-gpio = <&portc 8 GPIO_ACTIVE_LOW>;
+		power-ct-gpio = <&portc 9 GPIO_ACTIVE_HIGH>;
+		pwm-gpio = <&portb 4 GPIO_ACTIVE_HIGH>;
+	};
+
+	aliases {
+		/delete-property/ ethernet1;
+	};
+
+	/delete-node/ i2c@04010000;
+	i2c1: i2c@04010000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV1835_CLK_I2C>;
+		reg = <0x0 0x04010000 0x0 0x1000>;
+		interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+		clock-frequency = <100000>;
+
+		#size-cells = <0x0>;
+		#address-cells = <0x1>;
+		resets = <&rst RST_I2C1>;
+		reset-names = "i2c1";
+
+		pcf85063: pcf85063@0x51 {
+			compatible = "nxp,pcf85063";
+			reg = <0x51>;
+		};
+		cap_touch_cvitek:cap_touch@2c {
+			compatible = "cvitek,cap_touch";
+			reg = <0x2c>;
+			status = "okay";
+		};
+	};
+
+	spi0:spi0@04180000 {
+		compatible = "snps,dw-apb-ssi";
+		reg = <0x0 0x04180000 0x0 0x10000>;
+		interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&clk CV1835_CLK_SPI>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		num-cs = <1>;
+		//switch-gpios = <&port0a 7 0>;
+		spidev: spidev@0 {
+			compatible = "rohm,dh2228fv";
+			//memory-region = <&spi_lcd_reserved>;
+			spi-max-frequency = <25000000>;
+			reg = <0>;
+		};
+	};
+};
+

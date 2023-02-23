@@ -1,0 +1,67 @@
+;winclear
+system.reset
+translation.reset
+
+system.cpu cortexa53
+system.config debugaccessport 0
+system.config apbaccessport 0
+system.config axiaccessport 1
+system.config memoryaccessport 1
+; set corenumber first
+sys.config corenumber 1
+; then set corebase and ctibase
+sys.config corebase 0x81010000
+sys.config ctibase  0x81020000
+sys.jc 5mhz
+
+Wait 10.ms
+system.option enreset on
+system.option trst on
+system.option resetbreak on
+system.option waitreset 500.ms
+OPTION.SerialWire ON
+
+sys.down
+Wait 50.ms
+sys.up
+
+if system.up()
+(
+	; data.list
+)
+else
+(
+	dialog.ok "system.up failed"
+)
+
+; Reset
+break;
+WAIT !ISRUN() ;wait until target stop
+
+; MWriteS32 PM:0x4400000++0xf 0x14000000
+; MWriteS32 0x4400000++0xf 0x14000000
+; Register.Set pc 0x04400000
+; print "clear ROM"
+
+DO cv181x_core_reset.cmm
+
+Register.SET CPSR 0x03CD ; EL3H
+Data.Set SPR:0x33E00 25000000.  ; CNTFRQ_EL0: 25000000Hz
+Data.Set SPR:0x36110 0x00000735 ; SCR_EL3: non-secure, AARCH64
+Data.Set SPR:0x34110 0x0002 ; HCR_EL2
+
+DO gic.cmm
+
+Register.SET CPSR 0x03C9 ; EL2H
+
+&SDKPATH="C:\WSL\ws\cv-tip"
+
+; Load u-boot and kernel
+LoadBINARY &SDKPATH\u-boot\build\cv181x_fpga\u-boot-dtb.bin 0x88000000 %S32
+print "uboot loaded"
+LoadBINARY &SDKPATH\install\soc_cv181x_fpga\ramboot.itb 0x81200000
+print "kernel loaded"
+DATA.LOAD.ELF &SDKPATH\linux\build\cv181x_fpga\vmlinux /StripPART 4 /PATH C:\WSL /NoCode  ; Load kernel symbol
+
+Register.Set r0 0
+Register.Set PC 0x88000000

@@ -1,0 +1,27 @@
+/ {
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x200000>; // 2MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x04872000>; // 72MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+	};
+};

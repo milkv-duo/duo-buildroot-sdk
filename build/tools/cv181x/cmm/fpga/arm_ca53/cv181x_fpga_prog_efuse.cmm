@@ -1,0 +1,22 @@
+print "Program cv181x fpga efuse"
+
+Data.Set PM:0x03050000 %long 0x10
+
+; [Write scs_config]
+; Data.Set PM:0x03050340 %long 0x00000044
+
+; [Write FTSN1~4]
+; uart2_rts
+; Data.Set PM:0x03050208 %long 0x008F3164
+
+; uart2_cts
+; Data.Set PM:0x03050208 %long 0x00913364
+
+; fastboot, check id pin
+Data.Set PM:0x03050208 %long 0x00913361
+Data.Set PM:0x03050210 %long 0x55667788
+Data.Set PM:0x03050218 %long 0x44332211
+Data.Set PM:0x03050220 %long 0x88776655
+
+Data.Set PM:0x03050000 %long 0x30
+print "Program cv181x fpga efuse done"

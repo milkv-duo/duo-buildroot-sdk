@@ -1,0 +1,1 @@
+../../../default/rootfs_script/clean_rootfs.sh

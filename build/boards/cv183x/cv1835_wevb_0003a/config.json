@@ -1,0 +1,9 @@
+{
+    "ddr_cfg_list": [
+        "ddr4_4g_2666",
+        "ddr4_8g_2666",
+        "ddr4_4g_2666_sbs",
+        "ddr4_8g_2666_sbs"
+    ],
+    "board_information": "EMMC 8GB + DDR4 1GB"
+}

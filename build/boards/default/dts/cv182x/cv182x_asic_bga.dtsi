@@ -1,0 +1,111 @@
+/dts-v1/;
+#include "cv182x_asic.dtsi"
+
+&mipi_rx {
+	snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>;
+};
+
+&mipi_tx {
+	reset-gpio = <&porte 2 GPIO_ACTIVE_LOW>;
+	pwm-gpio = <&porte 0 GPIO_ACTIVE_HIGH>;
+	power-ct-gpio = <&porte 1 GPIO_ACTIVE_HIGH>;
+};
+
+&dac{
+	mute-gpio-l = <&porta 15 GPIO_ACTIVE_LOW>;
+	mute-gpio-r = <&porta 30 GPIO_ACTIVE_LOW>;
+};
+
+&spi0 {
+        status = "disabled";
+        num-cs = <1>;
+        spidev@0 {
+                compatible = "rohm,dh2228fv";
+                spi-max-frequency = <1000000>;
+                reg = <0>;
+	};
+};
+
+&spi1 {
+        status = "disabled";
+        num-cs = <1>;
+        spidev@0 {
+                compatible = "rohm,dh2228fv";
+                spi-max-frequency = <1000000>;
+                reg = <0>;
+	};
+};
+
+&spi2 {
+        status = "disabled";
+        num-cs = <1>;
+        spidev@0 {
+                compatible = "rohm,dh2228fv";
+                spi-max-frequency = <1000000>;
+                reg = <0>;
+	};
+};
+
+&spi3 {
+        status = "okay";
+        num-cs = <1>;
+        spidev@0 {
+                compatible = "rohm,dh2228fv";
+                spi-max-frequency = <1000000>;
+                reg = <0>;
+	};
+};
+
+&i2c0 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x03001070 0x0 0x3>;	// IIC0_SCL/IIC0_SCL/XGPIOA[28]
+	sda-pinmux = <0x03001074 0x0 0x3>;	// IIC0_SDA/IIC0_SDA/XGPIOA[29]
+	/* gpio port */
+	scl-gpios = <&porta 28 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porta 29 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c1 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x03009408 0x2 0x3>;	// SPI1_MOSI/IIC1_SCL/XGPIOB[7]
+	sda-pinmux = <0x0300940c 0x2 0x3>;	// SPI1_MISO/IIC1_SDA/XGPIOB[8]
+	/* gpio port */
+	scl-gpios = <&portb 7 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&portb 8 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c2 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x030010b8 0x4 0x3>;	// IIC2_SCL/IIC2_SCL/PWR_GPIO[12]
+	sda-pinmux = <0x030010bc 0x4 0x3>;	// IIC2_SDA/IIC2_SDA/PWR_GPIO[13]
+	/* gpio port */
+	scl-gpios = <&porte 12 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porte 13 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c3 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x03001014 0x0 0x3>;	// IIC3_SCL/IIC3_SCL/XGPIOA[5]
+	sda-pinmux = <0x03001018 0x0 0x3>;	// IIC3_SDA/IIC3_SDA/XGPIOA[6]
+	/* gpio port */
+	scl-gpios = <&porta 5 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porta 6 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c4 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x030010f0 0x2 0x3>;	// ADC3/IIC4_SCL/XGPIOB[1]
+	sda-pinmux = <0x030010f4 0x2 0x3>;	// ADC2/IIC4_SDA/XGPIOB[2]
+	/* gpio port */
+	scl-gpios = <&portb 1 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&portb 2 GPIO_ACTIVE_HIGH>;
+};
+
+/ {
+	/delete-node/ wifi-sd@5000000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+};

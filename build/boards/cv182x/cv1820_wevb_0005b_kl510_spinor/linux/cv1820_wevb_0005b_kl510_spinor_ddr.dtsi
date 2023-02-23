@@ -1,0 +1,31 @@
+/ {
+    memory {
+        reg = <0x0 0x80000000 0x0 0x4000000>; // 512MB
+        device_type = "memory";
+    };
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x200000>; // 2MB
+			alignment = <0x0 0x1000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x1C00000>; //28MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x00200000>; // 1.5MB
+			no-map;
+		};
+	};
+};

@@ -1,0 +1,72 @@
+#include "cv1835_asic.dtsi"
+
+/ {
+	memory {
+		reg = <0x1 0x00000000 0x0 0x40000000>; // 1GB
+		device_type = "memory";
+	};
+
+	rtos_shm {
+		compatible = "cvitek,rtos_cmdqu";
+		memory-region = <&rtos_shm_reserved>;
+	};
+	rtos_mem {
+		compatible = "cvitek,rtos_mem";
+		memory-region = <&rtos_mem_reserved>;
+	};
+
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x600000>; // 6MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x1C000000>; //352MB + vip 96MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x1 0x00000000 0 0xF0000000>;
+			size = <0x0 0x00200000>; // 2MB
+			no-map;
+		};
+
+		rtos_shm_reserved: rtos_shm {
+			alloc-ranges = <0x1 0x20000000 0 0x01000000>;
+			size = <0x0 0x01000000>; // 16MB
+			no-map;
+		};
+
+		rtos_mem_reserved: rtos_mem {
+			alloc-ranges = <0x1 0x10000000 0 0x02000000>;
+			size = <0x0 0x02000000>; // FreeRTOS 32MB
+			no-map;
+		};
+
+	};
+
+	/delete-node/ cv-emmc@4300000;
+	/delete-node/ wifi-sd@4320000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ i2c@04020000;
+	/delete-node/ ethernet@04520000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+	/delete-node/ cvi-spif@10000000;
+
+	aliases {
+		/delete-property/ ethernet1;
+	};
+};
+

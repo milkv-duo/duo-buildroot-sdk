@@ -1,0 +1,108 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+	compatible = "riscv-virtio";
+	model = "riscv-virtio,qemu";
+
+	reserved-memory {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		ranges;
+
+		mmode_resv0@80000000 {
+			reg = <0x00 0x80000000 0x00 0x20000>;
+		};
+	};
+
+	chosen {
+		bootargs = "console=ttyS0,115200n8 debug loglevel=8,initcall_debug=8 root=/dev/ init=/sbin/init earlycon=sbi";
+		stdout-path = "serial0";
+	};
+
+	uart0: serial@4140000 {
+		interrupts = <44>;
+		interrupt-parent = <0x03>;
+		clock-frequency = <25000000>;
+		reg = <0x00 0x4140000 0x00 0x100>;
+        compatible = "snps,dw-apb-uart";
+        reg-shift = <2>;
+        reg-io-width = <4>;
+		status = "okay";
+	};
+	cpus {
+		#address-cells = <0x01>;
+		#size-cells = <0x00>;
+		timebase-frequency = <25000000>;
+
+		cpu-map {
+
+			cluster0 {
+
+				core0 {
+					cpu = <0x01>;
+				};
+			};
+		};
+
+		cpu@0 {
+			linux,phandle = <0x01>;
+			phandle = <0x01>;
+			device_type = "cpu";
+			reg = <0x00>;
+			status = "okay";
+			compatible = "riscv";
+			riscv,isa = "rv64imafdcsu";
+			mmu-type = "riscv,sv39";
+			clock-frequency = <25000000>;
+
+			interrupt-controller {
+				#interrupt-cells = <0x01>;
+				interrupt-controller;
+				compatible = "riscv,cpu-intc";
+				linux,phandle = <0x02>;
+				phandle = <0x02>;
+			};
+		};
+	};
+
+	memory@80000000 {
+		device_type = "memory";
+		reg = <0x00 0x80000000 0x00 0x8000000>;
+	};
+
+	soc {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		compatible = "simple-bus";
+		ranges;
+
+		interrupt-controller@70000000 {
+			linux,phandle = <0x03>;
+			phandle = <0x03>;
+			riscv,ndev = <0x50>;
+			riscv,max-priority = <0x07>;
+			reg-names = "control";
+			reg = <0x00 0x70000000 0x00 0x4000000>;
+			interrupts-extended = <0x02 11  0x02 0x09>;
+			//interrupts-extended = <0x02 0xffffffff 0x02 0x09>;
+			interrupt-controller;
+			compatible = "riscv,plic0";
+			#interrupt-cells = <0x01>;
+			#address-cells = <0x00>;
+		};
+
+		clint@74000000 {
+			interrupts-extended = <0x02 0x03 0x02 0x07>;
+			reg = <0x00 0x74000000 0x00 0x10000>;
+			compatible = "riscv,clint0";
+			clint,has-no-64bit-mmio;
+		};
+
+	};
+	aliases {
+		serial0 = &uart0;
+	};
+
+};

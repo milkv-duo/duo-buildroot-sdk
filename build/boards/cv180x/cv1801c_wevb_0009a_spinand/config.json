@@ -1,0 +1,8 @@
+{
+    "ddr_cfg_list": [
+        "",
+        "ddr3_1866_x16",
+        "ddr3_2133_x16"
+    ],
+    "board_information": "C906B + SPINAND 256MB + QFN SIP 128MB"
+}

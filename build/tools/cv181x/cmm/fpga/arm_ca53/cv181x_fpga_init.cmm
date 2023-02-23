@@ -1,0 +1,89 @@
+;winclear
+system.reset
+translation.reset
+; symbol.reset
+map.reset
+
+system.cpu cortexa53
+system.config debugaccessport 0
+system.config apbaccessport 0
+system.config axiaccessport 1
+system.config memoryaccessport 1
+; set corenumber first
+sys.config corenumber 1
+; then set corebase and ctibase
+sys.config corebase 0x81010000
+sys.config ctibase  0x81020000
+sys.jc 10mhz
+
+Wait 10.ms
+system.option enreset on
+system.option trst on
+system.option resetbreak on
+system.option waitreset 500.ms
+OPTION.SerialWire ON
+
+; winpos 20% 0% 20% 100%
+; AREA
+AREA.Clear
+
+sys.down
+Wait 50.ms
+sys.up
+
+if system.up()
+(
+	; data.list
+)
+else
+(
+	dialog.ok "system.up failed"
+)
+
+winpos 50% 0% 50% 100%
+; register
+
+; Program efuse
+
+; Reset
+break;
+WAIT !ISRUN() ;wait until target stop
+
+DO cv181x_core_reset.cmm
+; DO cv181x_fpga_prog_efuse.cmm
+; DO cv181x_fpga_prog_usb_efuse.cmm
+
+&SDKPATH="C:\WSL\ws\cv-tip"
+
+
+; Load BL1
+LoadBINARY &SDKPATH\build\cv1822_bl1\bl1_fpga.bin 0x4400000
+Register.Set pc 0x04400000
+
+; Load firmware
+LoadBINARY &SDKPATH\install\soc_cv181x_fpga\fip.bin 0xA0000000
+LoadBINARY &SDKPATH\install\soc_cv181x_fpga\ramboot.itb 0x81200000
+
+; Load Symbol
+;DATA.LOAD.ELF &SDKPATH\arm-trusted-firmware\build\cv1822_fpga\release\bl2\bl2.elf /StripPART 6 /PATH &SDKPATH /NoCode
+;DATA.LOAD.ELF &SDKPATH\u-boot\build\cv1822_fpga\u-boot /StripPART 6 /PATH &SDKPATH /NoCode
+;DATA.LOAD.ELF &SDKPATH\linux-linaro-stable\build\cv1822_fpga\vmlinux /StripPART 6 /PATH &SDKPATH /NoCode
+
+
+;/mnt/workspace/bm188x/arm-trusted-firmware -> X:\bm188x\arm-trusted-firmware
+;data.load.elf Y:\bm1882\install\soc_bm1882_fpga\bl1.elf /StripPART 6 /PATH Y:\bm1882\arm-trusted-firmware
+;data.load.elf C:\Workspace\Documents\bm1882\install\bl1.elf /StripPART 6 /PATH Y:\bm1882\arm-trusted-firmware
+;data.load.elf C:\Workspace\Documents\bm1882\soc_bm1882_fpga\bl1.elf /StripPART 6 /PATH Y:\bm1882\arm-trusted-firmware
+;data.load.elf Y:\bm1882\install\soc_bm1882_fpga\bl1.elf /nocode /StripPART 6 /PATH Y:\bm1882\arm-trusted-firmware
+;data.load.elf X:\bm188x\install\soc_bm1882_fpga\bl2.elf /nocode /StripPART 5 /PATH X:\bm188x\arm-trusted-firmware
+;data.load.elf X:\bm188x\install\soc_bm1882_fpga\bl31.elf /nocode /StripPART 5 /PATH X:\bm188x\arm-trusted-firmware
+;data.load.elf X:\bm188x\install\soc_bm1882_fpga\u-boot /nocode  /StripPART 5 /PATH X:\bm188x\u-boot
+;data.load.elf X:\bm188x\install\soc_bm1882_fpga\u-boot 0x07f6f000 /nocode  /StripPART 5 /PATH X:\bm188x\u-boto
+;data.load.elf X:\bm188x\install\soc_bm1882_fpga\vmlinux /nocode  /StripPART 5 /PATH X:\bm188x\linux-linaro-stable
+; vmlinux 0x100080000
+
+; DebugList
+; LoadLastWindow
+
+; Select core: [0, 1]
+; debuglist /core 0

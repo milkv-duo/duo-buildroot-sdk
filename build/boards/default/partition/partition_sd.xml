@@ -1,0 +1,7 @@
+<physical_partition type="sd">
+    <partition label="fip" size_in_kb="2560" file="fip.bin"/>
+    <partition label="BOOT" size_in_kb="8192" file="boot.sd"/>
+    <partition label="MISC" size_in_kb="384" file="logo.jpg" />
+    <partition label="ROOTFS" size_in_kb="71680" file="rootfs.sd" />
+</physical_partition>
+

@@ -1,0 +1,114 @@
+&sd {
+	no-1-8-v;
+};
+
+&mipi_rx{
+	snsr-reset = <&portc 13 GPIO_ACTIVE_LOW>, <&portc 13 GPIO_ACTIVE_LOW>, <&portc 13 GPIO_ACTIVE_LOW>;
+};
+
+&dac{
+	mute-gpio-r = <&porte 2 GPIO_ACTIVE_LOW>;
+};
+
+&spi0 {
+	status = "disabled";
+	num-cs = <1>;
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+	};
+};
+
+&spi1 {
+	status = "disabled";
+	num-cs = <1>;
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+	};
+};
+
+&spi2 {
+	status = "disabled";
+	num-cs = <1>;
+	spidev@0 {
+	compatible = "rohm,dh2228fv";
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+	};
+};
+
+&spi3 {
+	status = "okay";
+	num-cs = <1>;
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+	};
+};
+
+&i2c0 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x0300104c 0x4 0x3>;	// IIC0_SCL/IIC0_SCL/XGPIOA[28]
+	sda-pinmux = <0x03001050 0x4 0x3>;	// IIC0_SDA/IIC0_SDA/XGPIOA[29]
+	/* gpio port */
+	scl-gpios = <&porta 28 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porta 29 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c1 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x030010f4 0x4 0x3>;	// PAD_MIPIRX0N/IIC1_SCL/XGPIOC[10]
+	sda-pinmux = <0x030010f0 0x4 0x3>;	// PAD_MIPIRX1P/IIC1_SDA/XGPIOC[9]
+	/* gpio port */
+	scl-gpios = <&portc 10 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&portc 9 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c2 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x03001108 0x4 0x3>;	// PAD_MIPI_TXP1/IIC2_SCL/XGPIOC[15]
+	sda-pinmux = <0x03001104 0x4 0x3>;	// PAD_MIPI_TXM1/IIC2_SDA/XGPIOC[14]
+	/* gpio port */
+	scl-gpios = <&portc 15 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&portc 14 GPIO_ACTIVE_HIGH>;
+};
+
+&i2c3 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x0300109c 0x2 0x3>;	// SD1_CMD/IIC3_SCL/PWR_GPIO[22]
+	sda-pinmux = <0x030010a0 0x2 0x3>;	// SD1_CLK/IIC3_SDA/PWR_GPIO[23]
+	/* gpio port */
+	scl-gpios = <&porte 22 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porte 23 GPIO_ACTIVE_HIGH>;
+	status = "disabled";
+};
+
+&i2c4 {
+	/* FMUX_GPIO_REG iic_func_sel gpio_func_sel */
+	scl-pinmux = <0x030010e4 0x5 0x3>;	// PAD_MIPIRX2N/IIC4_SCL/XGPIOC[6]
+	sda-pinmux = <0x030010e8 0x5 0x3>;	// PAD_MIPIRX2P/IIC4_SDA/XGPIOC[7]
+	/* gpio port */
+	scl-gpios = <&portc 6 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&portc 7 GPIO_ACTIVE_HIGH>;
+	status = "disabled";
+};
+
+/ {
+	/delete-node/ wifi-sd@4320000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+
+	wifi_pin {
+		compatible = "cvitek,wifi-pin";
+		poweron-gpio = <&porte 2 GPIO_ACTIVE_HIGH>;
+		wakeup-gpio = <&porte 6 GPIO_ACTIVE_HIGH>;
+	};
+
+};

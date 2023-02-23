@@ -1,0 +1,1 @@
+../../../default/u-boot/cvitek_182x.h

@@ -1,0 +1,9 @@
+{
+    "ddr_cfg_list": [
+        "ddr4_4g_2666_x16",
+        "ddr4_8g_2666_x16",
+        "ddr4_4g_2666_x16_sbs",
+        "ddr4_8g_2666_x16_sbs"
+    ],
+    "board_information": "EMMC 8GB + DDR4 16bit 512MB"
+}

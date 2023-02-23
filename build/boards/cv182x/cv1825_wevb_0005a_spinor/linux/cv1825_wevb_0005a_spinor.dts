@@ -1,0 +1,72 @@
+/dts-v1/;
+#include "cv182x_asic.dtsi"
+
+/ {
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x200000>; // 2MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x03d47000>; // 54.3MB;must 4K align
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+
+		jpu_reserved: jpu {
+			alloc-ranges = <0x0 0x80000000 0 0xC0000000>;
+			size = <0x0 0x0010000>; // 64kB
+			no-map;
+		};
+	};
+
+	sd:cv-sd@4310000 {
+		no-1-8-v;
+	};
+
+	/delete-node/ cv-emmc@4300000;
+	/delete-node/ wifi-sd@5000000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+	/delete-node/ cv-spinf@4060000;
+	/delete-node/ mipi_rx;
+
+	mipi_rx: cif {
+		compatible = "cvitek,cif";
+		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0a0d0000 0x0 0x1000>,
+		      <0x0 0x0a0c4000 0x0 0x2000>, <0x0 0x03001c30 0x0 0x30>;
+		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1", "pad_ctrl";
+		interrupts = <GIC_SPI 155 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 156 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "csi0", "csi1";
+		snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>;
+		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY1>,
+			<&rst RST_CSIPHY0RST_APB>, <&rst RST_CSIPHY1RST_APB>;
+		reset-names = "phy0", "phy1", "phy-apb0", "phy-apb1";
+		clocks = <&clk CV182X_CLK_CAM0>, <&clk CV182X_CLK_CAM1>, <&clk CV182X_CLK_SRC_VIP_SYS_2>,
+			<&clk CV182X_CLK_DIV_0_SRC_VIP_SYS_2>, <&clk CV182X_CLK_DIV_1_SRC_VIP_SYS_2>;
+		clock-names = "clk_cam0", "clk_cam1", "clk_sys_2", "clk_div_0_src_vip_sys_2",
+				"clk_div_1_src_vip_sys_2";
+	};
+	aliases {
+	};
+};
+

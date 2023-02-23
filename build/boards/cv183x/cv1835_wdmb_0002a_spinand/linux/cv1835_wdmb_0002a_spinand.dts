@@ -1,0 +1,52 @@
+#include "cv1835_asic.dtsi"
+
+/ {
+	memory {
+		reg = <0x1 0x00000000 0x0 0x20000000>; // 512MB
+		device_type = "memory";
+	};
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x600000>; // 6MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x14400000>; //260MB + vip 64MB (support 5M sensor)
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x1 0x00000000 0 0xF0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+	};
+
+	/delete-node/ cvi-spif@10000000;
+	/delete-node/ cv-emmc@4300000;
+	/delete-node/ wifi-sd@4320000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ ethernet@04520000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+	/delete-node/ mipi_rx;
+	/delete-node/ pwm@3061000;
+	/delete-node/ pwm@3062000;
+	/delete-node/ pwm@3063000;
+
+	aliases {
+		/delete-property/ ethernet1;
+	};
+};
+

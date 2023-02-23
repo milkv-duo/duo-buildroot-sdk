@@ -1,0 +1,45 @@
+print "Program cv1835 fpga efuse"
+
+Data.Set PM:0x03050000 %long 0x10
+
+; [Write scs_config]
+Data.Set PM:0x03050340 %long 0x01B00044
+
+; [Set boot_speed2]
+Data.Set PM:0x03050250 %long 0x00000800
+
+; [Set single core]
+;Data.Set PM:0x03050254 %long 0x00000003
+
+; [Set platform nv counter]
+;Data.Set PM:0x03050328 % long 0x0023001F
+;Data.Set PM:0x03050328 % long 0xDC117899
+
+; [Set platform market segment]
+;Data.Set PM:0x03050228 % long 0xABCD7FAB
+;Data.Set PM:0x03050228 % long 0xBA783456
+
+; [Write root key hash to efuse]
+Data.Set PM:0x03050350 %long 0x62bf31e1
+Data.Set PM:0x03050358 %long 0x991fb4b4
+Data.Set PM:0x03050360 %long 0x667040cd
+Data.Set PM:0x03050368 %long 0xbefd8ba5
+Data.Set PM:0x03050370 %long 0x1bb7cf29
+Data.Set PM:0x03050378 %long 0x960dca9b
+Data.Set PM:0x03050380 %long 0x64eef7ac
+Data.Set PM:0x03050388 %long 0xef7481af
+
+; [Write ldr decryption key to efuse]
+Data.Set PM:0x030503B0 %long 0xDA353643
+Data.Set PM:0x030503B8 %long 0xE6E97066
+Data.Set PM:0x030503C0 %long 0x99C08F8E
+Data.Set PM:0x030503C8 %long 0x33AD4D4E
+
+; [Write userconf]
+Data.Set PM:0x03050258 %long 0x0E00F382
+Data.Set PM:0x03050260 %long 0x00000000
+Data.Set PM:0x03050268 %long 0x0E000000
+Data.Set PM:0x03050270 %long 0x01080305
+
+Data.Set PM:0x03050000 %long 0x30
+print "Program cv1835 fpga efuse done"

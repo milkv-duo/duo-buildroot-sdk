@@ -1,0 +1,9 @@
+/dts-v1/;
+#include "cv182x_asic_qfn.dtsi"
+#include "cv182x_asic_spinand.dtsi"
+#include "cv1822_wevb_0005b_128mb_spinand_ddr.dtsi"
+
+/ {
+
+};
+

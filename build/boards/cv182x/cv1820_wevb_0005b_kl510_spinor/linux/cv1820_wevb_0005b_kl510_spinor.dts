@@ -1,0 +1,7 @@
+/dts-v1/;
+#include "cv182x_asic_qfn.dtsi"
+#include "cv182x_asic_spinor.dtsi"
+#include "cv1820_wevb_0005b_kl510_spinor_ddr.dtsi"
+
+/ {
+};

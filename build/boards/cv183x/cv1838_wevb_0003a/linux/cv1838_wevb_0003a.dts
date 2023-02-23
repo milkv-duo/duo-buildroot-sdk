@@ -1,0 +1,82 @@
+#include "cv1835_asic.dtsi"
+
+/ {
+	memory {
+		reg = <0x1 0x00000000 0x0 0x80000000>; // 2GB
+		device_type = "memory";
+	};
+
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		cma_reserved: linux,cma {
+			compatible = "shared-dma-pool";
+			reusable;
+			size = <0x0 0x600000>; // 6MB
+			alignment = <0x0 0x200000>; // 2MB
+			linux,cma-default;
+		};
+
+		ion_reserved: ion {
+			compatible = "ion-region";
+			size = <0x0 0x1C400000>; //352MB + vip 100MB
+		};
+
+		vcodec_reserved: vcodec {
+			alloc-ranges = <0x1 0x00000000 0 0xF0000000>;
+			size = <0x0 0x00180000>; // 1.5MB
+			no-map;
+		};
+	};
+
+	vip {
+		compatible = "cvitek,vip";
+		reg = <0x0 0x0a080000 0x0 0x10000>,<0x0 0x0a0a0000 0x0 0x2000>,
+		      <0x0 0x0a0c8000 0x0 0xa0>,<0x0 0x0a000000 0x0 0x80000>,
+		      <0x0 0x0300c000 0x0 0x100>;
+		reg-names = "sc","dwa","vip_sys","isp","dphy";
+		interrupts = <GIC_SPI 139 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 157 IRQ_TYPE_LEVEL_HIGH>,
+			     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "sc","dwa","isp";
+		cvitek,cif-modules = <&mipi_rx>;
+		clocks = <&clk CV1835_CLK_AXI_VIP>, <&clk CV1835_CLK_SRC_VIP_SYS_0>,
+			<&clk CV1835_CLK_SRC_VIP_SYS_1>, <&clk CV1835_CLK_SRC_VIP_SYS_2>,
+			<&clk CV1835_CLK_ISP_TOP_VIP>, <&clk CV1835_CLK_IMG_D_VIP>,
+			<&clk CV1835_CLK_IMG_V_VIP>, <&clk CV1835_CLK_SC_TOP_VIP>,
+			<&clk CV1835_CLK_SC_D_VIP>, <&clk CV1835_CLK_SC_V1_VIP>,
+			<&clk CV1835_CLK_SC_V2_VIP>, <&clk CV1835_CLK_SC_V3_VIP>,
+			<&clk CV1835_CLK_DWA_VIP>, <&clk CV1835_CLK_BT_VIP>,
+			<&clk CV1835_CLK_DISP_VIP>, <&clk CV1835_CLK_DSI_MAC_VIP>,
+			<&clk CV1835_CLK_CSI_MAC0_VIP>, <&clk CV1835_CLK_CSI_MAC1_VIP>;
+		clock-names = "clk_axi", "clk_sys_0",
+			"clk_sys_1", "clk_sys_2",
+			"clk_isp_top", "clk_img_d",
+			"clk_img_v", "clk_sc_top",
+			"clk_sc_d", "clk_sc_v1",
+			"clk_sc_v2", "clk_sc_v3",
+			"clk_dwa", "clk_bt",
+			"clk_disp", "clk_dsi",
+			"clk_csi_mac0", "clk_csi_mac1";
+		clock-freq-vip-sys1 = <375000000>;
+	};
+
+	/delete-node/ cvi-spif@10000000;
+	/delete-node/ cv-spinf@4060000;
+	/delete-node/ wifi-sd@4320000;
+	/delete-node/ i2c@04010000;
+	/delete-node/ i2c@04020000;
+	/delete-node/ ethernet@04520000;
+	/delete-node/ i2s@04110000;
+	/delete-node/ i2s@04120000;
+	/delete-node/ sound_ext1;
+	/delete-node/ sound_ext2;
+	/delete-node/ sound_PDM;
+
+	aliases {
+		/delete-property/ ethernet1;
+	};
+};
+
