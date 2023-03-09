@@ -267,7 +267,7 @@ static void imx327_fpga_linear_720p30_init(VI_PIPE ViPipe)
 	imx327_fpga_write_register(ViPipe, 0x3473, 0x05); // x_out_size
 	imx327_fpga_write_register(ViPipe, 0x3480, 0x49); // incksel7
 
-//	imx327_fpga_default_reg_init(ViPipe);
+	imx327_fpga_default_reg_init(ViPipe);
 
 	imx327_fpga_write_register(ViPipe, 0x3000, 0x00); /* standby */
 	delay_ms(20);
@@ -361,8 +361,9 @@ static void imx327_fpga_wdr_720p30_2to1_init(VI_PIPE ViPipe)
 	imx327_fpga_write_register(ViPipe, 0x347B, 0x23); //
 	imx327_fpga_write_register(ViPipe, 0x3480, 0x49); // incksel7
 
-	delay_ms(20); // delay
+	imx327_fpga_default_reg_init(ViPipe);
 	imx327_fpga_write_register(ViPipe, 0x3000, 0x00); // STANDBY
+	delay_ms(20); // delay
 	imx327_fpga_write_register(ViPipe, 0x3002, 0x00); /* master mode start */
 	imx327_fpga_write_register(ViPipe, 0x304b, 0x0a);
 

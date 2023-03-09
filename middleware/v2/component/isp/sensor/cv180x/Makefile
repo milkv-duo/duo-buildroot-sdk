@@ -92,6 +92,12 @@ sms_sc035gs_1L:
 sms_sc035hgs:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc1346_1L:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc1346_1L_slave:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc200ai:
 	$(call MAKE_SENSOR, ${@})
 

@@ -38,13 +38,13 @@ else ifeq ($(SDK_VER), glibc_riscv64)
   SYSROOT := $(ROOT_DIR)/../../host-tools/gcc/riscv64-linux-x86_64/sysroot
   KERNEL_INC := $(KERNEL_DIR)/riscv/usr/include
   OPT_LEVEL := -Os
-  OPT_LEVEL += -march=rv64imafdcvxthead -mcmodel=medany -mabi=lp64dv
+  OPT_LEVEL += -mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d
 else ifeq ($(SDK_VER), musl_riscv64)
   export CROSS_COMPILE = $(CROSS_COMPILE_MUSL_RISCV64)
   SYSROOT := $(ROOT_DIR)/../../host-tools/gcc/riscv64-linux-musl-x86_64/sysroot
   KERNEL_INC := $(KERNEL_DIR)/riscv/usr/include
   OPT_LEVEL := -Os
-  OPT_LEVEL += -march=rv64imafdcvxthead -mcmodel=medany -mabi=lp64d
+  OPT_LEVEL += -mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d
 endif
 
 ## INCLUDE PATH ##

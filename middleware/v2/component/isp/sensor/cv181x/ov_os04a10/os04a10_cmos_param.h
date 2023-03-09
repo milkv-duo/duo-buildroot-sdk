@@ -40,17 +40,17 @@ static const OS04A10_MODE_S g_astOs04a10_mode[OS04A10_MODE_NUM] = {
 		},
 		.f32MaxFps = 30,
 		.f32MinFps = 0.74, /* 0x658 * 30 / 0xFFFF */
-		.u32HtsDef = 2688,
-		.u32VtsDef = 1624,
+		.u32HtsDef = 1484,
+		.u32VtsDef = 2432,
 		.stExp[0] = {
-			.u16Min = 2,
-			.u16Max = 1624 - 8,
+			.u16Min = 1,
+			.u16Max = 2432 - 8,
 			.u16Def = 500,
 			.u16Step = 1,
 		},
 		.stAgain[0] = {
 			.u32Min = 1024,
-			.u32Max = 15872,
+			.u32Max = 68200,
 			.u32Def = 1024,
 			.u32Step = 1,
 		},
@@ -104,26 +104,26 @@ static const OS04A10_MODE_S g_astOs04a10_mode[OS04A10_MODE_NUM] = {
 		.u32VStart = 0,
 		.u32VEnd = 0x5ff,
 		.stExp[0] = {
-			.u16Min = 8,
+			.u16Min = 2,
 			.u16Max = 88,
 			.u16Def = 88,
 			.u16Step = 1,
 		},
 		.stExp[1] = {
-			.u16Min = 8,
+			.u16Min = 2,
 			.u16Max = 0x486 - 4 - 88,
 			.u16Def = 500,
 			.u16Step = 1,
 		},
 		.stAgain[0] = {
 			.u32Min = 1024,
-			.u32Max = 15872,
+			.u32Max = 68200,
 			.u32Def = 1024,
 			.u32Step = 1,
 		},
 		.stAgain[1] = {
 			.u32Min = 1024,
-			.u32Max = 15872,
+			.u32Max = 68200,
 			.u32Def = 1024,
 			.u32Step = 1,
 		},
@@ -210,7 +210,7 @@ static ISP_CMOS_BLACK_LEVEL_S g_stIspBlcCalibratio10Bit = {
 
 struct combo_dev_attr_s os04a10_rx_attr = {
 	.input_mode = INPUT_MODE_MIPI,
-	.mac_clk = RX_MAC_CLK_500M,
+	.mac_clk = RX_MAC_CLK_400M,
 	.mipi_attr = {
 		.raw_data_type = RAW_DATA_12BIT,
 		.lane_id = {0, 1, 2, 3, 4},

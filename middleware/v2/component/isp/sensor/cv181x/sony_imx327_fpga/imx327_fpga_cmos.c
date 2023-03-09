@@ -98,7 +98,7 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	pstAeSnsDft->u32FullLinesStd = pstSnsState->u32FLStd;
 	pstAeSnsDft->u32FlickerFreq = 50 * 256;
 	pstAeSnsDft->u32FullLinesMax = IMX327_FPGA_FULL_LINES_MAX;
-	pstAeSnsDft->u32HmaxTimes = (1000000) / (pstSnsState->u32FLStd * 30);
+	pstAeSnsDft->u32HmaxTimes = (1000000) / (pstSnsState->u32FLStd * 10);
 
 	pstAeSnsDft->stIntTimeAccu.enAccuType = AE_ACCURACY_LINEAR;
 	pstAeSnsDft->stIntTimeAccu.f32Accuracy = 1;
@@ -115,7 +115,7 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	pstAeSnsDft->u32MaxISPDgainTarget = 2 << pstAeSnsDft->u32ISPDgainShift;
 
 	if (g_au32LinesPer500ms[ViPipe] == 0)
-		pstAeSnsDft->u32LinesPer500ms = pstSnsState->u32FLStd * 30 / 2;
+		pstAeSnsDft->u32LinesPer500ms = pstSnsState->u32FLStd * 10 / 2;
 	else
 		pstAeSnsDft->u32LinesPer500ms = g_au32LinesPer500ms[ViPipe];
 	pstAeSnsDft->u32SnsStableFrame = 8;
@@ -748,7 +748,7 @@ static CVI_S32 cmos_set_wdr_mode(VI_PIPE ViPipe, CVI_U8 u8Mode)
 			pstSnsState->u8ImgMode = IMX327_FPGA_MODE_720P30_WDR;
 
 		pstSnsState->enWDRMode = WDR_MODE_2To1_LINE;
-		g_astImx327_fpga_State[ViPipe].u8Hcg    = 0x1;
+		g_astImx327_fpga_State[ViPipe].u8Hcg    = 0x2;
 		if (pstSnsState->u8ImgMode == IMX327_FPGA_MODE_1080P30_WDR) {
 			pstSnsState->u32FLStd = g_astImx327_fpga_mode[pstSnsState->u8ImgMode].u32VtsDef * 2;
 			g_astImx327_fpga_State[ViPipe].u32BRL  = g_astImx327_fpga_mode[pstSnsState->u8ImgMode].u16BRL;
@@ -935,7 +935,7 @@ static CVI_S32 cmos_set_image_mode(VI_PIPE ViPipe, ISP_CMOS_SENSOR_IMAGE_MODE_S 
 	u8SensorImageMode = pstSnsState->u8ImgMode;
 	pstSnsState->bSyncInit = CVI_FALSE;
 
-	if (pstSensorImageMode->f32Fps <= 30) {
+	if (pstSensorImageMode->f32Fps <= 10) {
 		if (pstSnsState->enWDRMode == WDR_MODE_NONE) {
 			if (IMX327_FPGA_RES_IS_720P(pstSensorImageMode->u16Width, pstSensorImageMode->u16Height)) {
 				u8SensorImageMode = IMX327_FPGA_MODE_720P30;
@@ -1057,7 +1057,7 @@ static CVI_S32 sensor_patch_rx_attr(RX_INIT_ATTR_S *pstRxInitAttr)
 	if (pstRxInitAttr->stMclkAttr.bMclkEn)
 		pstRxAttr->mclk.cam = pstRxInitAttr->stMclkAttr.u8Mclk;
 
-	if (pstRxInitAttr->MipiDev >= 2)
+	if (pstRxInitAttr->MipiDev >= VI_MAX_DEV_NUM)
 		return CVI_SUCCESS;
 
 	pstRxAttr->devno = pstRxInitAttr->MipiDev;

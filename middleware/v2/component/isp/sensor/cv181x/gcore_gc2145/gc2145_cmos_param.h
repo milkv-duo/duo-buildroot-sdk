@@ -69,4 +69,3 @@ struct combo_dev_attr_s gc2145_rx_attr = {
 
 
 #endif /* __GC2145_CMOS_PARAM_H_ */
-

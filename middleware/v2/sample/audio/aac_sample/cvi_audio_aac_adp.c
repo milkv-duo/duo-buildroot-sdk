@@ -7,6 +7,7 @@
  */
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include "cvi_audio_aac_adp.h"
 #include "cvi_audio_dl_adp.h"

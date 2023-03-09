@@ -275,7 +275,7 @@ static void os04a10_linear_1520p30_12BIT_init(VI_PIPE ViPipe)
 	os04a10_write_register(ViPipe, 0x0109, 0x01);
 	os04a10_write_register(ViPipe, 0x0104, 0x02);
 	os04a10_write_register(ViPipe, 0x0102, 0x00);
-	os04a10_write_register(ViPipe, 0x0305, 0x40);
+	os04a10_write_register(ViPipe, 0x0305, 0x5c);
 	os04a10_write_register(ViPipe, 0x0306, 0x00);
 	os04a10_write_register(ViPipe, 0x0307, 0x00);
 	os04a10_write_register(ViPipe, 0x0308, 0x05);
@@ -284,7 +284,7 @@ static void os04a10_linear_1520p30_12BIT_init(VI_PIPE ViPipe)
 	os04a10_write_register(ViPipe, 0x0322, 0x01);
 	os04a10_write_register(ViPipe, 0x0323, 0x02);
 	os04a10_write_register(ViPipe, 0x0324, 0x00);
-	os04a10_write_register(ViPipe, 0x0325, 0x8b);
+	os04a10_write_register(ViPipe, 0x0325, 0xd0);
 	os04a10_write_register(ViPipe, 0x0327, 0x05);
 	os04a10_write_register(ViPipe, 0x0329, 0x02);
 	os04a10_write_register(ViPipe, 0x032c, 0x02);
@@ -449,8 +449,8 @@ static void os04a10_linear_1520p30_12BIT_init(VI_PIPE ViPipe)
 	os04a10_write_register(ViPipe, 0x380b, 0xf0);
 	os04a10_write_register(ViPipe, 0x380c, 0x05);
 	os04a10_write_register(ViPipe, 0x380d, 0xcc);
-	os04a10_write_register(ViPipe, 0x380e, 0x06);
-	os04a10_write_register(ViPipe, 0x380f, 0x58);
+	os04a10_write_register(ViPipe, 0x380e, 0x09);
+	os04a10_write_register(ViPipe, 0x380f, 0x80);
 	os04a10_write_register(ViPipe, 0x3811, 0x08);
 	os04a10_write_register(ViPipe, 0x3813, 0x08);
 	os04a10_write_register(ViPipe, 0x3814, 0x01);
@@ -541,7 +541,7 @@ static void os04a10_linear_1520p30_12BIT_init(VI_PIPE ViPipe)
 	os04a10_write_register(ViPipe, 0x4811, 0xff);
 	os04a10_write_register(ViPipe, 0x4813, 0x00);
 	os04a10_write_register(ViPipe, 0x481f, 0x30);
-	os04a10_write_register(ViPipe, 0x4837, 0x14);
+	os04a10_write_register(ViPipe, 0x4837, 0x0d);
 	os04a10_write_register(ViPipe, 0x484b, 0x27);
 	os04a10_write_register(ViPipe, 0x4d00, 0x4d);
 	os04a10_write_register(ViPipe, 0x4d01, 0x9d);

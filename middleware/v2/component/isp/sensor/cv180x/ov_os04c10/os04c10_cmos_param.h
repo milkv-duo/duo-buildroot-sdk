@@ -51,7 +51,7 @@ static const OS04C10_MODE_S g_astOs04c10_mode[OS04C10_MODE_NUM] = {
 		},
 		.stAgain[0] = {
 			.u32Min = 1024,
-			.u32Max = 15872,
+			.u32Max = 45495,
 			.u32Def = 1024,
 			.u32Step = 1,
 		},
@@ -92,7 +92,7 @@ static const OS04C10_MODE_S g_astOs04c10_mode[OS04C10_MODE_NUM] = {
 		},
 		.stAgain[0] = {
 			.u32Min = 1024,
-			.u32Max = 15872,
+			.u32Max = 45495,
 			.u32Def = 1024,
 			.u32Step = 1,
 		},

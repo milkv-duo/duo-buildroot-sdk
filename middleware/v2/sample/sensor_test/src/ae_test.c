@@ -898,6 +898,48 @@ static void AE_SetBlc(CVI_U8 sID, CVI_U8 type)
 	CVI_ISP_SetBlackLevelAttr(sID, &stBlackLevelAttr);
 }
 
+static void AE_WorkFrameCheck(CVI_U8 sID, CVI_U32 expTime, CVI_U32 ISONum1, CVI_U32 ISONum2)
+{
+	CVI_U32 u32CheckCnt = 110;
+	ISP_EXPOSURE_ATTR_S stExpAttr;
+
+	memset(&stExpAttr, 0, sizeof(ISP_EXPOSURE_ATTR_S));
+
+	CVI_ISP_GetExposureAttr(sID, &stExpAttr);
+
+	stExpAttr.u8DebugMode = 82;
+
+	stExpAttr.bByPass = 0;
+	stExpAttr.enOpType = OP_TYPE_MANUAL;
+	stExpAttr.stManual.enExpTimeOpType = OP_TYPE_MANUAL;
+	stExpAttr.stManual.enISONumOpType = OP_TYPE_MANUAL;
+	stExpAttr.stManual.u32ExpTime = expTime;
+	stExpAttr.stManual.enGainType = AE_TYPE_ISO;
+	stExpAttr.stManual.u32ISONum = ISONum1;
+
+	CVI_ISP_SetExposureAttr(sID, &stExpAttr);
+
+	for (CVI_U32 i = 0; i < u32CheckCnt; i++) {
+
+		if (i % 20 == 0x00) {
+
+			if (stExpAttr.stManual.u32ISONum == ISONum1) {
+				stExpAttr.stManual.u32ISONum = ISONum2;
+			} else {
+				stExpAttr.stManual.u32ISONum = ISONum1;
+			}
+
+			CVI_ISP_SetExposureAttr(sID, &stExpAttr);
+		}
+
+		CVI_ISP_GetVDTimeOut(sID, ISP_VD_BE_END, 200);
+	}
+
+	stExpAttr.enOpType = OP_TYPE_AUTO;
+	stExpAttr.u8DebugMode = 0;
+	CVI_ISP_SetExposureAttr(sID, &stExpAttr);
+}
+
 static void sensor_ae_test_init(void)
 {
 	memset(&stSnsDft, 0, sizeof(AE_SENSOR_DEFAULT_S) * MAX_SENSOR_NUM);
@@ -923,6 +965,7 @@ CVI_S32 sensor_ae_test(void)
 	SAMPLE_PRT("8:AE_ShutterLinearTest(sID, fid 0: LE 1: SE, startExpTime, endExpTime)\n");
 	SAMPLE_PRT("9:AE_GainTableLinearTest(sID, type: again 0 dgain 1, startIndex, endIndex)\n");
 	SAMPLE_PRT("10:AE_SetBlc(sID, type: 0:disable 1:auto, 2:manu)\n");
+	SAMPLE_PRT("11:AE_WorkFrameCheck(sID, time, ISO 1, ISO 2)\n");
 	SAMPLE_PRT("Item/sID/para1/para2/para3\n\n");
 
 	scanf("%d %d %d %d %d", &item, &sID, &para1, &para2, &para3);
@@ -964,6 +1007,8 @@ CVI_S32 sensor_ae_test(void)
 	case 10:
 		AE_SetBlc(sID, para1);
 		break;
+	case 11:
+		AE_WorkFrameCheck(sID, para1, para2, para3);
 	default:
 		break;
 	}

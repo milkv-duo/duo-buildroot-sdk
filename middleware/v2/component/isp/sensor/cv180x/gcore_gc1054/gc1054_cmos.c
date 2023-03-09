@@ -705,7 +705,7 @@ static CVI_S32 sensor_patch_rx_attr(RX_INIT_ATTR_S *pstRxInitAttr)
 
 	CMOS_CHECK_POINTER(pstRxInitAttr);
 
-	if (pstRxInitAttr->MipiDev >= 2)
+	if (pstRxInitAttr->MipiDev >= VI_MAX_DEV_NUM)
 		return CVI_SUCCESS;
 
 	pstRxAttr->devno = pstRxInitAttr->MipiDev;

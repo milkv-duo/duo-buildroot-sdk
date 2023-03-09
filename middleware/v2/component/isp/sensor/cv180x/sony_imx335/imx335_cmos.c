@@ -1056,7 +1056,7 @@ static CVI_S32 sensor_patch_rx_attr(RX_INIT_ATTR_S *pstRxInitAttr)
 	if (pstRxInitAttr->stMclkAttr.bMclkEn)
 		pstRxAttr->mclk.cam = pstRxInitAttr->stMclkAttr.u8Mclk;
 
-	if (pstRxInitAttr->MipiDev >= 2)
+	if (pstRxInitAttr->MipiDev >= VI_MAX_DEV_NUM)
 		return CVI_SUCCESS;
 
 	pstRxAttr->devno = pstRxInitAttr->MipiDev;

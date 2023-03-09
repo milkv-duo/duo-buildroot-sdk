@@ -2295,6 +2295,13 @@ CVI_S32 SAMPLE_VENC_STOP(sampleVenc *psv)
 			if (pcic->testMode == JPEG_CONTI_ENCODE_MODE) {
 				CVI_S32 s32Ret;
 
+				if (pcic->bThreadDisable == CVI_FALSE && gs_VencTask[s32ChnIdx] != 0) {
+					pthread_join(gs_VencTask[s32ChnIdx], CVI_NULL);
+					CVI_VENC_SYNC("GetVencStreamProc done\n");
+
+					gs_VencTask[s32ChnIdx] = 0;
+				}
+
 				s32Ret = CVI_VENC_StopRecvFrame(s32ChnIdx);
 				if (s32Ret != CVI_SUCCESS) {
 					CVI_VENC_ERR("CVI_VENC_StopRecvPic vechn[%d] failed with %#x!\n",

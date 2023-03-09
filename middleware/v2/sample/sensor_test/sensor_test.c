@@ -51,7 +51,6 @@ static int sys_vi_init(void)
 
 	//Set sensor number
 	CVI_VI_SetDevNum(stIniCfg.devNum);
-
 	/************************************************
 	 * step1:  Config VI
 	 ************************************************/
@@ -445,6 +444,71 @@ static CVI_S32 sensor_linear_wdr_switch(void)
 	return s32Ret;
 }
 
+int sensor_dump(void)
+{
+	CVI_U64 addr = 0;
+	CVI_U32 size = 0;
+	FILE *output;
+	char img_name[128] = {0, };
+
+	CVI_TRACE_LOG(CVI_DBG_WARN, "dump addr:\n");
+	scanf("%lx", &addr);
+	CVI_TRACE_LOG(CVI_DBG_WARN, "dump size(0\1):\n");
+	scanf("%x", &size);
+
+	snprintf(img_name, sizeof(img_name), "register_%lx.bin", addr);
+
+	output = fopen(img_name, "wb");
+	if (output == NULL) {
+		memset(img_name, 0x0, sizeof(img_name));
+		snprintf(img_name, sizeof(img_name), "register_%lx.bin", addr);
+		output = fopen(img_name, "wb");
+		if (output == NULL) {
+			CVI_TRACE_LOG(CVI_DBG_ERR, "fopen fail\n");
+			return CVI_FAILURE;
+		}
+	}
+
+	void *vir_addr = CVI_SYS_Mmap(addr, size);
+
+	fwrite(vir_addr, size, 1, output);
+	fflush(output);
+
+	CVI_SYS_Munmap(vir_addr, size);
+
+	fclose(output);
+
+	return CVI_SUCCESS;
+}
+
+int sensor_proc(void)
+{
+	CVI_S32 s32Ret = CVI_SUCCESS;
+	CVI_S32 op;
+
+	SAMPLE_PRT("---debug_info------------------------------------------------\n");
+	SAMPLE_PRT("1: /proc/cvitek/vi_dbg\n");
+	SAMPLE_PRT("2: /proc/cvitek/vi\n");
+	SAMPLE_PRT("3: /proc/mipi-rx\n");
+	scanf("%d", &op);
+
+	switch (op) {
+	case 1:
+		system("cat /proc/cvitek/vi_dbg");
+		break;
+	case 2:
+		system("cat /proc/cvitek/vi");
+		break;
+	case 3:
+		system("cat /proc/mipi-rx");
+		break;
+	default:
+		break;
+	}
+
+	return s32Ret;
+}
+
 #ifdef ENABLE_LOAD_ISPD_SO
 
 #include <dlfcn.h>
@@ -509,6 +573,8 @@ int main(int argc, char **argv)
 		SAMPLE_PRT("3: set chn flip/mirror\n");
 		SAMPLE_PRT("4: linear wdr switch\n");
 		SAMPLE_PRT("5: AE debug\n");
+		SAMPLE_PRT("6: sensor dump\n");
+		SAMPLE_PRT("7: sensor proc\n");
 		SAMPLE_PRT("255: exit\n");
 		scanf("%d", &op);
 
@@ -527,6 +593,12 @@ int main(int argc, char **argv)
 			break;
 		case 5:
 			s32Ret = sensor_ae_test();
+			break;
+		case 6:
+			s32Ret = sensor_dump();
+			break;
+		case 7:
+			s32Ret = sensor_proc();
 			break;
 		default:
 			break;

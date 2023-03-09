@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <syslog.h>
 #include <errno.h>
+#include <math.h>
 #ifdef ARCH_CV182X
 #include "cvi_type.h"
 #include "cvi_comm_video.h"
@@ -25,6 +26,7 @@
 #include "os04c10_cmos_ex.h"
 #include "os04c10_cmos_param.h"
 
+#define EPS 1e-7
 #define DIV_0_TO_1(a)   ((0 == (a)) ? 1 : (a))
 #define DIV_0_TO_1_FLOAT(a) ((((a) < 1E-10) && ((a) > -1E-10)) ? 1 : (a))
 #define OS04C10_ID 0x530443
@@ -66,6 +68,8 @@ static CVI_U16 g_au16InitWBGain[VI_MAX_PIPE_NUM][3] = {{0} };
 static CVI_U16 g_au16SampleRgain[VI_MAX_PIPE_NUM] = {0};
 static CVI_U16 g_au16SampleBgain[VI_MAX_PIPE_NUM] = {0};
 static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
+static CVI_FLOAT OTP_rate;
+static CVI_BOOL HCG_EN;
 /*****Os04c10 Lines Range*****/
 #define OS04C10_FULL_LINES_MAX  (0xFFFF)
 #define OS04C10_FULL_LINES_MAX_2TO1_WDR  (0xFFFF)
@@ -81,6 +85,7 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
 #define OS04C10_DGAIN2_ADDR		0x350E
 #define OS04C10_L2S_ADDR		0x3798
 #define OS04C10_VTS_ADDR		0x380E
+#define OS04C10_LINEAR_HCG_ADDR		0x3798
 #define OS04C10_GGAIN_ADDR		0x5142
 #define OS04C10_TABLE_END		0xffff
 
@@ -341,21 +346,36 @@ static CVI_U32 gain_table[64] = {
 static CVI_S32 cmos_again_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32AgainLin, CVI_U32 *pu32AgainDb)
 {
 	int i;
+	ISP_SNS_STATE_S *pstSnsState = CVI_NULL;
 
 	(void) ViPipe;
+	OS04C10_SENSOR_GET_CTX(ViPipe, pstSnsState);
 
 	CMOS_CHECK_POINTER(pu32AgainLin);
 	CMOS_CHECK_POINTER(pu32AgainDb);
+	CMOS_CHECK_POINTER(pstSnsState);
+	float rate;
 
-	if (*pu32AgainLin >= gain_table[63]) {
-		*pu32AgainLin = gain_table[63];
+	if (OTP_rate < 1.0)
+		OTP_rate = (((os04c10_read_register(ViPipe, 0x71e0) * 256) + os04c10_read_register(ViPipe, 0x71e1))
+			   * 1.0) / 1024;
+	if (pstSnsState->enWDRMode == WDR_MODE_NONE && *pu32AgainLin > 15900) {
+		rate = OTP_rate;
+		HCG_EN = CVI_TRUE;
+	} else {
+		rate = 1;
+		HCG_EN = CVI_FALSE;
+	}
+
+	if (*pu32AgainLin >= (unsigned int)(gain_table[63] * rate)) {
+		*pu32AgainLin = (unsigned int)(gain_table[63] * rate);
 		*pu32AgainDb = (63 - 48) * 64 + 1024;
 		return CVI_SUCCESS;
 	}
 
 	for (i = 1; i < 64; i++) {
-		if (*pu32AgainLin < gain_table[i]) {
-			*pu32AgainLin = gain_table[i - 1];
+		if (*pu32AgainLin < (unsigned int)(gain_table[i] * rate)) {
+			*pu32AgainLin = (unsigned int)(gain_table[i - 1] * rate);
 			i--;
 			if (i < 16)
 				*pu32AgainDb = i * 8 + 128;
@@ -369,6 +389,10 @@ static CVI_S32 cmos_again_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32AgainLin, CVI_
 			break;
 		}
 	}
+
+	if (*pu32AgainLin < 15872 && fabs(rate - OTP_rate) <= EPS)
+		*pu32AgainLin = 15872;
+
 	return CVI_SUCCESS;
 }
 
@@ -403,6 +427,11 @@ static CVI_S32 cmos_gains_update(VI_PIPE ViPipe, CVI_U32 *pu32Again, CVI_U32 *pu
 	pstSnsRegsInfo = &pstSnsState->astSyncInfo[0].snsCfg;
 
 	if (pstSnsState->enWDRMode == WDR_MODE_NONE) {
+		if (HCG_EN) {
+			pstSnsRegsInfo->astI2cData[LINEAR_HCG].u32Data = 0x40;
+		} else {
+			pstSnsRegsInfo->astI2cData[LINEAR_HCG].u32Data = 0xc0;
+		}
 		/* linear mode */
 		u32Again = pu32Again[0];
 		u32Dgain = pu32Dgain[0];
@@ -715,6 +744,7 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 			pstI2c_data[i].u8DevAddr = os04c10_i2c_addr;
 			pstI2c_data[i].u32AddrByteNum = os04c10_addr_byte;
 			pstI2c_data[i].u32DataByteNum = os04c10_data_byte;
+			pstI2c_data[i].bvblankUpdate = CVI_FALSE;
 		}
 
 		switch (pstSnsState->enWDRMode) {
@@ -765,6 +795,9 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 			pstI2c_data[LINEAR_LAUNCH_1].u32RegAddr = OS04C10_HOLD_3208;
 			pstI2c_data[LINEAR_LAUNCH_1].u32Data = 0xA0;
 			pstI2c_data[LINEAR_LAUNCH_1].u8DelayFrmNum = 0;
+			pstI2c_data[LINEAR_HCG].u32RegAddr = OS04C10_LINEAR_HCG_ADDR;
+			pstI2c_data[LINEAR_HCG].bvblankUpdate = CVI_TRUE;
+			pstI2c_data[LINEAR_HCG].u8DelayFrmNum = 3;
 			break;
 		}
 		pstSnsState->bSyncInit = CVI_TRUE;
@@ -928,7 +961,7 @@ static CVI_S32 sensor_patch_rx_attr(RX_INIT_ATTR_S *pstRxInitAttr)
 	if (pstRxInitAttr->stMclkAttr.bMclkEn)
 		pstRxAttr->mclk.cam = pstRxInitAttr->stMclkAttr.u8Mclk;
 
-	if (pstRxInitAttr->MipiDev >= 2)
+	if (pstRxInitAttr->MipiDev >= VI_MAX_DEV_NUM)
 		return CVI_SUCCESS;
 
 	pstRxAttr->devno = pstRxInitAttr->MipiDev;

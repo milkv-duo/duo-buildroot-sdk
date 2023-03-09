@@ -48,7 +48,8 @@ VI_DEV_ATTR_S DEV_ATTR_SENSOR_BASE = {
 	{1920, 1080},
 	{
 		WDR_MODE_NONE,
-		1080
+		1080,
+		0
 	},
 	.enBayerFormat = BAYER_FORMAT_BG,
 };
@@ -251,6 +252,17 @@ CVI_S32 SAMPLE_COMM_VI_GetDevAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, VI_DEV_ATTR_
 	// WDR mode
 	if (enSnsType >= SAMPLE_SNS_TYPE_LINEAR_BUTT)
 		pstViDevAttr->stWDRAttr.enWDRMode = WDR_MODE_2To1_LINE;
+
+	// set synthetic wdr mode
+	switch (enSnsType) {
+	case SMS_SC1346_1L_MIPI_1M_30FPS_10BIT_WDR2TO1:
+	case SMS_SC1346_1L_MIPI_1M_60FPS_10BIT_WDR2TO1:
+		pstViDevAttr->stWDRAttr.bSyntheticWDR = 1;
+		break;
+	default:
+		pstViDevAttr->stWDRAttr.bSyntheticWDR = 0;
+		break;
+	}
 
 	// YUV Sensor
 	switch (enSnsType) {
@@ -930,6 +942,12 @@ CVI_S32 SAMPLE_COMM_VI_GetSizeBySensor(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *pen
 	case NEXTCHIP_N5_1M_2CH_25FPS_8BIT:
 	case PIXELPLUS_PR2020_1M_25FPS_8BIT:
 	case PIXELPLUS_PR2020_1M_30FPS_8BIT:
+	case SMS_SC1346_1L_MIPI_1M_30FPS_10BIT:
+	case SMS_SC1346_1L_MIPI_1M_30FPS_10BIT_WDR2TO1:
+	case SMS_SC1346_1L_MIPI_1M_60FPS_10BIT:
+	case SMS_SC1346_1L_MIPI_1M_60FPS_10BIT_WDR2TO1:
+	case SMS_SC1346_1L_SLAVE_MIPI_1M_30FPS_10BIT:
+	case SMS_SC1346_1L_SLAVE_MIPI_1M_60FPS_10BIT:
 	case SOI_H65_MIPI_1M_30FPS_10BIT:
 	case SONY_IMX290_MIPI_1M_30FPS_12BIT:
 #ifdef FPGA_PORTING
@@ -1551,6 +1569,10 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"SMS_SC035GS_MIPI_480P_120FPS_12BIT",
 	"SMS_SC035GS_1L_MIPI_480P_120FPS_10BIT",
 	"SMS_SC035HGS_MIPI_480P_120FPS_12BIT",
+	"SMS_SC1346_1L_MIPI_1M_30FPS_10BIT",
+	"SMS_SC1346_1L_MIPI_1M_60FPS_10BIT",
+	"SMS_SC1346_1L_SLAVE_MIPI_1M_30FPS_10BIT",
+	"SMS_SC1346_1L_SLAVE_MIPI_1M_60FPS_10BIT",
 	"SMS_SC200AI_MIPI_2M_30FPS_10BIT",
 	"SMS_SC301IOT_MIPI_3M_30FPS_10BIT",
 	"SMS_SC401AI_MIPI_3M_30FPS_10BIT",
@@ -1623,6 +1645,8 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"OV_OS08A20_SLAVE_MIPI_5M_30FPS_10BIT_WDR2TO1",
 	"OV_OS08A20_MIPI_8M_30FPS_10BIT_WDR2TO1",
 	"OV_OS08A20_SLAVE_MIPI_8M_30FPS_10BIT_WDR2TO1",
+	"SMS_SC1346_1L_MIPI_1M_30FPS_10BIT_WDR2TO1",
+	"SMS_SC1346_1L_MIPI_1M_60FPS_10BIT_WDR2TO1",
 	"SMS_SC200AI_MIPI_2M_30FPS_10BIT_WDR2TO1",
 	"SMS_SC500AI_MIPI_4M_30FPS_10BIT_WDR2TO1",
 	"SMS_SC500AI_MIPI_5M_30FPS_10BIT_WDR2TO1",
@@ -1662,6 +1686,7 @@ static SAMPLE_INI_CFG_S	stDefIniCfg = {
 	.s32SnsI2cAddr[1] = -1,
 	.MipiDev[0]   = 0xFF,
 	.MipiDev[1]   = 0xFF,
+	.MipiDev[2]   = 0xFF,
 	.u8UseMultiSns = 0,
 };
 
@@ -1952,6 +1977,19 @@ const INI_HDLR_S stSectionSensor2[INI_SENSOR_NUM] = {
 	[INI_SENSOR_ORIEN] = {"orien", 1, 0, 0, parse_sensor_orien},
 };
 
+const INI_HDLR_S stSectionSensor3[INI_SENSOR_NUM] = {
+	[INI_SENSOR_NAME] = {"name", 2, 0, 0, parse_sensor_name},
+	[INI_SENSOR_BUSID] = {"bus_id", 2, 0, 0, parse_sensor_busid},
+	[INI_SENSOR_I2CADDR] = {"sns_i2c_addr", 2, 0, 0, parse_sensor_i2caddr},
+	[INI_SENSOR_MIPIDEV] = {"mipi_dev", 2, 0, 0, parse_sensor_mipidev},
+	[INI_SENSOR_LANEID] = {"lane_id", 2, 0, 0, parse_sensor_laneid},
+	[INI_SENSOR_PNSWAP] = {"pn_swap", 2, 0, 0, parse_sensor_pnswap},
+	[INI_SENSOR_HWSYNC] = {"hw_sync", 2, 0, 0, parse_sensor_hwsync},
+	[INI_SENSOR_MCLKEN] = {"mclk_en", 2, 0, 0, parse_sensor_mclken},
+	[INI_SENSOR_MCLK] = {"mclk", 2, 0, 0, parse_sensor_mclk},
+	[INI_SENSOR_ORIEN] = {"orien", 2, 0, 0, parse_sensor_orien},
+};
+
 static int parse_handler(void *user, const char *section, const char *name, const char *value)
 {
 	SAMPLE_INI_CFG_S *cfg = (SAMPLE_INI_CFG_S *)user;
@@ -1966,6 +2004,9 @@ static int parse_handler(void *user, const char *section, const char *name, cons
 		size = INI_SENSOR_NUM;
 	} else if (strcmp(section, "sensor2") == 0) {
 		hdler = stSectionSensor2;
+		size = INI_SENSOR_NUM;
+	} else if (strcmp(section, "sensor3") == 0) {
+		hdler = stSectionSensor3;
 		size = INI_SENSOR_NUM;
 	} else {
 		/* unknown section/name */

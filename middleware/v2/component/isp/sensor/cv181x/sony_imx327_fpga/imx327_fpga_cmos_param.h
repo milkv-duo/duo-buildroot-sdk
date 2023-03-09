@@ -38,9 +38,9 @@ static const IMX327_FPGA_MODE_S g_astImx327_fpga_mode[IMX327_FPGA_MODE_NUM] = {
 				.u32Height = 729,
 			},
 		},
-		.f32MaxFps = 30,
+		.f32MaxFps = 10,
 		.f32MinFps = 0.09, /* 750 *30 / 0x3FFFF */
-		.u32HtsDef = 0x19C8,
+		.u32HtsDef = 0x4D58,
 		.u32VtsDef = 750,
 		.stExp[0] = {
 			.u16Min = 1,
@@ -100,9 +100,9 @@ static const IMX327_FPGA_MODE_S g_astImx327_fpga_mode[IMX327_FPGA_MODE_NUM] = {
 				.u32Height = 729,
 			},
 		},
-		.f32MaxFps = 30,
+		.f32MaxFps = 5,
 		.f32MinFps = 0.09, /* 750 *30 / 0x3FFFF */
-		.u32HtsDef = 0x19C8,
+		.u32HtsDef = 0x4D58,
 		.u32VtsDef = 750,
 		.stExp[0] = {
 			.u16Min = 1,
