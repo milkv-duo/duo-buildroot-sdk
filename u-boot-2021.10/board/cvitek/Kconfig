@@ -24,7 +24,6 @@ config TARGET_CVITEK_CV181X
 config TARGET_CVITEK_CV180X
 	bool "Support CVITEK CV180X"
 	select TARGET_CVITEK
-
 endchoice
 
 source "board/cvitek/cv1835/Kconfig"

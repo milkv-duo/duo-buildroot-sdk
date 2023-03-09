@@ -232,12 +232,12 @@ static void cv182xa_ephy_init(void)
 	mmio_write_32(0x03009054, 0x2F62);
 
 // LED PAD MUX
-	mmio_write_32(0x030010e0, 0x05);
-	mmio_write_32(0x030010e4, 0x05);
-	//(SD1_CLK selphy)
-	mmio_write_32(0x050270b0, 0x11111111);
-	//(SD1_CMD selphy)
-	mmio_write_32(0x050270b4, 0x11111111);
+	// mmio_write_32(0x030010e0, 0x05);
+	// mmio_write_32(0x030010e4, 0x05);
+	// //(SD1_CLK selphy)
+	// mmio_write_32(0x050270b0, 0x11111111);
+	// //(SD1_CMD selphy)
+	// mmio_write_32(0x050270b4, 0x11111111);
 
 // LED
 	// Switch to MII-page1
@@ -262,14 +262,25 @@ static void cv182xa_ephy_init(void)
 
 	// Switch to MII-page18
 	mmio_write_32(0x0300907c, 0x1200);
-	// p18.0x12, lpf
+#if IS_ENABLED(CONFIG_TARGET_CVITEK_CV181X)
+	/* mars LPF(8, 8, 8, 8) HPF(-8, 50(+32), -36, -8) */
+	// lpf
 	mmio_write_32(0x03009048, 0x0808);
 	mmio_write_32(0x0300904C, 0x0808);
-// hpf
-//sean
+	// hpf
 	mmio_write_32(0x03009050, 0x32f8);
 	mmio_write_32(0x03009054, 0xf8dc);
-
+#elif IS_ENABLED(CONFIG_TARGET_CVITEK_CV180X)
+	/* phobos LPF:(1 8 23 23 8 1) HPF:(-4,58,-45,8,-5, 0) from sean PPT */
+	// lpf
+	mmio_write_32(0x03009048, 0x0801);
+	mmio_write_32(0x0300904C, 0x1717);
+	mmio_write_32(0x0300905C, 0x0108);
+	// hpf
+	mmio_write_32(0x03009050, 0x3afc);
+	mmio_write_32(0x03009054, 0x08d3);
+	mmio_write_32(0x03009060, 0x00fb);
+#endif
 	// Switch to MII-page0
 	mmio_write_32(0x0300907c, 0x0000);
 	// EPHY start auto-neg procedure
@@ -341,7 +352,7 @@ static struct phy_driver cv182xa_driver = {
 	.shutdown = &genphy_shutdown,
 };
 
-int phy_cv182xa_init(void)
+int phy_cvitek_init(void)
 {
 	phy_register(&cv182xa_driver);
 

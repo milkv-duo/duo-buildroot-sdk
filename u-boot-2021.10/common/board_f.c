@@ -368,6 +368,15 @@ static int reserve_ion(void)
 }
 #endif
 
+#if (CONFIG_SYS_RESVLOGOSZ != 0)
+static int reserve_logo(void)
+{
+	gd->relocaddr -= CONFIG_SYS_RESVLOGOSZ;
+	debug("Reserving %dk for bootlogo at %08lx\n", (CONFIG_SYS_RESVLOGOSZ >> 16), gd->relocaddr);
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_PRAM
 /* reserve protected RAM */
 static int reserve_pram(void)
@@ -917,6 +926,9 @@ static const init_fnc_t init_sequence_f[] = {
 	setup_dest_addr,
 #if (CONFIG_SYS_RESVIONSZ != 0)
 	reserve_ion,
+#endif
+#if (CONFIG_SYS_RESVLOGOSZ != 0)
+	reserve_logo,
 #endif
 
 #ifdef CONFIG_OF_BOARD_FIXUP

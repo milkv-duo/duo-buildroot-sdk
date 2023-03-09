@@ -486,7 +486,10 @@ void autoboot_command(const char *s)
 		if (lock)
 			prev = disable_ctrlc(1); /* disable Ctrl-C checking */
 
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 		board_save_time_record(TIME_RECORDS_FIELD_BOOTCMD_START);
+#endif
 		run_command_list(s, -1, 0);
 
 		if (lock)

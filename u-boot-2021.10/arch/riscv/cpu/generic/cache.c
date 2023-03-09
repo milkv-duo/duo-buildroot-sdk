@@ -48,7 +48,7 @@ void flush_dcache_range(unsigned long start, unsigned long end)
  * Will enter trap mode.
  * Comment the implement to avoid problem first
  */
-#if CV181X_UBOOT_USE_DCACHE_API
+#if CV181X_UBOOT_USE_DCACHE_API || ATHENA2_UBOOT_USE_DCACHE_API
 void dcache_enable(void)
 {
 	asm volatile(

@@ -5,166 +5,95 @@
 
 #include <common.h>
 #include <clk.h>
-#include <display.h>
-#include <dm.h>
-#include <fdtdec.h>
-#include <panel.h>
-#include <regmap.h>
-#include <syscon.h>
 #include <asm/gpio.h>
-#include <asm/hardware.h>
+//#include <asm/hardware.h>
 #include <asm/io.h>
-#include <dm/uclass-internal.h>
+//#include <dm/uclass-internal.h>
 #include <linux/kernel.h>
 
+#include "reg.h"
 #include "vip_common.h"
 #include "scaler.h"
 #include "dsi_phy.h"
+#include <cvi_lvds.h>
 
-DECLARE_GLOBAL_DATA_PTR;
-
-#define MHz 1000000
-
-/*
- * Private information for cvi lvds
- *
- * @regs: lvds controller address
- * @panel: panel assined by device tree
- * @ref_clk: reference clock for lvds dsi pll
- * @sysclk: config clock for lvds dsi register
- * @pix_clk: pixel clock for vop->dsi data transmission
- * @phy_clk: lvds dphy output clock
- * @txbyte_clk: clock for dsi->dphy high speed data transmission
- * @txesc_clk: clock for tx esc mode
- */
-struct cvi_lvds_priv {
-	struct udevice *panel;
-	u32 ref_clk;
-	u32 sys_clk;
-	u32 pix_clk;
-	u32 phy_clk;
-	u32 txbyte_clk;
-	u32 txesc_clk;
-};
-
-static int cvi_lvds_read_timing(struct udevice *dev, struct display_timing *timing)
+static void _fill_disp_timing(struct sclr_disp_timing *timing, struct sync_info_s *sync_info)
 {
-	int ret;
+	timing->vtotal = sync_info->vid_vsa_lines + sync_info->vid_vbp_lines
+			+ sync_info->vid_active_lines + sync_info->vid_vfp_lines - 1;
+	timing->htotal = sync_info->vid_hsa_pixels + sync_info->vid_hbp_pixels
+			+ sync_info->vid_hline_pixels + sync_info->vid_hfp_pixels - 1;
+	timing->vsync_start = 1;
+	timing->vsync_end = timing->vsync_start + sync_info->vid_vsa_lines - 1;
+	timing->vfde_start = timing->vsync_start + sync_info->vid_vsa_lines + sync_info->vid_vbp_lines;
+	timing->vfde_end = timing->vfde_start + sync_info->vid_active_lines - 1;
+	timing->hsync_start = 1;
+	timing->hsync_end = timing->hsync_start + sync_info->vid_hsa_pixels - 1;
+	timing->hfde_start = timing->hsync_start + sync_info->vid_hsa_pixels + sync_info->vid_hbp_pixels;
+	timing->hfde_end = timing->hfde_start + sync_info->vid_hline_pixels - 1;
+	timing->vsync_pol = sync_info->vid_vsa_pos_polarity;
+	timing->hsync_pol = sync_info->vid_hsa_pos_polarity;
 
-	ret = fdtdec_decode_display_timing(gd->fdt_blob, dev_of_offset(dev), 0, timing);
-	if (ret) {
-		debug("%s: Failed to decode display timing (ret=%d)\n",
-		      __func__, ret);
-		return -EINVAL;
-	}
-
-	return 0;
+	timing->vmde_start = timing->vfde_start;
+	timing->vmde_end = timing->vfde_end;
+	timing->hmde_start = timing->hfde_start;
+	timing->hmde_end = timing->hfde_end;
 }
 
-/*
- * This function is called by cvi_display_init() using cvi_lvds_enable() and
- * cvi_lvds_phy_enable() to initialize lvds controller and dphy. If success,
- * enable backlight.
- */
-static int cvi_lvds_enable(struct udevice *dev, int panel_bpp, const struct display_timing *timing)
+int lvds_init(struct cvi_lvds_cfg_s *lvds_cfg)
 {
-	int ret = 0;
-	struct cvi_lvds_priv *priv = dev_get_priv(dev);
+	union sclr_lvdstx lvds_reg;
+	bool data_en[LANE_MAX_NUM] = {false, false, false, false, false};
+	struct sclr_disp_timing timing;
+	struct disp_ctrl_gpios ctrl_gpios;
+	int i = 0, ret = 0;
 
-	/* Fill the lvds controller parameter */
-	priv->ref_clk = 24 * MHz;
-	priv->sys_clk = priv->ref_clk;
-	priv->pix_clk = timing->pixelclock.typ;
-	priv->phy_clk = priv->pix_clk * 6;
-	priv->txbyte_clk = priv->phy_clk / 8;
-	priv->txesc_clk = 20 * MHz;
-
-#if 0
-	/* Config  and enable lvds dsi according to timing */
-	ret = rk_lvds_enable(dev, timing);
-	if (ret) {
-		debug("%s: rk_lvds_enable() failed (err=%d)\n",
-		      __func__, ret);
-		return ret;
+	for (i = 0; i < LANE_MAX_NUM; i++) {
+		if (lvds_cfg->lane_id[i] < 0 || lvds_cfg->lane_id[i] >= LANE_MAX_NUM) {
+			dphy_dsi_set_lane(i, VO_LVDS_LANE_MAX, false, false);
+			continue;
+		}
+		dphy_dsi_set_lane(i, lvds_cfg->lane_id[i], lvds_cfg->lane_pn_swap[i], false);
+		if (lvds_cfg->lane_id[i] != VO_LVDS_LANE_CLK) {
+			data_en[lvds_cfg->lane_id[i] - 1] = true;
+		}
 	}
 
-	/* Config and enable lvds phy */
-	ret = rk_lvds_phy_enable(dev);
-	if (ret) {
-		debug("%s: rk_lvds_phy_enable() failed (err=%d)\n",
-		      __func__, ret);
-		return ret;
-	}
+	dphy_dsi_lane_en(true, data_en, false);
+	sclr_disp_set_intf(SCLR_VO_INTF_LVDS);
 
-	/* Enable backlight */
-	ret = panel_enable_backlight(priv->panel);
-	if (ret) {
-		debug("%s: panel_enable_backlight() failed (err=%d)\n",
-		      __func__, ret);
-		return ret;
+	lvds_reg.b.out_bit = lvds_cfg->out_bits;
+	lvds_reg.b.vesa_mode = lvds_cfg->mode;
+	if (lvds_cfg->chn_num == 1)
+		lvds_reg.b.dual_ch = 0;
+	else if (lvds_cfg->chn_num == 2)
+		lvds_reg.b.dual_ch = 1;
+	else {
+		lvds_reg.b.dual_ch = 0;
+		printf("invalid lvds chn_num(%d). Use 1 instead.", lvds_cfg->chn_num);
 	}
-#endif
+	lvds_reg.b.vs_out_en = 1;
+	lvds_reg.b.hs_out_en = 1;
+	lvds_reg.b.hs_blk_en = 1;
+	lvds_reg.b.ml_swap = 1;
+	lvds_reg.b.ctrl_rev = 0;
+	lvds_reg.b.oe_swap = 0;
+	lvds_reg.b.en = 1;
+
+	dphy_lvds_set_pll(lvds_cfg->pixelclock, lvds_cfg->chn_num);
+	dphy_dsi_analog_setting(true);
+	sclr_lvdstx_set(lvds_reg);
+
+	_fill_disp_timing(&timing, &lvds_cfg->sync_info);
+	sclr_disp_set_timing(&timing);
+	sclr_disp_tgen_enable(true);
+
+	get_disp_ctrl_gpios(&ctrl_gpios);
+	ret = dm_gpio_set_value(&ctrl_gpios.disp_pwm_gpio,
+				ctrl_gpios.disp_pwm_gpio.flags & GPIOD_ACTIVE_LOW ? 0 : 1);
+	if (ret < 0)
+		printf("dm_gpio_set_value(disp_pwm_gpio, deassert) failed: %d", ret);
 
 	return ret;
 }
-
-static int cvi_lvds_ofdata_to_platdata(struct udevice *dev)
-{
-	struct cvi_lvds_priv *priv = dev_get_priv(dev);
-
-	priv = priv;
-
-#if 0
-	priv->grf = syscon_get_first_range(ROCKCHIP_SYSCON_GRF);
-	if (priv->grf <= 0) {
-		debug("%s: Get syscon grf failed (ret=%llu)\n",
-		      __func__, (u64)priv->grf);
-		return  -ENXIO;
-	}
-#endif
-	return 0;
-}
-
-/*
- * Probe function: check panel existence and readingit's timing. Then config
- * lvds dsi controller and enable it according to the timing parameter.
- */
-static int cvi_lvds_probe(struct udevice *dev)
-{
-	int ret = 0;
-	struct cvi_lvds_priv *priv = dev_get_priv(dev);
-
-	priv = priv;
-
-#if 0
-	ret = uclass_get_device_by_phandle(UCLASS_PANEL, dev, "cvitek,panel",
-					   &priv->panel);
-	if (ret) {
-		debug("%s: Can not find panel (err=%d)\n", __func__, ret);
-		return ret;
-	}
-#endif
-
-	return ret;
-}
-
-static const struct dm_display_ops cvi_lvds_ops = {
-	.read_timing = cvi_lvds_read_timing,
-	.enable = cvi_lvds_enable,
-};
-
-static const struct udevice_id cvi_lvds_ids[] = {
-	{ .compatible = "cvitek,lvds" },
-	{ }
-};
-
-U_BOOT_DRIVER(cvi_lvds) = {
-	.name	= "cvi_lvds",
-	.id	= UCLASS_DISPLAY,
-	.of_match = cvi_lvds_ids,
-	.ofdata_to_platdata = cvi_lvds_ofdata_to_platdata,
-	.probe	= cvi_lvds_probe,
-	.ops	= &cvi_lvds_ops,
-	.priv_auto_alloc_size   = sizeof(struct cvi_lvds_priv),
-};
 

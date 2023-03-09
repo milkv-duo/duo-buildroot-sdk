@@ -48,7 +48,7 @@ enum CVI_EFUSE_OTHERS_E {
 CVI_S32 CVI_EFUSE_GetSize(enum CVI_EFUSE_AREA_E area, CVI_U32 *size);
 CVI_S32 CVI_EFUSE_Read(enum CVI_EFUSE_AREA_E area, CVI_U8 *buf, CVI_U32 buf_size);
 CVI_S32 CVI_EFUSE_Write(enum CVI_EFUSE_AREA_E area, const CVI_U8 *buf, CVI_U32 buf_size);
-CVI_S32 CVI_EFUSE_EnableSecureBoot(void);
+CVI_S32 CVI_EFUSE_EnableSecureBoot(uint32_t sel);
 CVI_S32 CVI_EFUSE_IsSecureBootEnabled(void);
 CVI_S32 CVI_EFUSE_Lock(enum CVI_EFUSE_LOCK_E lock);
 CVI_S32 CVI_EFUSE_IsLocked(enum CVI_EFUSE_LOCK_E lock);

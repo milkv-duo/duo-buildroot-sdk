@@ -1,5 +1,5 @@
 #include <common.h>
-
+#include <linux/delay.h>
 #include "vip_common.h"
 #include "reg.h"
 

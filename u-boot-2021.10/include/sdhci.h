@@ -23,6 +23,8 @@
 #include <../../board/cvitek/cv181x/sdhci_reg.h>
 #elif defined(CONFIG_TARGET_CVITEK_CV180X)
 #include <../../board/cvitek/cv180x/sdhci_reg.h>
+#elif defined(CONFIG_TARGET_CVITEK_ATHENA2)
+#include <../../board/cvitek/athena2/sdhci_reg.h>
 #endif
 /*
  * Controller registers

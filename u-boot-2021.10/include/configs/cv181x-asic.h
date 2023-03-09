@@ -37,6 +37,7 @@
 
 /* Physical Memory Map */
 #define CONFIG_SYS_RESVIONSZ		CVIMMAP_ION_SIZE
+#define CONFIG_SYS_RESVLOGOSZ		CVIMMAP_BOOTLOGO_SIZE
 #define CONFIG_SYS_BOOTMAPSZ		CVIMMAP_KERNEL_MEMORY_SIZE
 
 #define PHYS_SDRAM_1			CVIMMAP_KERNEL_MEMORY_ADDR
@@ -69,7 +70,6 @@
 #define SYS_COUNTER_FREQ_IN_SECOND 25000000
 
 /* 16550 Serial Configuration */
-#define CONFIG_CONS_INDEX		1
 #define CONFIG_SYS_NS16550_COM1		0x04140000
 #define CONFIG_SYS_NS16550_SERIAL
 #define CONFIG_SYS_NS16550_REG_SIZE	(-4)
@@ -187,10 +187,10 @@
 	#define UIMAG_ADDR	CVIMMAP_UIMAG_ADDR
 
 	#ifdef CONFIG_BOOTLOGO
-		#define LOGO_RESERVED_ADDR "0x81800000"
-		#define LOGO_READ_ADDR "0x84080000"
+		#define LOGO_RESERVED_ADDR __stringify(CVIMMAP_BOOTLOGO_ADDR)//yuv load addr
+		#define LOGO_READ_ADDR "0x84080000" //jpeg load addr
 		#define VO_ALIGNMENT "16"
-		#define LOGOSIZE "0x80000"
+		#define LOGOSIZE "0x80000" //jpeg max size
 	#endif
 /******************************************************************************/
 /* define common env */
@@ -270,11 +270,11 @@
 		#ifdef CONFIG_NAND_SUPPORT
 			#define LOAD_LOGO "nand read " LOGO_READ_ADDR " MISC;"
 		#elif defined(CONFIG_SPI_FLASH)
-			#define LOAD_LOGO ""
+			#define LOAD_LOGO "sf probe;sf read " LOGO_READ_ADDR " ${MISC_PART_OFFSET} ${MISC_PART_SIZE};"
 		#else
 			#define LOAD_LOGO "mmc dev 0;mmc read " LOGO_READ_ADDR " ${MISC_PART_OFFSET} ${MISC_PART_SIZE};"
 		#endif
-		#define SHOWLOGOCOMMAND (LOAD_LOGO CVI_JPEG START_VO START_VL SET_VO_BG)
+		#define SHOWLOGOCOMMAND LOAD_LOGO CVI_JPEG START_VO START_VL SET_VO_BG
 	#else
 		#define SHOWLOGOCMD
 	#endif

@@ -1,7 +1,7 @@
 #include <common.h>
 #include <stdbool.h>
 #include <errno.h>
-
+#include <linux/delay.h>
 #include "vip_common.h"
 #include "scaler_reg.h"
 #include "reg.h"
@@ -49,9 +49,10 @@ void dphy_dsi_lane_en(bool clk_en, bool *data_en, bool preamble_en)
  * @param lane_num: lane[0-4].
  * @param lane: the role of this lane.
  * @param pn_swap: if this lane positive/negative swap.
+ * @param clk_phase_shift: if this clk lane phase shift 90 degree.
  * @return: 0 for success.
  */
-int dphy_dsi_set_lane(u8 lane_num, enum lane_id lane, bool pn_swap)
+int dphy_dsi_set_lane(u8 lane_num, enum lane_id lane, bool pn_swap, bool clk_phase_shift)
 {
 	if ((lane_num > 4) || (lane > DSI_LANE_MAX))
 		return -1;
@@ -60,7 +61,8 @@ int dphy_dsi_set_lane(u8 lane_num, enum lane_id lane, bool pn_swap)
 	_reg_write_mask(reg_base + REG_DSI_PHY_LANE_PN_SWAP, BIT(lane_num), pn_swap << lane_num);
 
 	if (lane == DSI_LANE_CLK)
-		_reg_write_mask(reg_base + REG_DSI_PHY_LANE_SEL, 0x1f << 24, (1 << 24) << lane_num);
+		_reg_write_mask(reg_base + REG_DSI_PHY_LANE_SEL, 0x1f << 24,
+				clk_phase_shift ? ((1 << 24) << lane_num) : 0);
 	if (lane == DSI_LANE_0) {
 		data_0_lane = lane_num;
 		data_0_pn_swap = pn_swap;
@@ -154,6 +156,15 @@ void dphy_dsi_set_pll(u32 clkkHz, u8 lane, u8 bits)
 	// update
 	_reg_write_mask(reg_base + REG_DSI_PHY_REG_8C, BIT(0), 0);
 	_reg_write_mask(reg_base + REG_DSI_PHY_REG_8C, BIT(0), 1);
+}
+
+void dphy_dsi_analog_setting(bool is_lvds)
+{
+	//mercury needs this analog setting while lvds tx mode
+	if (is_lvds)
+		_reg_write_mask(reg_base + REG_DSI_PHY_REG_74, 0x3ff, 0x2AA);
+	else
+		_reg_write_mask(reg_base + REG_DSI_PHY_REG_74, 0x3ff, 0x0);
 }
 
 #define dcs_delay 1

@@ -37,6 +37,7 @@
 #define SNOR_MFR_JUYANG		CFI_MFR_JUYANG
 #define SNOR_MFR_BOYA		CFI_MFR_BOYA
 #define SNOR_MFR_PY		0x85
+#define SNOR_MFR_FUDAN		0xA1
 
 /*
  * Note on opcode nomenclature: some opcodes have a format like

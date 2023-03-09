@@ -126,8 +126,11 @@ static void announce_and_cleanup(int fake)
 
 	cleanup_before_linux();
 
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 	// Save kernel start time
 	board_save_time_record(TIME_RECORDS_FIELD_KERNEL_START);
+#endif
 }
 
 static void setup_start_tag (struct bd_info *bd)

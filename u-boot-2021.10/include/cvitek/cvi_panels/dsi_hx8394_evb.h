@@ -7,7 +7,6 @@
 #define _MIPI_TX_PARAM_HX8394_H_
 
 #include <cvi_mipi.h>
-
 const struct combo_dev_cfg_s dev_cfg_hx8394_720x1280 = {
 	.devno = 0,
 #ifdef MIPI_PANEL_2_LANES
@@ -15,7 +14,7 @@ const struct combo_dev_cfg_s dev_cfg_hx8394_720x1280 = {
 #else
 	.lane_id = {MIPI_TX_LANE_0, MIPI_TX_LANE_1, MIPI_TX_LANE_CLK, MIPI_TX_LANE_2, MIPI_TX_LANE_3},
 #endif
-#ifdef MIPI_PANEL_LANE_SWAP
+#ifdef CONFIG_MIPI_PANEL_LANE_SWAP
 	.lane_pn_swap = {true, true, true, true, true},
 #else
 	.lane_pn_swap = {false, false, false, false, false},

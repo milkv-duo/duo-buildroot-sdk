@@ -454,7 +454,11 @@ int image_decomp(int comp, ulong load, ulong image_start, int type,
 
 #ifndef USE_HOSTCC
 	// Save decompression start time
+
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 	board_save_time_record(TIME_RECORDS_FIELD_DECOMPRESS_KERNEL_START);
+#endif
 	start = get_timer(0);
 #endif
 

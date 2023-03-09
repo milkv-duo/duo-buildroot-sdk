@@ -31,12 +31,16 @@
 #define CONFIG_REMAKE_ELF
 
 /* Physical Memory Map */
+#ifndef CONFIG_SYS_BOOTMAPSZ
+#define CONFIG_SYS_BOOTMAPSZ	0x10000000
+#endif
 #define PHYS_SDRAM_1			0x80000000
 #define PHYS_SDRAM_1_SIZE		CONFIG_SYS_BOOTMAPSZ
 #define CONFIG_SYS_SDRAM_BASE		PHYS_SDRAM_1
 
 /* Link Definitions */
-#define CONFIG_SYS_TEXT_BASE		0x80200000
+#define CVIMMAP_ION_ADDR 0x83c80000  /* offset 60.5MiB */
+#define CONFIG_SYS_TEXT_BASE		0x88000000
 #define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_SDRAM_BASE + 0x03f00000)
 
 /* default address for bootm command without arguments */
@@ -59,7 +63,6 @@
 #endif
 
 /* 16550 Serial Configuration */
-#define CONFIG_CONS_INDEX		1
 #define CONFIG_SYS_NS16550_COM1		0x04140000
 #define CONFIG_SYS_NS16550_SERIAL
 #define CONFIG_SYS_NS16550_REG_SIZE	(-4)
@@ -74,6 +77,7 @@
 /* Download related definitions */
 #define UPGRADE_SRAM_ADDR    0x0e000030
 #define UBOOT_PID_SRAM_ADDR  0x0e000030
+#define UPDATE_ADDR			 0x83800000
 #define IMG_ADDR 0x80090000
 #define HEADER_ADDR 0x80080000
 #define USB_UPDATE_MAGIC 0x4D474E31
@@ -224,11 +228,19 @@
 	#define CONSOLEDEV "ttyS0\0"
 
 	/* config loglevel */
+#ifdef __riscv__
 	#ifdef RELEASE
-		#define OTHERBOOTARGS   "othbootargs=earlycon=sbi release loglevel=0\0"
+		#define OTHERBOOTARGS   "othbootargs=earlycon=sbi release loglevel=10\0"
 	#else
-		#define OTHERBOOTARGS   "othbootargs=earlycon=sbi loglevel=9\0"
+		#define OTHERBOOTARGS   "othbootargs=earlycon=sbi loglevel=10\0"
 	#endif
+#else
+	#ifdef RELEASE
+		#define OTHERBOOTARGS   "othbootargs=earlycon release loglevel=10\0"
+	#else
+		#define OTHERBOOTARGS   "othbootargs=earlycon loglevel=10\0"
+	#endif
+#endif
 
 	/* config mtdids */
 	#ifdef CONFIG_NAND_SUPPORT

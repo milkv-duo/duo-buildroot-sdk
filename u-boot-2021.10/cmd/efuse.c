@@ -8,6 +8,8 @@
 #include <mmio.h>
 #include <cvi_efuse.h>
 
+#ifdef __riscv
+
 #define EFUSE_DEBUG 0
 
 #define _cc_trace(fmt, ...) __trace("", __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
@@ -278,7 +280,14 @@ static struct _CVI_EFUSE_USER_S {
 
 #define CVI_EFUSE_LOCK_ADDR 0xF8
 #define CVI_EFUSE_SECURE_CONF_ADDR 0xA0
-#define CVI_EFUSE_SCS_ENABLE_SHIFT 0
+#define CVI_EFUSE_SCS_ENABLE_SHIFT			0
+// for secure boot sign
+#define CVI_EFUSE_TEE_SCS_ENABLE_SHIFT			2
+#define CVI_EFUSE_ROOT_PUBLIC_KEY_SELECTION_SHIFT	20
+// for secure boot encryption
+#define CVI_EFUSE_BOOT_LOADER_ENCRYPTION		6
+#define CVI_EFUSE_LDR_KEY_SELECTION_SHIFT		23
+
 
 CVI_S32 CVI_EFUSE_GetSize(enum CVI_EFUSE_AREA_E area, CVI_U32 *size)
 {
@@ -417,9 +426,17 @@ CVI_S32 CVI_EFUSE_Write(enum CVI_EFUSE_AREA_E area, const CVI_U8 *buf, CVI_U32 b
 	return CVI_SUCCESS;
 }
 
-CVI_S32 CVI_EFUSE_EnableSecureBoot(void)
+CVI_S32 CVI_EFUSE_EnableSecureBoot(uint32_t sel)
 {
-	CVI_U32 value = 0x3 << CVI_EFUSE_SCS_ENABLE_SHIFT;
+	CVI_U32 value = 0;
+
+	value |= 0x3 << CVI_EFUSE_TEE_SCS_ENABLE_SHIFT;
+	value |= 0x4 << CVI_EFUSE_ROOT_PUBLIC_KEY_SELECTION_SHIFT;
+
+	if (sel != 1) {
+		value |= 0x3 << CVI_EFUSE_BOOT_LOADER_ENCRYPTION;
+		value |= 0x4 << CVI_EFUSE_LDR_KEY_SELECTION_SHIFT;
+	}
 
 	return _CVI_EFUSE_Write(CVI_EFUSE_SECURE_CONF_ADDR, &value, sizeof(value));
 }
@@ -434,8 +451,49 @@ CVI_S32 CVI_EFUSE_IsSecureBootEnabled(void)
 	if (ret < 0)
 		return ret;
 
-	value &= 0x3 << CVI_EFUSE_SCS_ENABLE_SHIFT;
-	return !!value;
+	ret = (value & (0x3 << CVI_EFUSE_TEE_SCS_ENABLE_SHIFT)) >> CVI_EFUSE_TEE_SCS_ENABLE_SHIFT;
+	if (ret == 0) {
+		printf("Secure Boot is disable\n");
+		return 0;
+	}
+
+	ret = (value & (0x7 << CVI_EFUSE_ROOT_PUBLIC_KEY_SELECTION_SHIFT)) >> CVI_EFUSE_ROOT_PUBLIC_KEY_SELECTION_SHIFT;
+	switch (ret) {
+	case 0:
+		printf("Secure Boot sign is enable, verity with rot_pk_a_hash\n");
+		break;
+	case 1:
+		printf("Secure Boot sign is enable, verity with rot_pk_b_hash\n");
+		break;
+	case 2:
+		printf("Secure Boot sign is enable, verity with rot_pk_c_hash\n");
+		break;
+	default:
+		printf("Secure Boot sign is enable, verity with efuse KPUB HASH\n");
+		break;
+	}
+
+	ret = (value & (0x3 << CVI_EFUSE_BOOT_LOADER_ENCRYPTION)) >> CVI_EFUSE_BOOT_LOADER_ENCRYPTION;
+	if (ret == 0)
+		return 0;
+
+	ret = (value & (0x7 << CVI_EFUSE_LDR_KEY_SELECTION_SHIFT)) >> CVI_EFUSE_LDR_KEY_SELECTION_SHIFT;
+	switch (ret) {
+	case 0:
+		printf("Secure Boot encryption is enable, decrypt with ldr_ek_a\n");
+		break;
+	case 1:
+		printf("Secure Boot encryption is enable, decrypt with ldr_ek_b\n");
+		break;
+	case 2:
+		printf("Secure Boot encryption is enable, decrypt with ldr_ek_c\n");
+		break;
+	default:
+		printf("Secure Boot encryption is enable, decrypt with efuse LDR DES KEY\n");
+		break;
+	}
+
+	return 0;
 }
 
 CVI_S32 CVI_EFUSE_Lock(enum CVI_EFUSE_LOCK_E lock)
@@ -576,13 +634,12 @@ static int do_efuser(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv
 		ret = CVI_EFUSE_IsLocked(idx);
 		printf("%s is %s locked\n", efuse_index[idx], ret ? "" : "not");
 		return 0;
+	} else if (idx == CVI_EFUSE_SECUREBOOT) {
+		ret = CVI_EFUSE_IsSecureBootEnabled();
+		return 0;
 	} else if (idx < CVI_EFUSE_LOCK_WRITE_LAST) {
 		ret = CVI_EFUSE_IsWriteLocked(idx);
 		printf("%s is %s write_locked\n", efuse_index[idx], ret ? "" : "not");
-		return 0;
-	} else if (idx == CVI_EFUSE_SECUREBOOT) {
-		ret = CVI_EFUSE_IsSecureBootEnabled();
-		printf("Secure Boot is %s\n", ret ? "enabled" : "disabled");
 		return 0;
 	}
 
@@ -640,6 +697,15 @@ static int do_efusew(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv
 
 		printf("%s is locked\n", efuse_index[idx]);
 		return 0;
+	} else if (idx == CVI_EFUSE_SECUREBOOT) {
+		if (argc != 3)
+			return CMD_RET_USAGE;
+
+		uint32_t sel = simple_strtoul(argv[2], NULL, 0);
+
+		ret = CVI_EFUSE_EnableSecureBoot(sel);
+		printf("Enabled Secure Boot is %s\n", ret >= 0 ? "success" : "failed");
+		return 0;
 	} else if (idx < CVI_EFUSE_LOCK_WRITE_LAST) {
 		if (CVI_EFUSE_LockWrite(idx) < 0) {
 			printf("Failed to lock write %s\n", efuse_index[idx]);
@@ -647,11 +713,6 @@ static int do_efusew(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv
 		}
 
 		printf("%s is locked\n", efuse_index[idx]);
-		return 0;
-
-	} else if (idx == CVI_EFUSE_SECUREBOOT) {
-		ret = CVI_EFUSE_EnableSecureBoot();
-		printf("Enabled Secure Boot is %s\n", ret >= 0 ? "success" : "failed");
 		return 0;
 	}
 
@@ -709,3 +770,5 @@ U_BOOT_CMD(efusew_word, 9, 1, do_efusew_word, "Write word to efuse",
 U_BOOT_CMD(efuser_dump, 9, 1, do_efuser_dump, "Read/Dump efuse",
 	   "do_efuser_dump\n"
 	   "    - args ...");
+
+#endif

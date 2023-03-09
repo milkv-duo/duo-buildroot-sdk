@@ -6,7 +6,7 @@
 #include <common.h>
 #include <clk.h>
 #include <asm/gpio.h>
-#include <asm/hardware.h>
+//#include <asm/hardware.h>
 #include <asm/io.h>
 
 #include "reg.h"

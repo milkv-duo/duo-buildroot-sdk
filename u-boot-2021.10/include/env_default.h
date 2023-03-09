@@ -52,6 +52,9 @@ const uchar default_environment[] = {
 #ifdef	CONFIG_NORBOOTCOMMAND
 	"norboot="	CONFIG_NORBOOTCOMMAND		"\0"
 #endif
+#ifdef CONFIG_BOOTLOGO
+	"showlogo="	SHOWLOGOCOMMAND			"\0"
+#endif
 #if defined(CONFIG_BOOTDELAY)
 	"bootdelay="	__stringify(CONFIG_BOOTDELAY)	"\0"
 #endif

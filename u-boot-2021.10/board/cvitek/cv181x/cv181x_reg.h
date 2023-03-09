@@ -16,7 +16,7 @@
  */
 #define GP_REG0 (TOP_BASE + 0x80)
 #define GP_REG1 (TOP_BASE + 0x84)
-#define GP_REG2 (TOP_BASE + 0x88
+#define GP_REG2 (TOP_BASE + 0x88)
 #define GP_REG3 (TOP_BASE + 0x8C)
 #define GP_REG4 (TOP_BASE + 0x90)
 #define GP_REG5 (TOP_BASE + 0x94)

@@ -38,12 +38,15 @@ uint32_t update_magic;
 enum chunk_type_e { dont_care = 0, check_crc };
 enum storage_type_e { sd_dl = 0, usb_dl };
 
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 static uint32_t bcd2hex4(uint32_t bcd)
 {
 	return ((bcd) & 0x0f) + (((bcd) >> 4) & 0xf0) + (((bcd) >> 8) & 0xf00) + (((bcd) >> 12) & 0xf000);
 }
 
 static int _storage_update(enum storage_type_e type);
+#endif
 
 int _prgImage(char *file, uint32_t chunk_header_size, char *file_name)
 {
@@ -118,6 +121,8 @@ int _prgImage(char *file, uint32_t chunk_header_size, char *file_name)
 	return size;
 }
 
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 static int _checkHeader(char *file, char strStorage[10])
 {
 	char *magic = (void *)HEADER_ADDR;
@@ -174,15 +179,20 @@ static int _storage_update(enum storage_type_e type)
 	int ret = 0;
 	char cmd[255] = { '\0' };
 	char strStorage[10] = { '\0' };
+	uint8_t sd_index = 0;
 
 	if (type == sd_dl) {
 		printf("Start SD downloading...\n");
 		// Consider SD card with MBR as default
 #if defined(CONFIG_NAND_SUPPORT) || defined(CONFIG_SPI_FLASH)
 		strlcpy(strStorage, "mmc 0:1", 9);
+		sd_index = 0;
 #elif defined(CONFIG_EMMC_SUPPORT)
+		sd_index = 1;
 		strlcpy(strStorage, "mmc 1:1", 9);
 #endif
+		snprintf(cmd, 255, "mmc dev %u:1 SD_HS", sd_index);
+		run_command(cmd, 0);
 		snprintf(cmd, 255, "fatload %s %p fip.bin;", strStorage,
 			 (void *)HEADER_ADDR);
 		ret = run_command(cmd, 0);
@@ -191,9 +201,13 @@ static int _storage_update(enum storage_type_e type)
 			printf("** Trying use partition 0 (without MBR) **\n");
 #if defined(CONFIG_NAND_SUPPORT) || defined(CONFIG_SPI_FLASH)
 			strlcpy(strStorage, "mmc 0:0", 9);
+			sd_index = 0;
 #elif defined(CONFIG_EMMC_SUPPORT)
+			sd_index = 1;
 			strlcpy(strStorage, "mmc 1:0", 9);
 #endif
+			snprintf(cmd, 255, "mmc dev %u:0 SD_HS", sd_index);
+			run_command(cmd, 0);
 			snprintf(cmd, 255, "fatload %s %p fip.bin;", strStorage,
 				 (void *)HEADER_ADDR);
 			ret = run_command(cmd, 0);
@@ -218,11 +232,15 @@ static int _storage_update(enum storage_type_e type)
 		run_command(cmd, 0);
 		snprintf(cmd, 255, "mmc write %p 0x800 0x800;;",
 			 (void *)HEADER_ADDR);
-		run_command(cmd, 0);
+		ret = run_command(cmd, 0);
 		printf("Program fip.bin done\n");
 		// Switch to user partition
 		run_command("mmc dev 0 0", 0);
 #endif
+		if (ret == 0)
+			SET_DL_COMPLETE();
+		else
+			return ret;
 	}
 	for (int i = 1; i < ARRAY_SIZE(imgs); i++) {
 		snprintf(cmd, 255, "fatload %s %p %s 0x%x 0;", strStorage,
@@ -236,8 +254,6 @@ static int _storage_update(enum storage_type_e type)
 		if (_checkHeader(imgs[i], strStorage))
 			continue;
 	}
-	if (ret == 0)
-		SET_DL_COMPLETE();
 	return 0;
 }
 
@@ -288,10 +304,14 @@ static int _usb_update(uint32_t usb_pid)
 	};
 	return 0;
 }
+#endif
 
 static int do_cvi_update(struct cmd_tbl *cmdtp, int flag, int argc,
 			 char *const argv[])
 {
+
+#if (!defined CONFIG_TARGET_CVITEK_CV181X_FPGA) && (!defined CONFIG_TARGET_CVITEK_ATHENA2_FPGA) && \
+	(!defined ATHENA2_FPGA_PALLDIUM_ENV)
 	int ret = 1;
 	uint32_t usb_pid = 0;
 
@@ -311,6 +331,9 @@ static int do_cvi_update(struct cmd_tbl *cmdtp, int flag, int argc,
 	}
 
 	return ret;
+#else
+	return 0;
+#endif
 }
 
 U_BOOT_CMD(

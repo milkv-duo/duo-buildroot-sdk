@@ -64,6 +64,11 @@ config DISPLAY_CVITEK_MIPI
 	  high-speed serial interface between a host processor and
 	  a display module.
 
+config MIPI_PANEL_LANE_SWAP
+	bool "MIPI DSI lane PN swap"
+	help
+          This enables Display Serial Interface(DSI) lane PN swap function.
+
 endchoice
 
 endif

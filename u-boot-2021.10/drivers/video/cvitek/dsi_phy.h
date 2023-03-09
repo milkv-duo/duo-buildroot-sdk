@@ -19,11 +19,12 @@ enum lane_id {
 
 void dphy_set_base_addr(void *base);
 void dphy_dsi_lane_en(bool clk_en, bool *data_en, bool preamble_en);
-int dphy_dsi_set_lane(u8 lane_num, enum lane_id lane, bool pn_swap);
+int dphy_dsi_set_lane(u8 lane_num, enum lane_id lane, bool pn_swap, bool clk_phase_shift);
 void dphy_init(enum sclr_vo_intf intf);
 void dphy_dsi_set_pll(u32 clkkHz, u8 lane, u8 bits);
 void dphy_lvds_enable(bool en);
 void dphy_lvds_set_pll(u32 clkkHz, u8 link);
+void dphy_dsi_analog_setting(bool is_lvds);
 
 void dpyh_mipi_tx_manual_packet(const u8 *data, u8 count);
 

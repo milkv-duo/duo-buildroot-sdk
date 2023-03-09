@@ -123,6 +123,30 @@ void pinmux_config(int io_type)
 			PINMUX_CONFIG(EMMC_CMD, SPINAND_MISO);
 			PINMUX_CONFIG(EMMC_DAT1, SPINAND_CS);
 		break;
+		case PINMUX_DSI:
+			PINMUX_CONFIG(PAD_MIPI_TXM0, XGPIOC_12);
+			PINMUX_CONFIG(PAD_MIPI_TXP0, XGPIOC_13);
+			PINMUX_CONFIG(PAD_MIPI_TXM1, XGPIOC_14);
+			PINMUX_CONFIG(PAD_MIPI_TXP1, XGPIOC_15);
+			PINMUX_CONFIG(PAD_MIPI_TXM2, XGPIOC_16);
+			PINMUX_CONFIG(PAD_MIPI_TXP2, XGPIOC_17);
+			PINMUX_CONFIG(PAD_MIPI_TXM3, XGPIOC_20);
+			PINMUX_CONFIG(PAD_MIPI_TXP3, XGPIOC_21);
+			PINMUX_CONFIG(PAD_MIPI_TXM4, XGPIOC_18);
+			PINMUX_CONFIG(PAD_MIPI_TXP4, XGPIOC_19);
+		break;
+		case PINMUX_LVDS:
+			PINMUX_CONFIG(PAD_MIPI_TXM0, XGPIOC_12);
+			PINMUX_CONFIG(PAD_MIPI_TXP0, XGPIOC_13);
+			PINMUX_CONFIG(PAD_MIPI_TXM1, XGPIOC_14);
+			PINMUX_CONFIG(PAD_MIPI_TXP1, XGPIOC_15);
+			PINMUX_CONFIG(PAD_MIPI_TXM2, XGPIOC_16);
+			PINMUX_CONFIG(PAD_MIPI_TXP2, XGPIOC_17);
+			PINMUX_CONFIG(PAD_MIPI_TXM3, XGPIOC_20);
+			PINMUX_CONFIG(PAD_MIPI_TXP3, XGPIOC_21);
+			PINMUX_CONFIG(PAD_MIPI_TXM4, XGPIOC_18);
+			PINMUX_CONFIG(PAD_MIPI_TXP4, XGPIOC_19);
+		break;
 		default:
 			break;
 	}
@@ -130,8 +154,8 @@ void pinmux_config(int io_type)
 
 #include "../cvi_board_init.c"
 
-#if defined(CONFIG_PHY_CVITEK_CV182XA) /* config cvitek cv182xa eth internal phy on ASIC board */
-static void cv182xa_ephy_id_init(void)
+#if defined(CONFIG_PHY_CVITEK) /* config cvitek cv181x eth internal phy on ASIC board */
+static void cv181x_ephy_id_init(void)
 {
 	// set rg_ephy_apb_rw_sel 0x0804@[0]=1/APB by using APB interface
 	mmio_write_32(0x03009804, 0x0001);
@@ -142,12 +166,40 @@ static void cv182xa_ephy_id_init(void)
 	// Release 0x0800[2]=1/dig_rst_n, Let mii_reg can be accessabile
 	mmio_write_32(0x03009800, 0x0904);
 
+	// ANA INIT (PD/EN), switch to MII-page5
+	mmio_write_32(0x0300907c, 0x0500);
+	// Release ANA_PD p5.0x10@[13:8] = 6'b001100
+	mmio_write_32(0x03009040, 0x0c00);
+	// Release ANA_EN p5.0x10@[7:0] = 8'b01111110
+	mmio_write_32(0x03009040, 0x0c7e);
+
+	// Wait PLL_Lock, Lock_Status p5.0x12@[15] = 1
+	//mdelay(1);
+
+	// Release 0x0800[1] = 1/ana_rst_n
+	mmio_write_32(0x03009800, 0x0906);
+
+	// ANA INIT
+	// @Switch to MII-page5
+	mmio_write_32(0x0300907c, 0x0500);
+
 	// PHY_ID
 	mmio_write_32(0x03009008, 0x0043);
 	mmio_write_32(0x0300900c, 0x5649);
 
 	// switch to MDIO control by ETH_MAC
 	mmio_write_32(0x03009804, 0x0000);
+}
+
+static void cv181x_ephy_led_pinmux(void)
+{
+	// LED PAD MUX
+	mmio_write_32(0x030010e0, 0x05);
+	mmio_write_32(0x030010e4, 0x05);
+	//(SD1_CLK selphy)
+	mmio_write_32(0x050270b0, 0x11111111);
+	//(SD1_CMD selphy)
+	mmio_write_32(0x050270b4, 0x11111111);
 }
 #endif
 
@@ -162,16 +214,19 @@ void cpu_pwr_ctrl(void)
 
 int board_init(void)
 {
+#ifndef CONFIG_TARGET_CVITEK_CV181X_FPGA
 	extern volatile uint32_t BOOT0_START_TIME;
 	uint16_t start_time = DIV_ROUND_UP(BOOT0_START_TIME, SYS_COUNTER_FREQ_IN_SECOND / 1000);
 
 	// Save uboot start time. time is from boot0.h
 	mmio_write_16(TIME_RECORDS_FIELD_UBOOT_START, start_time);
+#endif
 
 	cpu_pwr_ctrl();
 
-#if defined(CONFIG_PHY_CVITEK_CV182XA) /* config cvitek cv182xa eth internal phy on ASIC board */
-	cv182xa_ephy_id_init();
+#if defined(CONFIG_PHY_CVITEK) /* config cvitek cv181x eth internal phy on ASIC board */
+	cv181x_ephy_id_init();
+	cv181x_ephy_led_pinmux();
 #endif
 
 #if defined(CONFIG_NAND_SUPPORT)
@@ -180,6 +235,11 @@ int board_init(void)
 	pinmux_config(PINMUX_SPI_NOR);
 #elif defined(CONFIG_EMMC_SUPPORT)
 	pinmux_config(PINMUX_EMMC);
+#endif
+#ifdef CONFIG_DISPLAY_CVITEK_MIPI
+	pinmux_config(PINMUX_DSI);
+#elif defined(CONFIG_DISPLAY_CVITEK_LVDS)
+	pinmux_config(PINMUX_LVDS);
 #endif
 	pinmux_config(PINMUX_SDIO1);
 	cvi_board_init();

@@ -148,11 +148,11 @@ config PHY_CORTINA_ACCESS
 	help
 		Cortina Access Ethernet PHYs init process
 
-config PHY_CVITEK_CV182XA
-	bool "CVITEK CV182XA Ethernet PHYs support"
+config PHY_CVITEK
+	bool "CVITEK internal Ethernet PHYs support"
 	help
 	  Enable support for RMII PHYs manufactured by CVITEK
-	  Include driver for cv182xa.
+	  Include driver for cvitek.
 	  This is an internal ethernet phy.
 	  And support 100Mbs full duplex.
 

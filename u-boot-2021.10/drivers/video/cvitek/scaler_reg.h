@@ -136,6 +136,7 @@
 #define REG_DSI_PHY_LPRX_OV        (REG_DSI_WRAP_BASE + 0x4C)
 #define REG_DSI_PHY_PD             (REG_DSI_WRAP_BASE + 0x64)
 #define REG_DSI_PHY_TXPLL          (REG_DSI_WRAP_BASE + 0x6C)
+#define REG_DSI_PHY_REG_74         (REG_DSI_WRAP_BASE + 0x74)
 #define REG_DSI_PHY_REG_8C         (REG_DSI_WRAP_BASE + 0x8C)
 #define REG_DSI_PHY_REG_SET        (REG_DSI_WRAP_BASE + 0x90)
 #define REG_DSI_PHY_LANE_SEL       (REG_DSI_WRAP_BASE + 0x9C)

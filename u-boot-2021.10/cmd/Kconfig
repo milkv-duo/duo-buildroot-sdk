@@ -979,6 +979,15 @@ config CMD_GPT_RENAME
 	  partitions via the 'gpt swap' command or to rename single
 	  partitions via the 'rename' command.
 
+config BOOTLOGO
+        bool "Show bootlogo"
+    select CMD_CVI_JPEG
+        help
+      Show bootlogo when uboot is booting.
+          This provides a way to show bootlogo which is saved in MISC partition.
+          When enable this command it will add a new environment variable showlogo
+      and will add the showlogo to the beginning of bootcmd
+
 config CMD_IDE
 	bool "ide - Support for IDE drivers"
 	select IDE
@@ -2388,6 +2397,26 @@ config CMD_UBIFS
 	select LZO
 	help
 	  UBIFS is a file system for flash devices which works on top of UBI.
+
+config CMD_CVI_VO
+        bool "VO command supports mars"
+        depends on VIDEO_CVITEK
+        help
+          Support for the cv1835 vo interface.
+          This includes controls of vo interface/timing, video layer.
+          startvo: start interface.
+          stopvo: stop interface.
+          startvl: start video layer reading from ddr.
+          stopvl: stop video layer.
+          setvobg: set bgcolor.
+
+config CMD_CVI_JPEG
+        bool "CVI JPEG decoder"
+        help
+          Support for the jpeg decorder
+          uboot will check the jpeg file, alloc buffer
+          and decode jpg file to yuv format to the
+          destination address
 
 config CMD_CVI_UPDATE
 	bool "cvitek update command"

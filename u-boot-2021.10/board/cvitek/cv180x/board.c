@@ -157,8 +157,8 @@ void pinmux_config(int io_type)
 
 #include "../cvi_board_init.c"
 
-#if defined(CONFIG_PHY_CVITEK_CV182XA)
-static void cv182xa_ephy_id_init(void)
+#if defined(CONFIG_PHY_CVITEK)
+static void cv180x_ephy_id_init(void)
 {
 	// set rg_ephy_apb_rw_sel 0x0804@[0]=1/APB by using APB interface
 	mmio_write_32(0x03009804, 0x0001);
@@ -169,12 +169,40 @@ static void cv182xa_ephy_id_init(void)
 	// Release 0x0800[2]=1/dig_rst_n, Let mii_reg can be accessabile
 	mmio_write_32(0x03009800, 0x0904);
 
+	// ANA INIT (PD/EN), switch to MII-page5
+	mmio_write_32(0x0300907c, 0x0500);
+	// Release ANA_PD p5.0x10@[13:8] = 6'b001100
+	mmio_write_32(0x03009040, 0x0c00);
+	// Release ANA_EN p5.0x10@[7:0] = 8'b01111110
+	mmio_write_32(0x03009040, 0x0c7e);
+
+	// Wait PLL_Lock, Lock_Status p5.0x12@[15] = 1
+	//mdelay(1);
+
+	// Release 0x0800[1] = 1/ana_rst_n
+	mmio_write_32(0x03009800, 0x0906);
+
+	// ANA INIT
+	// @Switch to MII-page5
+	mmio_write_32(0x0300907c, 0x0500);
+
 	// PHY_ID
 	mmio_write_32(0x03009008, 0x0043);
 	mmio_write_32(0x0300900c, 0x5649);
 
 	// switch to MDIO control by ETH_MAC
 	mmio_write_32(0x03009804, 0x0000);
+}
+
+static void cv180x_ephy_led_pinmux(void)
+{
+	// LED PAD MUX
+	mmio_write_32(0x0300109c, 0x05);
+	mmio_write_32(0x030010a0, 0x05);
+	//(SD1_CLK selphy)
+	mmio_write_32(0x050270b0, 0x11111111);
+	//(SD1_CMD selphy)
+	mmio_write_32(0x050270b4, 0x11111111);
 }
 #endif
 
@@ -186,8 +214,9 @@ int board_init(void)
 	// Save uboot start time. time is from boot0.h
 	mmio_write_16(TIME_RECORDS_FIELD_UBOOT_START, start_time);
 
-#if defined(CONFIG_PHY_CVITEK_CV182XA) /* config cvitek cr181x/cr180x eth internal phy on ASIC board */
-	cv182xa_ephy_id_init();
+#if defined(CONFIG_PHY_CVITEK) /* config cvitek cv180x eth internal phy on ASIC board */
+	cv180x_ephy_id_init();
+	cv180x_ephy_led_pinmux();
 #endif
 
 #if defined(CONFIG_NAND_SUPPORT)

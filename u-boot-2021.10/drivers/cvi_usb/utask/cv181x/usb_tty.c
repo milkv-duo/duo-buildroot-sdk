@@ -731,9 +731,23 @@ static void bulkOutCmplMain(struct usb_ep *ep, struct usb_request *req)
 	case CVI_USB_S2D:
 		/* INFO("CVI_USB_S2D, addr = 0x%lx, len = 0x%lx\n",dest_addr, msg_s2d->size); */
 		sendInReq(length, CVI_USB_S2D, bulkCmplEmpty, NULL, 0);
+
 		if (dest_addr >= GLOBAL_MEM_START_ADDR)
-			resetOutReqS2D(dest_addr, msg_s2d->size,
-				       bulkResetOutReq);
+		{
+			resetOutReqS2D(dest_addr, msg_s2d->size, bulkResetOutReq);
+
+#ifdef CONFIG_NAND_SUPPORT
+			// Erase partition first
+			if (!strncmp((char *)((uintptr_t)HEADER_ADDR), "CIMG", 4)) {
+				strlcpy(prevExtra,
+					(char *)((uintptr_t)HEADER_ADDR + 20),
+					EXTRA_FLAG_SIZE);
+				snprintf(cmd, 255, "nand erase.part -y %s", prevExtra);
+				pr_debug("%s\n", cmd);
+				run_command(cmd, 0);
+			}
+#endif
+		}
 		else
 			sramOutReqS2D(dest_addr, msg_s2d->size);
 		return;
@@ -779,18 +793,6 @@ static void bulkOutCmplMain(struct usb_ep *ep, struct usb_request *req)
 		resetOutReq();
 		break;
 	case CVI_USB_PROGRAM:
-#ifdef CONFIG_NAND_SUPPORT
-		// Erase partition first
-		if (strncmp((char *)((uintptr_t)HEADER_ADDR + 20), prevExtra,
-			    EXTRA_FLAG_SIZE)) {
-			strlcpy(prevExtra,
-				(char *)((uintptr_t)HEADER_ADDR + 20),
-				EXTRA_FLAG_SIZE);
-			snprintf(cmd, 255, "nand erase.part -y %s", prevExtra);
-			pr_debug("%s\n", cmd);
-			run_command(cmd, 0);
-		}
-#endif
 		/* INFO("CVI_USB_PROGRAM\n"); */
 		_prgImage((void *)UPDATE_ADDR, 0x40, NULL);
 		sendInReq(length, CVI_USB_PROGRAM, bulkResetOutReq, NULL, 0);
