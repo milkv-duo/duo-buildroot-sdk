@@ -1,0 +1,41 @@
+
+Discarded input sections
+
+ .group         0x0000000000000000        0xc /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .text          0x0000000000000000        0x0 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .data          0x0000000000000000        0x0 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .bss           0x0000000000000000        0x0 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .rodata.build_message
+                0x0000000000000000       0x1a /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .rodata.version_string
+                0x0000000000000000       0x10 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_info    0x0000000000000000       0x89 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_abbrev  0x0000000000000000       0x48 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_aranges
+                0x0000000000000000       0x20 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_macro   0x0000000000000000       0x11 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_macro   0x0000000000000000      0x8b6 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_line    0x0000000000000000       0x28 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .debug_str     0x0000000000000000     0x2a7d /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .comment       0x0000000000000000       0x4e /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+ .riscv.attributes
+                0x0000000000000000       0x57 /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+
+.text           0x0000000000000000        0x4
+                0x0000000000000000        0x4 LONG 0xdeadbeef
+ *(*)
+                0x0000000080000000                DEF_DRAM_BASE = 0x80000000
+                0x0000000080000000                DEF_MONITOR_RUNADDR = 0x80000000
+                0x000000008fe00000                DEF_BLCP_2ND_RUNADDR = 0x8fe00000
+LOAD /root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/build_message.o
+OUTPUT(/root/.jenkins/workspace/v4.1.0_release_build/fsbl/build/cv1812cp_wevb_0006a_spinor/blmacros/blmacros.elf elf64-littleriscv)

@@ -1,0 +1,5 @@
+*.d
+fip.bin
+build_message.o
+blmacros.dis
+build/cvi_board_memmap.h

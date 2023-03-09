@@ -44,8 +44,15 @@ class SignedFIP(FIP):
     def rsa_to_n(self, rsa):
         return rsa.n.to_bytes(rsa.size_in_bytes(), byteorder="big")
 
+    def print_kpub_hash(self, bytes):
+        bytes_str = ['{:02x}'.format(int(i)) for i in bytes]
+        logging.info("KPUB_HASH:" + "".join(bytes_str))
+
     def sign_bl_pk(self):
         self.param1["ROOT_PK"].content = self.rsa_to_n(self.root_priv)
+        kpub_hash = SHA256.new(self.param1["ROOT_PK"].content[:256])
+        self.print_kpub_hash(kpub_hash.digest())
+
         self.param1["BL_PK"].content = self.rsa_to_n(self.bl_priv)
 
         digest = SHA256.new(self.rsa_to_n(self.bl_priv))

@@ -225,9 +225,7 @@ define MAKE_BL
         $(eval BUILD_DIR  := ${BUILD_PLAT}/bl$(1))
         $(eval BL_SOURCES := $(BL$(call uppercase,$(1))_SOURCES))
         $(eval SOURCES    := $(BL_SOURCES))
-        $(eval BULID_OUT  := $(BUILD_DIR)/build_message.o) 
-		$(eval OBJS_SOURCE := $(wildcard $(BUILD_DIR)/*.o))
-		$(eval OBJS       := $(filter-out $(BULID_OUT),$(OBJS_SOURCE)))
+        $(eval OBJS       := $(addprefix $(BUILD_DIR)/,$(call SOURCES_TO_OBJS,$(SOURCES))))
         $(eval LINKERFILE := $(call IMG_LINKERFILE,$(1)))
         $(eval MAPFILE    := $(call IMG_MAPFILE,$(1)))
         $(eval ELF        := $(call IMG_ELF,$(1)))
@@ -262,8 +260,6 @@ $(ELF): $(OBJS) $(LINKERFILE) | bl$(1)_dirs
 	@echo 'const char build_message[] = $(BUILD_MESSAGE_TIMESTAMP); \
 	       const char version_string[] = "${VERSION_STRING}";' | \
 		$$(CC) $$(TF_CFLAGS) $$(CFLAGS) -xc -c - -o $(BUILD_DIR)/build_message.o
-	$$(Q)$$(LD) -o $$@ $$(TF_LDFLAGS) $$(LDFLAGS) -Map=$(MAPFILE) \
-		--script $(LINKERFILE) $(BUILD_DIR)/build_message.o $(OBJS) $(LDLIBS)
 
 $(SYM): $(ELF)
 	@echo "  SYM     $$@"
