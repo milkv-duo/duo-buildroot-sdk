@@ -1,5 +1,5 @@
-#ifndef __CV180X_REG_H
-#define __CV180X_REG_H
+#ifndef __CV181X_REG_H
+#define __CV181X_REG_H
 
 #define SEC_BASE                                0x02000000
 #define TOP_BASE                                0x03000000
@@ -74,4 +74,4 @@
 
 /* watchdog */
 
-#endif /* __CV180X_REG_H */
+#endif /* __CV181X_REG_H */

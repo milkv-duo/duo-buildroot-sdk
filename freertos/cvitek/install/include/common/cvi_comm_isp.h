@@ -146,6 +146,7 @@ typedef union _ISP_SNS_COMMBUS_U {
 typedef struct _ISP_I2C_DATA_S {
 	CVI_BOOL bUpdate;
 	CVI_BOOL bDropFrm;
+	CVI_BOOL bvblankUpdate;
 	CVI_U8 u8DelayFrmNum; /*RW; Number of delayed frames for the sensor register*/
 	CVI_U8 u8DropFrmNum; /*RW; Number of frame to drop*/
 	CVI_U8 u8IntPos; /*RW;Position where the configuration of the sensor register takes effect */
@@ -904,11 +905,11 @@ enum ISP_AWB_TEMP_E {
 struct ST_ISP_AWB_SHIFT_LV_S {
 	CVI_U8 u8LowLvMode; /*RW; Range:[0x0, 0x1]*/
 	CVI_U16 u16LowLvCT[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0xFF]*/
-	CVI_U16 u16LowLvThr[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0xF]*/
+	CVI_U16 u16LowLvThr[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0x5DC]*/
 	CVI_U16 u16LowLvRatio[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x64, 0x3E8]*/
 	CVI_U8 u8HighLvMode; /*RW; Range:[0x0, 0x1]*/
 	CVI_U16 u16HighLvCT[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0xFF]*/
-	CVI_U16 u16HighLvThr[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0xF]*/
+	CVI_U16 u16HighLvThr[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x0, 0x5DC]*/
 	CVI_U16 u16HighLvRatio[ISP_AWB_COLORTEMP_NUM]; /*RW; Range:[0x64, 0x3E8]*/
 };
 

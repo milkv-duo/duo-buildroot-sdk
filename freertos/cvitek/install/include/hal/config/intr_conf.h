@@ -1,5 +1,5 @@
-#ifndef _CV180X_INTERRUPT_CONFIG_H_
-#define _CV180X_INTERRUPT_CONFIG_H_
+#ifndef _CV181X_INTERRUPT_CONFIG_H_
+#define _CV181X_INTERRUPT_CONFIG_H_
 
 /* irq */
 #define IRQ_LEVEL 0
@@ -137,4 +137,4 @@ void pinmux_config(int io_type);
  */
 #define NUM_IRQ (62)
 
-#endif //end of_CV180X_INTERRUPT_CONFIG_H_
+#endif //end of_CV181X_INTERRUPT_CONFIG_H_

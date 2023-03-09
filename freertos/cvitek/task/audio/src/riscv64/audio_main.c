@@ -581,18 +581,20 @@ void prvAudioRunTask(void *pvParameters)
 			pVqeConfigSsp->s32RevMask = _pstVqeConfig->s32RevMask;
 			pVqeConfigSsp->para_notch_freq = _pstVqeConfig->para_notch_freq;
 
-			if (paudio_ssp_block != NULL)
+
+			if (paudio_ssp_block == NULL) {
+				paudio_ssp_block = CviAud_Algo_Init(pVqeConfigSsp->u32OpenMask, pVqeConfigSsp);
+				if (paudio_ssp_block == NULL) {
+					aud_error("[CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK]paudio_ssp_block failure\n");
+					rtos_cmdq.param_ptr = CVIAUDIO_RTOS_BLOCK_MODE_FAILURE_FLAG;
+					clean_dcache_range((uintptr_t)pstAudBlockMailBox, sizeof(ST_CVIAUDIO_MAILBOX_BLOCK));
+					xQueueSend(xQueueAudioCmdqu, &rtos_cmdq, 0U);
+					break;
+				} else
+					aud_info("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK init success!!\n");
+			} else
 				aud_error("warning paudio_ssp_blcok not Null..\n");
 
-			paudio_ssp_block = CviAud_Algo_Init(pVqeConfigSsp->u32OpenMask, pVqeConfigSsp);
-			if (paudio_ssp_block == NULL) {
-				aud_error("[CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK]paudio_ssp_block failure\n");
-				rtos_cmdq.param_ptr = CVIAUDIO_RTOS_BLOCK_MODE_FAILURE_FLAG;
-				clean_dcache_range((uintptr_t)pstAudBlockMailBox, sizeof(ST_CVIAUDIO_MAILBOX_BLOCK));
-				xQueueSend(xQueueAudioCmdqu, &rtos_cmdq, 0U);
-				break;
-			} else
-				aud_info("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK init success!!\n");
 			xQueueSend(xQueueAudioCmdqu, &rtos_cmdq, 0U);
 			}
 			break;

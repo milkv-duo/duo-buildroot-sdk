@@ -1,0 +1,4 @@
+*.bin
+cvitek/task/isp/isp
+
+cvitek/build/

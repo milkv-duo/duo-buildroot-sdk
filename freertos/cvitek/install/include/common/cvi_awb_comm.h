@@ -69,6 +69,8 @@ typedef struct _ISP_WB_Q_INFO_S {
 	CVI_U32 u32FirstStableTime;
 	ISP_AWB_INDOOR_OUTDOOR_STATUS_E enInOutStatus;
 	CVI_S16 s16Bv;
+	CVI_U16 u16GrayWorldRgain;
+	CVI_U16 u16GrayWorldBgain;
 } ISP_WB_Q_INFO_S;
 
 #ifdef __cplusplus

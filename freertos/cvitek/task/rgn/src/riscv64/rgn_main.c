@@ -62,6 +62,8 @@ void prvRGNRunTask(void *pvParameters)
 		rgn_printf("xPortGetFreeHeapSize(%d)\n", xPortGetFreeHeapSize());
 
 		canvas_cmpr_attr = (RGN_CANVAS_CMPR_ATTR_S *)rtos_cmdq.param_ptr;
+		inv_dcache_range((uintptr_t)canvas_cmpr_attr, ALIGN(sizeof(RGN_CANVAS_CMPR_ATTR_S), 64));
+		inv_dcache_range((uintptr_t)canvas_cmpr_attr, ALIGN(canvas_cmpr_attr->u32BsSize, 64));
 		rgn_printf("phyAddr(%x) u32Width(%d) u32Height(%d) u32BgColor(%x) enPixelFormat(%d) u32ObjNum(%d)\n",
 			rtos_cmdq.param_ptr,
 			canvas_cmpr_attr->u32Width,
