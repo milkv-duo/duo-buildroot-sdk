@@ -370,6 +370,16 @@ config ARCH_CV181X
     help
       This enables support for Cvitek's CV181X
 
+config ARCH_ATHENA2
+    bool "Cvitek ATHENA2 SoC"
+    select PINCTRL
+    select PINCTRL_BM
+    select PINMUX
+    select PINCONF
+    select GENERIC_PINCONF
+    help
+      This enables support for Cvitek's ATHENA2
+
 config ARCH_CV952X
     bool "Cvitek CV952X SoC"
     select PINCTRL
@@ -475,6 +485,39 @@ config ARCH_CV181X_ASIC
 
 endchoice
 endif # end ARCH_CV181X
+
+if ARCH_ATHENA2
+config ARCH_CVITEK_CHIP
+    string "athena2"
+    help
+      This enables support for Cvitek ATHENA2 series
+
+choice
+    prompt "Select the platform of SoC"
+    default ARCH_ATHENA2_FPGA
+    help
+      Select the platform of SoC
+        FPGA
+        PALLADIUM
+        ASIC
+
+config ARCH_ATHENA2_PALLADIUM
+    bool "Cvitek ATHENA2 SoC - Palladium"
+    help
+      This enables support for Cvitek's ATHENA2 SoC on Palladium platform
+
+config ARCH_ATHENA2_FPGA
+    bool "Cvitek ATHENA2 SoC - FPGA"
+    help
+      This enables support for Cvitek's ATHENA2 SoC on FPGA platform
+
+config ARCH_ATHENA2_ASIC
+    bool "Cvitek ATHENA2 SoC- ASIC"
+    help
+      This enables support for Cvitek's ATHENA2 SoC ASIC
+
+endchoice
+endif # end ARCH_ATHENA2
 
 if ARCH_CV952X
 config ARCH_CVITEK_CHIP

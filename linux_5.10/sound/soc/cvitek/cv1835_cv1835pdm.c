@@ -30,14 +30,32 @@ static int cv1835_pdm_codec_init(struct snd_soc_pcm_runtime *rtd)
 static struct snd_soc_ops cv1835_pdm_ops = {
 	.hw_params = cv1835_pdm_hw_params,
 };
+static struct snd_soc_dai_link_component cv1835_pdm_cpus = {
+	.name = "4110000.i2s",
+	.dai_name = "4110000.i2s",
 
+};
+
+static struct snd_soc_dai_link_component cv1835_pdm_codecs = {
+	.name = "41d0c00.pdm",
+	.dai_name = "cv1835pdm",
+
+};
+
+static struct snd_soc_dai_link_component cv1835_pdm_platform = {
+	.name = "4110000.i2s",
+	.dai_name = "4110000.i2s",
+
+};
 static struct snd_soc_dai_link cv1835_pdm_dai = {
 	.name = "cv1835-i2s-1",
 	.stream_name = "cv1835-pdm",
-	.cpu_dai_name = "4110000.i2s",
-	.codec_dai_name = "cv1835pdm",
-	.platform_name = "4110000.i2s",
-	.codec_name = "41d0c00.pdm",
+	.cpus = &cv1835_pdm_cpus,
+	.num_cpus = 1,
+	.codecs = &cv1835_pdm_codecs,
+	.num_codecs = 1,
+	.platforms = &cv1835_pdm_platform,
+	.num_platforms = 1,
 	.ops = &cv1835_pdm_ops,
 	.init = cv1835_pdm_codec_init,
 	.dai_fmt = SND_SOC_DAIFMT_I2S
@@ -56,7 +74,7 @@ static struct snd_soc_card cv1835_pdm = {
 
 static const struct of_device_id cvi_audio_match_ids[] = {
 	{
-		.compatible = "cvitek,cv1835-pdm",
+		.compatible = "cvitek,cv182x-pdm",
 		//.data = (void *) &cv1835_pdm_dai,
 	},
 	{ }

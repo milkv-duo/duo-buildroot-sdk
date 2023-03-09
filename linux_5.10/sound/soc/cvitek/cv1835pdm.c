@@ -223,6 +223,8 @@ static int cv1835pdm_probe(struct platform_device *pdev)
 {
 	struct cvi1835pdm *pdm;
 	struct resource *res;
+	struct miscdevice *miscdev;
+	int ret;
 
 	dev_info(&pdev->dev, "%s\n", __func__);
 
@@ -236,6 +238,17 @@ static int cv1835pdm_probe(struct platform_device *pdev)
 	if (IS_ERR(pdm->pdm_base))
 		return PTR_ERR(pdm->pdm_base);
 
+	miscdev = &pdm->miscdev;
+	miscdev->minor = MISC_DYNAMIC_MINOR;
+	miscdev->name = "cv1835pdm";
+	//miscdev->fops = &adc_fops;
+	miscdev->parent = NULL;
+
+	ret = misc_register(miscdev);
+	if (ret) {
+		pr_err("pdm: failed to register misc device.\n");
+		return ret;
+	}
 	dev_set_drvdata(&pdev->dev, pdm);
 	pdm->dev = &pdev->dev;
 

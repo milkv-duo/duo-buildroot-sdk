@@ -157,6 +157,12 @@ static const struct flash_info cvitek_parts[] = {
 	{ "FM25Q64", INFO(0xF83217, 0x0, 64 * 1024, 128,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
 		.fixups = &sr_bit1_qe_fixups },
+	{ "FM25Q128A", INFO(0xA14018, 0x0, 64 * 1024, 256,
+			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
+		.fixups = &sr_bit1_qe_fixups },
+	{ "FM25W128A", INFO(0xA12818, 0x0, 64 * 1024, 256,
+			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
+		.fixups = &sr_bit1_qe_fixups },
 	{ "BY25Q128AS", INFO(0x684018, 0x0, 64 * 1024, 256,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
 		.fixups = &sr_bit1_qe_fixups },

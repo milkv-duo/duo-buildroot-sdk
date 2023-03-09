@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Generic efuse drivers configuration
+#
+
+menuconfig EFUSE
+	bool "Efuse drivers"
+	default y
+	help
+		Efuse drivers offer a generic mechanism for
+		efuse management.
+		Only support cv181x and cv180x currently
+		Efuse driver build-in is better
+
+if EFUSE
+
+config CV181X_EFUSE
+	tristate "Efuse driver for CVITEK CV181X"
+	depends on ARCH_CV181X || COMPILE_TEST
+	default y
+	help
+		Select this driver for CVITEK CV181X efuse
+		This driver is used for program and read efuse
+		This driver can also be built as a module
+		But build-in is better.
+
+config CV180X_EFUSE
+	tristate "Efuse driver for CVITEK CV180X"
+	depends on ARCH_CV180X || COMPILE_TEST
+	default y
+	help
+		Select this driver for CVITEK CV180X efuse op
+		This driver is used for program and read efuse
+		This driver can also be built as a module
+                But build-in is better.
+
+endif

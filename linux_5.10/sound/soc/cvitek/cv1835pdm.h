@@ -11,7 +11,7 @@
 #define __CV1835PDM_H__
 
 #include <linux/clk.h>
-
+#include <linux/miscdevice.h>
 /* register offset */
 #define PDM_EN_REG	        0x30
 #define PDM_EN				0x1
@@ -56,6 +56,7 @@ struct cvi1835pdm {
 	void __iomem *pdm_base;
 	struct clk *clk;
 	struct device *dev;
+	struct miscdevice miscdev;
 };
 
 #endif  /* __CV1835PDM_H__ */

@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 #include <linux/memblock.h>
 
-#define MAX_RESERVED_REGIONS	64
+#define MAX_RESERVED_REGIONS	4
 
 #if defined(CONFIG_ARCH_CVITEK)
 struct reserved_mem_size_entry {
@@ -69,7 +69,7 @@ void __init fdt_reserved_mem_save_node(unsigned long node, const char *uname,
 	}
 
 	rmem->fdt_node = node;
-	rmem->name = uname;
+	strncpy(rmem->name, uname, 8);
 	rmem->base = base;
 	rmem->size = size;
 
