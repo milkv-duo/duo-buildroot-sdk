@@ -240,7 +240,18 @@ function build_middleware()
 
   pushd $MW_PATH
     rm -rf lib
-    ln -s lib_"$SDK_VER" lib
+    if [ -d $(echo ${CHIP_ARCH} | tr A-Z a-z)/lib_"$SDK_VER" ];
+    then
+        ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/lib_"$SDK_VER" lib
+    else
+        ln -s lib_"$SDK_VER" lib
+    fi
+
+    if [ -d $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ];
+    then
+        rm -rf ko
+        ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ko
+    fi
   popd
 
   pushd "$MW_PATH"/component/isp
@@ -257,11 +268,7 @@ function build_middleware()
   cp -af "$MW_PATH"/lib/3rd/*.so* "$SYSTEM_OUT_DIR"/lib
   # copy ko
   mkdir -p "$SYSTEM_OUT_DIR"/ko
-  if [[ "$BUILD_FOR_DEBUG" != "y" ]]; then
-  cp -af "$MW_PATH"/ko_shrink/* "$SYSTEM_OUT_DIR"/ko/
-  else
   cp -af "$MW_PATH"/ko/* "$SYSTEM_OUT_DIR"/ko/
-  fi
 
   # add sdk version
   echo "SDK_VERSION=${SDK_VER}" > "$SYSTEM_OUT_DIR"/sdk-release
@@ -498,11 +505,7 @@ function cvi_setup_env()
   if [ -z "${STORAGE_TYPE}" ]; then
     FLASH_PARTITION_XML="$BUILD_PATH"/boards/default/partition/partition_none.xml
   else
-    if [[ "$BUILD_FOR_DEBUG" != "y" ]]; then
-      FLASH_PARTITION_XML="$BUILD_PATH"/boards/"${CHIP_ARCH,,}"/"$PROJECT_FULLNAME"/partition/partition_"$STORAGE_TYPE"_rls.xml
-    else
-      FLASH_PARTITION_XML="$BUILD_PATH"/boards/"${CHIP_ARCH,,}"/"$PROJECT_FULLNAME"/partition/partition_"$STORAGE_TYPE".xml
-    fi
+    FLASH_PARTITION_XML="$BUILD_PATH"/boards/"${CHIP_ARCH,,}"/"$PROJECT_FULLNAME"/partition/partition_"$STORAGE_TYPE".xml
     if ! [ -e "$FLASH_PARTITION_XML" ]; then
       print_error "${FLASH_PARTITION_XML} does not exist!!"
       return 1

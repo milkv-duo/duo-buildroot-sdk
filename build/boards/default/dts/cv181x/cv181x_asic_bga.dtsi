@@ -3,9 +3,11 @@
 	mute-gpio-r = <&porta 30 GPIO_ACTIVE_LOW>;
 };
 
+&i2c1 {
+	status = "disabled";
+};
+
 / {
-	/delete-node/ wifi-sd@4320000;
-	/delete-node/ i2c@04010000;
 	/delete-node/ i2s@04110000;
 	/delete-node/ i2s@04120000;
 	/delete-node/ sound_ext1;

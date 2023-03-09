@@ -353,7 +353,7 @@
 			bank-name = "portd";
 			gpio-controller;
 			#gpio-cells = <2>;
-			snps,nr-gpios = <12>;
+			snps,nr-gpios = <32>;
 			reg = <0>;
 		};
 	};
@@ -369,7 +369,7 @@
 			bank-name = "porte";
 			gpio-controller;
 			#gpio-cells = <2>;
-			snps,nr-gpios = <24>;
+			snps,nr-gpios = <32>;
 			reg = <0>;
 		};
 	};
@@ -536,6 +536,7 @@
 		pll_reg = <0x300207C>;
 		no-mmc;
 		no-sd;
+		status = "disabled";
 	};
 
 	i2s_mclk: i2s_mclk {
@@ -666,8 +667,9 @@
 	mipi_rx: cif {
 		compatible = "cvitek,cif";
 		reg = <0x0 0x0a0c2000 0x0 0x2000>, <0x0 0x0a0d0000 0x0 0x1000>,
-		      <0x0 0x0a0c4000 0x0 0x2000>, <0x0 0x03001c30 0x0 0x30>;
-		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1", "pad_ctrl";
+		      <0x0 0x0a0c4000 0x0 0x2000>, <0x0 0x0a0c6000 0x0 0x2000>,
+		      <0x0 0x03001c30 0x0 0x30>;
+		reg-names = "csi_mac0", "csi_wrap0", "csi_mac1", "csi_mac2", "pad_ctrl";
 		snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>;
 		resets = <&rst RST_CSIPHY0>, <&rst RST_CSIPHY1>,
 			<&rst RST_CSIPHY0RST_APB>, <&rst RST_CSIPHY1RST_APB>;
@@ -737,18 +739,34 @@
 
 	vo {
 		compatible = "cvitek,vo";
-		reg = <0x0 0x0a080000 0x0 0x10000>, <0x0 0x0a0d1000 0x0 0x100>;
-		reg-names = "sc","dphy";
+		reg = <0x0 0x0a080000 0x0 0x10000>, <0x0 0x0a0c8000 0x0 0xa0>, <0x0 0x0a0d1000 0x0 0x100>;
+		reg-names = "sc", "vip_sys", "dphy";
 		clocks = <&clk CV181X_CLK_DISP_VIP>, <&clk CV181X_CLK_DSI_MAC_VIP>, <&clk CV181X_CLK_BT_VIP>;
+		reset-gpio = <&porte 2 GPIO_ACTIVE_LOW>;
+		pwm-gpio = <&porte 0 GPIO_ACTIVE_HIGH>;
+		power-ct-gpio = <&porte 1 GPIO_ACTIVE_HIGH>;
 		clock-names = "clk_disp", "clk_dsi", "clk_bt";
+	};
+
+#if (CVIMMAP_FRAMEBUFFER_SIZE > 0)
+	reserved-memory {
+	  #size-cells = <0x2>;
+	  #address-cells = <0x2>;
+	  ranges;
+
+		fb_reserved: cvifb {
+			alloc-ranges = <0x0 CVIMMAP_FRAMEBUFFER_ADDR 0 CVIMMAP_FRAMEBUFFER_SIZE>;
+			size = <0x0 CVIMMAP_FRAMEBUFFER_SIZE>;
+		};
 	};
 
 	cvifb {
 		compatible = "cvitek,fb";
+		memory-region = <&fb_reserved>;
 		reg = <0x0 0x0a088000 0x0 0x1000>;
 		reg-names = "disp";
 	};
-
+#endif
 	dwa {
 		compatible = "cvitek,dwa";
 		reg = <0x0 0x0a0c0000 0x0 0x1000>;
@@ -890,7 +908,20 @@
 
 
 	aliases {
+		i2c0 = &i2c0;
+		i2c1 = &i2c1;
+		i2c2 = &i2c2;
+		i2c3 = &i2c3;
+		i2c4 = &i2c4;
+		//spi0 = &spi0;
+		//spi1 = &spi1;
+		//spi2 = &spi2;
+		//spi3 = &spi3;
 		serial0 = &uart0;
+		serial1 = &uart1;
+		serial2 = &uart2;
+		serial3 = &uart3;
+		serial4 = &uart4;
 		ethernet0 = &ethernet0;
 	};
 

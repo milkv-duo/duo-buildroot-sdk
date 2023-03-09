@@ -1,0 +1,11 @@
+<physical_partition type="emmc">
+	<partition label="BOOT" size_in_kb="8192" file="boot.emmc" />
+	<partition label="MISC" size_in_kb="512" file="logo.jpg" />
+	<!-- Beware that in emmc u-boot environment should be 0x40000 alignment -->
+	<partition label="ENV" size_in_kb="128" file="" />
+	<partition label="ROOTFS" size_in_kb="70656" file="rootfs.emmc" />
+	<partition label="SYSTEM" size_in_kb="40960" file="system.emmc" type="ext4" />
+    <partition label="CFG" size_in_kb="15240" file="cfg.emmc" mountpoint="/mnt/cfg" type="ext4" />
+	<partition label="DATA" size_in_kb="3145728" file="" mountpoint="/mnt/data" type="ext4"/>
+</physical_partition>
+

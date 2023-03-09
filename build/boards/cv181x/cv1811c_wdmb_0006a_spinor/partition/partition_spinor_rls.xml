@@ -1,0 +1,7 @@
+<physical_partition type="spinor">
+    <partition label="fip" size_in_kb="580" readonly="false" file="fip.bin"/>
+    <partition label="BOOT" size_in_kb="2160" readonly="false" file="boot.spinor"/>
+    <partition label="ROOTFS" size_in_kb="3204" readonly="false" file="rootfs.spinor" />
+    <partition label="DATA"  size_in_kb="2248" readonly="false" file="data.spinor" mountpoint="/mnt/data" type="squashfs" />
+</physical_partition>
+

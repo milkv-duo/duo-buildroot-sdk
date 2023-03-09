@@ -9,7 +9,12 @@ opensbi-clean:
 	$(call print_target)
 	${Q}$(MAKE) -C ${OPENSBI_PATH} PLATFORM=generic distclean
 
-FSBL_OUTPUT_PATH = ${FSBL_PATH}/build/${PROJECT_FULLNAME}
+ifeq (${CONFIG_FSBL_SECURE_BOOT_SUPPORT},y)
+FSBL_WORK_PATH = ${FSBL_PATH}_secureboot
+else
+FSBL_WORK_PATH = ${FSBL_PATH}
+endif
+FSBL_OUTPUT_PATH = ${FSBL_WORK_PATH}/build/${PROJECT_FULLNAME}
 ifeq ($(call qstrip,${CONFIG_ARCH}),riscv)
 fsbl-build: opensbi
 endif
@@ -27,9 +32,9 @@ fsbl%: export OD_CLK_SEL=${CONFIG_OD_CLK_SEL}
 fsbl%: export VC_CLK_OVERDRIVE=${CONFIG_VC_CLK_OVERDRIVE}
 fsbl-build: u-boot-build memory-map
 	$(call print_target)
-	${Q}mkdir -p ${FSBL_PATH}/build
-	${Q}ln -snrf -t ${FSBL_PATH}/build ${CVI_BOARD_MEMMAP_H_PATH}
-	${Q}$(MAKE) -j${NPROC} -C ${FSBL_PATH} O=${FSBL_OUTPUT_PATH} BLCP_2ND_PATH=${BLCP_2ND_PATH} \
+	${Q}mkdir -p ${FSBL_WORK_PATH}/build
+	${Q}ln -snrf -t ${FSBL_WORK_PATH}/build ${CVI_BOARD_MEMMAP_H_PATH}
+	${Q}$(MAKE) -j${NPROC} -C ${FSBL_WORK_PATH} O=${FSBL_OUTPUT_PATH} BLCP_2ND_PATH=${BLCP_2ND_PATH} \
 		LOADER_2ND_PATH=${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/u-boot-raw.bin
 	${Q}cp ${FSBL_OUTPUT_PATH}/fip.bin ${OUTPUT_DIR}/
 

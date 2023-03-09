@@ -1,0 +1,10 @@
+# ignore files
+.config
+.defconfig
+config.cmake
+*.pyc
+.config.old
+
+
+# ignore dirs
+output/

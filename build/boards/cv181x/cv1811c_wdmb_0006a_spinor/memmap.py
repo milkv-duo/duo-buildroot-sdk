@@ -1,1 +1,1 @@
-../../default/memmap/cv181x/memmap_ddr_64mb.py
+../../default/memmap/cv181x/memmap_ddr_128mb.py

@@ -257,7 +257,7 @@ config NO_TP
 
 config USB_OSDRV_CVITEK_GADGET
 	bool "Select CONFIG_USB_OSDRV_CVITEK_GADGET to build osdrv with usb gadget cvg"
-	default y
+	default n
 	help
 	  Say 'Y' or 'M' here to enable device controller functionality
 	  of the Cvitek driver.

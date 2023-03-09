@@ -129,6 +129,10 @@ def gen_sensor_tuning_param_list():
                             for x in xlist:
                                 temp_chip_list.append("CHIP_" + x)
 
+                    if len(temp_chip_list) == 0:
+                        print("Error: chip list is mismatch between isp_tuning and build/boards, pls check!!!")
+                        return kconfig_param_config_default_tmpl
+
                     temp_str = kconfig_param_config_menu_tmpl.format(
                         " || ".join(temp_chip_list),
                         customers,
