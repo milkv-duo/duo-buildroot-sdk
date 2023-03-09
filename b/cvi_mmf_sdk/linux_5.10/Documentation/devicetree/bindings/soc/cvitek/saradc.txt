@@ -1,8 +1,0 @@
-Cvitek saradc driver
-
-This document describes the binding for the Cvitek saradc.
-
-Required properties:
-- compatible: "cvitek,saradc"
-- reg: saradc register regions
-- interrupts: saradc interrupt number

@@ -1,6 +1,0 @@
-Cvitek base driver
-
-This document describes the binding for the Cvitek base.
-
-Required properties:
-- compatible: "cvitek,base"

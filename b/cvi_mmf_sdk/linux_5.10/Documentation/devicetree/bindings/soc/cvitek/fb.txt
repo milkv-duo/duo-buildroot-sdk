@@ -1,8 +1,0 @@
-Cvitek fb driver
-
-This document describes the binding for the Cvitek fb.
-
-Required properties:
-- compatible: "cvitek,fb"
-- reg: fb register regions
-- interrupts: display interrupt number

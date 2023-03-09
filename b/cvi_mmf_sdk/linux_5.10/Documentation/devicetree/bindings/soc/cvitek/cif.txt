@@ -1,8 +1,0 @@
-Cvitek cif driver
-
-This document describes the binding for the Cvitek cif.
-
-Required properties:
-- compatible: "cvitek,cif"
-- reg: cif register regions
-- interrupts: cif interrupt number
