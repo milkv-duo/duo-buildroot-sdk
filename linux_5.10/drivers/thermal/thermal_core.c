@@ -433,8 +433,15 @@ static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
 		    tz->temperature >= trip_temp)
 			thermal_notify_tz_trip_up(tz->id, trip);
 		if (tz->last_temperature >= trip_temp &&
-		    tz->temperature < (trip_temp - hyst))
+			tz->temperature < (trip_temp - hyst)) {
 			thermal_notify_tz_trip_down(tz->id, trip);
+			} else if (tz->last_temperature >= (trip_temp + hyst) &&
+			(tz->temperature < trip_temp + hyst) && (trip == 0) && (tz->last_temperature != tz->temperature)) {
+				thermal_notify_tz_trip_down(tz->id, trip + 1);
+			} else if (tz->last_temperature >= (trip_temp - hyst) &&
+			(tz->temperature < trip_temp - hyst) && (trip == 0) && (tz->last_temperature != tz->temperature)) {
+				thermal_notify_tz_trip_down(tz->id, trip);
+			}
 	}
 
 	if (type == THERMAL_TRIP_CRITICAL || type == THERMAL_TRIP_HOT)

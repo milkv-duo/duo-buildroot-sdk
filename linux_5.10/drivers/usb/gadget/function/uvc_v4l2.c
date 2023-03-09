@@ -58,6 +58,9 @@ struct uvc_format {
 static struct uvc_format uvc_formats[] = {
 	{ 16, V4L2_PIX_FMT_YUYV  },
 	{ 0,  V4L2_PIX_FMT_MJPEG },
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	{ 0,  V4L2_PIX_FMT_H264 },
+#endif
 };
 
 static int

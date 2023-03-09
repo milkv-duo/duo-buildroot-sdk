@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/sound/cvitek,cv182xa.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Cvitek CV181X cv182xa codec driver
+
+maintainers:
+  - Ethan Chen <ethan.chen@cvitek.com>
+
+description: |
+  The Cvitek CV181X cv182xa internal audio codec driver.
+
+properties:
+  compatible:
+    const: cvitek,cv182xa-adc
+    const: cvitek,cv182xa-dac
+    const: cvitek,cv182xaadc
+    const: cvitek,cv182xadac
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  cvi,model:
+    maxItems: 1
+
+  clock-names:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - clocks
+	- clock-names
+	- cvi,model
+additionalProperties: false
+
+examples:
+  # adc codec node:
+  - |
+	adc: adc@0300A100 {
+		compatible = "cvitek,cv182xaadc";
+		reg = <0x0 0x0300A100 0x0 0x100>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+		clk_source = <0x04130000>;
+	};
+
+  # dac codec node:
+  - |
+	dac: dac@0300A000 {
+		compatible = "cvitek,cv182xadac";
+		reg = <0x0 0x0300A000 0x0 0x100>;
+		clocks = <&i2s_mclk 0>;
+		clock-names = "i2sclk";
+	};
+
+  # sound_adc node:
+  - |
+	sound_adc {
+		compatible = "cvitek,cv182xa-adc";
+		cvi,model = "CV182XA";
+		cvi,card_name = "cv182xa_adc";
+	};
+
+  # sound_dac node:
+  - |
+	sound_dac {
+		compatible = "cvitek,cv182xa-dac";
+		cvi,model = "CV182XA";
+		cvi,card_name = "cv182xa_dac";
+	};

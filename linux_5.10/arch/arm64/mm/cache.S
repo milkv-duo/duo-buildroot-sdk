@@ -232,6 +232,7 @@ SYM_FUNC_START_PI(__dma_map_area)
 	b.eq	__dma_inv_area
 	b	__dma_clean_area
 SYM_FUNC_END_PI(__dma_map_area)
+EXPORT_SYMBOL(__dma_map_area)
 
 /*
  *	__dma_unmap_area(start, size, dir)

@@ -57,3 +57,4 @@ void arch_setup_dma_ops(struct device *dev, u64 dma_base, u64 size,
 		dev->dma_ops = &xen_swiotlb_dma_ops;
 #endif
 }
+EXPORT_SYMBOL(arch_setup_dma_ops);

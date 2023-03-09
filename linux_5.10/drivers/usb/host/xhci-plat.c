@@ -84,6 +84,10 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 	 * dev struct in order to setup MSI
 	 */
 	xhci->quirks |= XHCI_PLAT | priv->quirks;
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+	/* Use the SW bandwidth calculation. */
+	xhci->quirks |= XHCI_SW_BW_CHECKING;
+#endif
 }
 
 /* called during probe() after chip reset completes */
@@ -105,7 +109,32 @@ static int xhci_plat_start(struct usb_hcd *hcd)
 	return xhci_run(hcd);
 }
 
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+static int cvi_core_init_mode(struct platform_device *pdev)
+{
+	/* Bypass the bandwidth report. */
+	iowrite32((ioread32(ioremap(0x040D8098, 0x4)) | (1 << 17) | (1 << 18)),
+		ioremap(0x040D8098, 0x4));
+	return 0;
+}
+#endif
+
 #ifdef CONFIG_OF
+
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+int xhci_cvitek_init_quirk(struct usb_hcd *hcd)
+{
+
+	if (usb_hcd_is_primary_hcd(hcd))
+		cvi_core_init_mode(to_platform_device(hcd->self.controller));
+	return 0;
+}
+
+static const struct xhci_plat_priv xhci_plat_cvitek = {
+	.init_quirk = xhci_cvitek_init_quirk,
+};
+#endif
+
 static const struct xhci_plat_priv xhci_plat_marvell_armada = {
 	.init_quirk = xhci_mvebu_mbus_init_quirk,
 };
@@ -132,6 +161,11 @@ static const struct of_device_id usb_xhci_of_match[] = {
 	}, {
 		.compatible = "xhci-platform",
 	}, {
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+		.compatible = "cvitek,xhci-platform",
+		.data = &xhci_plat_cvitek,
+	}, {
+#endif
 		.compatible = "marvell,armada-375-xhci",
 		.data = &xhci_plat_marvell_armada,
 	}, {

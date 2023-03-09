@@ -1,0 +1,8 @@
+Bitmain TPU driver
+
+Required properties:
+- compatible: "cvitek,tpu"
+- reg: TDMA and TIU engine's register regions
+- interrupts: TDMA interrupt number
+- resets: reset handles for TIU and TDMA
+- reset-names: should be "tiu" and "tdma"

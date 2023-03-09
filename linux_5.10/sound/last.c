@@ -16,7 +16,7 @@ static int __init alsa_sound_last_init(void)
 	for (idx = 0; idx < SNDRV_CARDS; idx++) {
 		card = snd_card_ref(idx);
 		if (card) {
-			printk(KERN_INFO "  #%i: %s\n", idx, card->longname);
+			//printk(KERN_INFO "  #%i: %s\n", idx, card->longname);
 			snd_card_unref(card);
 			ok++;
 		}

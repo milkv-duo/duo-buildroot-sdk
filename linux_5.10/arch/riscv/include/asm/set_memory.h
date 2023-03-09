@@ -27,14 +27,14 @@ int set_direct_map_default_noflush(struct page *page);
 
 #endif /* __ASSEMBLY__ */
 
-#ifdef CONFIG_ARCH_HAS_STRICT_KERNEL_RWX
+#ifdef CONFIG_STRICT_KERNEL_RWX
 #ifdef CONFIG_64BIT
 #define SECTION_ALIGN (1 << 21)
 #else
 #define SECTION_ALIGN (1 << 22)
 #endif
-#else /* !CONFIG_ARCH_HAS_STRICT_KERNEL_RWX */
+#else /* !CONFIG_STRICT_KERNEL_RWX */
 #define SECTION_ALIGN L1_CACHE_BYTES
-#endif /* CONFIG_ARCH_HAS_STRICT_KERNEL_RWX */
+#endif /* CONFIG_STRICT_KERNEL_RWX */
 
 #endif /* _ASM_RISCV_SET_MEMORY_H */

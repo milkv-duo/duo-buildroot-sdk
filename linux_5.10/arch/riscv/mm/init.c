@@ -152,6 +152,14 @@ disable:
 }
 #endif /* CONFIG_BLK_DEV_INITRD */
 
+static phys_addr_t firmware_size __initdata;
+static int __init early_get_firmware_size(char *arg)
+{
+	firmware_size = memparse(arg, &arg);
+	return 0;
+}
+early_param("riscv.fwsz", early_get_firmware_size);
+
 void __init setup_bootmem(void)
 {
 	phys_addr_t mem_start = 0;
@@ -192,6 +200,11 @@ void __init setup_bootmem(void)
 	 * not work for DTB pointers that are fixmap addresses
 	 */
 	memblock_reserve(dtb_early_pa, fdt_totalsize(dtb_early_va));
+
+	if (firmware_size > PAGE_SIZE && firmware_size < LOAD_OFFSET)
+		memblock_reserve(__pa(PAGE_OFFSET), firmware_size);
+	else
+		memblock_reserve(__pa(PAGE_OFFSET), LOAD_OFFSET);
 
 	early_init_fdt_scan_reserved_mem();
 	memblock_allow_resize();
@@ -434,7 +447,7 @@ static uintptr_t __init best_map_size(phys_addr_t base, phys_addr_t size)
 asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 {
 	uintptr_t va, pa, end_va;
-	uintptr_t load_pa = (uintptr_t)(&_start);
+	uintptr_t load_pa = (uintptr_t)(&_start) - LOAD_OFFSET;
 	uintptr_t load_sz = (uintptr_t)(&_end) - load_pa;
 	uintptr_t map_size = best_map_size(load_pa, MAX_EARLY_MAPPING_SIZE);
 #ifndef __PAGETABLE_PMD_FOLDED
@@ -472,8 +485,8 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 	/* Setup trampoline PGD and PMD */
 	create_pgd_mapping(trampoline_pg_dir, PAGE_OFFSET,
 			   (uintptr_t)trampoline_pmd, PGDIR_SIZE, PAGE_TABLE);
-	create_pmd_mapping(trampoline_pmd, PAGE_OFFSET,
-			   load_pa, PMD_SIZE, PAGE_KERNEL_EXEC);
+	create_pmd_mapping(trampoline_pmd, PAGE_OFFSET + LOAD_OFFSET,
+			   load_pa + LOAD_OFFSET, PMD_SIZE, PAGE_KERNEL_EXEC);
 #else
 	/* Setup trampoline PGD */
 	create_pgd_mapping(trampoline_pg_dir, PAGE_OFFSET,

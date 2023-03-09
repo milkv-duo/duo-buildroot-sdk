@@ -12,13 +12,16 @@
 #include <linux/usb/ch9.h>
 #include <linux/usb/gadget.h>
 #include <linux/usb/video.h>
-
+#if IS_ENABLED(CONFIG_USB_UVCG_SG_TRANSFER)
+#include <linux/scatterlist.h>
+#endif
 #include <media/v4l2-dev.h>
 
 #include "uvc.h"
 #include "uvc_queue.h"
 #include "uvc_video.h"
 
+#define UVCG_MAX_SG_NUM		64	// 8ms in 125us interval.
 /* --------------------------------------------------------------------------
  * Video codecs
  */
@@ -94,6 +97,7 @@ uvc_video_encode_bulk(struct usb_request *req, struct uvc_video *video,
 		video->payload_size = 0;
 }
 
+#if !IS_ENABLED(CONFIG_USB_UVCG_SG_TRANSFER)
 static void
 uvc_video_encode_isoc(struct usb_request *req, struct uvc_video *video,
 		struct uvc_buffer *buf)
@@ -120,7 +124,44 @@ uvc_video_encode_isoc(struct usb_request *req, struct uvc_video *video,
 		video->fid ^= UVC_STREAM_FID;
 	}
 }
+#else
+static void
+uvc_video_encode_isoc(struct usb_request *req, struct uvc_video *video,
+		struct uvc_buffer *buf)
+{
+	int i;
+	struct scatterlist *sg;
 
+	req->length = 0;
+
+	for_each_sg(req->sg, sg, UVCG_MAX_SG_NUM, i) {
+		void *mem = sg_virt(sg);
+		int len = video->req_size;
+		int ret;
+
+		/* Add the header. */
+		ret = uvc_video_encode_header(video, buf, mem, len);
+		mem += ret;
+		len -= ret;
+		/* Process video data. */
+		ret = uvc_video_encode_data(video, buf, mem, len);
+		len -= ret;
+
+		sg->length = video->req_size - len;
+		req->length += sg->length;
+
+		if (buf->bytesused == video->queue.buf_used) {
+			video->queue.buf_used = 0;
+			buf->state = UVC_BUF_STATE_DONE;
+			uvcg_queue_next_buffer(&video->queue, buf);
+			video->fid ^= UVC_STREAM_FID;
+			i++;
+			break;
+		}
+	}
+	req->num_sgs = i;
+}
+#endif
 /* --------------------------------------------------------------------------
  * Request handling
  */
@@ -199,6 +240,9 @@ uvc_video_alloc_requests(struct uvc_video *video)
 {
 	unsigned int req_size;
 	unsigned int i;
+#if IS_ENABLED(CONFIG_USB_UVCG_SG_TRANSFER)
+	unsigned int j;
+#endif
 	int ret = -ENOMEM;
 
 	BUG_ON(video->req_size);
@@ -206,7 +250,7 @@ uvc_video_alloc_requests(struct uvc_video *video)
 	req_size = video->ep->maxpacket
 		 * max_t(unsigned int, video->ep->maxburst, 1)
 		 * (video->ep->mult);
-
+#if !IS_ENABLED(CONFIG_USB_UVCG_SG_TRANSFER)
 	for (i = 0; i < UVC_NUM_REQUESTS; ++i) {
 		video->req_buffer[i] = kmalloc(req_size, GFP_KERNEL);
 		if (video->req_buffer[i] == NULL)
@@ -225,6 +269,32 @@ uvc_video_alloc_requests(struct uvc_video *video)
 	}
 
 	video->req_size = req_size;
+#else
+	req_size = ALIGN(req_size, 32);
+	for (i = 0; i < UVC_NUM_REQUESTS; ++i) {
+		video->req_buffer[i] = kmalloc(req_size * UVCG_MAX_SG_NUM, GFP_KERNEL);
+		if (video->req_buffer[i] == NULL)
+			goto error;
+
+		video->req[i] = usb_ep_alloc_request(video->ep, GFP_KERNEL);
+		if (video->req[i] == NULL)
+			goto error;
+		video->req[i]->sg = kmalloc(sizeof(struct scatterlist) * UVCG_MAX_SG_NUM, GFP_KERNEL);
+		if (video->req[i]->sg == NULL)
+			goto error;
+		sg_init_table(video->req[i]->sg, UVCG_MAX_SG_NUM);
+		video->req[i]->buf = video->req_buffer[i];
+		for (j = 0; j < UVCG_MAX_SG_NUM; j++)
+			sg_set_buf(&video->req[i]->sg[j], video->req[i]->buf + req_size * j, 0);
+		video->req[i]->num_sgs = 0;
+		video->req[i]->length = 0;
+		video->req[i]->complete = uvc_video_complete;
+		video->req[i]->context = video;
+		list_add_tail(&video->req[i]->list, &video->req_free);
+	}
+
+	video->req_size = req_size;
+#endif
 
 	return 0;
 
@@ -278,6 +348,11 @@ static void uvcg_video_pump(struct work_struct *work)
 
 		video->encode(req, video, buf);
 
+		if (!video->ep->enabled) {
+			spin_unlock_irqrestore(&queue->irqlock, flags);
+			uvcg_queue_cancel(queue, 0);
+			break;
+		}
 		/* Queue the USB request */
 		ret = uvcg_video_ep_queue(video, req);
 		spin_unlock_irqrestore(&queue->irqlock, flags);

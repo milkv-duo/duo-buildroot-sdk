@@ -1,0 +1,192 @@
+#
+# CVITEK Audio Sound SoC drivers
+#
+
+config SND_SOC_CV1835_ADAU1372
+	tristate "Support for the CV1835-ADAU1372 card"
+	help
+	  Say y or m if you want to add support for the analog
+	  codec ADAU1372 connect to the CVITEK CV1835 boards.
+	  Then select it for built in or module.
+	  If not, please don't select it
+
+config SND_SOC_CV1835_CV1835PDM
+	tristate "Support for the CV1835-CV1835PDM card"
+	help
+	 Say Y or M if you want to add support for CVITEK PDM connect
+	 to CVITEK CV1835 I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV182X_CV182XPDM
+	tristate "Support for the CV182X-CV182XPDM card"
+	help
+	 Say Y or M if you want to add support for CVITEK PDM connect
+	 to CVITEK CV182X I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV1835_CV1835ADC
+	tristate "Support for the CV1835-CV1835ADC card"
+	help
+	 Say Y or M if you want to add support for CVITEK ADC connect
+	 to CVITEK CV1835 I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV1835_CV1835DAC
+	tristate "Support for the CV1835-CV1835ADC card"
+	help
+	 Say Y or M if you want to add support for CVITEK DAC connect
+	 to CVITEK CV1835 I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV182X_CV182XADC
+	tristate "Support for the CV182X-CV182XADC card"
+	help
+	 Say Y or M if you want to add support for CV182X ADC connect
+	 to CVITEK CV182X I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV182X_CV182XDAC
+	tristate "Support for the CV182X-CV182XADC card"
+	help
+	 Say Y or M if you want to add support for CVITEK DAC connect
+	 to CVITEK CV182X I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV182XA_CV182XAADC
+	tristate "Support for the CV182XA-CV182XAADC card"
+	help
+	 Say Y or M if you want to add support for CV182XA ADC connect
+	 to CVITEK CV182XA I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_SOC_CV182XA_CV182XADAC
+	tristate "Support for the CV182XA-CV182XADAC card"
+	help
+	 Say Y or M if you want to add support for CVITEK DAC connect
+	 to CVITEK CV182XA I2S device.
+	 Then select it for built in or module.
+	 Say N, if not support
+
+config SND_CV1835_I2S
+	tristate "CVITEK CV1835 I2S Device Driver"
+	depends on CLKDEV_LOOKUP
+	select SND_SOC_GENERIC_DMAENGINE_PCM
+	help
+	 Say y or m if you want to add support for I2S driver for
+	 CVITEK CV1835 I2S device. The device supports upto maximum of
+	 2 channels each for play and record.
+	 Say N, if not support
+
+config SND_SOC_CV1835PDM
+    tristate "CVITEK CV1835 PDM device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK PDM driver for
+	 CVITEK CV1835 I2S device. The device supports digital external
+	 MICs.
+	 Say N, if not support
+
+config SND_SOC_CV1835ADC
+    tristate "CVITEK CV1835 ADC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK ADC driver for
+	 CVITEK CV1835 I2S device. The device supports analog external
+	 MICs.
+	 Say N, if not support
+
+config SND_SOC_CV182XADC
+    tristate "CVITEK CV182X ADC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK ADC driver for
+	 CVITEK CV182X I2S device. The device supports analog external
+	 MICs.
+	 Say N, if not support
+
+config SND_SOC_CV182XAADC
+    tristate "CVITEK CV182XA ADC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK ADC driver for
+	 CVITEK CV182XA I2S device. The device supports analog external
+	 MICs.
+	 Say N, if not support
+
+config SND_SOC_CV1835DAC
+    tristate "CVITEK CV1835 DAC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK DAC driver for
+	 CVITEK CV1835 I2S device. The device supports analog external
+	 devices (ex. headphone or speaker).
+	 Say N, if not support
+
+config SND_SOC_CV182XDAC
+    tristate "CVITEK CV182X DAC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK DAC driver for
+	 CVITEK CV182X I2S device. The device supports analog external
+	 devices (ex. headphone or speaker).
+	 Say N, if not support
+
+config SND_SOC_CV182XADAC
+    tristate "CVITEK CV182XA DAC device driver"
+	depends on SND
+	help
+	 Say y or m if you want to add support for CVITEK DAC driver for
+	 CVITEK CV182XA I2S device. The device supports analog external
+	 devices (ex. headphone or speaker).
+	 Say N, if not support
+
+config SND_SOC_CV1835_CONCURRENT_I2S
+	tristate "Support concurrent TX and RX by one I2S and the other I2S"
+	depends on SND
+	help
+	  Say Y, ex. if you want to receive audio data from I2S1 FIFO and
+	  transfer audio data to I2S0 FIFO concurrently. This is because
+	  of 1 I2S IP only has 1 FIFO, we need to bind 2 I2S IPs with 1 I/O
+
+	  If this device never do concurrent TX/RX, please don't select it
+
+config SND_SOC_CV183x_DUMMY_CARD
+	tristate "Support concurrent TX and RX by one I2S and the other I2S"
+	depends on SND
+	help
+	  Say Y, ex. if you want to receive audio data from I2S1 FIFO and
+	  transfer audio data to I2S0 FIFO concurrently. This is because
+	  of 1 I2S IP only has 1 FIFO, we need to bind 2 I2S IPs with 1 I/O
+
+	  If this device never do concurrent TX/RX, please don't select it
+
+config SND_SOC_CV1835_USE_AUDIO_PLL
+	tristate "Use internal audio PLL as I2S clock source"
+	depends on SND
+	help
+	  Say Y, ex. if you want to use internal audio PLL (24.576Mhz) as
+	  I2S MCLK input. Enable this configuration, we don't need to use
+	  external oscillator to provide MCLK clock. But be remember to enable
+	  MCLK out if codec also need MCLK clock.
+
+config CV1835_I2S_SUBSYS
+	bool "cvitek i2s tdm sub-system driver"
+	depends on SND
+	help
+	  Enable cvitek i2s_tdm sub-system driver to do i2s_tdm configuration.
+	  One need to set this sub-system if he want to do multi-record at the same
+	  time.
+	  Or do TX/RX simutaneously. ex. set I2S0 as RX and I2S1 as TX.
+	  Due to 1 I2S IP only has 1 FIFO. One must do this setting.
+
+config SND_SOC_CV1835_LT9611
+	tristate "Support for the lt9611 card"
+	help
+	  lt9611 codec enable.

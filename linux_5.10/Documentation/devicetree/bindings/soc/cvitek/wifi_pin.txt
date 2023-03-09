@@ -1,0 +1,6 @@
+sCvitek wifi pin driver
+
+Required properties:
+- compatible: "cvitek,wifi-pin"
+- power-gpio: Wifi chip power on gpio
+- wakeup-gpio: Wifi chip wakeup gpio

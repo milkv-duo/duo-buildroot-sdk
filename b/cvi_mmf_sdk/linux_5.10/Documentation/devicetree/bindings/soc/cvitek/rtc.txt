@@ -1,0 +1,8 @@
+Cvitek rtc driver
+
+This document describes the binding for the Cvitek rtc.
+
+Required properties:
+- compatible: "cvitek,rtc"
+- reg: rtc register regions
+- interrupts: rtc interrupt number

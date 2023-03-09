@@ -750,6 +750,42 @@ static int spi_nor_write_sr(struct spi_nor *nor, const u8 *sr, size_t len)
 }
 
 /**
+ * spi_nor_write_sr2_jy() - Write the Status Register.
+ * @nor:	pointer to 'struct spi_nor'.
+ * @sr:		pointer to DMA-able buffer to write to the Status Register.
+ * @len:	number of bytes to write to the Status Register.
+ *
+ * Return: 0 on success, -errno otherwise.
+ */
+static int spi_nor_write_sr2_jy(struct spi_nor *nor, const u8 *sr, size_t len)
+{
+	int ret;
+
+	ret = spi_nor_write_enable(nor);
+	if (ret)
+		return ret;
+
+	if (nor->spimem) {
+		struct spi_mem_op op =
+			SPI_MEM_OP(SPI_MEM_OP_CMD(SPINOR_OP_WRSR2_JY, 1),
+				   SPI_MEM_OP_NO_ADDR,
+				   SPI_MEM_OP_NO_DUMMY,
+				   SPI_MEM_OP_DATA_OUT(len, sr, 1));
+
+		ret = spi_mem_exec_op(nor->spimem, &op);
+	} else {
+		ret = nor->controller_ops->write_reg(nor, SPINOR_OP_WRSR2_JY,
+						     sr, len);
+	}
+
+	if (ret) {
+		dev_dbg(nor->dev, "error %d writing SR\n", ret);
+		return ret;
+	}
+
+	return spi_nor_wait_till_ready(nor);
+}
+/**
  * spi_nor_write_sr1_and_check() - Write one byte to the Status Register 1 and
  * ensure that the byte written match the received value.
  * @nor:	pointer to a 'struct spi_nor'.
@@ -1959,6 +1995,40 @@ int spi_nor_sr2_bit1_quad_enable(struct spi_nor *nor)
 	return spi_nor_write_16bit_cr_and_check(nor, nor->bouncebuf[0]);
 }
 
+int spi_nor_sr_bit1_quad_enable(struct spi_nor *nor)
+{
+	int ret;
+	u8 sr2;
+	u8 sr2_written;
+
+	ret = spi_nor_read_cr(nor, &sr2);
+	if (ret)
+		return ret;
+
+	if (sr2 & SR2_QUAD_EN_BIT1)
+		return 0;
+
+	sr2 |= SR2_QUAD_EN_BIT1;
+
+	ret = spi_nor_write_sr2_jy(nor, &sr2, 1);
+	if (ret)
+		return ret;
+
+	sr2_written = sr2;
+
+	/* Read back and check it. */
+	ret = spi_nor_read_cr(nor, &sr2);
+	if (ret)
+		return ret;
+
+	if (sr2 != sr2_written) {
+		dev_dbg(nor->dev, "SR2: Read back test failed\n");
+		return -EIO;
+	}
+
+	return 0;
+}
+
 /**
  * spi_nor_sr2_bit7_quad_enable() - set QE bit in Status Register 2.
  * @nor:	pointer to a 'struct spi_nor'
@@ -2007,6 +2077,7 @@ int spi_nor_sr2_bit7_quad_enable(struct spi_nor *nor)
 }
 
 static const struct spi_nor_manufacturer *manufacturers[] = {
+	&spi_nor_cvitek,
 	&spi_nor_atmel,
 	&spi_nor_catalyst,
 	&spi_nor_eon,
@@ -2755,15 +2826,28 @@ static void spi_nor_info_init_params(struct spi_nor *nor)
 	if (info->flags & SPI_NOR_DUAL_READ) {
 		params->hwcaps.mask |= SNOR_HWCAPS_READ_1_1_2;
 		spi_nor_set_read_settings(&params->reads[SNOR_CMD_READ_1_1_2],
-					  0, 8, SPINOR_OP_READ_1_1_2,
-					  SNOR_PROTO_1_1_2);
+				0, 8, SPINOR_OP_READ_1_1_2,
+				SNOR_PROTO_1_1_2);
 	}
 
 	if (info->flags & SPI_NOR_QUAD_READ) {
 		params->hwcaps.mask |= SNOR_HWCAPS_READ_1_1_4;
 		spi_nor_set_read_settings(&params->reads[SNOR_CMD_READ_1_1_4],
-					  0, 8, SPINOR_OP_READ_1_1_4,
-					  SNOR_PROTO_1_1_4);
+				0, 8, SPINOR_OP_READ_1_1_4,
+				SNOR_PROTO_1_1_4);
+
+		params->hwcaps.mask |= SNOR_HWCAPS_READ_1_4_4;
+		spi_nor_set_read_settings(&params->reads[SNOR_CMD_READ_1_4_4],
+				0, 6, SPINOR_OP_READ_1_4_4,
+				SNOR_PROTO_1_4_4);
+
+	}
+
+	if (info->flags & SPI_NOR_HAS_FIX_DUMMY) {
+		spi_nor_set_read_settings(&params->reads[SNOR_CMD_READ_1_4_4],
+				0, 10, SPINOR_OP_READ_1_4_4,
+				SNOR_PROTO_1_4_4);
+
 	}
 
 	if (info->flags & SPI_NOR_OCTAL_READ) {
@@ -2776,7 +2860,13 @@ static void spi_nor_info_init_params(struct spi_nor *nor)
 	/* Page Program settings. */
 	params->hwcaps.mask |= SNOR_HWCAPS_PP;
 	spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP],
-				SPINOR_OP_PP, SNOR_PROTO_1_1_1);
+			SPINOR_OP_PP, SNOR_PROTO_1_1_1);
+
+	if (info->flags & SPI_NOR_QUAD_WRITE) {
+		params->hwcaps.mask |= SNOR_HWCAPS_PP_1_1_4;
+		spi_nor_set_pp_settings(&params->page_programs[SNOR_CMD_PP_1_1_4],
+				SPINOR_OP_PP_1_1_4, SNOR_PROTO_1_1_4);
+	}
 
 	/*
 	 * Sector Erase settings. Sort Erase Types in ascending order, with the
@@ -3216,7 +3306,7 @@ int spi_nor_scan(struct spi_nor *nor, const char *name,
 	dev_info(dev, "%s (%lld Kbytes)\n", info->name,
 			(long long)mtd->size >> 10);
 
-	dev_dbg(dev,
+	dev_info(dev,
 		"mtd .name = %s, .size = 0x%llx (%lldMiB), "
 		".erasesize = 0x%.8x (%uKiB) .numeraseregions = %d\n",
 		mtd->name, (long long)mtd->size, (long long)(mtd->size >> 20),

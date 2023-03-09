@@ -1,0 +1,33 @@
+#
+# CVITEK SoC drivers
+#
+menu "CVITEK SoC drivers"
+
+config CV1835_SYSDMA_REMAP
+	bool "CVITEK SoC sysdma remap driver"
+	depends on ARCH_CVITEK
+	help
+	  Enables driver for sysdma remap on CV1835 SoC.
+	  If someone need to use sysDMA of CV1835, they
+	  need to set src select value of related devices
+	  in this top register.
+
+config CVI_WIFI_PIN
+	bool "CVITEK SoC wifi specific pin definition"
+	depends on ARCH_CVITEK
+	help
+	  Enables driver for wifi specify pin on CviTek SoC.
+	  Enable this configuration to enable API to get
+	  GPIO number to do certain action, ex. power on
+	  or wakeup pin.
+
+config CVI_BT_PIN
+	bool "CVITEK SoC BT specific pin definition"
+	depends on ARCH_CVITEK
+	help
+	  Enables driver for BT specify pin on CviTek SoC.
+	  Enable this configuration to enable API to get
+	  GPIO number to do certain action, ex. power on
+	  or wakeup pin.
+
+endmenu

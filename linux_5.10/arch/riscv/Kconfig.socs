@@ -48,4 +48,14 @@ config SOC_KENDRYTE_K210_DTB_BUILTIN
 	  This option should be selected if no bootloader is being used.
 	  If unsure, say Y.
 
+config ARCH_CVITEK
+	bool "CVITEK SoCs"
+	help
+	  This enables support for cvitek SoC platform hardware.
+
+config SOC_THEAD
+	bool "T-HEAD SoCs"
+	help
+	  This enables support for T-HEAD SoC platform hardware.
+
 endmenu

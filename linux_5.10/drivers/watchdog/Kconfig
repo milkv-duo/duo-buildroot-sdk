@@ -724,6 +724,20 @@ config IMX2_WDT
 	  To compile this driver as a module, choose M here: the
 	  module will be called imx2_wdt.
 
+config ICE_WDT
+	tristate "ICE+ Watchdog"
+	depends on RISCV
+	default y
+	select WATCHDOG_CORE
+	help
+	  This is the driver for the hardware watchdog
+	  on the ice and later processors.
+	  If you have one of these processors and wish to have
+	  watchdog support enabled, say Y, otherwise say N.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ice_wdt.
+
 config IMX_SC_WDT
 	tristate "IMX SC Watchdog"
 	depends on HAVE_ARM_SMCCC

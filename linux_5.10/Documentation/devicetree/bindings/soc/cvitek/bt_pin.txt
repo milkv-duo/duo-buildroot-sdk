@@ -1,0 +1,5 @@
+Cvitek bluetooth pin driver
+
+Required properties:
+- compatible: "cvitek,bt-pin"
+- power-gpio: bluetooth chip power on gpio

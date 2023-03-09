@@ -25,6 +25,38 @@ xconfig: $(obj)/qconf
 gconfig: $(obj)/gconf
 	$(Q)$< $(silent) $(Kconfig)
 
+PHONY += scriptconfig iscriptconfig kmenuconfig guiconfig dumpvarsconfig setconfig
+
+PYTHONCMD ?= python
+kpython := PYTHONPATH=$(srctree)/Kconfiglib:$$PYTHONPATH $(PYTHONCMD)
+
+ifneq ($(filter scriptconfig,$(MAKECMDGOALS)),)
+ifndef SCRIPT
+$(error Use "make scriptconfig SCRIPT=<path to script> [SCRIPT_ARG=<argument>]")
+endif
+endif
+
+scriptconfig:
+	$(Q)$(kpython) $(SCRIPT) $(Kconfig) $(if $(SCRIPT_ARG),"$(SCRIPT_ARG)")
+
+setconfig:
+	$(Q)$(kpython) $(srctree)/Kconfiglib/setconfig.py --kconfig $(Kconfig) $(SCRIPT_ARG)
+
+iscriptconfig:
+	$(Q)$(kpython) -i -c \
+	  "import kconfiglib; \
+	   kconf = kconfiglib.Kconfig('$(Kconfig)'); \
+	   print('A Kconfig instance \'kconf\' for the architecture $(ARCH) has been created.')"
+
+kmenuconfig:
+	$(Q)$(kpython) $(srctree)/Kconfiglib/menuconfig.py $(Kconfig)
+
+guiconfig:
+	$(Q)$(kpython) $(srctree)/Kconfiglib/guiconfig.py $(Kconfig)
+
+dumpvarsconfig:
+	$(Q)$(kpython) $(srctree)/Kconfiglib/examples/dumpvars.py $(Kconfig)
+
 menuconfig: $(obj)/mconf
 	$(Q)$< $(silent) $(Kconfig)
 

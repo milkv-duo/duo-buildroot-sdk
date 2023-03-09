@@ -27,6 +27,16 @@ config SPI_NXP_SPIFI
 	  Flash. Enable this option if you have a device with a SPIFI
 	  controller and want to access the Flash as a mtd device.
 
+config SPI_CVI_SPIF
+     tristate "Cvitek SPI Flash Interface (SPIF)"
+     depends on HAS_IOMEM
+     help
+       Enable support for the Cvitek SPI Flash controller.
+
+       SPIF is a specialized controller for connecting serial SPI
+       Flash. Enable this option if you have a device with a SPIF
+       controller and want to access the Flash as a mtd device.
+
 config SPI_INTEL_SPI
 	tristate
 

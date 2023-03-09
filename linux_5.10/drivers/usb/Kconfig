@@ -125,6 +125,43 @@ source "drivers/usb/chipidea/Kconfig"
 
 source "drivers/usb/isp1760/Kconfig"
 
+config USB_CVITEK_DRD
+	tristate "Cvitek USB DRD Core Support"
+	depends on USB && HAS_DMA
+	select USB_XHCI_PLATFORM if USB_SUPPORT && USB_XHCI_HCD
+	help
+	  Say Y or M here if your system has a Dual Role SuperSpeed
+	  USB controller based on the Cvitek USB3 IP Core.
+
+	  If you choose to build this driver is a dynamically linked
+	  module, the module will be called cviusb_drd.ko.
+
+if USB_CVITEK_DRD
+
+config USB_CVITEK_MISC
+	bool "Additional miscellaneous device for ioctl"
+	depends on (USB=y || USB=USB_CVITEK_DRD)
+	help
+	  Select this if you want to send commands to driver
+	  using I/O control.
+
+	  The miscellaneous function includes the drd state
+	  configuration and gadget standby mode.
+
+endif
+
+config USB_CVITEK_GADGET
+	tristate "Cvitek device controller"
+	depends on USB_GADGET
+	help
+	  Bitmain device controller driver for CV183X.
+	  BM1880 USB device can support USB 2.0 high speed.
+
+	  Say 'Y' or 'M' here to enable device controller functionality
+	  of the Cvitek driver.
+
+comment "Platform Glue Driver Support"
+
 comment "USB port drivers"
 
 if USB

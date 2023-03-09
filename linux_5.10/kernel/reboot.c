@@ -416,7 +416,7 @@ void ctrl_alt_del(void)
 		kill_cad_pid(SIGINT, 1);
 }
 
-char poweroff_cmd[POWEROFF_CMD_PATH_LEN] = "/sbin/poweroff";
+char poweroff_cmd[POWEROFF_CMD_PATH_LEN] = "/sbin/poweroff -f";
 static const char reboot_cmd[] = "/sbin/reboot";
 
 static int run_cmd(const char *cmd)

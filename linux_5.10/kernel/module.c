@@ -3836,6 +3836,10 @@ static int load_module(struct load_info *info, const char __user *uargs,
 	long err = 0;
 	char *after_dashes;
 
+#ifdef CONFIG_ARCH_CVITEK
+	flags |= (MODULE_INIT_IGNORE_MODVERSIONS | MODULE_INIT_IGNORE_VERMAGIC);
+#endif
+
 	err = elf_header_check(info);
 	if (err) {
 		pr_err("Module has invalid ELF header\n");
@@ -4439,8 +4443,9 @@ static int modules_open(struct inode *inode, struct file *file)
 	int err = seq_open(file, &modules_op);
 
 	if (!err) {
-		struct seq_file *m = file->private_data;
-		m->private = kallsyms_show_value(file->f_cred) ? NULL : (void *)8ul;
+		// Show ko base address as default during KALLSYM disable.
+		// struct seq_file *m = file->private_data;
+		// m->private = kallsyms_show_value(file->f_cred) ? NULL : (void *)8ul;
 	}
 
 	return err;

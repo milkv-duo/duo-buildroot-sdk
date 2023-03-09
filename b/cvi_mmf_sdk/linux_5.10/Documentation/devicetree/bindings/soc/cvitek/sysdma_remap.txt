@@ -1,0 +1,19 @@
+Cvitek sysDMA remap driver
+
+This document describes the binding for Cvitek sysDMA remap register.
+
+Required properties:
+- compatible: "cvitek,sysdma_remap"
+- reg: sysDMA remap register regions
+- ch-remap: assign device for each sysDMA remap channel.
+  There are maximum 16 channels can be assigned to remap register.
+  But be noted that sysDMA can only support 8 channels at one time.
+
+
+Example:
+	sysdma_remap {
+		compatible = "cvitek,sysdma_remap";
+		reg = <0x0 0x03000154 0x0 0x10>;
+		ch-remap = <CVI_I2S0_RX CVI_I2S0_TX CVI_I2S1_RX CVI_I2S1_TX
+					CVI_SPI_NAND CVI_SPI_NAND CVI_I2S3_RX CVI_I2S3_TX>;
+	};

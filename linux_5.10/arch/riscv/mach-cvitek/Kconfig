@@ -1,0 +1,93 @@
+config ARCH_CVITEK
+    bool "Cvitek SoC Family"
+	select ION_CVITEK
+	select SCHED_CVITEK
+	help
+      This enables support for Cvitek SoC family.
+
+if ARCH_CVITEK
+choice
+	prompt "Select the chip of SoC"
+	default ARCH_CV181X
+	help
+	  Select the chip for SoC
+
+config ARCH_CV181X
+	bool "Cvitek CV181X SoC"
+	help
+	  This enables support for Cvitek's CV181X
+
+config ARCH_CV180X
+	bool "Cvitek CV180X SoC"
+	help
+	  This enables support for Cvitek's CV180X
+
+endchoice
+
+if ARCH_CV181X
+config ARCH_CVITEK_CHIP
+	string "cv181x"
+	help
+	  This enables support for Cvitek CV181X series
+
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV181X_FPGA
+	help
+	  Select the platform of SoC
+	    FPGA
+	    PALLADIUM
+	    ASIC
+
+config ARCH_CV181X_PALLADIUM
+	bool "Cvitek CV181X SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV181X SoC on Palladium platform
+
+config ARCH_CV181X_FPGA
+	bool "Cvitek CV181X SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV181X SoC on FPGA platform
+
+config ARCH_CV181X_ASIC
+	bool "Cvitek CV181X SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV181X SoC ASIC
+
+endchoice
+endif # end ARCH_CV181X
+
+if ARCH_CV180X
+config ARCH_CVITEK_CHIP
+	string "cv180x"
+	help
+	  This enables support for Cvitek CV180X series
+
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV180X_FPGA
+	help
+	  Select the platform of SoC
+	    FPGA
+	    PALLADIUM
+	    ASIC
+
+config ARCH_CV180X_PALLADIUM
+	bool "Cvitek CV180X SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV180X SoC on Palladium platform
+
+config ARCH_CV180X_FPGA
+	bool "Cvitek CV180X SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV180X SoC on FPGA platform
+
+config ARCH_CV180X_ASIC
+	bool "Cvitek CV180X SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV180X SoC ASIC
+
+endchoice
+endif # end ARCH_CV181X
+
+endif # end ARCH_CVITEK

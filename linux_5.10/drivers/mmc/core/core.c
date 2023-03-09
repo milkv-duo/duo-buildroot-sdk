@@ -244,6 +244,16 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 		}
 	}
 
+	/*
+	 * Block all CMD except for CMD0 once CARD ever unplugged
+	 */
+	if (host->ever_unplugged && mrq->cmd->opcode != 0) {
+		mrq->cmd->error = -EBUSY;
+		mmc_complete_cmd(mrq);
+		complete(&mrq->completion);
+		return;
+	}
+
 	if (mrq->cap_cmd_during_tfr) {
 		host->ongoing_mrq = mrq;
 		/*
@@ -342,6 +352,16 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 
 	if (mmc_card_removed(host->card))
 		return -ENOMEDIUM;
+
+	/*
+	 * Block all CMD except for CMD0 once CARD ever unplugged
+	 */
+	if (host->ever_unplugged) {
+		if (mrq->cmd->opcode == 0)
+			host->ever_unplugged = false;
+		else
+			return -ENOMEDIUM;
+	}
 
 	mmc_mrq_pr_debug(host, mrq, false);
 
@@ -718,6 +738,16 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
 	 */
 	if (mmc_card_long_read_time(card) && data->flags & MMC_DATA_READ) {
 		data->timeout_ns = 600000000;
+		data->timeout_clks = 0;
+	}
+
+	/*
+	 * For Micron eMMC (MTFC4GACAJCN 8GB), when boot after power loss,
+	 * it might take very long time (longer than 500ms). Per Micron's
+	 * suggestion to extend the read data timeout velue.
+	 */
+	if (mmc_card_extra_long_read_time(card) && data->flags & MMC_DATA_READ) {
+		data->timeout_ns = 0x7fffffff;
 		data->timeout_clks = 0;
 	}
 
@@ -2089,9 +2119,11 @@ int mmc_hw_reset(struct mmc_host *host)
 	ret = host->bus_ops->hw_reset(host);
 	mmc_bus_put(host);
 
-	if (ret < 0)
-		pr_warn("%s: tried to HW reset card, got error %d\n",
+	if (ret < 0) {
+		host->ever_unplugged = true;
+		pr_err("%s: tried to HW reset card, got error %d\n",
 			mmc_hostname(host), ret);
+	}
 
 	return ret;
 }

@@ -39,13 +39,7 @@ ENTRY(_start)
 	/* Image load offset (0MB) from start of RAM for M-mode */
 	.dword 0
 #else
-#if __riscv_xlen == 64
-	/* Image load offset(2MB) from start of RAM */
-	.dword 0x200000
-#else
-	/* Image load offset(4MB) from start of RAM */
-	.dword 0x400000
-#endif
+	.dword LOAD_OFFSET
 #endif
 	/* Effective size of kernel image */
 	.dword _end - _start
@@ -69,7 +63,7 @@ pe_head_start:
 #ifdef CONFIG_MMU
 relocate:
 	/* Relocate return address */
-	li a1, PAGE_OFFSET
+	li a1, PAGE_OFFSET + LOAD_OFFSET
 	la a2, _start
 	sub a1, a1, a2
 	add ra, ra, a1
@@ -182,7 +176,6 @@ setup_trap_vector:
 
 END(_start)
 
-	__INIT
 ENTRY(_start_kernel)
 	/* Mask all interrupts */
 	csrw CSR_IE, zero
@@ -227,7 +220,7 @@ pmp_done:
 	 * Disable FPU to detect illegal usage of
 	 * floating point in kernel space
 	 */
-	li t0, SR_FS
+	li t0, SR_FS | SR_VS
 	csrc CSR_STATUS, t0
 
 #ifdef CONFIG_SMP

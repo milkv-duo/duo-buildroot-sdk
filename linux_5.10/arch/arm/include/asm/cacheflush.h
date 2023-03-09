@@ -157,6 +157,8 @@ extern void __cpuc_flush_dcache_area(void *, size_t);
  * visible to the CPU.
  */
 extern void dmac_flush_range(const void *, const void *);
+extern void __dma_map_area(const void *addr, size_t size, int dir);
+extern void __dma_unmap_area(const void *addr, size_t size, int dir);
 
 #endif
 

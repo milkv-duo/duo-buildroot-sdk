@@ -139,6 +139,7 @@ head-y		:= arch/arm/kernel/head$(MMUEXT).o
 # during boot, and this offset is critical to the functioning of
 # kexec-tools.
 textofs-y	:= 0x00008000
+textofs-$(CONFIG_ARCH_CVITEK) := 0x00108000
 # We don't want the htc bootloader to corrupt kernel during resume
 textofs-$(CONFIG_PM_H1940)      := 0x00108000
 # RTD1195 has Boot ROM at start of address space
@@ -227,6 +228,7 @@ machine-$(CONFIG_ARCH_VT8500)		+= vt8500
 machine-$(CONFIG_ARCH_ZX)		+= zx
 machine-$(CONFIG_ARCH_ZYNQ)		+= zynq
 machine-$(CONFIG_PLAT_SPEAR)		+= spear
+machine-$(CONFIG_ARCH_CVITEK)       += cvitek
 
 # Platform directory name.  This list is sorted alphanumerically
 # by CONFIG_* macro name.

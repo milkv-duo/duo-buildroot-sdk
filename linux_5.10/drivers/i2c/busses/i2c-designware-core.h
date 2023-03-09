@@ -286,6 +286,7 @@ struct dw_i2c_dev {
 	int			mode;
 	struct i2c_bus_recovery_info rinfo;
 	bool			suspended;
+	int			use_interstop;
 };
 
 #define ACCESS_INTR_MASK	0x00000001

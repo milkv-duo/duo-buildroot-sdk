@@ -14,10 +14,13 @@
 #include <linux/tick.h>
 #include <linux/ptrace.h>
 #include <linux/uaccess.h>
+#include <uapi/linux/elf.h>
 
 #include <asm/unistd.h>
 #include <asm/processor.h>
+#include <asm/compat.h>
 #include <asm/csr.h>
+#include <asm/stacktrace.h>
 #include <asm/string.h>
 #include <asm/switch_to.h>
 #include <asm/thread_info.h>
@@ -39,7 +42,7 @@ void arch_cpu_idle(void)
 	raw_local_irq_enable();
 }
 
-void show_regs(struct pt_regs *regs)
+void __show_regs(struct pt_regs *regs)
 {
 	show_regs_print_info(KERN_DEFAULT);
 
@@ -69,6 +72,12 @@ void show_regs(struct pt_regs *regs)
 	pr_cont("status: " REG_FMT " badaddr: " REG_FMT " cause: " REG_FMT "\n",
 		regs->status, regs->badaddr, regs->cause);
 }
+void show_regs(struct pt_regs *regs)
+{
+	__show_regs(regs);
+	if (!user_mode(regs))
+		dump_backtrace(regs, NULL, KERN_DEFAULT);
+}
 
 void start_thread(struct pt_regs *regs, unsigned long pc,
 	unsigned long sp)
@@ -82,8 +91,22 @@ void start_thread(struct pt_regs *regs, unsigned long pc,
 		 */
 		fstate_restore(current, regs);
 	}
+
+	if (has_vector) {
+		regs->status |= SR_VS_INITIAL;
+		vstate_restore(current, regs);
+	}
+
 	regs->epc = pc;
 	regs->sp = sp;
+
+#ifdef CONFIG_COMPAT
+	regs->status &= ~SR_UXL;
+	if (is_compat_task())
+		regs->status |= SR_UXL_32;
+	else
+		regs->status |= SR_UXL_64;
+#endif
 }
 
 void flush_thread(void)

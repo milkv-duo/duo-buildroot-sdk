@@ -158,6 +158,14 @@ config CICADA_PHY
 	help
 	  Currently supports the cis8204
 
+config CV182XA_PHY
+	tristate "CV182XA PHYs"
+	help
+	  Enable support for RMII PHYs manufactured by CVITEK
+	  Include driver for cv182xa.
+	  This is an internal ethernet phy.
+	  And support 100Mbs full duplex.
+
 config CORTINA_PHY
 	tristate "Cortina EDC CDR 10G Ethernet PHY"
 	help

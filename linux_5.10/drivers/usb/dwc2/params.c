@@ -163,34 +163,31 @@ static void dwc2_set_stm32f7_hsotg_params(struct dwc2_hsotg *hsotg)
 	p->host_perio_tx_fifo_size = 256;
 }
 
-static void dwc2_set_stm32mp15_fsotg_params(struct dwc2_hsotg *hsotg)
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+static void dwc2_set_cv182x_params(struct dwc2_hsotg *hsotg)
 {
 	struct dwc2_core_params *p = &hsotg->params;
 
 	p->otg_cap = DWC2_CAP_PARAM_NO_HNP_SRP_CAPABLE;
-	p->speed = DWC2_SPEED_PARAM_FULL;
-	p->host_rx_fifo_size = 128;
-	p->host_nperio_tx_fifo_size = 96;
-	p->host_perio_tx_fifo_size = 96;
-	p->max_packet_count = 256;
-	p->phy_type = DWC2_PHY_TYPE_PARAM_FS;
-	p->i2c_enable = false;
-	p->activate_stm_fs_transceiver = true;
-	p->activate_stm_id_vb_detection = true;
+	p->speed = DWC2_SPEED_PARAM_HIGH;
+	p->phy_type = DWC2_PHY_TYPE_PARAM_UTMI;
+	p->ahbcfg = GAHBCFG_HBSTLEN_INCR16 << GAHBCFG_HBSTLEN_SHIFT;
+	p->phy_utmi_width = 16;
+	p->g_dma = 1;
+	p->g_dma_desc = 1;
+	p->lpm = false;
+	p->lpm_clock_gating = false;
+	p->besl = false;
+	p->hird_threshold_en = false;
+	p->max_packet_count = (1 << 10) - 1;
+	p->max_transfer_size = (1 << 19) - 1;
+	p->reload_ctl = 0;
+	p->enable_dynamic_fifo = true;
+	p->en_multiple_tx_fifo = true;
+	/* [TODO] shall we power down this ?*/
 	p->power_down = DWC2_POWER_DOWN_PARAM_NONE;
 }
-
-static void dwc2_set_stm32mp15_hsotg_params(struct dwc2_hsotg *hsotg)
-{
-	struct dwc2_core_params *p = &hsotg->params;
-
-	p->otg_cap = DWC2_CAP_PARAM_NO_HNP_SRP_CAPABLE;
-	p->activate_stm_id_vb_detection = !device_property_read_bool(hsotg->dev, "usb-role-switch");
-	p->host_rx_fifo_size = 440;
-	p->host_nperio_tx_fifo_size = 256;
-	p->host_perio_tx_fifo_size = 256;
-	p->power_down = DWC2_POWER_DOWN_PARAM_NONE;
-}
+#endif
 
 const struct of_device_id dwc2_of_match_table[] = {
 	{ .compatible = "brcm,bcm2835-usb", .data = dwc2_set_bcm_params },
@@ -216,10 +213,10 @@ const struct of_device_id dwc2_of_match_table[] = {
 	{ .compatible = "st,stm32f4x9-hsotg" },
 	{ .compatible = "st,stm32f7-hsotg",
 	  .data = dwc2_set_stm32f7_hsotg_params },
-	{ .compatible = "st,stm32mp15-fsotg",
-	  .data = dwc2_set_stm32mp15_fsotg_params },
-	{ .compatible = "st,stm32mp15-hsotg",
-	  .data = dwc2_set_stm32mp15_hsotg_params },
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	{ .compatible = "cvitek,cv182x-usb",
+	  .data = dwc2_set_cv182x_params },
+#endif
 	{},
 };
 MODULE_DEVICE_TABLE(of, dwc2_of_match_table);
@@ -858,10 +855,12 @@ int dwc2_get_hwparams(struct dwc2_hsotg *hsotg)
 	return 0;
 }
 
+typedef void (*set_params_cb)(struct dwc2_hsotg *data);
+
 int dwc2_init_params(struct dwc2_hsotg *hsotg)
 {
 	const struct of_device_id *match;
-	void (*set_params)(struct dwc2_hsotg *data);
+	set_params_cb set_params;
 
 	dwc2_set_default_params(hsotg);
 	dwc2_get_device_properties(hsotg);

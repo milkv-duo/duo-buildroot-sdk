@@ -22,6 +22,29 @@
 #include "../uapi/ion.h"
 
 /**
+ * struct ion_platform_heap - defines a heap in the given platform
+ * @type:	type of the heap from ion_heap_type enum
+ * @id:		unique identifier for heap.  When allocating higher numb ers
+ *		will be allocated from first.  At allocation these are passed
+ *		as a bit mask and therefore can not exceed ION_NUM_HEAP_IDS.
+ * @name:	used for debug purposes
+ * @base:	base address of heap in physical memory if applicable
+ * @size:	size of the heap in bytes if applicable
+ * @priv:	private info passed from the board file
+ *
+ * Provided by the board file.
+ */
+struct ion_platform_heap {
+	enum ion_heap_type type;
+	unsigned int id;
+	const char *name;
+	phys_addr_t base;
+	size_t size;
+	phys_addr_t align;
+	void *priv;
+};
+
+/**
  * struct ion_buffer - metadata for a particular buffer
  * @list:		element in list of deferred freeable buffers
  * @dev:		back pointer to the ion_device
@@ -38,7 +61,10 @@
  * @attachments:	list of devices attached to this buffer
  */
 struct ion_buffer {
-	struct list_head list;
+	union {
+		struct rb_node node;
+		struct list_head list;
+	};
 	struct ion_device *dev;
 	struct ion_heap *heap;
 	unsigned long flags;
@@ -50,6 +76,10 @@ struct ion_buffer {
 	void *vaddr;
 	struct sg_table *sg_table;
 	struct list_head attachments;
+#ifdef CONFIG_ION_CVITEK
+	phys_addr_t paddr;
+	const char *name;
+#endif
 };
 
 void ion_buffer_destroy(struct ion_buffer *buffer);
@@ -57,14 +87,20 @@ void ion_buffer_destroy(struct ion_buffer *buffer);
 /**
  * struct ion_device - the metadata of the ion device node
  * @dev:		the actual misc device
+ * @buffers:		an rb tree of all the existing buffers
+ * @buffer_lock:	lock protecting the tree of buffers
  * @lock:		rwsem protecting the tree of heaps and clients
  */
 struct ion_device {
 	struct miscdevice dev;
+	struct rb_root buffers;
+	struct mutex buffer_lock;
 	struct rw_semaphore lock;
 	struct plist_head heaps;
 	struct dentry *debug_root;
 	int heap_cnt;
+	long (*custom_ioctl)(struct ion_device *dev, unsigned int cmd,
+			     unsigned long arg);
 };
 
 /**
@@ -152,11 +188,15 @@ struct ion_heap {
 	spinlock_t free_lock;
 	wait_queue_head_t waitqueue;
 	struct task_struct *task;
-
+	struct dentry *heap_dfs_root;
+	u64 total_size;
 	/* heap statistics */
 	u64 num_of_buffers;
 	u64 num_of_alloc_bytes;
 	u64 alloc_bytes_wm;
+
+	int (*debug_show)(struct ion_heap *heap, struct seq_file *s,
+			  void *unused);
 
 	/* protect heap statistics */
 	spinlock_t stat_lock;
@@ -177,7 +217,17 @@ void ion_heap_unmap_kernel(struct ion_heap *heap, struct ion_buffer *buffer);
 int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
 		      struct vm_area_struct *vma);
 int ion_heap_buffer_zero(struct ion_buffer *buffer);
+int ion_heap_pages_zero(struct page *page, size_t size, pgprot_t pgprot);
 
+#ifdef CONFIG_ION_CVITEK
+int ion_alloc(size_t len,
+	      unsigned int heap_id_mask,
+	      unsigned int flags, struct ion_buffer **buf);
+#else
+int ion_alloc(size_t len,
+	      unsigned int heap_id_mask,
+	      unsigned int flags);
+#endif
 /**
  * ion_heap_init_shrinker
  * @heap:		the heap
@@ -289,6 +339,15 @@ void ion_page_pool_destroy(struct ion_page_pool *pool);
 struct page *ion_page_pool_alloc(struct ion_page_pool *pool);
 void ion_page_pool_free(struct ion_page_pool *pool, struct page *page);
 
+#ifdef CONFIG_ION_CARVEOUT_HEAP
+struct ion_heap *ion_carveout_heap_create(struct ion_platform_heap *heap_data);
+#else
+static inline struct ion_heap
+*ion_carveout_heap_create(struct ion_platform_heap *heap_data)
+{
+	return ERR_PTR(-EINVAL);
+}
+#endif
 /** ion_page_pool_shrink - shrinks the size of the memory cached in the pool
  * @pool:		the pool
  * @gfp_mask:		the memory type to reclaim
@@ -299,4 +358,34 @@ void ion_page_pool_free(struct ion_page_pool *pool, struct page *page);
 int ion_page_pool_shrink(struct ion_page_pool *pool, gfp_t gfp_mask,
 			 int nr_to_scan);
 
+int ion_query_heaps(struct ion_heap_query *query, int is_kernel);
+
+#ifdef CONFIG_ION_CVITEK
+struct ion_buffer *
+ion_alloc_nofd(size_t len, unsigned int heap_id_mask, unsigned int flags);
+void ion_free(pid_t fd_pid, int fd);
+void ion_free_nofd(struct ion_buffer *buffer);
+int ion_buf_begin_cpu_access(struct ion_buffer *buffer);
+int ion_buf_end_cpu_access(struct ion_buffer *buffer);
+
+#ifdef CONFIG_ION_CARVEOUT_HEAP
+struct ion_heap *ion_carveout_heap_create(struct ion_platform_heap *heap_data);
+#else
+static inline struct ion_heap
+*ion_carveout_heap_create(struct ion_platform_heap *heap_data)
+{
+	return ERR_PTR(-EINVAL);
+}
+#endif
+#endif
+#ifdef CONFIG_ION_CHUNK_HEAP
+struct ion_heap
+*ion_chunk_heap_create(struct ion_platform_heap *data, u32 chunk_size);
+#else
+static inline struct ion_heap
+*ion_chunk_heap_create(struct ion_platform_heap *data, u32 chunk_size)
+{
+	return ERR_PTR(-EINVAL);
+}
+#endif
 #endif /* _ION_H */

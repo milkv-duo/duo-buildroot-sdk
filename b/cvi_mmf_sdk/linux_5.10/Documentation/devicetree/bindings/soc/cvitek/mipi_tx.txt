@@ -1,0 +1,7 @@
+Cvitek mipi_tx driver
+
+This document describes the binding for the Cvitek vip.
+
+Required properties:
+- compatible: "cvitek,mipi_tx"
+- reg: mipi_tx register regions

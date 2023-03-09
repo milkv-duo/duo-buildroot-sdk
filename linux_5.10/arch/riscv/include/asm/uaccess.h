@@ -10,6 +10,31 @@
 
 #include <asm/pgtable.h>		/* for TASK_SIZE */
 
+#ifdef CONFIG_SET_FS
+/*
+ * The fs value determines whether argument validity checking should be
+ * performed or not.  If get_fs() == USER_DS, checking is performed, with
+ * get_fs() == KERNEL_DS, checking is bypassed.
+ *
+ * For historical reasons, these macros are grossly misnamed.
+ */
+#define KERNEL_DS      (~0UL)
+#define USER_DS                (TASK_SIZE)
+
+#define get_ds()       (KERNEL_DS)
+#define get_fs()       (current_thread_info()->addr_limit)
+
+static inline void set_fs(mm_segment_t fs)
+{
+	current_thread_info()->addr_limit = fs;
+}
+
+#define segment_eq(a, b) ((a) == (b))
+
+#define user_addr_max()        (get_fs())
+#define uaccess_kernel() segment_eq(get_fs(), KERNEL_DS)
+#endif /* CONFIG_SET_FS */
+
 /*
  * User space memory access functions
  */

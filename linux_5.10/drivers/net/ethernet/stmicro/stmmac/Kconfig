@@ -57,6 +57,16 @@ config DWMAC_GENERIC
 	  platform specific code to function or is using platform
 	  data for setup.
 
+config DWMAC_CVITEK
+    tristate "CVITEK DWMAC support"
+    default ARCH_CVITEK
+    depends on OF && (ARCH_CVITEK || COMPILE_TEST)
+    help
+      Support for CVITEK DWMAC Ethernet.
+      This selects CVITEK SoC glue layer support for the stmmac
+      device driver. This driver is used for the CVITEK series
+      SOCs GMAC ethernet controller.
+
 config DWMAC_ANARION
 	tristate "Adaptrum Anarion GMAC support"
 	default ARC

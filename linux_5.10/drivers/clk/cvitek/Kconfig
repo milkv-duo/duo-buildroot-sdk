@@ -1,0 +1,12 @@
+config COMMON_CLK_CVITEK
+    bool "Clock driver for CVITEK SoC Family"
+    depends on ARCH_CVITEK || COMPILE_TEST
+    default ARCH_CVITEK
+    help
+       Support the clocks on CVITEK SoC Family.
+
+config COMMON_CLK_CV1832_TPU_500M
+	bool "Set TPU clock to 500MHz for CV1832"
+	depends on COMMON_CLK_CVITEK
+	help
+	  Set TPU clock to 500MHz for CV1832.

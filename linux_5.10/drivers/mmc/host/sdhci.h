@@ -127,6 +127,7 @@
 #define  SDHCI_RESET_DATA	0x04
 
 #define SDHCI_INT_STATUS	0x30
+#define SDHCI_ERR_INT_STATUS	0x32
 #define SDHCI_INT_ENABLE	0x34
 #define SDHCI_SIGNAL_ENABLE	0x38
 #define  SDHCI_INT_RESPONSE	0x00000001
@@ -474,6 +475,17 @@ struct sdhci_host {
  */
 #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
 
+/* To enhance power consumption,
+ * the sdio clk be disabled when CMD/DAT bus idle
+ */
+#define SDHCI_QUIRK2_SW_CLK_GATING_SUPPORT			(1<<29)
+/* The system physically doesn't support 3.3v, even if the host does */
+#define SDHCI_QUIRK2_NO_3_3_V               (1<<30)
+
+/* Support Disable when device is not present (EMMC only) */
+#define SDHCI_QUIRK2_SUPPORT_DISABLE_CLK        (1<<31)
+
+
 	int irq;		/* Device IRQ */
 	void __iomem *ioaddr;	/* Mapped address */
 	phys_addr_t mapbase;	/* physical address base */
@@ -651,6 +663,10 @@ struct sdhci_ops {
 					 unsigned int length);
 	void	(*request_done)(struct sdhci_host *host,
 				struct mmc_request *mrq);
+	int	(*select_drive_strength)(struct sdhci_host *host,
+					 struct mmc_card *card,
+					 unsigned int max_dtr, int host_drv,
+					 int card_drv, int *drv_type);
 	void    (*dump_vendor_regs)(struct sdhci_host *host);
 };
 

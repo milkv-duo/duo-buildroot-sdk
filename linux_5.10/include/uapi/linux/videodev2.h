@@ -1110,6 +1110,10 @@ static inline __u64 v4l2_timeval_to_ns(const struct timeval *tv)
 #define V4L2_BUF_FLAG_LAST			0x00100000
 /* request_fd is valid */
 #define V4L2_BUF_FLAG_REQUEST_FD		0x00800000
+/* cvitek define buf from isp_fe_0 */
+#define V4L2_BUF_FLAG_FRAME_ISP_0		0x00200000
+/* cvitek define buf from isp_fe_1 */
+#define V4L2_BUF_FLAG_FRAME_ISP_1		0x00400000
 
 /**
  * struct v4l2_exportbuffer - export of video buffer as DMABUF file descriptor

@@ -1128,7 +1128,7 @@ request_firmware_nowait(
 	fw_work->device = device;
 	fw_work->context = context;
 	fw_work->cont = cont;
-	fw_work->opt_flags = FW_OPT_NOWAIT |
+	fw_work->opt_flags = FW_OPT_NOWAIT | FW_OPT_NO_WARN |
 		(uevent ? FW_OPT_UEVENT : FW_OPT_USERHELPER);
 
 	if (!uevent && fw_cache_is_setup(device, name)) {

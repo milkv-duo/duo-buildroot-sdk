@@ -19,9 +19,9 @@ static struct {
 	__u8	   id;
 } gio_name_table[] = {
 	{ .name = "SGI Impact", .id = 0x10 },
-	{ .name = "Phobos G160", .id = 0x35 },
-	{ .name = "Phobos G130", .id = 0x36 },
-	{ .name = "Phobos G100", .id = 0x37 },
+	{ .name = "CV180X G160", .id = 0x35 },
+	{ .name = "CV180X G130", .id = 0x36 },
+	{ .name = "CV180X G100", .id = 0x37 },
 	{ .name = "Set Engineering GFE", .id = 0x38 },
 	/* fake IDs */
 	{ .name = "SGI Newport", .id = 0x7e },

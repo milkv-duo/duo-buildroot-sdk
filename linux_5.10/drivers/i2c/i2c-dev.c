@@ -29,6 +29,14 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
+#if defined(CONFIG_ARCH_CVITEK)
+#define I2C0 "i2c@04000000"
+#define I2C1 "i2c@04010000"
+#define I2C2 "i2c@04020000"
+#define I2C3 "i2c@04030000"
+#define I2C4 "i2c@04040000"
+#endif
+
 /*
  * An i2c_dev represents an i2c_adapter ... an I2C or SMBus master, not a
  * slave (i2c_client) with which messages will be exchanged.  It's coupled
@@ -660,7 +668,24 @@ static int i2cdev_attach_adapter(struct device *dev, void *dummy)
 	i2c_dev->dev.class = i2c_dev_class;
 	i2c_dev->dev.parent = &adap->dev;
 	i2c_dev->dev.release = i2cdev_dev_release;
+
+#if defined(CONFIG_ARCH_CVITEK)
+	if (!strcmp(adap->dev.of_node->full_name, I2C0))
+		adap->i2c_idx = 0;
+	if (!strcmp(adap->dev.of_node->full_name, I2C1))
+		adap->i2c_idx = 1;
+	if (!strcmp(adap->dev.of_node->full_name, I2C2))
+		adap->i2c_idx = 2;
+	if (!strcmp(adap->dev.of_node->full_name, I2C3))
+		adap->i2c_idx = 3;
+	if (!strcmp(adap->dev.of_node->full_name, I2C4))
+		adap->i2c_idx = 4;
+
+	dev_set_name(&i2c_dev->dev, "i2c-%d", adap->i2c_idx);
+#else
 	dev_set_name(&i2c_dev->dev, "i2c-%d", adap->nr);
+#endif
+
 
 	res = cdev_device_add(&i2c_dev->cdev, &i2c_dev->dev);
 	if (res) {

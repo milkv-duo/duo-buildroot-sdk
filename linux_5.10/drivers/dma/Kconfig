@@ -730,6 +730,8 @@ source "drivers/dma/ti/Kconfig"
 
 source "drivers/dma/fsl-dpaa2-qdma/Kconfig"
 
+source "drivers/dma/cvitek/Kconfig"
+
 # clients
 comment "DMA Clients"
 	depends on DMA_ENGINE

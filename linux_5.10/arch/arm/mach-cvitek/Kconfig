@@ -1,0 +1,198 @@
+config ARCH_CVITEK
+    bool "Cvitek SoC Family"
+	select ION_CVITEK
+	select SCHED_CVITEK
+	help
+      This enables support for Cvitek SoC family.
+
+if ARCH_CVITEK
+choice
+	prompt "Select the chip of SoC"
+	default ARCH_CV1835
+	help
+	  Select the chip for SoC
+
+config ARCH_CV1835
+	bool "Cvitek CV1835 SoC"
+	select PINCTRL
+	select PINCTRL_BM
+	select PINMUX
+	select PINCONF
+	select GENERIC_PINCONF
+	help
+	  This enables support for Cvitek's CV1835
+
+config ARCH_CV182X
+	bool "Cvitek CV182X SoC"
+	select PINCTRL
+	select PINCTRL_BM
+	select PINMUX
+	select PINCONF
+	select GENERIC_PINCONF
+    select ARM_GIC
+    select ARM_AMBA
+    select ARM_GIC_V3
+	help
+	  This enables support for Cvitek's CV1822
+
+config ARCH_CV181X
+	bool "Cvitek CV181X SoC"
+	select PINCTRL
+	select PINCTRL_BM
+	select PINMUX
+	select PINCONF
+	select GENERIC_PINCONF
+    select ARM_GIC
+    select ARM_AMBA
+    select ARM_GIC_V3
+	help
+	  This enables support for Cvitek's CV181X
+
+endchoice
+
+if ARCH_CV1835
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV1835_FPGA
+	help
+	  Select the platform of SoC
+
+config ARCH_CV1835_PALLADIUM
+	bool "Cvitek CV1835 SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV1835 SoC on Palladium platform
+
+config ARCH_CV1835_FPGA
+	bool "Cvitek CV1835 SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV1835 SoC on FPGA platform
+
+config ARCH_CV1835_ASIC
+	bool "Cvitek CV1835 SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV1835 SoC ASIC
+
+endchoice
+
+endif # end ARCH_CV1835
+
+if ARCH_CV1822
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV1822_FPGA
+	help
+	  Select the platform of SoC
+
+config ARCH_CV1822_PALLADIUM
+	bool "Cvitek CV1822 SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV1822 SoC on Palladium platform
+
+config ARCH_CV1822_FPGA
+	bool "Cvitek CV1822 SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV1822 SoC on FPGA platform
+
+config ARCH_CV1822_ASIC
+	bool "Cvitek CV1822 SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV1822 SoC ASIC
+
+endchoice
+
+endif # end ARCH_CV1822
+
+if ARCH_CV182X
+config ARCH_CVITEK_CHIP
+	string "cv182x"
+	help
+	  This enables support for Cvitek CV182X series
+
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV182X_FPGA
+	help
+	  Select the platform of SoC
+
+config ARCH_CV182X_PALLADIUM
+	bool "Cvitek CV182X SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV182X SoC on Palladium platform
+
+config ARCH_CV182X_FPGA
+	bool "Cvitek CV182X SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV182X SoC on FPGA platform
+
+config ARCH_CV182X_ASIC
+	bool "Cvitek CV182X SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV182X SoC ASIC
+
+endchoice
+endif # end ARCH_CV182X
+
+if ARCH_CV183X
+config ARCH_CVITEK_CHIP
+	string "cv183x"
+	help
+	  This enables support for Cvitek CV183X series
+
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV183X_ASIC
+	help
+	  Select the platform of SoC
+
+config ARCH_CV183X_PALLADIUM
+	bool "Cvitek CV183X SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV183X SoC on Palladium platform
+
+config ARCH_CV183X_FPGA
+	bool "Cvitek CV183X SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV183X SoC on FPGA platform
+
+config ARCH_CV183X_ASIC
+	bool "Cvitek CV183X SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV183X SoC ASIC
+endchoice
+
+endif # end ARCH_CV183X
+
+if ARCH_CV181X
+config ARCH_CVITEK_CHIP
+	string "cv181x"
+	help
+	  This enables support for Cvitek CV181X series
+
+choice
+	prompt "Select the platform of SoC"
+	default ARCH_CV181X_FPGA
+	help
+	  Select the platform of SoC
+	    FPGA
+	    PALLADIUM
+	    ASIC
+
+config ARCH_CV181X_PALLADIUM
+	bool "Cvitek CV181X SoC - Palladium"
+	help
+	  This enables support for Cvitek's CV181X SoC on Palladium platform
+
+config ARCH_CV181X_FPGA
+	bool "Cvitek CV182X SoC - FPGA"
+	help
+	  This enables support for Cvitek's CV181X SoC on FPGA platform
+
+config ARCH_CV181X_ASIC
+	bool "Cvitek CV181X SoC- ASIC"
+	help
+	  This enables support for Cvitek's CV181X SoC ASIC
+
+endchoice
+endif # end ARCH_CV181X
+
+endif # end ARCH_CVITEK

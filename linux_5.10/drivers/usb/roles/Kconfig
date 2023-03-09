@@ -2,6 +2,7 @@
 
 config USB_ROLE_SWITCH
 	tristate "USB Role Switch Support"
+	depends on USB_DWC2_DUAL_ROLE
 	help
 	  USB Role Switch is a device that can select the USB role - host or
 	  device - for a USB port (connector). In most cases dual-role capable

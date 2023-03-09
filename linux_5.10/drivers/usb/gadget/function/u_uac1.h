@@ -10,15 +10,19 @@
 
 #include <linux/usb/composite.h>
 
-#define UAC1_OUT_EP_MAX_PACKET_SIZE	200
 #define UAC1_DEF_CCHMASK	0x3
 #define UAC1_DEF_CSRATE		48000
 #define UAC1_DEF_CSSIZE		2
 #define UAC1_DEF_PCHMASK	0x3
 #define UAC1_DEF_PSRATE		48000
 #define UAC1_DEF_PSSIZE		2
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+#define UAC1_OUT_EP_MAX_PACKET_SIZE	256
+#define UAC1_DEF_REQ_NUM	3
+#else
+#define UAC1_OUT_EP_MAX_PACKET_SIZE	200
 #define UAC1_DEF_REQ_NUM	2
-
+#endif
 
 struct f_uac1_opts {
 	struct usb_function_instance	func_inst;

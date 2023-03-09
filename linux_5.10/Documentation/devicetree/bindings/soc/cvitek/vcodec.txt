@@ -1,0 +1,11 @@
+Cvitek Video Codec Driver
+
+This document describes the binding for Cvitek Video Codec.
+
+Required properties:
+- compatible: should be one of the following
+  - "cvitek,vcodec"
+  - "cvitek,cv1822-fpga-vcodec"
+  - "cvitek,cv1822-fpga-jpeg"
+- reg: vcodec register regions
+- interrupts: vcodec interrupt number

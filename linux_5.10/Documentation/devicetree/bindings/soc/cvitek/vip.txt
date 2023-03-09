@@ -1,0 +1,8 @@
+Cvitek vip driver
+
+This document describes the binding for the Cvitek vip.
+
+Required properties:
+- compatible: "cvitek,vip"
+- reg: vip register regions
+- interrupts: vip interrupt number

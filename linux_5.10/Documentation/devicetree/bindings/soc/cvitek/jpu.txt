@@ -1,0 +1,8 @@
+Cvitek JPEG Driver
+
+This document describes the binding for Cvitek JPEG.
+
+Required properties:
+- compatible: "cvitek,jpeg"
+- reg: jpu register regions
+- interrupts: jpu interrupt number

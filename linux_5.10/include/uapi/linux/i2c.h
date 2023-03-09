@@ -71,6 +71,7 @@ struct i2c_msg {
 	__u16 flags;
 #define I2C_M_RD		0x0001	/* read data, from slave to master */
 					/* I2C_M_RD is guaranteed to be 0x0001! */
+#define I2C_M_WRSTOP        0x0002  /* if allow stop between msg. */
 #define I2C_M_TEN		0x0010	/* this is a ten bit chip address */
 #define I2C_M_DMA_SAFE		0x0200	/* the buffer of this message is DMA safe */
 					/* makes only sense in kernelspace */

@@ -4708,6 +4708,7 @@ static int nand_detect(struct nand_chip *chip, struct nand_flash_dev *type)
 	memorg->planes_per_lun = 1;
 	memorg->luns_per_target = 1;
 
+#ifndef CONFIG_MTD_NAND_CVSNFC
 	/*
 	 * Reset the chip, required by some chips (e.g. Micron MT29FxGxxxxx)
 	 * after power-up.
@@ -4746,6 +4747,10 @@ static int nand_detect(struct nand_chip *chip, struct nand_flash_dev *type)
 		return -ENODEV;
 	}
 
+#endif
+	memcpy(chip->id.data, type->id, NAND_MAX_ID_LEN);
+	maf_id = chip->id.data[0];
+	dev_id = chip->id.data[1];
 	chip->id.len = nand_id_len(id_data, ARRAY_SIZE(chip->id.data));
 
 	/* Try to identify manufacturer */
@@ -5647,6 +5652,7 @@ static int nand_scan_tail(struct nand_chip *chip)
 			break;
 		case 64:
 		case 128:
+		case 256:
 			mtd_set_ooblayout(mtd,
 					  nand_get_large_page_hamming_ooblayout());
 			break;

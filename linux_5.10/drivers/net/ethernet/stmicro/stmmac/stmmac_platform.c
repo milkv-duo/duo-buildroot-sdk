@@ -506,6 +506,25 @@ stmmac_probe_config_dt(struct platform_device *pdev, const char **mac)
 		plat->pmt = 1;
 	}
 
+	if (of_device_is_compatible(np, "cvitek,ethernet")) {
+		of_property_read_u32(np, "snps,multicast-filter-bins",
+				     &plat->multicast_filter_bins);
+		of_property_read_u32(np, "snps,perfect-filter-entries",
+				     &plat->unicast_filter_entries);
+		plat->unicast_filter_entries = dwmac1000_validate_ucast_entries(&pdev->dev, plat->unicast_filter_entries);
+		plat->multicast_filter_bins = dwmac1000_validate_mcast_bins(&pdev->dev, plat->multicast_filter_bins);
+#if defined(CONFIG_ARCH_CV183X)
+		plat->has_gmac4 = 1;
+		plat->has_gmac = 0;
+		plat->tso_en = 1;
+#else
+		plat->has_gmac4 = 0;
+		plat->has_gmac = 1;
+		plat->tso_en = 0;
+#endif
+		plat->pmt = 0;
+	}
+
 	if (of_device_is_compatible(np, "snps,dwmac-4.00") ||
 	    of_device_is_compatible(np, "snps,dwmac-4.10a") ||
 	    of_device_is_compatible(np, "snps,dwmac-4.20a") ||

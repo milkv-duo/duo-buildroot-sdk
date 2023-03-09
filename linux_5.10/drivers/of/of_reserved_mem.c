@@ -23,6 +23,16 @@
 #include <linux/memblock.h>
 
 #define MAX_RESERVED_REGIONS	64
+
+#if defined(CONFIG_ARCH_CVITEK)
+struct reserved_mem_size_entry {
+	char *uname;
+	phys_addr_t size;
+};
+static struct reserved_mem_size_entry reserved_mem_size_array[MAX_RESERVED_REGIONS];
+static int reserved_mem_size_entry_count;
+#endif
+
 static struct reserved_mem reserved_mem[MAX_RESERVED_REGIONS];
 static int reserved_mem_count;
 
@@ -81,6 +91,9 @@ static int __init __reserved_mem_alloc_size(unsigned long node,
 	const __be32 *prop;
 	bool nomap;
 	int ret;
+#if defined(CONFIG_ARCH_CVITEK)
+	int i;
+#endif
 
 	prop = of_get_flat_dt_prop(node, "size", &len);
 	if (!prop)
@@ -91,6 +104,18 @@ static int __init __reserved_mem_alloc_size(unsigned long node,
 		return -EINVAL;
 	}
 	size = dt_mem_next_cell(dt_root_size_cells, &prop);
+#if defined(CONFIG_ARCH_CVITEK)
+	for (i = 0; i < reserved_mem_size_entry_count; i++) {
+		if (!strcmp(uname, reserved_mem_size_array[i].uname)) {
+			pr_info("fix reserved-memory item %s from bootargs\n", reserved_mem_size_array[i].uname);
+
+			pr_info("old size=%pa, new size=%pa\n", &size, &reserved_mem_size_array[i].size);
+
+			size = reserved_mem_size_array[i].size;
+			break;
+		}
+	}
+#endif
 
 	prop = of_get_flat_dt_prop(node, "alignment", &len);
 	if (prop) {
@@ -160,6 +185,82 @@ static int __init __reserved_mem_alloc_size(unsigned long node,
 
 	return 0;
 }
+
+#if defined(CONFIG_ARCH_CVITEK)
+static char *next_arg_separator(char *args, char **param, char **val, char separator)
+{
+	unsigned int i, equals = 0;
+	int in_quote = 0, quoted = 0;
+	char *next;
+
+	if (*args == '"') {
+		args++;
+		in_quote = 1;
+		quoted = 1;
+	}
+
+	for (i = 0; args[i]; i++) {
+		if (args[i] == separator && !in_quote)
+			break;
+		if (equals == 0) {
+			if (args[i] == '=')
+				equals = i;
+		}
+		if (args[i] == '"')
+			in_quote = !in_quote;
+	}
+
+	*param = args;
+	if (!equals)
+		*val = NULL;
+	else {
+		args[equals] = '\0';
+		*val = args + equals + 1;
+
+		/* Don't include quotes in value. */
+		if (**val == '"') {
+			(*val)++;
+			if (args[i-1] == '"')
+				args[i-1] = '\0';
+		}
+	}
+	if (quoted && args[i-1] == '"')
+		args[i-1] = '\0';
+
+	if (args[i]) {
+		args[i] = '\0';
+		next = args + i + 1;
+	} else
+		next = args + i;
+
+	/* Chew up trailing spaces. */
+	return skip_spaces(next);
+}
+
+
+static int __init early_reserved_size(char *args)
+{
+	char *param, *size;
+	u64 u64_size;
+
+	pr_debug("%s args is %s\n", __func__, args);
+
+	while (*args) {
+		args = next_arg_separator(args, &param, &size, ':');
+		reserved_mem_size_array[reserved_mem_size_entry_count].uname = param;
+		kstrtou64(size, 16, &u64_size);
+		reserved_mem_size_array[reserved_mem_size_entry_count].size = u64_size;
+		reserved_mem_size_entry_count++;
+
+		pr_debug("%s, parsed %s", __func__, param);
+
+		pr_debug(" val=%pa\n", &reserved_mem_size_array[reserved_mem_size_entry_count - 1].size);
+	}
+
+	return 0;
+}
+early_param("reserved_mem_size", early_reserved_size);
+#endif
 
 static const struct of_device_id __rmem_of_table_sentinel
 	__used __section("__reservedmem_of_table_end");
@@ -356,8 +457,8 @@ int of_reserved_mem_device_init_by_idx(struct device *dev,
 		mutex_lock(&of_rmem_assigned_device_mutex);
 		list_add(&rd->list, &of_rmem_assigned_device_list);
 		mutex_unlock(&of_rmem_assigned_device_mutex);
-
-		dev_info(dev, "assigned reserved memory node %s\n", rmem->name);
+		// FIXME: dmesg -n 8
+		//dev_info(dev, "assigned reserved memory node %s\n", rmem->name);
 	} else {
 		kfree(rd);
 	}

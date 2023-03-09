@@ -2,7 +2,8 @@
 
 CFLAGS_init.o := -mcmodel=medany
 ifdef CONFIG_FTRACE
-CFLAGS_REMOVE_init.o = -pg
+CFLAGS_REMOVE_init.o = $(CC_FLAGS_FTRACE)
+CFLAGS_REMOVE_cacheflush.o = $(CC_FLAGS_FTRACE)
 endif
 
 KCOV_INSTRUMENT_init.o := n
@@ -11,6 +12,10 @@ obj-y += init.o
 obj-y += extable.o
 obj-$(CONFIG_MMU) += fault.o pageattr.o
 obj-y += cacheflush.o
+obj-y += context.o
+obj-y += dma-mapping.o
+obj-y += ioremap.o
+obj-y += asid.o
 obj-y += context.o
 
 ifeq ($(CONFIG_MMU),y)

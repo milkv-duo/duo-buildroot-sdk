@@ -253,7 +253,7 @@ static int apply_r_riscv_align_rela(struct module *me, u32 *location,
 	pr_err(
 	  "%s: The unexpected relocation type 'R_RISCV_ALIGN' from PC = %p\n",
 	  me->name, location);
-	return -EINVAL;
+	return 0; /* Do not return -EINVAL when relocation type is R_RISCV_ALIGN */
 }
 
 static int apply_r_riscv_add32_rela(struct module *me, u32 *location,
@@ -309,6 +309,45 @@ static int (*reloc_handlers_rela[]) (struct module *me, u32 *location,
 	[R_RISCV_SUB64]			= apply_r_riscv_sub64_rela,
 };
 
+static inline int apply_calc_pcrel_lo12(Elf_Shdr *sechdrs, Elf_Rela *rel,
+			   Elf_Sym *sym, unsigned int relidx,
+		       unsigned int symindex, unsigned int relsec,
+		       struct module *me, Elf_Addr *v) {
+	unsigned long hi20_loc =
+		sechdrs[sechdrs[relsec].sh_info].sh_addr
+		+ rel[relidx].r_offset;
+	u32 hi20_type = ELF_RISCV_R_TYPE(rel[relidx].r_info);
+	int ret = 0;
+
+	/* Find the corresponding HI20 relocation entry */
+	if (hi20_loc == sym->st_value
+		&& (hi20_type == R_RISCV_PCREL_HI20
+		|| hi20_type == R_RISCV_GOT_HI20)) {
+		s32 hi20, lo12;
+		Elf_Sym *hi20_sym =
+			(Elf_Sym *)sechdrs[symindex].sh_addr
+			+ ELF_RISCV_R_SYM(rel[relidx].r_info);
+		unsigned long hi20_sym_val =
+			hi20_sym->st_value
+			+ rel[relidx].r_addend;
+
+		/* Calculate lo12 */
+		size_t offset = hi20_sym_val - hi20_loc;
+
+		if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
+			&& hi20_type == R_RISCV_GOT_HI20) {
+			offset = module_emit_got_entry(
+				me, hi20_sym_val);
+			offset = offset - hi20_loc;
+		}
+		hi20 = (offset + 0x800) & 0xfffff000;
+		lo12 = offset - hi20;
+		*v = lo12;
+		ret = 1;
+	}
+	return ret;
+}
+
 int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 		       unsigned int symindex, unsigned int relsec,
 		       struct module *me)
@@ -357,38 +396,26 @@ int apply_relocate_add(Elf_Shdr *sechdrs, const char *strtab,
 
 		if (type == R_RISCV_PCREL_LO12_I || type == R_RISCV_PCREL_LO12_S) {
 			unsigned int j;
+			unsigned int found = 0;
 
-			for (j = 0; j < sechdrs[relsec].sh_size / sizeof(*rel); j++) {
-				unsigned long hi20_loc =
-					sechdrs[sechdrs[relsec].sh_info].sh_addr
-					+ rel[j].r_offset;
-				u32 hi20_type = ELF_RISCV_R_TYPE(rel[j].r_info);
+			/* in some module, the hi20 type is before the lo12 type,
+			 * so we search the i-1 first to reduice the search time.
+			 */
+			if (i > 0) {
+				j = i - 1;
+				found = apply_calc_pcrel_lo12(sechdrs, rel, sym, j, symindex,
+					relsec, me, &v);
+			}
 
-				/* Find the corresponding HI20 relocation entry */
-				if (hi20_loc == sym->st_value
-				    && (hi20_type == R_RISCV_PCREL_HI20
-					|| hi20_type == R_RISCV_GOT_HI20)) {
-					s32 hi20, lo12;
-					Elf_Sym *hi20_sym =
-						(Elf_Sym *)sechdrs[symindex].sh_addr
-						+ ELF_RISCV_R_SYM(rel[j].r_info);
-					unsigned long hi20_sym_val =
-						hi20_sym->st_value
-						+ rel[j].r_addend;
-
-					/* Calculate lo12 */
-					size_t offset = hi20_sym_val - hi20_loc;
-					if (IS_ENABLED(CONFIG_MODULE_SECTIONS)
-					    && hi20_type == R_RISCV_GOT_HI20) {
-						offset = module_emit_got_entry(
-							 me, hi20_sym_val);
-						offset = offset - hi20_loc;
+			if (found == 0) {
+				for (j = 0; j < sechdrs[relsec].sh_size / sizeof(*rel); j++) {
+					if (j != i-1) {
+						found = apply_calc_pcrel_lo12(sechdrs, rel, sym, j,
+							symindex, relsec, me, &v);
 					}
-					hi20 = (offset + 0x800) & 0xfffff000;
-					lo12 = offset - hi20;
-					v = lo12;
-
-					break;
+					if (found) {
+						break;
+					}
 				}
 			}
 			if (j == sechdrs[relsec].sh_size / sizeof(*rel)) {

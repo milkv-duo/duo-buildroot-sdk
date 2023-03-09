@@ -544,7 +544,11 @@ err_memunmap:
 }
 
 /* Simple wrapper functions to be able to use a function pointer */
+#ifdef CONFIG_ARCH_CVITEK
+void optee_smccc_smc(unsigned long a0, unsigned long a1,
+#else
 static void optee_smccc_smc(unsigned long a0, unsigned long a1,
+#endif
 			    unsigned long a2, unsigned long a3,
 			    unsigned long a4, unsigned long a5,
 			    unsigned long a6, unsigned long a7,
@@ -552,6 +556,9 @@ static void optee_smccc_smc(unsigned long a0, unsigned long a1,
 {
 	arm_smccc_smc(a0, a1, a2, a3, a4, a5, a6, a7, res);
 }
+#ifdef CONFIG_ARCH_CVITEK
+EXPORT_SYMBOL(optee_smccc_smc);
+#endif
 
 static void optee_smccc_hvc(unsigned long a0, unsigned long a1,
 			    unsigned long a2, unsigned long a3,

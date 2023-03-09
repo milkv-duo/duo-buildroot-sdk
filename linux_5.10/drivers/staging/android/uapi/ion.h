@@ -56,6 +56,8 @@ enum ion_heap_type {
  *
  */
 
+#define MAX_ION_BUFFER_NAME 32
+
 /**
  * struct ion_allocation_data - metadata passed from userspace for allocations
  * @len:		size of the allocation
@@ -72,6 +74,17 @@ struct ion_allocation_data {
 	__u32 flags;
 	__u32 fd;
 	__u32 unused;
+	__u64 paddr;
+	char name[MAX_ION_BUFFER_NAME];
+};
+
+struct ion_allocation_data_legacy {
+	__u64 len;
+	__u32 heap_id_mask;
+	__u32 flags;
+	__u32 fd;
+	__u32 unused;
+	__u64 paddr;
 };
 
 #define MAX_HEAP_NAME			32
@@ -104,6 +117,19 @@ struct ion_heap_query {
 	__u32 reserved2;
 };
 
+/**
+ * struct ion_custom_data - metadata passed to/from userspace for a custom ioctl
+ * @cmd:	the custom ioctl function to call
+ * @arg:	additional data to pass to the custom ioctl, typically a user
+ *		pointer to a predefined structure
+ *
+ * This works just like the regular cmd and arg fields of an ioctl.
+ */
+struct ion_custom_data {
+	unsigned int cmd;
+	unsigned long arg;
+};
+
 #define ION_IOC_MAGIC		'I'
 
 /**
@@ -114,6 +140,17 @@ struct ion_heap_query {
  */
 #define ION_IOC_ALLOC		_IOWR(ION_IOC_MAGIC, 0, \
 				      struct ion_allocation_data)
+
+#define ION_IOC_ALLOC_LEGACY		_IOWR(ION_IOC_MAGIC, 0, \
+				      struct ion_allocation_data_legacy)
+
+/**
+ * DOC: ION_IOC_CUSTOM - call architecture specific ion ioctl
+ *
+ * Takes the argument of the architecture specific ioctl to call and
+ * passes appropriate userdata for that ioctl
+ */
+#define ION_IOC_CUSTOM		_IOWR(ION_IOC_MAGIC, 6, struct ion_custom_data)
 
 /**
  * DOC: ION_IOC_HEAP_QUERY - information about available heaps

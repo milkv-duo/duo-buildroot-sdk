@@ -1,0 +1,9 @@
+* CVITEK CV180X Thermal Driver
+
+** Required properties:
+- compatible : "cvitek,cv180x-thermal"
+- reg : Address range of the thermal registers.
+- interrupts : Should contain interrupt for thermal system.
+- clocks : The clocks for thermal(tempsen).
+- clock-names : Should be "clk_tempsen".
+- #thermal-sensor-cells : Should be <1>.

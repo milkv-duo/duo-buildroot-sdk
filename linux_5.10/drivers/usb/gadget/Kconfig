@@ -455,6 +455,17 @@ config USB_CONFIGFS_F_UVC
 	  device. It provides a userspace API to process UVC control requests
 	  and stream video data to the host.
 
+config USB_UVCG_SG_TRANSFER
+	bool "USB UVCG SG Support"
+	depends on USB_CONFIGFS_F_UVC
+	depends on VIDEO_V4L2
+	depends on VIDEO_DEV
+	default n
+	help
+	  Enable the scatter-gather method for isochronous transfer in UVC.
+	  The USB device controller shall be able to queue multiple u-frame
+	  data by dma desriptors.
+
 config USB_CONFIGFS_F_PRINTER
 	bool "Printer function"
 	select USB_F_PRINTER

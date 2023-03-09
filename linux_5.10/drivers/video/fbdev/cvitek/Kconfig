@@ -1,0 +1,13 @@
+config FB_CVITEK
+	tristate "Cvitek framebuffer support"
+	depends on FB
+	select FB_CFB_FILLRECT
+	select FB_CFB_COPYAREA
+	select FB_CFB_IMAGEBLIT
+	help
+	  Framebuffer support for the CVITEK SoC.
+
+	  This driver is also available as a module ( = code which can be
+	  inserted and removed from the running kernel whenever you want). The
+	  module will be called cvifb. If you want to compile it as a module,
+	  say M here and read <file:Documentation/kbuild/modules.txt>.

@@ -61,6 +61,10 @@ enum usb_otg_state {
 	OTG_STATE_A_PERIPHERAL,
 	OTG_STATE_A_WAIT_VFALL,
 	OTG_STATE_A_VBUS_ERR,
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+	/* for hnp dual role */
+	OTG_STATE_A_EXIT_HNP,
+#endif
 };
 
 struct usb_phy;

@@ -1,0 +1,19 @@
+config VIDEO_CVITEK_CIF
+	tristate "CVITEK CIF driver"
+	depends on HAS_DMA
+	default y
+	help
+	  This is a V4L2 driver for the CVITEK camera interface.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called mipi_rx.
+
+config VIDEO_CVITEK_SNS_I2C
+	tristate "CVITEK Sensor I2C driver"
+	depends on HAS_DMA
+	default y
+	help
+	This is a V4L2 driver for the CVITEK Sensor I2C Wrapper.
+
+	To compile this driver as a module, choose M here: the
+	module will be called sensor_i2c.

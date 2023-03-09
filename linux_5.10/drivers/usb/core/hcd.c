@@ -2618,6 +2618,7 @@ static void usb_put_invalidate_rhdev(struct usb_hcd *hcd)
 	usb_put_dev(rhdev);
 }
 
+#if !defined(CONFIG_CVITEK_USB_LEGACY)
 /**
  * usb_add_hcd - finish generic HCD structure initialization and register
  * @hcd: the usb_hcd structure to initialize
@@ -2902,6 +2903,336 @@ void usb_remove_hcd(struct usb_hcd *hcd)
 }
 EXPORT_SYMBOL_GPL(usb_remove_hcd);
 
+#else
+/**
+ * usb_otg_add_hcd - finish generic HCD structure initialization and register
+ * @hcd: the usb_hcd structure to initialize
+ * @irqnum: Interrupt line to allocate
+ * @irqflags: Interrupt type flags
+ *
+ * Finish the remaining parts of generic HCD initialization: allocate the
+ * buffers of consistent memory, register the bus, request the IRQ line,
+ * and call the driver's reset() and start() routines.
+ */
+static int usb_otg_add_hcd(struct usb_hcd *hcd,
+			   unsigned int irqnum, unsigned long irqflags)
+{
+	int retval;
+	struct usb_device *rhdev;
+
+	if (!hcd->skip_phy_initialization && usb_hcd_is_primary_hcd(hcd)) {
+		hcd->phy_roothub = usb_phy_roothub_alloc(hcd->self.sysdev);
+		if (IS_ERR(hcd->phy_roothub))
+			return PTR_ERR(hcd->phy_roothub);
+
+		retval = usb_phy_roothub_init(hcd->phy_roothub);
+		if (retval)
+			return retval;
+
+		retval = usb_phy_roothub_power_on(hcd->phy_roothub);
+		if (retval)
+			goto err_usb_phy_roothub_power_on;
+	}
+
+	dev_info(hcd->self.controller, "%s\n", hcd->product_desc);
+
+	/* Keep old behaviour if authorized_default is not in [0, 1]. */
+	if (authorized_default < 0 || authorized_default > 1) {
+		if (hcd->wireless)
+			clear_bit(HCD_FLAG_DEV_AUTHORIZED, &hcd->flags);
+		else
+			set_bit(HCD_FLAG_DEV_AUTHORIZED, &hcd->flags);
+	} else {
+		if (authorized_default)
+			set_bit(HCD_FLAG_DEV_AUTHORIZED, &hcd->flags);
+		else
+			clear_bit(HCD_FLAG_DEV_AUTHORIZED, &hcd->flags);
+	}
+	set_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
+
+	/* per default all interfaces are authorized */
+	set_bit(HCD_FLAG_INTF_AUTHORIZED, &hcd->flags);
+
+	/* HC is in reset state, but accessible.  Now do the one-time init,
+	 * bottom up so that hcds can customize the root hubs before hub_wq
+	 * starts talking to them.  (Note, bus id is assigned early too.)
+	 */
+	retval = hcd_buffer_create(hcd);
+	if (retval != 0) {
+		dev_dbg(hcd->self.sysdev, "pool alloc failed\n");
+		goto err_create_buf;
+	}
+
+	retval = usb_register_bus(&hcd->self);
+	if (retval < 0)
+		goto err_register_bus;
+
+	rhdev = usb_alloc_dev(NULL, &hcd->self, 0);
+	if (rhdev == NULL) {
+		dev_err(hcd->self.sysdev, "unable to allocate root hub\n");
+		retval = -ENOMEM;
+		goto err_allocate_root_hub;
+	}
+	mutex_lock(&usb_port_peer_mutex);
+	hcd->self.root_hub = rhdev;
+	mutex_unlock(&usb_port_peer_mutex);
+
+	rhdev->rx_lanes = 1;
+	rhdev->tx_lanes = 1;
+
+	switch (hcd->speed) {
+	case HCD_USB11:
+		rhdev->speed = USB_SPEED_FULL;
+		break;
+	case HCD_USB2:
+		rhdev->speed = USB_SPEED_HIGH;
+		break;
+	case HCD_USB25:
+		rhdev->speed = USB_SPEED_WIRELESS;
+		break;
+	case HCD_USB3:
+		rhdev->speed = USB_SPEED_SUPER;
+		break;
+	case HCD_USB32:
+		rhdev->rx_lanes = 2;
+		rhdev->tx_lanes = 2;
+		/* fall through */
+	case HCD_USB31:
+		rhdev->speed = USB_SPEED_SUPER_PLUS;
+		break;
+	default:
+		retval = -EINVAL;
+		goto err_set_rh_speed;
+	}
+
+	/* wakeup flag init defaults to "everything works" for root hubs,
+	 * but drivers can override it in reset() if needed, along with
+	 * recording the overall controller's system wakeup capability.
+	 */
+	device_set_wakeup_capable(&rhdev->dev, 1);
+
+	/* HCD_FLAG_RH_RUNNING doesn't matter until the root hub is
+	 * registered.  But since the controller can die at any time,
+	 * let's initialize the flag before touching the hardware.
+	 */
+	set_bit(HCD_FLAG_RH_RUNNING, &hcd->flags);
+
+	/* "reset" is misnamed; its role is now one-time init. the controller
+	 * should already have been reset (and boot firmware kicked off etc).
+	 */
+	if (hcd->driver->reset) {
+		retval = hcd->driver->reset(hcd);
+		if (retval < 0) {
+			dev_err(hcd->self.controller, "can't setup: %d\n",
+					retval);
+			goto err_hcd_driver_setup;
+		}
+	}
+	hcd->rh_pollable = 1;
+
+	/* NOTE: root hub and controller capabilities may not be the same */
+	if (device_can_wakeup(hcd->self.controller)
+			&& device_can_wakeup(&hcd->self.root_hub->dev))
+		dev_dbg(hcd->self.controller, "supports USB remote wakeup\n");
+
+	/* initialize tasklets */
+	init_giveback_urb_bh(&hcd->high_prio_bh);
+	init_giveback_urb_bh(&hcd->low_prio_bh);
+
+	/* enable irqs just before we start the controller,
+	 * if the BIOS provides legacy PCI irqs.
+	 */
+	if (usb_hcd_is_primary_hcd(hcd) && irqnum) {
+		retval = usb_hcd_request_irqs(hcd, irqnum, irqflags);
+		if (retval)
+			goto err_request_irq;
+	}
+
+	hcd->state = HC_STATE_RUNNING;
+	retval = hcd->driver->start(hcd);
+	if (retval < 0) {
+		dev_err(hcd->self.controller, "startup error %d\n", retval);
+		goto err_hcd_driver_start;
+	}
+
+	/* starting here, usbcore will pay attention to this root hub */
+	retval = register_root_hub(hcd);
+	if (retval != 0)
+		goto err_register_root_hub;
+
+	retval = sysfs_create_group(&rhdev->dev.kobj, &usb_bus_attr_group);
+	if (retval < 0) {
+		dev_err(hcd->self.controller, "Cannot register USB bus sysfs attributes: %d\n",
+		       retval);
+		goto error_create_attr_group;
+	}
+	if (hcd->uses_new_polling && HCD_POLL_RH(hcd))
+		usb_hcd_poll_rh_status(hcd);
+
+	return retval;
+
+error_create_attr_group:
+	clear_bit(HCD_FLAG_RH_RUNNING, &hcd->flags);
+	if (HC_IS_RUNNING(hcd->state))
+		hcd->state = HC_STATE_QUIESCING;
+	spin_lock_irq(&hcd_root_hub_lock);
+	hcd->rh_registered = 0;
+	spin_unlock_irq(&hcd_root_hub_lock);
+
+#ifdef CONFIG_PM
+	cancel_work_sync(&hcd->wakeup_work);
+#endif
+	mutex_lock(&usb_bus_idr_lock);
+	usb_disconnect(&rhdev);		/* Sets rhdev to NULL */
+	mutex_unlock(&usb_bus_idr_lock);
+err_register_root_hub:
+	hcd->rh_pollable = 0;
+	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+	del_timer_sync(&hcd->rh_timer);
+	hcd->driver->stop(hcd);
+	hcd->state = HC_STATE_HALT;
+	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+	del_timer_sync(&hcd->rh_timer);
+err_hcd_driver_start:
+	if (usb_hcd_is_primary_hcd(hcd) && hcd->irq > 0)
+		free_irq(irqnum, hcd);
+err_request_irq:
+err_hcd_driver_setup:
+err_set_rh_speed:
+	usb_put_invalidate_rhdev(hcd);
+err_allocate_root_hub:
+	usb_deregister_bus(&hcd->self);
+err_register_bus:
+	hcd_buffer_destroy(hcd);
+err_create_buf:
+	usb_phy_roothub_power_off(hcd->phy_roothub);
+err_usb_phy_roothub_power_on:
+	usb_phy_roothub_exit(hcd->phy_roothub);
+
+	return retval;
+}
+
+/**
+ * usb_otg_remove_hcd - shutdown processing for generic HCDs
+ * @hcd: the usb_hcd structure to remove
+ * Context: !in_interrupt()
+ *
+ * Disconnects the root hub, then reverses the effects of usb_add_hcd(),
+ * invoking the HCD's stop() method.
+ */
+static void usb_otg_remove_hcd(struct usb_hcd *hcd)
+{
+	struct usb_device *rhdev = hcd->self.root_hub;
+
+	dev_info(hcd->self.controller, "remove, state %x\n", hcd->state);
+
+	usb_get_dev(rhdev);
+	sysfs_remove_group(&rhdev->dev.kobj, &usb_bus_attr_group);
+
+	clear_bit(HCD_FLAG_RH_RUNNING, &hcd->flags);
+	if (HC_IS_RUNNING(hcd->state))
+		hcd->state = HC_STATE_QUIESCING;
+
+	dev_dbg(hcd->self.controller, "roothub graceful disconnect\n");
+	spin_lock_irq(&hcd_root_hub_lock);
+	hcd->rh_registered = 0;
+	spin_unlock_irq(&hcd_root_hub_lock);
+
+#ifdef CONFIG_PM
+	cancel_work_sync(&hcd->wakeup_work);
+#endif
+
+	mutex_lock(&usb_bus_idr_lock);
+	usb_disconnect(&rhdev);		/* Sets rhdev to NULL */
+	mutex_unlock(&usb_bus_idr_lock);
+
+	/*
+	 * tasklet_kill() isn't needed here because:
+	 * - driver's disconnect() called from usb_disconnect() should
+	 *   make sure its URBs are completed during the disconnect()
+	 *   callback
+	 *
+	 * - it is too late to run complete() here since driver may have
+	 *   been removed already now
+	 */
+
+	/* Prevent any more root-hub status calls from the timer.
+	 * The HCD might still restart the timer (if a port status change
+	 * interrupt occurs), but usb_hcd_poll_rh_status() won't invoke
+	 * the hub_status_data() callback.
+	 */
+	hcd->rh_pollable = 0;
+	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+	del_timer_sync(&hcd->rh_timer);
+
+	hcd->driver->stop(hcd);
+	hcd->state = HC_STATE_HALT;
+
+	/* In case the HCD restarted the timer, stop it again. */
+	clear_bit(HCD_FLAG_POLL_RH, &hcd->flags);
+	del_timer_sync(&hcd->rh_timer);
+
+	if (usb_hcd_is_primary_hcd(hcd)) {
+		if (hcd->irq > 0)
+			free_irq(hcd->irq, hcd);
+	}
+
+	usb_deregister_bus(&hcd->self);
+	hcd_buffer_destroy(hcd);
+
+	usb_phy_roothub_power_off(hcd->phy_roothub);
+	usb_phy_roothub_exit(hcd->phy_roothub);
+
+	usb_put_invalidate_rhdev(hcd);
+	hcd->flags = 0;
+}
+
+static struct otg_hcd_ops otg_hcd_intf = {
+	.add = usb_otg_add_hcd,
+	.remove = usb_otg_remove_hcd,
+};
+
+/**
+ * usb_add_hcd - finish generic HCD structure initialization and register
+ * @hcd: the usb_hcd structure to initialize
+ * @irqnum: Interrupt line to allocate
+ * @irqflags: Interrupt type flags
+ *
+ * Finish the remaining parts of generic HCD initialization: allocate the
+ * buffers of consistent memory, register the bus, request the IRQ line,
+ * and call the driver's reset() and start() routines.
+ * If it is an OTG device then it only registers the HCD with OTG core.
+ *
+ */
+int usb_add_hcd(struct usb_hcd *hcd,
+		unsigned int irqnum, unsigned long irqflags)
+{
+	/* If OTG device, OTG core takes care of adding HCD */
+	if (usb_otg_register_hcd(hcd, irqnum, irqflags, &otg_hcd_intf))
+		return usb_otg_add_hcd(hcd, irqnum, irqflags);
+	return 0;
+}
+EXPORT_SYMBOL_GPL(usb_add_hcd);
+
+/**
+ * usb_remove_hcd - shutdown processing for generic HCDs
+ * @hcd: the usb_hcd structure to remove
+ * Context: !in_interrupt()
+ *
+ * Disconnects the root hub, then reverses the effects of usb_add_hcd(),
+ * invoking the HCD's stop() method.
+ * If it is an OTG device then it unregisters the HCD from OTG core
+ * as well.
+ */
+void usb_remove_hcd(struct usb_hcd *hcd)
+{
+	/* If OTG device, OTG core takes care of stopping HCD */
+	if (usb_otg_unregister_hcd(hcd))
+		usb_otg_remove_hcd(hcd);
+}
+EXPORT_SYMBOL_GPL(usb_remove_hcd);
+
+#endif
 void
 usb_hcd_platform_shutdown(struct platform_device *dev)
 {

@@ -249,6 +249,8 @@ patternProperties:
     description: Shenzen Chuangsiqi Technology Co.,Ltd.
   "^cubietech,.*":
     description: Cubietech, Ltd.
+  "^cvitek,.*":
+    description:  Cvitek Co., Ltd.
   "^cypress,.*":
     description: Cypress Semiconductor Corporation
   "^cznic,.*":

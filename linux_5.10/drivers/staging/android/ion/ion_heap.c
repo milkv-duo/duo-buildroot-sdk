@@ -14,39 +14,25 @@
 #include <uapi/linux/sched/types.h>
 #include <linux/scatterlist.h>
 #include <linux/vmalloc.h>
-
 #include "ion.h"
+#include <linux/io.h>
 
 void *ion_heap_map_kernel(struct ion_heap *heap,
 			  struct ion_buffer *buffer)
 {
-	struct sg_page_iter piter;
 	void *vaddr;
-	pgprot_t pgprot;
-	struct sg_table *table = buffer->sg_table;
-	int npages = PAGE_ALIGN(buffer->size) / PAGE_SIZE;
-	struct page **pages = vmalloc(array_size(npages,
-						 sizeof(struct page *)));
-	struct page **tmp = pages;
 
-	if (!pages)
-		return ERR_PTR(-ENOMEM);
+	pr_debug("ion_heap_map_kernel addr=0x%llx, size=%lu\n", buffer->paddr, PAGE_ALIGN(buffer->size));
 
 	if (buffer->flags & ION_FLAG_CACHED)
-		pgprot = PAGE_KERNEL;
+		vaddr = memremap(buffer->paddr, PAGE_ALIGN(buffer->size), MEMREMAP_WB);
 	else
-		pgprot = pgprot_writecombine(PAGE_KERNEL);
+		vaddr = ioremap(buffer->paddr, PAGE_ALIGN(buffer->size));
 
-	for_each_sgtable_page(table, &piter, 0) {
-		BUG_ON(tmp - pages >= npages);
-		*tmp++ = sg_page_iter_page(&piter);
-	}
-
-	vaddr = vmap(pages, npages, VM_MAP, pgprot);
-	vfree(pages);
-
-	if (!vaddr)
+	if (!vaddr) {
+		pr_err("ion_heap_map_kernel map failed\n");
 		return ERR_PTR(-ENOMEM);
+	}
 
 	return vaddr;
 }
@@ -54,7 +40,10 @@ void *ion_heap_map_kernel(struct ion_heap *heap,
 void ion_heap_unmap_kernel(struct ion_heap *heap,
 			   struct ion_buffer *buffer)
 {
-	vunmap(buffer->vaddr);
+	if (buffer->flags & ION_FLAG_CACHED)
+		memunmap(buffer->vaddr);
+	else
+		iounmap(buffer->vaddr);
 }
 
 int ion_heap_map_user(struct ion_heap *heap, struct ion_buffer *buffer,
@@ -125,6 +114,21 @@ int ion_heap_buffer_zero(struct ion_buffer *buffer)
 		pgprot = pgprot_writecombine(PAGE_KERNEL);
 
 	return ion_heap_sglist_zero(table, pgprot);
+}
+
+int ion_heap_pages_zero(struct page *page, size_t size, pgprot_t pgprot)
+{
+	struct scatterlist sg;
+	struct sg_table sgt;
+
+	sg_init_table(&sg, 1);
+	sg_set_page(&sg, page, size, 0);
+
+	sgt.sgl = &sg;
+	sgt.nents = 1;
+	sgt.orig_nents = 1;
+
+	return ion_heap_sglist_zero(&sgt, pgprot);
 }
 
 void ion_heap_freelist_add(struct ion_heap *heap, struct ion_buffer *buffer)

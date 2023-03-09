@@ -556,4 +556,13 @@ config MTD_NAND_DISKONCHIP_BBTWRITE
 	  load time (assuming you build diskonchip as a module) with the module
 	  parameter "inftl_bbt_write=1".
 
+config MTD_NAND_CVSNFC
+    tristate "Support SPINFC controller on CVITEK chips"
+    depends on HAS_DMA
+    help
+      Enable the driver for SPI NAND flash on platforms using a CVSNFC controller.
+      Thiscontroller is foudn on CV1835
+      Enable the driver for SPI NAND flash on platforms using a CVSNFC controller.
+      Thiscontroller is foudn on CV1835
+
 endif # MTD_RAW_NAND

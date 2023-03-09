@@ -24,7 +24,7 @@ PECOFF_FILE_ALIGNMENT = 0x200;
 SECTIONS
 {
 	/* Beginning of code and text segment */
-	. = LOAD_OFFSET;
+	. = PAGE_OFFSET + LOAD_OFFSET;
 	_start = .;
 	HEAD_TEXT_SECTION
 	. = ALIGN(PAGE_SIZE);

@@ -1,0 +1,6 @@
+config DW_DMAC_CVITEK
+        bool "cvitek dma engine based DW DMAC"
+        select DMA_ENGINE
+        help
+          Support the DMA engine for cvitek platform devices.
+

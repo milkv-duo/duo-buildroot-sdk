@@ -212,6 +212,11 @@ static inline int mmc_card_long_read_time(const struct mmc_card *c)
 	return c->quirks & MMC_QUIRK_LONG_READ_TIME;
 }
 
+static inline int mmc_card_extra_long_read_time(const struct mmc_card *c)
+{
+	return c->quirks & MMC_QUIRK_EXTRA_LONG_READ_TIME;
+}
+
 static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
 {
 	return c->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING;

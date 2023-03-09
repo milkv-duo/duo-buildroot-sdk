@@ -643,7 +643,10 @@ static struct file *pick_file(struct files_struct *files, unsigned fd)
 {
 	struct file *file = NULL;
 	struct fdtable *fdt;
-
+	if (files == NULL) {
+		printk("pick_file files is NULL fd = %d!\n", fd);
+		return NULL;
+	}
 	spin_lock(&files->file_lock);
 	fdt = files_fdtable(files);
 	if (fd >= fdt->max_fds)

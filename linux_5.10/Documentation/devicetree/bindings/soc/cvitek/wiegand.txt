@@ -1,0 +1,8 @@
+Cvitek wiegand driver
+
+This document describes the binding for the Cvitek vip.
+
+Required properties:
+- compatible: "cvitek,wiegand"
+- reg: wiegand register regions
+- interrupts: wiegand interrupt number

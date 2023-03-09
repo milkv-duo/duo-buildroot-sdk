@@ -122,6 +122,9 @@ struct usb_request {
 
 	int			status;
 	unsigned		actual;
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+	int req_map;
+#endif
 };
 
 /*-------------------------------------------------------------------------*/
@@ -718,6 +721,22 @@ struct usb_gadget_driver {
 };
 
 
+#if defined(CONFIG_CVITEK_USB_LEGACY)
+/*-------------------------------------------------------------------------*/
+
+/**
+ * struct otg_gadget_ops - Interface between OTG core and gadget
+ *
+ * Provided by the gadget core to allow the OTG core to start/stop the gadget
+ *
+ * @start: function to start the gadget
+ * @stop: function to stop the gadget
+ */
+struct otg_gadget_ops {
+	int (*start)(struct usb_gadget *gadget);
+	int (*stop)(struct usb_gadget *gadget);
+};
+#endif
 
 /*-------------------------------------------------------------------------*/
 

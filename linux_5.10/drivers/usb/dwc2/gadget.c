@@ -304,7 +304,12 @@ static void dwc2_hsotg_init_fifo(struct dwc2_hsotg *hsotg)
 	u32 *txfsz = hsotg->params.g_tx_fifo_size;
 
 	/* Reset fifo map if not correctly cleared during previous session */
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	dev_dbg(hsotg->dev,
+		"%s: fifo is not cleared correctly\n", __func__);
+#else
 	WARN_ON(hsotg->fifo_map);
+#endif
 	hsotg->fifo_map = 0;
 
 	/* set RX/NPTX FIFO sizes */
@@ -422,7 +427,10 @@ static void dwc2_hsotg_unmap_dma(struct dwc2_hsotg *hsotg,
 {
 	struct usb_request *req = &hs_req->req;
 
-	usb_gadget_unmap_request(&hsotg->gadget, req, hs_ep->dir_in);
+	usb_gadget_unmap_request(&hsotg->gadget, req, hs_ep->map_dir);
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	req->dma = 0;
+#endif
 }
 
 /*
@@ -1242,6 +1250,11 @@ static int dwc2_hsotg_map_dma(struct dwc2_hsotg *hsotg,
 {
 	int ret;
 
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	if (req->dma)
+		return 0;
+#endif
+	hs_ep->map_dir = hs_ep->dir_in;
 	ret = usb_gadget_map_request(&hsotg->gadget, req, hs_ep->dir_in);
 	if (ret)
 		goto dma_error;
@@ -1543,7 +1556,6 @@ static void dwc2_hsotg_complete_oursetup(struct usb_ep *ep,
 static struct dwc2_hsotg_ep *ep_from_windex(struct dwc2_hsotg *hsotg,
 					    u32 windex)
 {
-	struct dwc2_hsotg_ep *ep;
 	int dir = (windex & USB_DIR_IN) ? 1 : 0;
 	int idx = windex & 0x7F;
 
@@ -1553,12 +1565,7 @@ static struct dwc2_hsotg_ep *ep_from_windex(struct dwc2_hsotg *hsotg,
 	if (idx > hsotg->num_of_eps)
 		return NULL;
 
-	ep = index_to_ep(hsotg, idx, dir);
-
-	if (idx && ep->dir_in != dir)
-		return NULL;
-
-	return ep;
+	return index_to_ep(hsotg, idx, dir);
 }
 
 /**
@@ -2036,7 +2043,15 @@ static void dwc2_hsotg_enqueue_setup(struct dwc2_hsotg *hsotg)
 
 	ret = dwc2_hsotg_ep_queue(&hsotg->eps_out[0]->ep, req, GFP_ATOMIC);
 	if (ret < 0) {
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+		/* Not to show this message due to flow necessary.
+		 * We may switch to device mode without cable connected.
+		 */
+		if (ret != -EAGAIN)
+			dev_err(hsotg->dev, "%s: failed queue (%d)\n", __func__, ret);
+#else
 		dev_err(hsotg->dev, "%s: failed queue (%d)\n", __func__, ret);
+#endif
 		/*
 		 * Don't think there's much we can do other than watch the
 		 * driver fail.
@@ -3386,7 +3401,7 @@ void dwc2_hsotg_core_init_disconnected(struct dwc2_hsotg *hsotg,
 
 	/* remove the HNP/SRP and set the PHY */
 	usbcfg &= ~(GUSBCFG_SRPCAP | GUSBCFG_HNPCAP);
-        dwc2_writel(hsotg, usbcfg, GUSBCFG);
+	dwc2_writel(hsotg, usbcfg, GUSBCFG);
 
 	dwc2_phy_init(hsotg, true);
 
@@ -3695,10 +3710,10 @@ irq_retry:
 		dwc2_writel(hsotg, GINTSTS_RESETDET, GINTSTS);
 
 		/* This event must be used only if controller is suspended */
-		if (hsotg->lx_state == DWC2_L2) {
-			dwc2_exit_partial_power_down(hsotg, true);
-			hsotg->lx_state = DWC2_L0;
-		}
+		if (hsotg->in_ppd && hsotg->lx_state == DWC2_L2)
+			dwc2_exit_partial_power_down(hsotg, 0, true);
+
+		hsotg->lx_state = DWC2_L0;
 	}
 
 	if (gintsts & (GINTSTS_USBRST | GINTSTS_RESETDET)) {
@@ -4621,11 +4636,15 @@ static int dwc2_hsotg_vbus_session(struct usb_gadget *gadget, int is_active)
 	spin_lock_irqsave(&hsotg->lock, flags);
 
 	/*
-	 * If controller is hibernated, it must exit from power_down
-	 * before being initialized / de-initialized
+	 * If controller is in partial power down state, it must exit from
+	 * that state before being initialized / de-initialized
 	 */
-	if (hsotg->lx_state == DWC2_L2)
-		dwc2_exit_partial_power_down(hsotg, false);
+	if (hsotg->lx_state == DWC2_L2 && hsotg->in_ppd)
+		/*
+		 * No need to check the return value as
+		 * registers are not being restored.
+		 */
+		dwc2_exit_partial_power_down(hsotg, 0, false);
 
 	if (is_active) {
 		hsotg->op_state = OTG_STATE_B_PERIPHERAL;
@@ -4884,6 +4903,10 @@ int dwc2_gadget_init(struct dwc2_hsotg *hsotg)
 	else if (hsotg->dr_mode == USB_DR_MODE_PERIPHERAL)
 		hsotg->op_state = OTG_STATE_B_PERIPHERAL;
 
+#if IS_ENABLED(CONFIG_ARCH_CVITEK)
+	/* Not support OTG protocol */
+	hsotg->gadget.is_otg = 0;
+#endif
 	ret = dwc2_hsotg_hw_cfg(hsotg);
 	if (ret) {
 		dev_err(hsotg->dev, "Hardware configuration failed: %d\n", ret);
@@ -5307,6 +5330,10 @@ int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *hsotg,
 	dwc2_writel(hsotg, dr->dcfg, DCFG);
 	dwc2_writel(hsotg, dr->dctl, DCTL);
 
+	/* On USB Reset, reset device address to zero */
+	if (reset)
+		dwc2_clear_bit(hsotg, DCFG, DCFG_DEVADDR_MASK);
+
 	/* De-assert Wakeup Logic */
 	gpwrdn = dwc2_readl(hsotg, GPWRDN);
 	gpwrdn &= ~GPWRDN_PMUACTV;
@@ -5356,4 +5383,206 @@ int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *hsotg,
 	dev_dbg(hsotg->dev, "Hibernation recovery completes here\n");
 
 	return ret;
+}
+
+/**
+ * dwc2_gadget_enter_partial_power_down() - Put controller in partial
+ * power down.
+ *
+ * @hsotg: Programming view of the DWC_otg controller
+ *
+ * Return: non-zero if failed to enter device partial power down.
+ *
+ * This function is for entering device mode partial power down.
+ */
+int dwc2_gadget_enter_partial_power_down(struct dwc2_hsotg *hsotg)
+{
+	u32 pcgcctl;
+	int ret = 0;
+
+	dev_dbg(hsotg->dev, "Entering device partial power down started.\n");
+
+	/* Backup all registers */
+	ret = dwc2_backup_global_registers(hsotg);
+	if (ret) {
+		dev_err(hsotg->dev, "%s: failed to backup global registers\n",
+			__func__);
+		return ret;
+	}
+
+	ret = dwc2_backup_device_registers(hsotg);
+	if (ret) {
+		dev_err(hsotg->dev, "%s: failed to backup device registers\n",
+			__func__);
+		return ret;
+	}
+
+	/*
+	 * Clear any pending interrupts since dwc2 will not be able to
+	 * clear them after entering partial_power_down.
+	 */
+	dwc2_writel(hsotg, 0xffffffff, GINTSTS);
+
+	/* Put the controller in low power state */
+	pcgcctl = dwc2_readl(hsotg, PCGCTL);
+
+	pcgcctl |= PCGCTL_PWRCLMP;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+	udelay(5);
+
+	pcgcctl |= PCGCTL_RSTPDWNMODULE;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+	udelay(5);
+
+	pcgcctl |= PCGCTL_STOPPCLK;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+
+	/* Set in_ppd flag to 1 as here core enters suspend. */
+	hsotg->in_ppd = 1;
+	hsotg->lx_state = DWC2_L2;
+
+	dev_dbg(hsotg->dev, "Entering device partial power down completed.\n");
+
+	return ret;
+}
+
+/*
+ * dwc2_gadget_exit_partial_power_down() - Exit controller from device partial
+ * power down.
+ *
+ * @hsotg: Programming view of the DWC_otg controller
+ * @restore: indicates whether need to restore the registers or not.
+ *
+ * Return: non-zero if failed to exit device partial power down.
+ *
+ * This function is for exiting from device mode partial power down.
+ */
+int dwc2_gadget_exit_partial_power_down(struct dwc2_hsotg *hsotg,
+					bool restore)
+{
+	u32 pcgcctl;
+	u32 dctl;
+	struct dwc2_dregs_backup *dr;
+	int ret = 0;
+
+	dr = &hsotg->dr_backup;
+
+	dev_dbg(hsotg->dev, "Exiting device partial Power Down started.\n");
+
+	pcgcctl = dwc2_readl(hsotg, PCGCTL);
+	pcgcctl &= ~PCGCTL_STOPPCLK;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+
+	pcgcctl = dwc2_readl(hsotg, PCGCTL);
+	pcgcctl &= ~PCGCTL_PWRCLMP;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+
+	pcgcctl = dwc2_readl(hsotg, PCGCTL);
+	pcgcctl &= ~PCGCTL_RSTPDWNMODULE;
+	dwc2_writel(hsotg, pcgcctl, PCGCTL);
+
+	udelay(100);
+	if (restore) {
+		ret = dwc2_restore_global_registers(hsotg);
+		if (ret) {
+			dev_err(hsotg->dev, "%s: failed to restore registers\n",
+				__func__);
+			return ret;
+		}
+		/* Restore DCFG */
+		dwc2_writel(hsotg, dr->dcfg, DCFG);
+
+		ret = dwc2_restore_device_registers(hsotg, 0);
+		if (ret) {
+			dev_err(hsotg->dev, "%s: failed to restore device registers\n",
+				__func__);
+			return ret;
+		}
+	}
+
+	/* Set the Power-On Programming done bit */
+	dctl = dwc2_readl(hsotg, DCTL);
+	dctl |= DCTL_PWRONPRGDONE;
+	dwc2_writel(hsotg, dctl, DCTL);
+
+	/* Set in_ppd flag to 0 as here core exits from suspend. */
+	hsotg->in_ppd = 0;
+	hsotg->lx_state = DWC2_L0;
+
+	dev_dbg(hsotg->dev, "Exiting device partial Power Down completed.\n");
+	return ret;
+}
+
+/**
+ * dwc2_gadget_enter_clock_gating() - Put controller in clock gating.
+ *
+ * @hsotg: Programming view of the DWC_otg controller
+ *
+ * Return: non-zero if failed to enter device partial power down.
+ *
+ * This function is for entering device mode clock gating.
+ */
+void dwc2_gadget_enter_clock_gating(struct dwc2_hsotg *hsotg)
+{
+	u32 pcgctl;
+
+	dev_dbg(hsotg->dev, "Entering device clock gating.\n");
+
+	/* Set the Phy Clock bit as suspend is received. */
+	pcgctl = dwc2_readl(hsotg, PCGCTL);
+	pcgctl |= PCGCTL_STOPPCLK;
+	dwc2_writel(hsotg, pcgctl, PCGCTL);
+	udelay(5);
+#if !IS_ENABLED(CONFIG_ARCH_CVITEK)
+	/* Set the Gate hclk as suspend is received. */
+	pcgctl = dwc2_readl(hsotg, PCGCTL);
+	pcgctl |= PCGCTL_GATEHCLK;
+	dwc2_writel(hsotg, pcgctl, PCGCTL);
+	udelay(5);
+#endif
+
+	hsotg->lx_state = DWC2_L2;
+	hsotg->bus_suspended = true;
+}
+
+/*
+ * dwc2_gadget_exit_clock_gating() - Exit controller from device clock gating.
+ *
+ * @hsotg: Programming view of the DWC_otg controller
+ * @rem_wakeup: indicates whether remote wake up is enabled.
+ *
+ * This function is for exiting from device mode clock gating.
+ */
+void dwc2_gadget_exit_clock_gating(struct dwc2_hsotg *hsotg, int rem_wakeup)
+{
+	u32 pcgctl;
+	u32 dctl;
+
+	dev_dbg(hsotg->dev, "Exiting device clock gating.\n");
+
+#if !IS_ENABLED(CONFIG_ARCH_CVITEK)
+	/* Clear the Gate hclk. */
+	pcgctl = dwc2_readl(hsotg, PCGCTL);
+	pcgctl &= ~PCGCTL_GATEHCLK;
+	dwc2_writel(hsotg, pcgctl, PCGCTL);
+	udelay(5);
+#endif
+
+	/* Phy Clock bit. */
+	pcgctl = dwc2_readl(hsotg, PCGCTL);
+	pcgctl &= ~PCGCTL_STOPPCLK;
+	dwc2_writel(hsotg, pcgctl, PCGCTL);
+	udelay(5);
+
+	if (rem_wakeup) {
+		/* Set Remote Wakeup Signaling */
+		dctl = dwc2_readl(hsotg, DCTL);
+		dctl |= DCTL_RMTWKUPSIG;
+		dwc2_writel(hsotg, dctl, DCTL);
+	}
+
+	/* Change to L0 state */
+	call_gadget(hsotg, resume);
+	hsotg->lx_state = DWC2_L0;
+	hsotg->bus_suspended = false;
 }

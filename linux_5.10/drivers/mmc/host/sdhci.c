@@ -45,6 +45,11 @@
 
 #define MAX_TUNING_LOOP 40
 
+//#define DEBUG_CMD_ONCE_ERROR_OCCUR
+#ifdef DEBUG_CMD_ONCE_ERROR_OCCUR
+static bool bForceDumpCMD;
+#endif
+
 static unsigned int debug_quirks = 0;
 static unsigned int debug_quirks2;
 
@@ -110,6 +115,9 @@ void sdhci_dumpregs(struct sdhci_host *host)
 				   sdhci_readl(host, SDHCI_ADMA_ADDRESS));
 		}
 	}
+#ifdef DEBUG_CMD_ONCE_ERROR_OCCUR
+	bForceDumpCMD = true;
+#endif
 
 	if (host->ops->dump_vendor_regs)
 		host->ops->dump_vendor_regs(host);
@@ -242,7 +250,8 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
 			return;
 	}
 
-	host->ops->reset(host, mask);
+	if (host->ops->reset)
+		host->ops->reset(host, mask);
 
 	if (mask & SDHCI_RESET_ALL) {
 		if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
@@ -270,6 +279,12 @@ static void sdhci_set_default_irqs(struct sdhci_host *host)
 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
 }
+
+/*register macro */
+#define P_VENDOR_SPECIFIC_AREA		0xE8
+#define P_VENDOR2_SPECIFIC_AREA		0xEA
+#define VENDOR_EMMC_CTRL		0x2C
+#define SDHCI_ERR_INT_STATUS_EN		0x36
 
 static void sdhci_config_dma(struct sdhci_host *host)
 {
@@ -321,6 +336,7 @@ static void sdhci_init(struct sdhci_host *host, int soft)
 {
 	struct mmc_host *mmc = host->mmc;
 	unsigned long flags;
+	void *vendor_base = NULL;
 
 	if (soft)
 		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
@@ -329,6 +345,13 @@ static void sdhci_init(struct sdhci_host *host, int soft)
 
 	if (host->v4_mode)
 		sdhci_do_enable_v4_mode(host);
+	vendor_base = host->ioaddr + (readl(host->ioaddr + P_VENDOR_SPECIFIC_AREA) & ((1<<12)-1));
+
+#ifdef CONFIG_ARCH_CV183X
+	writew(readw(vendor_base + VENDOR_EMMC_CTRL) | 0x1, vendor_base + VENDOR_EMMC_CTRL);
+#elif defined(CONFIG_ARCH_CV182X)
+//	writew(readw(vendor_base) | 0x1, vendor_base);
+#endif
 
 	spin_lock_irqsave(&host->lock, flags);
 	sdhci_set_default_irqs(host);
@@ -1930,6 +1953,9 @@ clock_set:
 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
 		<< SDHCI_DIVIDER_HI_SHIFT;
 
+	pr_debug("host->max_clk %u, clock:%u, actual_clock:%u, real_div:%u\n",
+		 host->max_clk, clock, *actual_clock, real_div);
+
 	return clk;
 }
 EXPORT_SYMBOL_GPL(sdhci_calc_clk);
@@ -2130,6 +2156,12 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	struct mmc_command *cmd;
 	unsigned long flags;
 	bool present;
+
+	if (host->quirks2 & SDHCI_QUIRK2_SW_CLK_GATING_SUPPORT) {
+		sdhci_writew(host,
+			sdhci_readw(host, SDHCI_CLOCK_CONTROL) | SDHCI_CLOCK_CARD_EN,
+			SDHCI_CLOCK_CONTROL);
+	}
 
 	/* Firstly check card presence */
 	present = mmc->ops->get_cd(mmc);
@@ -2855,6 +2887,18 @@ out:
 }
 EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
 
+static int sdhci_select_drive_strength(struct mmc_card *card,
+				       unsigned int max_dtr, int host_drv,
+				       int card_drv, int *drv_type)
+{
+	struct sdhci_host *host = mmc_priv(card->host);
+
+	if (!host->ops->select_drive_strength)
+		return 0;
+
+	return host->ops->select_drive_strength(host, card, max_dtr, host_drv,
+						card_drv, drv_type);
+}
 static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
 {
 	/* Host Controller v3.00 defines preset value registers */
@@ -2937,6 +2981,11 @@ static void sdhci_card_event(struct mmc_host *mmc)
 
 	present = mmc->ops->get_cd(mmc);
 
+	/* Once REG_0x24[16] is 0, raise a flag. */
+	if (!present) {
+		mmc->ever_unplugged = true;
+	}
+
 	spin_lock_irqsave(&host->lock, flags);
 
 	/* Check sdhci_has_requests() first in case we are runtime suspended */
@@ -2968,6 +3017,7 @@ static const struct mmc_host_ops sdhci_ops = {
 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
 	.prepare_hs400_tuning		= sdhci_prepare_hs400_tuning,
 	.execute_tuning			= sdhci_execute_tuning,
+	.select_drive_strength		= sdhci_select_drive_strength,
 	.card_event			= sdhci_card_event,
 	.card_busy	= sdhci_card_busy,
 };
@@ -3097,6 +3147,12 @@ static bool sdhci_request_done(struct sdhci_host *host)
 		host->ops->request_done(host, mrq);
 	else
 		mmc_request_done(host->mmc, mrq);
+
+	if (host->quirks2 & SDHCI_QUIRK2_SW_CLK_GATING_SUPPORT) {
+		sdhci_writew(host,
+			(sdhci_readw(host, SDHCI_CLOCK_CONTROL) & ~SDHCI_CLOCK_CARD_EN),
+			SDHCI_CLOCK_CONTROL);
+	}
 
 	return false;
 }
@@ -3444,6 +3500,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
 			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
 				      SDHCI_CARD_PRESENT;
 
+			if (intmask & SDHCI_INT_CARD_REMOVE)
+				host->mmc->ever_unplugged = true;
 			/*
 			 * There is a observation on i.mx esdhc.  INSERT
 			 * bit will be immediately set again when it gets
@@ -3469,6 +3527,54 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
 						       SDHCI_INT_CARD_REMOVE);
 			result = IRQ_WAKE_THREAD;
 		}
+
+#ifdef DEBUG_CMD_ONCE_ERROR_OCCUR
+		if ((intmask & SDHCI_INT_ERROR) && (bForceDumpCMD == false)) {
+#else
+		if (intmask & SDHCI_INT_ERROR) {
+#endif
+			//Ignore error of Tuning CMD.
+			//MMC - CMD21
+			//SD  - CMD19
+			if (host->cmd &&
+			(((host->cmd->opcode != 21) &&
+			(host->mmc->card) && (host->mmc->card->type == MMC_TYPE_MMC)) ||
+			((host->cmd->opcode != 19) &&
+			(host->mmc->card) && (host->mmc->card->type == MMC_TYPE_SD)))) {
+				pr_err("%s: host->mmc->card->type = %d\n", __func__, host->mmc->card->type);
+				pr_err("%s: err cmd %p\n", __func__, host->cmd);
+				pr_err("%s: err opcode %d\n", __func__, host->cmd->opcode);
+				pr_err("%s: err interrupt 0x%08x\n", __func__, intmask);
+				sdhci_dumpregs(host);
+#ifdef DEBUG_CMD_ONCE_ERROR_OCCUR
+				bForceDumpCMD = true;
+#endif
+			}
+		}
+
+#ifdef DEBUG_CMD_ONCE_ERROR_OCCUR
+		if (bForceDumpCMD) {
+			if (host->cmd) {
+				SDHCI_DUMP("%s: [DEBUG]err cmd %p\n", __func__, host->cmd);
+				SDHCI_DUMP("%s: [DEBUG]err opcode %d\n", __func__, host->cmd->opcode);
+			} else if (host->data_cmd) {
+				SDHCI_DUMP("%s: [DEBUG]err datacmd %p\n", __func__, host->data_cmd);
+				SDHCI_DUMP("%s: [DEBUG]err opcode %d\n", __func__, host->data_cmd->opcode);
+			}
+			SDHCI_DUMP("%s: [DEBUG]err interrupt 0x%08x\n", __func__, intmask);
+			SDHCI_DUMP("%s: [DEBUG]Argument: 0x%08x\n", __func__,
+					sdhci_readl(host, SDHCI_ARGUMENT));
+			SDHCI_DUMP("%s: [DEBUG]Resp[0]:   0x%08x | Resp[1]:  0x%08x\n", __func__,
+					sdhci_readl(host, SDHCI_RESPONSE),
+					sdhci_readl(host, SDHCI_RESPONSE + 4));
+			SDHCI_DUMP("%s: [DEBUG]Resp[2]:   0x%08x | Resp[3]:  0x%08x\n", __func__,
+					sdhci_readl(host, SDHCI_RESPONSE + 8),
+					sdhci_readl(host, SDHCI_RESPONSE + 12));
+			if (intmask & SDHCI_INT_ERROR) {
+				sdhci_dumpregs(host);
+			}
+		}
+#endif
 
 		if (intmask & SDHCI_INT_CMD_MASK)
 			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK, &intmask);
@@ -4140,7 +4246,7 @@ int sdhci_setup_host(struct sdhci_host *host)
 	override_timeout_clk = host->timeout_clk;
 
 	if (host->version > SDHCI_SPEC_420) {
-		pr_err("%s: Unknown controller version (%d). You may experience problems.\n",
+		pr_debug("%s: Host Controller version %d\n",
 		       mmc_hostname(mmc), host->version);
 	}
 
@@ -4405,7 +4511,10 @@ int sdhci_setup_host(struct sdhci_host *host)
 				mmc_hostname(mmc), ret);
 			mmc->supply.vqmmc = ERR_PTR(-EINVAL);
 		}
+	}
 
+	if (host->quirks2 & SDHCI_QUIRK2_NO_3_3_V) {
+		host->flags &= ~SDHCI_SIGNALING_330;
 	}
 
 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {

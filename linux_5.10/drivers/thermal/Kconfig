@@ -412,6 +412,50 @@ config MTK_THERMAL
 	  Enable this option if you want to have support for thermal management
 	  controller present in Mediatek SoCs
 
+config CV1835_THERMAL
+	tristate "Temperature sensor driver for CVITEK CV1835"
+	depends on ARCH_CV183X || COMPILE_TEST
+	default y
+	help
+	  Select this driver for CVITEK CV1835 temperature sensor monitoring
+	  system temperature measurements and alerts.
+	  This driver is used for monitoring the temperature sensor and handles
+	  the alert trip point interrupts and notifies the thermal framework with
+	  the trip point and temperature details of the zone.
+
+config CV182X_THERMAL
+	tristate "Temperature sensor driver for CVITEK CV182X"
+	depends on ARCH_CV182X || COMPILE_TEST
+	default y
+	help
+	  Select this driver for CVITEK CV182X temperature sensor monitoring
+	  system temperature measurements and alerts.
+	  This driver is used for monitoring the temperature sensor and handles
+	  the alert trip point interrupts and notifies the thermal framework with
+	  the trip point and temperature details of the zone.
+
+config CV181X_THERMAL
+	tristate "Temperature sensor driver for CVITEK CV181X"
+	depends on ARCH_CV181X || COMPILE_TEST
+	default y
+	help
+	  Select this driver for CVITEK CV181X temperature sensor monitoring
+	  system temperature measurements and alerts.
+	  This driver is used for monitoring the temperature sensor and handles
+	  the alert trip point interrupts and notifies the thermal framework with
+	  the trip point and temperature details of the zone.
+
+config CV180X_THERMAL
+	tristate "Temperature sensor driver for CVITEK CV180X"
+	depends on ARCH_CV180X || COMPILE_TEST
+	default y
+	help
+	  Select this driver for CVITEK CV180X temperature sensor monitoring
+	  system temperature measurements and alerts.
+	  This driver is used for monitoring the temperature sensor and handles
+	  the alert trip point interrupts and notifies the thermal framework with
+	  the trip point and temperature details of the zone.
+
 config AMLOGIC_THERMAL
 	tristate "Amlogic Thermal Support"
 	default ARCH_MESON

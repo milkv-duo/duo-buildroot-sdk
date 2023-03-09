@@ -16,15 +16,6 @@
 
 #include "slot-gpio.h"
 
-struct mmc_gpio {
-	struct gpio_desc *ro_gpio;
-	struct gpio_desc *cd_gpio;
-	irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
-	char *ro_label;
-	char *cd_label;
-	u32 cd_debounce_delay_ms;
-};
-
 static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
 {
 	/* Schedule a card detection after a debounce timeout */

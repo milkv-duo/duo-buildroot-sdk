@@ -1,0 +1,3 @@
+*.dts
+*.dtsi
+!cv1835_asic.dtsi

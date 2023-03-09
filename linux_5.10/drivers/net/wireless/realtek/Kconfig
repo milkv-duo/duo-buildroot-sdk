@@ -16,5 +16,30 @@ source "drivers/net/wireless/realtek/rtl818x/Kconfig"
 source "drivers/net/wireless/realtek/rtlwifi/Kconfig"
 source "drivers/net/wireless/realtek/rtl8xxxu/Kconfig"
 source "drivers/net/wireless/realtek/rtw88/Kconfig"
+source "drivers/net/wireless/realtek/rtl8188f/Kconfig"
+
+config RTL8188FU
+    tristate "Realtek 8188F USB WiFi"
+    help
+      Help message of RTL8818FU
+      This is the driver of Realtek wifi drvier.
+      This chip work through USB.
+      You need to say Y if your board use this chip to implement wifi
+
+config RTL8189FS
+    tristate "Realtek 8189F SDIO WiFi"
+    help
+      Help message of RTL8189FS
+      This is the driver of Realtek wifi drvier.
+      This chip work through SDIO.
+      You need to say Y if your board use this chip to implement wifi
+
+config RTL8723DS
+    tristate "Realtek 8723D SDIO or SPI WiFi"
+    help
+      Help message of RTL8723DS
+      This is the driver of Realtek wifi drvier.
+      This chip work through SDIO.
+      You need to say Y if your board use this chip to implement wifi
 
 endif # WLAN_VENDOR_REALTEK

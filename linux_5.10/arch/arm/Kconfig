@@ -2050,3 +2050,4 @@ source "arch/arm/crypto/Kconfig"
 endif
 
 source "arch/arm/Kconfig.assembler"
+source "arch/arm/mach-cvitek/Kconfig"

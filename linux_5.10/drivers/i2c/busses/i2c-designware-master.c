@@ -205,6 +205,8 @@ static int i2c_dw_init_master(struct dw_i2c_dev *dev)
 	}
 
 	/* Write SDA hold time if supported */
+	dev->sda_hold_time = 0x1E;
+
 	if (dev->sda_hold_time)
 		regmap_write(dev->map, DW_IC_SDA_HOLD, dev->sda_hold_time);
 
@@ -330,9 +332,12 @@ i2c_dw_xfer_msg(struct dw_i2c_dev *dev)
 			 * be adjusted when receiving the first byte.
 			 * Thus we can't stop the transaction here.
 			 */
-			if (dev->msg_write_idx == dev->msgs_num - 1 &&
-			    buf_len == 1 && !(flags & I2C_M_RECV_LEN))
+			if (((dev->msg_write_idx == dev->msgs_num - 1) || (flags & I2C_M_WRSTOP)) &&
+			    buf_len == 1 && !(flags & I2C_M_RECV_LEN)) {
 				cmd |= BIT(9);
+				if (flags & I2C_M_WRSTOP)
+					dev->use_interstop = 1;
+			}
 
 			if (need_restart) {
 				cmd |= BIT(10);
@@ -507,7 +512,10 @@ i2c_dw_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[], int num)
 	 * additional interrupts are a hardware bug or this driver doesn't
 	 * handle them correctly yet.
 	 */
-	__i2c_dw_disable_nowait(dev);
+	if (!dev->use_interstop)
+		__i2c_dw_disable_nowait(dev);
+
+	dev->use_interstop = 0;
 
 	if (dev->msg_err) {
 		ret = dev->msg_err;
