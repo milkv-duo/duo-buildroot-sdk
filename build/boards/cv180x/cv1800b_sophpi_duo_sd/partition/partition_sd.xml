@@ -1,0 +1,5 @@
+<physical_partition type="sd">
+    <partition label="BOOT" size_in_kb="80960" readonly="false" file="boot.sd"/>
+    <partition label="ROOTFS" size_in_kb="204800" readonly="false" file="rootfs.sd" />
+    <partition label="DATA"  size_in_kb="512000" readonly="false" file="data.sd" mountpoint="/mnt/data" type="ext4" />
+</physical_partition>
