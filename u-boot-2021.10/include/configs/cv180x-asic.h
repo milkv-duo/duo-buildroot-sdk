@@ -80,6 +80,7 @@
 /*#define CONFIG_MENU_SHOW*/
 
 /* Download related definitions */
+#define UPGRADE_SRAM_ADDR	0x0e000030
 #define UBOOT_PID_SRAM_ADDR  0x0e000030
 #define UPDATE_ADDR	CVIMMAP_ION_ADDR
 #define HEADER_ADDR	UPDATE_ADDR
@@ -207,6 +208,8 @@
 		#else
 			#define ROOTARGS "ubi.mtd=ROOTFS ubi.block=0,0"
 		#endif /* CONFIG_SKIP_RAMDISK */
+	#elif defined(CONFIG_SD_BOOT)
+		#define ROOTARGS "root=" ROOTFS_DEV " rootwait rw"
 	#else
 		#define ROOTARGS "rootfstype=squashfs rootwait ro root=" ROOTFS_DEV
 	#endif
@@ -281,13 +284,17 @@
 
 	#define SD_BOOTM_COMMAND \
 				SET_BOOTARGS \
-				"echo Boot from SD with ramboot.itb;" \
-				"mmc dev 1 && fatload mmc 1 ${uImage_addr} ramboot.itb; " \
+				"echo Boot from SD ...;" \
+				"mmc dev 0 && fatload mmc 0 ${uImage_addr} boot.sd; " \
 				"if test $? -eq 0; then " \
 				UBOOT_VBOOT_BOOTM_COMMAND \
 				"fi;"
 
-	#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
+	#ifndef CONFIG_SD_BOOT
+		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
+	#else
+		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "run sdboot"
+	#endif
 
 	#if defined(CONFIG_NAND_SUPPORT)
 	/* For spi nand boot, need to reset DMA and its setting before exiting uboot */
