@@ -1,0 +1,26 @@
+From 424d090edb02221a8f78695632d9489a37e83971 Mon Sep 17 00:00:00 2001
+From: gaotianyu <gaotianyu@rd.netease.com>
+Date: Sun, 17 Oct 2021 14:55:51 +0800
+Subject: [PATCH] mod: if DEBUG equal 0 then enable debug info output
+
+Signed-off-by: gaotianyu <gaotianyu@rd.netease.com>
+---
+ src/makefile | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/makefile b/src/makefile
+index 4ece5b1..465df30 100644
+--- a/src/makefile
++++ b/src/makefile
+@@ -33,7 +33,7 @@ ZLOG_MINOR=2
+ CC:=$(shell sh -c 'type $(CC) >/dev/null 2>/dev/null && echo $(CC) || echo gcc')
+ OPTIMIZATION?=-O2
+ WARNINGS=-Wall -Wstrict-prototypes -fwrapv
+-DEBUG?= -g -ggdb
++DEBUG:= -g -ggdb
+ REAL_CFLAGS=$(OPTIMIZATION) -fPIC -pthread $(CFLAGS) $(WARNINGS) $(DEBUG)
+ REAL_LDFLAGS=$(LDFLAGS) -pthread
+ 
+-- 
+2.17.1
+

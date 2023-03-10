@@ -43,6 +43,9 @@ QT5BASE_CFLAGS += -O0
 QT5BASE_CXXFLAGS += -O0
 endif
 
+QT5BASE_CFLAGS += -march=armv8-a+crc
+QT5BASE_CXXFLAGS += -march=armv8-a+crc
+
 ifeq ($(BR2_X86_CPU_HAS_SSE2),)
 QT5BASE_CONFIGURE_OPTS += -no-sse2
 else ifeq ($(BR2_X86_CPU_HAS_SSE3),)

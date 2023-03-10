@@ -1,0 +1,26 @@
+From 194c79ae3fe12ea16165874b61f8a0cce9bf1c73 Mon Sep 17 00:00:00 2001
+From: gaotianyu <gaotianyu@rd.netease.com>
+Date: Fri, 22 Oct 2021 11:43:23 +0800
+Subject: [PATCH] fix TOP_DIR value error beacause of CVITEK platform
+
+Signed-off-by: gaotianyu <gaotianyu@rd.netease.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index e1d1469..45cd159 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ PROJECT_TITLE := FreeType
+ # The variable TOP_DIR holds the path to the topmost directory in the project
+ # engine source hierarchy.  If it is not defined, default it to `.'.
+ #
+-TOP_DIR ?= .
++TOP_DIR := .
+
+ # The variable OBJ_DIR gives the location where object files and the
+ # FreeType library are built.
+--
+2.17.1
+
