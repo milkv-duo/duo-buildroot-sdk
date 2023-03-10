@@ -244,6 +244,11 @@ function pack_upgrade
   command rm -rf "$TMPDIR"
 )}
 
+function pack_sd_image
+{(
+  "$COMMON_TOOLS_PATH"/sd_tools/sd_gen_burn_image.sh "$OUTPUT_DIR"
+)}
+
 function pack_prog_img
 {(
   local tmp_dir
