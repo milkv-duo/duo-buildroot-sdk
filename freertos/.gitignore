@@ -2,3 +2,5 @@
 cvitek/task/isp/isp
 
 cvitek/build/
+cvitek/install/bin
+cvitek/install/lib
