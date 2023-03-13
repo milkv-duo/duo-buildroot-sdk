@@ -246,7 +246,9 @@ function pack_upgrade
 
 function pack_sd_image
 {(
-  "$COMMON_TOOLS_PATH"/sd_tools/sd_gen_burn_image.sh "$OUTPUT_DIR"
+  pushd "$BUILD_PATH"
+  make sd_image || return "$?"
+  popd
 )}
 
 function pack_prog_img
