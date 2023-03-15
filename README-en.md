@@ -1,36 +1,33 @@
 
-
-简体中文 | [English](./README-en.md)
-
-<br>
-
-# 目录
-
-- [目录](#目录)
-- [项目简介](#项目简介)
-  - [硬件资料](#硬件资料)
-  - [芯片规格](#芯片规格)
-- [SDK目录结构](#sdk目录结构)
-- [快速开始](#快速开始)
-  - [准备编译环境](#准备编译环境)
-  - [获取SDK](#获取sdk)
-  - [准备编译工具](#准备编译工具)
-  - [编译](#编译)
-  - [SD卡烧录](#sd卡烧录)
-- [相关项目](#相关项目)
-- [关于算能](#关于算能)
-- [技术论坛](#技术论坛)
-
+[简体中文](./README.md) | English
 
 <br>
 
-# 项目简介
-- 本仓库提供[算能科技](https://www.sophgo.com/)端侧芯片`CV181x`和`CV180x`两个系列芯片的软件开发包(SDK)。
-- 主要适用于官方EVB
+# Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Project Introduction](#project-introduction)
+  - [Hardware Information](#hardware-information)
+  - [SOC SPEC](#soc-spec)
+- [SDK Directory Structure](#sdk-directory-structure)
+- [Quick Start](#quick-start)
+  - [Prepare the compilation environment](#prepare-the-compilation-environment)
+  - [Get SDK source code](#get-sdk-source-code)
+  - [Prepare cross-compilation tools](#prepare-cross-compilation-tools)
+  - [compile](#compile)
+  - [SD card burning](#sd-card-burning)
+- [About SOPHGO](#about-sophgo)
+  - [Related Efforts](#related-efforts)
+- [FORUM](#forum)
+
+
+# Project Introduction
+- This is a release SDK repository for the [SOPHGO](https://www.sophgo.com/) `cv181x` and `cv180x` series of Edge chips.
+- Mainly applicable to official EVB
 
 <br>
 
-## 硬件资料
+## Hardware Information
 - [《CV180xB EVB板硬件指南》](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/14/14/CV180xB_EVB%E6%9D%BF%E7%A1%AC%E4%BB%B6%E6%8C%87%E5%8D%97_V1.0.pdf)
 - [《CV180xC EVB板硬件指南》](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/18/18/CV180xC_EVB%E6%9D%BF%E7%A1%AC%E4%BB%B6%E6%8C%87%E5%8D%97_V1.0.pdf)
 - [《CV181xC EVB板硬件指南》](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/15/14/CV181xC_QFN_EVB%E6%9D%BF%E7%A1%AC%E4%BB%B6%E6%8C%87%E5%8D%97_V1.0.pdf)
@@ -38,11 +35,12 @@
 
 <br>
 
-## 芯片规格
-- [芯片产品简介](https://www.sophgo.com/product/index.html)
+## SOC SPEC
+- [SOC Product Brief](https://www.sophgo.com/product/index.html)
+
 <br><br>
 
-# SDK目录结构
+# SDK Directory Structure
 ```
 .
 ├── build               // 编译目录，存放编译脚本以及各board差异化配置
@@ -60,12 +58,12 @@
 
 <br><br>
 
-# 快速开始
+# Quick Start
 
-## 准备编译环境
-- 在虚拟机上安装一个ubuntu系统，或者使用本地的ubuntu系统，推荐`Ubuntu 20.04 LTS`
-- 安装串口工具： `mobarXterm` 或者 `xshell` 或者其他
-- 安装编译依赖的工具:
+## Prepare the compilation environment
+1. Install a virtual machine, or use a local ubuntu system, recommend`Ubuntu 20.04 LTS`
+2. Install the serial port tool: `mobarXterm` or `xshell` or other tools.
+3. Install the tools that compile dependencies.
 ```
 sudo apt install pkg-config
 sudo apt install build-essential
@@ -103,40 +101,40 @@ sudo apt install libncurses5
 sudo apt install flex
 sudo apt install bison
 ```
-*注意：cmake版本最低要求3.16.5*
+- Note: The minimum version of cmake requires 3.16.5
 
-## 获取SDK
+## Get SDK source code
 ```
 git clone https://github.com/sophgo/cvi_mmf_sdk.git
 ```
 
-## 准备编译工具
+## Prepare cross-compilation tools
 
-- 获取工具链
+- Get the cross-compilation toolchain
 ```
 wget https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz
 ```
-- 解压工具链并链接到SDK目录
+- Unpack the toolchain and link to the SDK directory
 ```
 tar xvf host-tools.tar.gz
 cd cvi_mmf_sdk/
 ln -s ../host-tools ./
 ```
 
-## 编译
-- 以 `cv1812h_wevb_0007a_emmc`为例
+## compile
+- Take `cv1812h_wevb_0007a_emmc` as an example
 ```
 cd cvi_mmf_sdk/
 source build/cvisetup.sh
 defconfig cv1812h_wevb_0007a_emmc
 build_all
 ```
-- 编译成功后可以在`install`目录下看到生成的image
+- After the compilation is successful, you can see the generated image in the `install` directory
 
-## SD卡烧录
-- 接好EVB板的串口线
-- 将SD卡格式化成FAT32格式
-- 将`install`目录下的image放入SD卡根目录
+## SD card burning
+- Connect the serial cable of the EVB board
+- Format the SD card into FAT32 format
+- Put the image in the `install` directory into the root directory of the SD card
 ```
 .
 ├── boot.emmc
@@ -146,8 +144,8 @@ build_all
 ├── rootfs.emmc
 └── system.emmc
 ```
-- 将SD卡插入的SD卡槽中
-- 将平台重新上电，开机自动进入烧录，烧录过程log如下：
+- Insert the SD card into the SD card slot
+- Power on the platform again, and it will automatically enter the burning process when it is turned on. The burning process log is as follows:
 ```
 Hit any key to stop autoboot:  0
 ## Resetting to default environment
@@ -193,23 +191,20 @@ MMC write: dev # 0, block # 240896, count 19928 ... 19928 blocks written: OK in 
 Saving Environment to MMC... Writing to MMC(0)... OK
 mars_c906#
 ```
-- 烧录成功，拔掉SD卡，重新给板子上电，进入系统
+- Burning is successful, unplug the SD card, power on the board again, and enter the system.
 
 <br><br>
 
-# 相关项目
-- [sophpi-huashan](https://github.com/sophgo/sophpi-huashan): 一款基于CV1812H的开源硬件
-- [sophpi-duo](https://github.com/sophgo/sophpi-duo)：一款基于CV1800B的开源硬件
+# About SOPHGO
+** SOPHGO is committed to becoming the world's leading general computing power provider.<br>
+SOPHGO focuses on the development and promotion of AI, RISC-V CPU and other computing products. With the self-developed chips as the core, SOPHGO has created a matrix of computing power products, which covers the whole scene of "cloud, edge and terminal" and provides computing power products and overall solutions for urban brains, intelligent computing centers, intelligent security, intelligent transportation, safety production, industrial quality inspection, intelligent terminals and others.SOPHGO has set up R&D centers in more than 10 cities and countries, including Beijing, Shanghai, Shenzhen, Qingdao, Xiamen, the United States and Singapore. **
+- [Official Website](https://www.sophgo.com/)
 
-<br>
+<br><br>
 
-# 关于算能
+## Related Efforts
+- [sophpi-huashan](https://github.com/sophgo/sophpi-huashan)
+- [sophpi-duo](https://github.com/sophgo/sophpi-duo)
 
-**算能致力于成为全球领先的通用算力提供商。<br>
-算能专注于AI、RISC-V CPU等算力产品的研发和推广应用，以自研产品为核心打造了覆盖“云、边、端”的全场景应用矩阵 ，为城市大脑、智算中心、智慧安防、智慧交通、安全生产、工业质检、智能终端等应用提供算力产品及整体解决方案 。公司在北京、上海、深圳、青岛、厦门等国内 10 多个城市及美国、新加坡等国家设有研发中心。**
-- [官方网站](https://www.sophgo.com/)
-
-# 技术论坛
-- [技术讨论 - 开源硬件sophpi](https://developer.sophgo.com/forum/index/25/51.html)
-
-
+# FORUM
+- [Discussions - Open Hardware sophpi](https://developer.sophgo.com/forum/index/25/51.html)
