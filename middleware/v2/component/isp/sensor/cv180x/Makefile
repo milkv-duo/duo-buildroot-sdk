@@ -71,6 +71,9 @@ ov_os08a20:
 ov_ov4689:
 	$(call MAKE_SENSOR, ${@})
 
+ov_ov5647:
+	$(call MAKE_SENSOR, ${@})
+
 ov_ov6211:
 	$(call MAKE_SENSOR, ${@})
 
@@ -174,6 +177,9 @@ sony_imx327_sublvds:
 	$(call MAKE_SENSOR, ${@})
 
 sony_imx335:
+	$(call MAKE_SENSOR, ${@})
+
+techpoint_tp2825:
 	$(call MAKE_SENSOR, ${@})
 
 all_sensor:

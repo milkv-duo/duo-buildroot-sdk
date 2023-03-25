@@ -161,29 +161,12 @@ CVI_S32 SAMPLE_PLAT_VI_INIT(SAMPLE_VI_CONFIG_S *pstViConfig)
 
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		SAMPLE_VI_INFO_S *pstViInfo = NULL;
+		SAMPLE_SNS_TYPE_E sns_type;
 
 		s32DevNum  = pstViConfig->as32WorkingViId[i];
 		pstViInfo = &pstViConfig->astViInfo[s32DevNum];
-
-		if ((pstViInfo->stSnsInfo.enSnsType == GCORE_GC2145_MIPI_2M_12FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PICO640_THERMAL_479P) ||
-			(pstViInfo->stSnsInfo.enSnsType == TECHPOINT_TP2850_MIPI_2M_30FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == TECHPOINT_TP2850_MIPI_4M_30FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == VIVO_MCS369Q_4M_30FPS_12BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == VIVO_MCS369_2M_30FPS_12BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == VIVO_MM308M2_2M_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == NEXTCHIP_N5_2M_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2020_1M_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2020_1M_30FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2020_2M_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2020_2M_30FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2100_2M_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2100_2M_2CH_25FPS_8BIT) ||
-			(pstViInfo->stSnsInfo.enSnsType == PIXELPLUS_PR2100_2M_4CH_25FPS_8BIT)) {
-			stPipeAttr.bYuvBypassPath = CVI_TRUE;
-		} else {
-			stPipeAttr.bYuvBypassPath = CVI_FALSE;
-		}
+		sns_type = pstViInfo->stSnsInfo.enSnsType;
+		stPipeAttr.bYuvBypassPath = SAMPLE_COMM_VI_GetYuvBypassSts(sns_type);
 
 		for (j = 0; j < WDR_MAX_PIPE_NUM; j++) {
 			if (pstViInfo->stPipeInfo.aPipe[j] >= 0 && pstViInfo->stPipeInfo.aPipe[j] < VI_MAX_PIPE_NUM) {
