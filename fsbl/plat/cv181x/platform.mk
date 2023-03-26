@@ -14,7 +14,7 @@ TEST_FROM_SPINOR1 := 0
 
 DEFINES += -DLZ4_USER_MEMORY_FUNCTIONS=1
 
-ifeq ($(FSBL_SECURE_BOOT_SUPPORT),1)
+# ifeq ($(FSBL_SECURE_BOOT_SUPPORT),1)
 DEFINES += \
 	-DNO_ALLOCS \
 	-DARGTYPE=3 \
@@ -31,7 +31,7 @@ CRYPT_INCLUDES := \
 CRYPT_SOURCES := \
 	lib/BigDigits/bigdigits.c \
 	lib/libtomcrypt/src/hashes/sha2/sha256.c
-endif
+# endif
 
 INCLUDES += \
 	-Iinclude \
@@ -59,13 +59,18 @@ INCLUDES += \
 	lib/lz4/lz4_all.c \
 	lib/lz4/xxhash.c
 
-#BL2_SOURCES = \
-	${BL2_CPU_SOURCES} \
+#BL2_SRCS = \
 	${BL_COMMON_SOURCES} \
-	plat/${CHIP_ARCH}/bl2/bl2_main.c \
+	plat/${CHIP_ARCH}/bl2/bl2_opt.c \
 	lib/utils/decompress.c \
 	${DECOMPRESSION_SOURCES}
+
+BL2_SOURCES = \
+	${BL2_CPU_SOURCES} \
+	${BL2_SRCS} \
+	plat/${CHIP_ARCH}/bl2/bl2_main.c
 
 #include plat/${CHIP_ARCH}/ddr/ddr.mk
 
 BL2_LINKERFILE := plat/${CHIP_ARCH}/bl2/bl2.ld.S
+BL2_RLS_OBJS := plat/${CHIP_ARCH}/bl2_objs/${PROJECT_FULLNAME}/bl2/*.o

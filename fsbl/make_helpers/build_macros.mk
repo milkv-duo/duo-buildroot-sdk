@@ -260,6 +260,8 @@ $(ELF): $(OBJS) $(LINKERFILE) | bl$(1)_dirs
 	@echo 'const char build_message[] = $(BUILD_MESSAGE_TIMESTAMP); \
 	       const char version_string[] = "${VERSION_STRING}";' | \
 		$$(CC) $$(TF_CFLAGS) $$(CFLAGS) -xc -c - -o $(BUILD_DIR)/build_message.o
+	$$(Q)$$(LD) -o $$@ $$(TF_LDFLAGS) $$(LDFLAGS) -Map=$(MAPFILE) \
+		--script $(LINKERFILE) $(BUILD_DIR)/build_message.o ${BL2_RLS_OBJS} $(OBJS) $(LDLIBS)
 
 $(SYM): $(ELF)
 	@echo "  SYM     $$@"

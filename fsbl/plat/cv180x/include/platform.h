@@ -17,6 +17,9 @@
 #include <bl_common.h>
 #include <mmio.h>
 
+extern struct _time_records *time_records;
+extern struct fip_param1 *fip_param1;
+
 void panic_handler(void) __dead2;
 void __system_reset(const char *file, unsigned int line) __dead2;
 #define SYSTEM_RESET(...)                                                                                              \
@@ -116,9 +119,13 @@ void set_rtc_en_registers(void);
 void apply_analog_trimming_data(void);
 
 void sys_pll_init(void);
+void sys_pll_init_od_sel(void);
 void sys_switch_all_to_pll(void);
 
-void init_comm_info(void);
+void lock_efuse_chipsn(void);
+int load_ddr(void);
+int load_rest(void);
+int load_rest_od_sel(void);
 
 #endif /* __ASSEMBLY__ */
 

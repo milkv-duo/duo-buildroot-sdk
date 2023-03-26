@@ -36,7 +36,7 @@ endif
 ################################################################################
 MAKE_HELPERS_DIRECTORY := make_helpers/
 
-V ?= 0
+V ?= 1
 DEBUG := 0
 LOG_LEVEL := 2
 ENABLE_ASSERTIONS := 1
@@ -170,6 +170,10 @@ $(eval $(call add_define,RTOS_ENABLE_FREERTOS))
 $(eval $(call add_define_val,RTOS_DUMP_PRINT_SZ_IDX,${RTOS_DUMP_PRINT_SZ_IDX}))
 $(eval $(call add_define_val,RTOS_FAST_IMAGE_TYPE,${RTOS_FAST_IMAGE_TYPE}))
 $(eval $(call add_define_val,RTOS_DUMP_PRINT_ENABLE,$(call yn10,${RTOS_DUMP_PRINT_ENABLE})))
+endif
+
+ifeq ($(OD_CLK_SEL),y)
+$(eval $(call add_define,OD_CLK_SEL))
 endif
 
 $(eval $(call add_define,FSBL_SECURE_BOOT_SUPPORT))
