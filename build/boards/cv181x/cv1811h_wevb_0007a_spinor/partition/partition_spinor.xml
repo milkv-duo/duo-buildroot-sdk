@@ -1,1 +1,12 @@
-../../../default/partition/partition_spinor_16mb_cv181x.xml
+<physical_partition type="spinor">
+    <partition label="fip" size_in_kb="1024" readonly="false" file="fip.bin"/>
+    <partition label="BOOT" size_in_kb="3072" readonly="false" file="boot.spinor"/>
+    <partition label="APPCFG" size_in_kb="64" readonly="false" file="app_cfg.bin"/>
+    <partition label="APPCFGDEF" size_in_kb="64" readonly="false" file="app_cfg_def.bin"/>
+    <partition label="ENV" size_in_kb="64" file="" />
+    <partition label="ENV_BAK" size_in_kb="64" file="" />
+    <partition label="ROOTFS" size_in_kb="11264" readonly="false" file="rootfs.spinor" />
+    <partition label="MISC" size_in_kb="512" file="logo.jpg" />
+    <partition label="DATA"  readonly="false" file="" mountpoint="/mnt/data" type="jffs2" />
+</physical_partition>
+
