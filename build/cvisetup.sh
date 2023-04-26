@@ -268,7 +268,11 @@ function build_middleware()
   cp -af "$MW_PATH"/lib/3rd/*.so* "$SYSTEM_OUT_DIR"/lib
   # copy ko
   mkdir -p "$SYSTEM_OUT_DIR"/ko
+  if [[ "$BUILD_FOR_DEBUG" != "y" ]]; then
+  cp -af "$MW_PATH"/ko_shrink/* "$SYSTEM_OUT_DIR"/ko/
+  else
   cp -af "$MW_PATH"/ko/* "$SYSTEM_OUT_DIR"/ko/
+  fi
 
   # add sdk version
   echo "SDK_VERSION=${SDK_VER}" > "$SYSTEM_OUT_DIR"/sdk-release

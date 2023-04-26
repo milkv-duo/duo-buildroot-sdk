@@ -1,0 +1,56 @@
+/dts-v1/;
+#include "cv181x_base_riscv.dtsi"
+#include "cv181x_asic_bga.dtsi"
+#include "cv181x_asic_emmc.dtsi"
+#include "cv181x_default_memmap.dtsi"
+#include "cv181x_base.dtsi"
+
+&dac {
+		/delete-property/ mute-gpio-l;
+		/delete-property/ mute-gpio-r;
+	};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
+&uart2 {
+	status = "okay";
+};
+
+&uart3 {
+	status = "okay";
+};
+
+&wifisd {
+	status = "okay";
+};
+
+&mipi_rx {
+	snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>, <&porta 6 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>;
+};
+
+/ {
+
+    i2c3: i2c@04030000 {
+		compatible = "snps,designware-i2c";
+		clocks = <&clk CV181X_CLK_I2C>;
+		reg = <0x0 0x04030000 0x0 0x1000>;
+		clock-frequency = <400000>;
+		resets = <&rst RST_I2C3>;
+		reset-names = "i2c3";
+		interrupts = <52 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-parent = <&plic0>;
+		gt9xx: gt9xx@14 {
+			compatible = "goodix,gt9xx";
+			reg = <0x14>;
+			status = "okay";
+		};
+
+	};
+};
+

@@ -9,6 +9,11 @@
 };
 
 / {
+	wifi_pin {
+		compatible = "cvitek,wifi-pin";
+		poweron-gpio = <&porte 25 GPIO_ACTIVE_HIGH>;
+		wakeup-gpio = <&porte 26 GPIO_ACTIVE_HIGH>;
 
+	};
 };
 

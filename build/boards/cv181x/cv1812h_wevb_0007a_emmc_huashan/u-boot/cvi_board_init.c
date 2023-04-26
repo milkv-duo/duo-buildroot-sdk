@@ -1,0 +1,85 @@
+static void set_rtc_register_for_power(void)
+{
+	printf("set_rtc_register_for_power\n");
+ 	mmio_write_32(0x050250AC, 0x2);
+	mmio_write_32(0x050260D0, 0x3);
+ 	mmio_write_32(0x03001098, 0x0);
+ 	mmio_write_32(0x0300109C, 0x0);
+ 	mmio_write_32(0x03001090, 0x0);
+ 	mmio_write_32(0x03001094, 0x0);
+ 	mmio_write_32(0x05027084, 0x0);
+	mmio_write_32(0x05027088, 0x0);
+ 	mmio_write_32(0x0502708C, 0x0);
+	mmio_write_32(0x05027090, 0x0);
+ 	mmio_write_32(0x050260BC, 0x1700);
+ 	mmio_write_32(0x05026128, 0x0);
+}
+
+int cvi_board_init(void)
+{
+	/*touch panel*/
+	PINMUX_CONFIG(IIC0_SCL, XGPIOA_28);
+	PINMUX_CONFIG(IIC0_SDA, XGPIOA_29);
+	PINMUX_CONFIG(VIVO_D9, XGPIOB_12);
+	PINMUX_CONFIG(VIVO_D8, XGPIOB_13);
+
+	//#########WIFI
+	pinmux_config(PINMUX_SDIO1);
+	PINMUX_CONFIG(AUX0, XGPIOA_30);
+
+	mmio_write_32(0x03020004, mmio_read_32(0x03020004) | 0x40000000);
+	mmio_write_32(0x03020000, mmio_read_32(0x03020000) | 0x40000000);
+
+	PINMUX_CONFIG(VIVO_D3, UART2_RTS);
+	PINMUX_CONFIG(VIVO_D4, UART2_CTS);
+	PINMUX_CONFIG(VIVO_D9, UART2_RX);
+	PINMUX_CONFIG(VIVO_D10, UART2_TX);
+	//########LT9611 IIC4
+	PINMUX_CONFIG(ADC3,IIC4_SCL);
+	PINMUX_CONFIG(ADC2,IIC4_SDA);
+
+	PINMUX_CONFIG(USB_VBUS_EN, XGPIOB_5);
+	PINMUX_CONFIG(PAD_MIPIRX5N, XGPIOC_0);
+
+	//#######sensor
+	PINMUX_CONFIG(IIC2_SDA, IIC2_SDA);
+	PINMUX_CONFIG(IIC2_SCL, IIC2_SCL);
+
+	//Sensor PWDN PIN
+	PINMUX_CONFIG(CAM_PD0, XGPIOA_1);
+	PINMUX_CONFIG(CAM_PD1, XGPIOA_4);
+
+	mmio_write_32(0x03020004, mmio_read_32(0x03020004) | 0x2);
+	mmio_write_32(0x03020000, mmio_read_32(0x03020000) | 0x2);
+
+	mmio_write_32(0x03020004, mmio_read_32(0x03020004) | 0x10);
+	mmio_write_32(0x03020000, mmio_read_32(0x03020000) | 0x10);
+	
+	//Sensor Reset PIN
+	PINMUX_CONFIG(CAM_RST0, XGPIOA_2);
+	PINMUX_CONFIG(IIC3_SDA, XGPIOA_6);
+	//Sensor Clock PIN
+	PINMUX_CONFIG(CAM_MCLK0, CAM_MCLK0);
+	PINMUX_CONFIG(CAM_MCLK1, CAM_MCLK1);
+
+	//Resolve I2C3 Conflict problem
+	PINMUX_CONFIG(IIC3_SCL, XGPIOA_5);
+
+	//#######tp
+	PINMUX_CONFIG(VIVO_D1, IIC3_SDA);
+	PINMUX_CONFIG(VIVO_D0, IIC3_SCL);
+
+	PINMUX_CONFIG(JTAG_CPU_TMS, XGPIOA_19);
+	PINMUX_CONFIG(JTAG_CPU_TCK, XGPIOA_18);
+
+	//########panel
+	PINMUX_CONFIG(JTAG_CPU_TRST, XGPIOA_20);
+	pinmux_config(PINMUX_DSI);
+	PINMUX_CONFIG(PWR_GPIO0, PWR_GPIO_0);
+
+    //######## usb
+	PINMUX_CONFIG(USB_VBUS_DET, XGPIOB_6);
+	set_rtc_register_for_power();
+
+	return 0;
+}
