@@ -1,0 +1,27 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    printf "Starting adbd: "
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/mnt/system/lib
+    devmem 0x03001108 32 0
+    /etc/uhubon.sh host
+    /etc/uhubon.sh device
+    /etc/run_usb.sh probe adb
+    /etc/run_usb.sh start
+    [ $? = 0 ] && echo "OK" || echo "FAIL"
+    ;;
+  stop)
+    printf "Stopping adbd: "
+    echo "OK"
+    ;;
+  restart|reload)
+    "$0" stop
+    "$0" start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

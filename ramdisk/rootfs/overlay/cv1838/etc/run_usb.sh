@@ -282,7 +282,7 @@ case "$1" in
 	probe
 	;;
   UDC)
-	ls /sys/class/udc/ >$CVI_GADGET/UDC
+	echo $CVI_UDC >$CVI_GADGET/UDC
 	;;
   *)
 	echo "Usage: $0 probe {acm|msc|cvg|uvc|uac1} {file (msc)}"
