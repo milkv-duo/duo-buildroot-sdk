@@ -20,7 +20,7 @@
 static void gc2093_linear_1080p30_init(VI_PIPE ViPipe);
 static void gc2093_wdr_1080p30_init(VI_PIPE ViPipe);
 
-const CVI_U8 gc2093_i2c_addr = 0x37;//0x6e
+CVI_U8 gc2093_i2c_addr = 0x37;//0x6e
 const CVI_U32 gc2093_addr_byte = 2;
 const CVI_U32 gc2093_data_byte = 1;
 static int g_fd[VI_MAX_PIPE_NUM] = {[0 ... (VI_MAX_PIPE_NUM - 1)] = -1};

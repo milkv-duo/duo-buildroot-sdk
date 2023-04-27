@@ -6,6 +6,7 @@ sensor-$(CONFIG_SENSOR_GCORE_GC2093)         += gcore_gc2093
 sensor-$(CONFIG_SENSOR_GCORE_GC2093_SLAVE)   += gcore_gc2093_slave
 sensor-$(CONFIG_SENSOR_GCORE_GC4653)         += gcore_gc4653
 sensor-$(CONFIG_SENSOR_GCORE_GC4653_SLAVE)   += gcore_gc4653_slave
+sensor-$(CONFIG_SENSOR_IMGDS_MIS2008)        += imgds_mis2008
 sensor-$(CONFIG_SENSOR_NEXTCHIP_N5)          += nextchip_n5
 sensor-$(CONFIG_SENSOR_OV_OS02D10)           += ov_os02d10
 sensor-$(CONFIG_SENSOR_OV_OS02D10_SLAVE)     += ov_os02d10_slave
@@ -45,6 +46,7 @@ sensor-$(CONFIG_SENSOR_SONY_IMX335)          += sony_imx335
 sensor-$(CONFIG_SENSOR_SONY_IMX347)          += sony_imx347
 sensor-$(CONFIG_SENSOR_SONY_IMX385)          += sony_imx385
 sensor-$(CONFIG_SENSOR_TECHPOINT_TP2850)     += techpoint_tp2850
+sensor-$(CONFIG_SENSOR_TECHPOINT_TP2863)     += techpoint_tp2863
 sensor-$(CONFIG_SENSOR_VIVO_MCS369)          += vivo_mcs369
 sensor-$(CONFIG_SENSOR_VIVO_MCS369Q)         += vivo_mcs369q
 sensor-$(CONFIG_SENSOR_VIVO_MM308M2)         += vivo_mm308m2
@@ -52,6 +54,7 @@ sensor-$(CONFIG_SENSOR_TECHPOINT_TP2825)     += techpoint_tp2825
 else ifeq ($(CHIP_ARCH), $(filter $(CHIP_ARCH),  CV180X CV181X CV182X))
 sensor-$(CONFIG_SENSOR_BRIGATES_BG0808)      += brigates_bg0808
 sensor-$(CONFIG_SENSOR_GCORE_GC02M1)         += gcore_gc02m1
+sensor-$(CONFIG_SENSOR_GCORE_GC0329)         += gcore_gc0329
 sensor-$(CONFIG_SENSOR_GCORE_GC1054)         += gcore_gc1054
 sensor-$(CONFIG_SENSOR_GCORE_GC2053)         += gcore_gc2053
 sensor-$(CONFIG_SENSOR_GCORE_GC2053_SLAVE)   += gcore_gc2053_slave
@@ -60,6 +63,7 @@ sensor-$(CONFIG_SENSOR_GCORE_GC2093)         += gcore_gc2093
 sensor-$(CONFIG_SENSOR_GCORE_GC2145)         += gcore_gc2145
 sensor-$(CONFIG_SENSOR_GCORE_GC4023)         += gcore_gc4023
 sensor-$(CONFIG_SENSOR_GCORE_GC4653)         += gcore_gc4653
+sensor-$(CONFIG_SENSOR_IMGDS_MIS2008)        += imgds_mis2008
 sensor-$(CONFIG_SENSOR_NEXTCHIP_N5)          += nextchip_n5
 sensor-$(CONFIG_SENSOR_NEXTCHIP_N6)          += nextchip_n6
 sensor-$(CONFIG_SENSOR_OV_OS04A10)           += ov_os04a10
@@ -103,6 +107,7 @@ sensor-$(CONFIG_SENSOR_SONY_IMX327_FPGA)     += sony_imx327_fpga
 sensor-$(CONFIG_SENSOR_SONY_IMX327_SUBLVDS)  += sony_imx327_sublvds
 sensor-$(CONFIG_SENSOR_SONY_IMX335)          += sony_imx335
 sensor-$(CONFIG_SENSOR_TECHPOINT_TP2825)     += techpoint_tp2825
+sensor-$(CONFIG_SENSOR_TECHPOINT_TP2863)     += techpoint_tp2863
 else
 $(error not supported chip arch cv180x/cv181x/cv182x/cv183x)
 endif

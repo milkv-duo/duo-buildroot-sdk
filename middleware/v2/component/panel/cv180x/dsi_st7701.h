@@ -19,7 +19,7 @@
 #define PIXEL_CLK(x) ((x##_VACT + x##_VSA + x##_VBP + x##_VFP) \
 	* (x##_HACT + x##_HSA + x##_HBP + x##_HFP) * 60 / 1000)
 
-const struct combo_dev_cfg_s dev_cfg_st7701_480x800 = {
+struct combo_dev_cfg_s dev_cfg_st7701_480x800 = {
 	.devno = 0,
 	.lane_id = {MIPI_TX_LANE_1, MIPI_TX_LANE_0, MIPI_TX_LANE_CLK, -1, -1},
 	.lane_pn_swap = {false, false, false, false, false},

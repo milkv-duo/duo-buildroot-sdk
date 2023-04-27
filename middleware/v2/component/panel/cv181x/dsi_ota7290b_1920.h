@@ -5,7 +5,7 @@
 #include <linux/cvi_comm_mipi_tx.h>
 
 // Not support BTA
-const struct combo_dev_cfg_s dev_cfg_ota7290b_440x1920 = {
+struct combo_dev_cfg_s dev_cfg_ota7290b_440x1920 = {
 	.devno = 0,
 	.lane_id = {MIPI_TX_LANE_3, MIPI_TX_LANE_2, MIPI_TX_LANE_CLK, MIPI_TX_LANE_1, MIPI_TX_LANE_0},
 	.lane_pn_swap = {true, true, true, true, true},

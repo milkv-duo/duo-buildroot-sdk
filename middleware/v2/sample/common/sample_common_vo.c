@@ -21,6 +21,7 @@
 
 #include "dsi_hx8394_evb.h"
 #include "i80_st7789v.h"
+#include "bt656_tp2803.h"
 
 static CVI_S32 sample_vo_i2c_file = -1;
 static CVI_S32 sample_vo_i2c_slave_addr;
@@ -176,6 +177,8 @@ CVI_S32 SAMPLE_COMM_VO_FillIntfAttr(VO_PUB_ATTR_S *pstPubAttr)
 	case VO_INTF_YPBPR:
 	case VO_INTF_VGA:
 	case VO_INTF_BT656:
+		pstPubAttr->stBtAttr = stTP2803Cfg;
+		break;
 	case VO_INTF_BT1120:
 	case VO_INTF_LCD:
 	case VO_INTF_LCD_18BIT:

@@ -29,6 +29,9 @@ brigates_bg0808:
 gcore_gc02m1:
 	$(call MAKE_SENSOR, ${@})
 
+gcore_gc0329:
+	$(call MAKE_SENSOR, ${@})
+
 gcore_gc1054:
 	$(call MAKE_SENSOR, ${@})
 
@@ -51,6 +54,9 @@ gcore_gc4023:
 	$(call MAKE_SENSOR, ${@})
 
 gcore_gc4653:
+	$(call MAKE_SENSOR, ${@})
+
+imgds_mis2008:
 	$(call MAKE_SENSOR, ${@})
 
 nextchip_n5:
@@ -180,6 +186,9 @@ sony_imx335:
 	$(call MAKE_SENSOR, ${@})
 
 techpoint_tp2825:
+	$(call MAKE_SENSOR, ${@})
+	
+techpoint_tp2863:
 	$(call MAKE_SENSOR, ${@})
 
 all_sensor:

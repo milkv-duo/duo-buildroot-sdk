@@ -4,7 +4,7 @@
 #include <linux/vo_mipi_tx.h>
 #include <linux/cvi_comm_mipi_tx.h>
 
-const struct combo_dev_cfg_s dev_cfg_nt35521_800x1280 = {
+struct combo_dev_cfg_s dev_cfg_nt35521_800x1280 = {
 	.devno = 0,
 	.lane_id = {MIPI_TX_LANE_CLK, MIPI_TX_LANE_0, MIPI_TX_LANE_2, MIPI_TX_LANE_3, MIPI_TX_LANE_1},
 	.lane_pn_swap = {false, false, false, false, false},

@@ -47,6 +47,8 @@ enum VENC_BIND_MODE_E {
 #define CVI_VENC_MASK_TRACE		0x10000
 #define CVI_VENC_MASK_DUMP_YUV	0x100000
 #define CVI_VENC_MASK_DUMP_BS	0x200000
+#define CVI_VENC_MASK_DEBUG     0x400000
+
 #define CVI_VENC_MASK_CURR		(CVI_VENC_MASK_ERR)
 
 typedef struct _venc_dbg_ {
@@ -197,12 +199,13 @@ extern pthread_t gs_VencTask[VENC_MAX_CHN_NUM];
 
 #define CVI_VENC_DEBUG(msg, ...)		\
 	do { \
-		struct timespec64 ts;	\
-		ktime_get_ts64(&ts);	\
-		pr_info("[DEBUG][%llu] %s = %d," msg, ts.tv_sec * 1000 + ts.tv_nsec / 1000000, __func__, \
-		__LINE__, ## __VA_ARGS__); \
+		if (vencDbg.currMask & CVI_VENC_MASK_DEBUG) { \
+			struct timespec64 ts;	\
+			ktime_get_ts64(&ts);	\
+			pr_info("[DEBUG][%llu] %s = %d," msg, ts.tv_sec * 1000 + ts.tv_nsec / 1000000, __func__, \
+			__LINE__, ## __VA_ARGS__); \
+		} \
 	} while (0)
-
 #define CVI_VENC_ERR(msg, ...)		\
 	do { \
 		if (vencDbg.currMask & CVI_VENC_MASK_ERR) \

@@ -93,7 +93,7 @@ typedef struct _GC2093_MODE_S {
 extern ISP_SNS_STATE_S *g_pastGc2093[VI_MAX_PIPE_NUM];
 extern ISP_SNS_COMMBUS_U g_aunGc2093_BusInfo[];
 extern ISP_SNS_MIRRORFLIP_TYPE_E g_aeGc2093_MirrorFip[VI_MAX_PIPE_NUM];
-extern const CVI_U8 gc2093_i2c_addr;
+extern CVI_U8 gc2093_i2c_addr;
 extern const CVI_U32 gc2093_addr_byte;
 extern const CVI_U32 gc2093_data_byte;
 extern void gc2093_init(VI_PIPE ViPipe);

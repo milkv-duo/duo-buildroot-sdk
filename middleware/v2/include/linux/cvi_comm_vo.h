@@ -36,6 +36,9 @@ extern "C" {
 #define VO_INTF_I80 (0x01L << 16)
 
 #define VO_GAMMA_NODENUM 65
+
+#define MAX_BT_PINS 20
+
 typedef CVI_U32 VO_INTF_TYPE_E;
 
 typedef enum _VO_INTF_SYNC_E {
@@ -288,6 +291,137 @@ typedef struct _VO_LVDS_ATTR_S {
 	enum VO_LVDS_MODE_E lvds_vesa_mode;
 } VO_LVDS_ATTR_S;
 
+enum VO_TOP_MUX {
+	VO_MUX_BT_VS = 0,
+	VO_MUX_BT_HS,
+	VO_MUX_BT_HDE,
+	VO_MUX_BT_DATA0,
+	VO_MUX_BT_DATA1,
+	VO_MUX_BT_DATA2,
+	VO_MUX_BT_DATA3,
+	VO_MUX_BT_DATA4,
+	VO_MUX_BT_DATA5,
+	VO_MUX_BT_DATA6,
+	VO_MUX_BT_DATA7,
+	VO_MUX_BT_DATA8,
+	VO_MUX_BT_DATA9,
+	VO_MUX_BT_DATA10,
+	VO_MUX_BT_DATA11,
+	VO_MUX_BT_DATA12,
+	VO_MUX_BT_DATA13,
+	VO_MUX_BT_DATA14,
+	VO_MUX_BT_DATA15,
+	VO_MUX_TG_HS_TILE = 30,
+	VO_MUX_TG_VS_TILE,
+	VO_MUX_MAX,
+};
+
+enum VO_TOP_SEL {
+	VO_CLK0 = 0,
+	VO_CLK1,
+	VO_D0,
+	VO_D1,
+	VO_D2,
+	VO_D3,
+	VO_D4,
+	VO_D5,
+	VO_D6,
+	VO_D7,
+	VO_D8,
+	VO_D9,
+	VO_D10,
+	VO_D11,
+	VO_D12,
+	VO_D13,
+	VO_D14,
+	VO_D15,
+	VO_D16,
+	VO_D17,
+	VO_D18,
+	VO_D19,
+	VO_D20,
+	VO_D21,
+	VO_D22,
+	VO_D23,
+	VO_D24,
+	VO_D25,
+	VO_D26,
+	VO_D27,
+	VO_D_MAX,
+};
+
+enum VO_TOP_D_SEL {
+	VO_VIVO_D0 = VO_D13,
+	VO_VIVO_D1 = VO_D14,
+	VO_VIVO_D2 = VO_D15,
+	VO_VIVO_D3 = VO_D16,
+	VO_VIVO_D4 = VO_D17,
+	VO_VIVO_D5 = VO_D18,
+	VO_VIVO_D6 = VO_D19,
+	VO_VIVO_D7 = VO_D20,
+	VO_VIVO_D8 = VO_D21,
+	VO_VIVO_D9 = VO_D22,
+	VO_VIVO_D10 = VO_D23,
+	VO_VIVO_CLK = VO_CLK1,
+	VO_MIPI_TXM4 = VO_D24,
+	VO_MIPI_TXP4 = VO_D25,
+	VO_MIPI_TXM3 = VO_D26,
+	VO_MIPI_TXP3 = VO_D27,
+	VO_MIPI_TXM2 = VO_D0,
+	VO_MIPI_TXP2 = VO_CLK0,
+	VO_MIPI_TXM1 = VO_D2,
+	VO_MIPI_TXP1 = VO_D1,
+	VO_MIPI_TXM0 = VO_D4,
+	VO_MIPI_TXP0 = VO_D3,
+	VO_MIPI_RXN5 = VO_D12,
+	VO_MIPI_RXP5 = VO_D11,
+	VO_MIPI_RXN2 = VO_D10,
+	VO_MIPI_RXP2 = VO_D9,
+	VO_MIPI_RXN1 = VO_D8,
+	VO_MIPI_RXP1 = VO_D7,
+	VO_MIPI_RXN0 = VO_D6,
+	VO_MIPI_RXP0 = VO_D5,
+	VO_PAD_MAX = VO_D_MAX
+};
+
+struct VO_D_REMAP {
+	enum VO_TOP_D_SEL sel;
+	enum VO_TOP_MUX mux;
+};
+
+struct VO_BT_PINS {
+	unsigned char pin_num;
+	struct VO_D_REMAP d_pins[MAX_BT_PINS];
+};
+
+enum VO_BT_MODE {
+	VO_BT_MODE_656 = 0,
+	VO_BT_MODE_1120,
+	VO_BT_MODE_601,
+	VO_BT_MODE_MAX,
+};
+
+enum VO_BT_CLK_MODE {
+	VO_BT_CLK_MODE_27M = 0,
+	VO_BT_CLK_MODE_36M,
+	VO_BT_CLK_MODE_37P125M,
+	VO_BT_CLK_MODE_72M,
+	VO_BT_CLK_MODE_74P25M,
+	VO_BT_CLK_MODE_148P5M,
+};
+
+/* Define BT's config
+ *
+ * bt_clk: bt clk sel
+ * mode: bt mode
+ * pins: bt pinmux cfg
+ */
+typedef struct _VO_BT_ATTR_S {
+	enum VO_BT_CLK_MODE bt_clk;
+	enum VO_BT_MODE mode;
+	struct VO_BT_PINS pins;
+} VO_BT_ATTR_S;
+
 /*
  * u32BgColor: Background color of a device, in RGB format.
  * enIntfType: Type of a VO interface.
@@ -304,6 +438,7 @@ typedef struct _VO_PUB_ATTR_S {
 	union {
 		VO_I80_CFG_S sti80Cfg;
 		VO_LVDS_ATTR_S stLvdsAttr;
+		VO_BT_ATTR_S stBtAttr;
 	};
 } VO_PUB_ATTR_S;
 

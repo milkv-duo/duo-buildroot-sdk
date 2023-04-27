@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
-
+#include <getopt.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -16,6 +16,33 @@
 
 #define PANLE_ADAPTIVITY 0
 static int fd;
+
+#define MAX_DSI_OPTIONS	128
+typedef enum _ARG_TYPE_ {
+	ARG_INT = 0,
+	ARG_UINT,
+	ARG_STRING,
+} ARG_TYPE;
+
+typedef struct _optionExt_ {
+	struct option opt;
+	int type;
+	int64_t min;
+	int64_t max;
+	const char *help;
+} optionExt;
+
+static optionExt long_option_ext[] = {
+	{{"laneid",    optional_argument, NULL, 'l'},   ARG_STRING,    0,   0,
+		"laneid sequence by order"},
+	{{"pnswap",       optional_argument, NULL, 'p'},   ARG_STRING,   0,   0,
+		"pnswap sequence by order"},
+	{{"dsi-control",     no_argument, NULL, 'd'}, ARG_STRING, 0,   0,
+		"set/get dsi status or settings." },
+	{{"help",      no_argument, NULL, 'h'},       ARG_STRING, 0,   0,
+		"print usage."},
+	{{NULL, 0, NULL, 0}, ARG_INT, 0, 0, "no param: just init the panel."}
+};
 
 int dsi_init(int devno, const struct dsc_instr *cmds, int size)
 {
@@ -142,39 +169,91 @@ void SAMPLE_DSI_Print_Control(void)
 	printf(" 5: set hs settle settings\n");
 }
 
-void SAMPLE_DSI_Usage(char *sPrgNm)
+void printDsiHelp(char **argv)
 {
-	printf("Usage : %s <index>\n", sPrgNm);
-	printf("no param: just init the panel.\n");
-	printf("-h: print usage.\n");
-	printf("-d: set/get dsi status or settings.\n");
+	CVI_U32 idx;
+
+	printf("// ------------------------------------------------\n");
+	printf("%s --laneid=laneid sequence --pnswap=pnswap sequence\n", argv[0]);
+	printf("EX.\n");
+	printf(" %s -h\n", argv[0]);
+	printf(" %s --laneid=1,2,0,-1,-1 --pnswap=1,1,0,0,0\n", argv[0]);
+	printf(" %s -d\n", argv[0]);
+	printf("// ------------------------------------------------\n");
+
+	for (idx = 0; idx < sizeof(long_option_ext) / sizeof(optionExt); idx++) {
+		if (long_option_ext[idx].opt.name == NULL)
+			break;
+
+		printf("--%s\n", long_option_ext[idx].opt.name);
+		printf("    %s\n", long_option_ext[idx].help);
+	}
 }
 
-int main(int argc, char *argv[])
+CVI_S32 SAMPLE_MIPI_SET_LANEID(char* pLaneid)
+{
+	if (pLaneid ==NULL) {
+		return CVI_FAILURE;
+    }
+
+	CVI_S32 lane_id[] = {0,0,0,0,0};
+	CVI_S32 n = sscanf(pLaneid, "%02d,%02d,%02d,%02d,%02d", &lane_id[0], &lane_id[1],&lane_id[2],&lane_id[3],&lane_id[4]);
+
+	if(n != sizeof(lane_id)/sizeof(CVI_S32)) {
+		return CVI_FAILURE;
+	}
+
+	for(CVI_U32 i = 0; i < sizeof(lane_id)/sizeof(CVI_S32); i++) {
+		if(lane_id[i] < -1 || lane_id[i] > 5) {
+			return CVI_FAILURE;
+		}
+		dev_cfg_hx8394_720x1280.lane_id[i] = lane_id[i];
+	}
+
+	return CVI_SUCCESS;
+}
+
+CVI_S32 SAMPLE_MIPI_SET_PNSWAP(char* pPnswap)
+{
+	if (pPnswap ==NULL) {
+		return CVI_FAILURE;
+    }
+
+	CVI_U32 pnswap[] = {0,0,0,0,0};
+	CVI_S32 n = sscanf(pPnswap, "%02d,%02d,%02d,%02d,%02d", &pnswap[0], &pnswap[1],&pnswap[2],&pnswap[3],&pnswap[4]);
+
+	if(n != sizeof(pnswap)/sizeof(CVI_U32)) {
+		return CVI_FAILURE;
+	}
+
+	for(CVI_U32 i = 0; i < sizeof(pnswap)/sizeof(CVI_U32); i++) {
+		if((pnswap[i] != 0) && (pnswap[i] != 1)) {
+			return CVI_FAILURE;
+		}
+		dev_cfg_hx8394_720x1280.lane_pn_swap[i] = (bool)(pnswap[i]);
+	}
+
+	return CVI_SUCCESS;
+}
+
+CVI_S32 SAMPLE_MIPI_TX_ENABLE()
 {
 	fd = open(MIPI_TX_NAME, O_RDWR | O_NONBLOCK, 0);
 	if (fd == -1) {
 		SAMPLE_PRT("Cannot open '%s': %d, %s\n", MIPI_TX_NAME, errno, strerror(errno));
-		return -1;
+		return CVI_FAILURE;
 	}
+	mipi_tx_disable(fd);
+	mipi_tx_cfg(fd, (struct combo_dev_cfg_s *)panel_desc.dev_cfg);
+	dsi_init(0, panel_desc.dsi_init_cmds, panel_desc.dsi_init_cmds_size);
+	mipi_tx_set_hs_settle(fd, panel_desc.hs_timing_cfg);
+	mipi_tx_enable(fd);
+	printf("Init for MIPI-Driver-%s\n", panel_desc.panel_name);
+	return CVI_SUCCESS;
+}
 
-	if (argc == 1) {
-		mipi_tx_disable(fd);
-		mipi_tx_cfg(fd, (struct combo_dev_cfg_s *)panel_desc.dev_cfg);
-		dsi_init(0, panel_desc.dsi_init_cmds, panel_desc.dsi_init_cmds_size);
-		mipi_tx_set_hs_settle(fd, panel_desc.hs_timing_cfg);
-		mipi_tx_enable(fd);
-		printf("Init for MIPI-Driver-%s\n", panel_desc.panel_name);
-		return 0;
-	} else if (argc == 2) {
-		if (!strncmp(argv[1], "-d", 2))
-			;
-		else {
-			SAMPLE_DSI_Usage(argv[0]);
-			return 0;
-		}
-	}
-
+void SAMPLE_DSI_CONTROLE()
+{
 	do {
 		CVI_U32 tmp;
 		SAMPLE_DSI_Print_Control();
@@ -252,6 +331,74 @@ int main(int argc, char *argv[])
 		} else
 			break;
 	} while (1);
+}
 
+int main(int argc, char *argv[])
+{
+	if(argc == 1) {
+		SAMPLE_MIPI_TX_ENABLE();
+		return CVI_SUCCESS;
+	}
+
+	struct option long_options[MAX_DSI_OPTIONS + 1];
+	CVI_S32 ch, idx, ret;
+	bool use_input_para = false;
+
+	memset((void *)long_options, 0, sizeof(long_options));
+
+	for (idx = 0; idx < MAX_DSI_OPTIONS; idx++) {
+		if (long_option_ext[idx].opt.name == NULL)
+			break;
+
+		if (idx >= MAX_DSI_OPTIONS) {
+			CVI_TRACE_LOG(CVI_DBG_ERR, "too many options\n");
+			return -1;
+		}
+
+		memcpy(&long_options[idx], &long_option_ext[idx].opt, sizeof(struct option));
+	}
+
+	optind = 0;
+	while ((ch = getopt_long(argc, argv, "dh", long_options, &idx)) != -1) {
+		switch (ch) {
+		case 'l':
+			ret = SAMPLE_MIPI_SET_LANEID(optarg);
+			if(ret != CVI_SUCCESS) {
+				CVI_TRACE_LOG(CVI_DBG_ERR, "invalid laneid parameter\n");
+				return ret;
+			}
+			use_input_para = true;
+			break;
+		case 'p':
+			ret = SAMPLE_MIPI_SET_PNSWAP(optarg);
+			if(ret != CVI_SUCCESS) {
+				CVI_TRACE_LOG(CVI_DBG_ERR, "invalid pnswap parameter\n");
+				return ret;
+			}
+			use_input_para = true;
+			break;
+		case 'd':
+			if(argc > 2) {
+				CVI_TRACE_LOG(CVI_DBG_ERR, "usage:%s -d. -d can't use in the same time with other command\n", argv[0]);
+				return CVI_FAILURE;
+			}
+			SAMPLE_DSI_CONTROLE();
+			break;
+		case 'h':
+			printDsiHelp(argv);
+			break;
+		default:
+			SAMPLE_PRT("ch = %c\n", ch);
+			printDsiHelp(argv);
+			break;
+		}
+	}
+
+	if (optind < argc)
+		printDsiHelp(argv);
+
+	if(use_input_para) {
+		SAMPLE_MIPI_TX_ENABLE();
+	}
 	return 0;
 }

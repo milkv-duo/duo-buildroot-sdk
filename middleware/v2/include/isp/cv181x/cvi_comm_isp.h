@@ -2086,9 +2086,9 @@ typedef struct _ISP_PRESHARPEN_MANUAL_ATTR_S {
 	CVI_U8 LumaAdpGain[SHARPEN_LUT_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 DeltaAdpGain[SHARPEN_LUT_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 LumaCorLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 LumaCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 LumaCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 MotionCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 MotionCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorWgtLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
 	CVI_U8 MotionCorWgtLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x80]*/
 	CVI_U8 GlobalGain; /*RW; Range:[0x0, 0xff]*/
@@ -2111,9 +2111,9 @@ typedef struct _ISP_PRESHARPEN_AUTO_ATTR_S {
 	CVI_U8 LumaAdpGain[SHARPEN_LUT_NUM][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 DeltaAdpGain[SHARPEN_LUT_NUM][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 LumaCorLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 LumaCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 LumaCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 MotionCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 MotionCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorWgtLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
 	CVI_U8 MotionCorWgtLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x80]*/
 	CVI_U8 GlobalGain[ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
@@ -2509,9 +2509,9 @@ typedef struct _ISP_SHARPEN_MANUAL_ATTR_S {
 	CVI_U8 LumaAdpGain[SHARPEN_LUT_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 DeltaAdpGain[SHARPEN_LUT_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 LumaCorLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 LumaCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 LumaCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 MotionCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 MotionCorLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorWgtLutIn[EE_LUT_NODE]; /*RW; Range:[0x0, 0xff]*/
 	CVI_U8 MotionCorWgtLutOut[EE_LUT_NODE]; /*RW; Range:[0x0, 0x80]*/
 	CVI_U8 GlobalGain; /*RW; Range:[0x0, 0xff]*/
@@ -2534,9 +2534,9 @@ typedef struct _ISP_SHARPEN_AUTO_ATTR_S {
 	CVI_U8 LumaAdpGain[SHARPEN_LUT_NUM][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 DeltaAdpGain[SHARPEN_LUT_NUM][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x3f]*/
 	CVI_U8 LumaCorLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 LumaCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 LumaCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
-	CVI_U8 MotionCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x20]*/
+	CVI_U8 MotionCorLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x1f]*/
 	CVI_U8 MotionCorWgtLutIn[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
 	CVI_U8 MotionCorWgtLutOut[EE_LUT_NODE][ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0x80]*/
 	CVI_U8 GlobalGain[ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff]*/
