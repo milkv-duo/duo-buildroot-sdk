@@ -2,6 +2,7 @@
     "sensor_list": [
 		"BRIGATES_BG0808",
 		"GCORE_GC02M1",
+		"GCORE_GC0312",
 		"GCORE_GC0329",
 		"GCORE_GC1054",
 		"GCORE_GC2053",
@@ -47,10 +48,14 @@
 		"SMS_SC3335",
 		"SMS_SC3335_SLAVE",
 		"SMS_SC3336",
+		"SMS_SC2331_1L",
 		"SMS_SC2335",
 		"SMS_SC2336",
+		"SMS_SC2336P",
 		"SMS_SC4210",
 		"SMS_SC4336",
+		"SMS_SC4336P",
+		"SMS_SC5336_2L",
 		"SMS_SC8238",
 		"SOI_F23",
 		"SOI_F35",
@@ -60,6 +65,7 @@
 		"SOI_H65",
 		"SOI_K06",
 		"SOI_Q03",
+		"SOI_Q03P",
 		"SONY_IMX290_2L",
 		"SONY_IMX307",
 		"SONY_IMX307_2L",
@@ -78,7 +84,8 @@
 		"TECHPOINT_TP2863",
 		"VIVO_MCS369",
 		"VIVO_MCS369Q",
-		"VIVO_MCS308M2"
+		"VIVO_MCS308M2",
+		"LONTIUM_LT6911"
 	],
 
 	"lens_list" : [
