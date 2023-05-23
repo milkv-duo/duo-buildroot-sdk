@@ -42,4 +42,12 @@ config RTL8723DS
       This chip work through SDIO.
       You need to say Y if your board use this chip to implement wifi
 
+config RTL8821CS
+    tristate "Realtek 8821C SDIO or SPI WiFi"
+    help
+      Help message of RTL8821CS
+      This is the driver of Realtek wifi drvier.
+      This chip work through SDIO.
+      You need to say Y if your board use this chip to implement wifi
+
 endif # WLAN_VENDOR_REALTEK
