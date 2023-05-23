@@ -4,9 +4,8 @@ ifeq ($(PARAM_FILE), )
 	include $(PARAM_FILE)
 endif
 include ../sample.mk
-include ./Kbuild
 
-PANEL_INC =../../component/panel/$(shell echo $(CVIARCH) | tr A-Z a-z)
+PANEL_INC =../../component/panel/$(shell echo $(CHIP_ARCH) | tr A-Z a-z)
 SDIR = $(PWD)
 SRCS = $(wildcard $(SDIR)/*.c)
 INCS = -I$(MW_INC) -I$(ISP_INC) -I$(KERNEL_INC) -I$(PANEL_INC) -I../common
@@ -26,13 +25,12 @@ LIBS += -lnanomsg
 LIBS += -lvenc -lvdec -lmisc
 endif
 
-CFLAGS += $(KBUILD_DEFINES)
 EXTRA_CFLAGS = $(INCS)
 EXTRA_LDFLAGS = $(LIBS) -lm -lpthread -latomic
 EXTRA_LDFLAGS += -lcvi_bin -lcvi_bin_isp $(ISP_LIB)
 
-.PHONY : clean all
-all: $(TARGET)
+.PHONY : clean all lt9611 clean_lt9611
+all: $(TARGET) lt9611
 
 $(SDIR)/%.o: $(SDIR)/%.c
 	@$(CC) $(DEPFLAGS) $(CFLAGS) $(EXTRA_CFLAGS) -o $@ -c $<
@@ -42,7 +40,13 @@ $(TARGET): $(OBJS) $(MW_LIB)/libvpu.a $(MW_LIB)/libsys.a $(MW_LIB)/libmipi_tx.a
 	@$(CXX) -o $@ $(OBJS) $(ELFFLAGS) $(EXTRA_LDFLAGS)
 	@echo -e $(BLUE)[LINK]$(END)[$(notdir $(CC))] $(notdir $@)
 
-clean:
+lt9611:
+	cd $(SDIR)/lt9611;make clean;make
+
+clean: clean_lt9611
 	@rm -f $(OBJS) $(DEPS) $(TARGET)
+
+clean_lt9611:
+	cd $(SDIR)/lt9611;make clean;
 
 -include $(DEPS)

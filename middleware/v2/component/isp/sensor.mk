@@ -54,6 +54,7 @@ sensor-$(CONFIG_SENSOR_TECHPOINT_TP2825)     += techpoint_tp2825
 else ifeq ($(CHIP_ARCH), $(filter $(CHIP_ARCH),  CV180X CV181X CV182X))
 sensor-$(CONFIG_SENSOR_BRIGATES_BG0808)      += brigates_bg0808
 sensor-$(CONFIG_SENSOR_GCORE_GC02M1)         += gcore_gc02m1
+sensor-$(CONFIG_SENSOR_GCORE_GC0312)         += gcore_gc0312
 sensor-$(CONFIG_SENSOR_GCORE_GC0329)         += gcore_gc0329
 sensor-$(CONFIG_SENSOR_GCORE_GC1054)         += gcore_gc1054
 sensor-$(CONFIG_SENSOR_GCORE_GC2053)         += gcore_gc2053
@@ -89,14 +90,19 @@ sensor-$(CONFIG_SENSOR_SMS_SC531AI_2L)       += sms_sc531ai_2L
 sensor-$(CONFIG_SENSOR_SMS_SC3332)           += sms_sc3332
 sensor-$(CONFIG_SENSOR_SMS_SC3335)           += sms_sc3335
 sensor-$(CONFIG_SENSOR_SMS_SC3336)           += sms_sc3336
+sensor-$(CONFIG_SENSOR_SMS_SC2331_1L)        += sms_sc2331_1L
 sensor-$(CONFIG_SENSOR_SMS_SC2335)           += sms_sc2335
 sensor-$(CONFIG_SENSOR_SMS_SC2336)           += sms_sc2336
+sensor-$(CONFIG_SENSOR_SMS_SC2336P)          += sms_sc2336p
 sensor-$(CONFIG_SENSOR_SMS_SC4336)           += sms_sc4336
+sensor-$(CONFIG_SENSOR_SMS_SC4336P)          += sms_sc4336p
+sensor-$(CONFIG_SENSOR_SMS_SC5336_2L)        += sms_sc5336_2L
 sensor-$(CONFIG_SENSOR_SOI_F23)              += soi_f23
 sensor-$(CONFIG_SENSOR_SOI_F35)              += soi_f35
 sensor-$(CONFIG_SENSOR_SOI_F37P)             += soi_f37p
 sensor-$(CONFIG_SENSOR_SOI_K06)              += soi_k06
 sensor-$(CONFIG_SENSOR_SOI_Q03)              += soi_q03
+sensor-$(CONFIG_SENSOR_SOI_Q03P)             += soi_q03p
 sensor-$(CONFIG_SENSOR_SONY_IMX307)          += sony_imx307
 sensor-$(CONFIG_SENSOR_SONY_IMX307_SLAVE)    += sony_imx307_slave
 sensor-$(CONFIG_SENSOR_SONY_IMX307_2L)       += sony_imx307_2L
@@ -108,6 +114,7 @@ sensor-$(CONFIG_SENSOR_SONY_IMX327_SUBLVDS)  += sony_imx327_sublvds
 sensor-$(CONFIG_SENSOR_SONY_IMX335)          += sony_imx335
 sensor-$(CONFIG_SENSOR_TECHPOINT_TP2825)     += techpoint_tp2825
 sensor-$(CONFIG_SENSOR_TECHPOINT_TP2863)     += techpoint_tp2863
+sensor-$(CONFIG_SENSOR_LONTIUM_LT6911)       += lontium_lt6911
 else
 $(error not supported chip arch cv180x/cv181x/cv182x/cv183x)
 endif

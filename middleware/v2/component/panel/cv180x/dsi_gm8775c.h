@@ -154,7 +154,7 @@ const struct dsc_instr dsi_init_cmds_gm8775c[] = {
 	// {.delay = 0, .data_type = 0x23, .size = 2, .data = data_gm8775c_41 }
 #endif
 };
-#endif
+
 #else
 #error "MIPI_TX_PARAM multi-delcaration!!"
 #endif // _MIPI_TX_PARAM_GM8775C_1080P_H_

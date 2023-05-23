@@ -30,45 +30,11 @@ sample/vio/sample_vio
 sample/vdecvo/sample_vdecvo
 sample/multivenc/sample_multivenc
 sample/ir_auto/ir_auto
-sample/ive/sample_16bitto8bit
-sample/ive/sample_add
-sample/ive/sample_and
-sample/ive/sample_bernsen
-sample/ive/sample_bgmodel
-sample/ive/sample_cannyedge
-sample/ive/sample_cannyhysedge
-sample/ive/sample_csc
-sample/ive/sample_dilate
-sample/ive/sample_dma
-sample/ive/sample_erode
-sample/ive/sample_filter
-sample/ive/sample_filterandcsc
-sample/ive/sample_framediffmotion
-sample/ive/sample_gmm
-sample/ive/sample_gmm2
-sample/ive/sample_gradfg
-sample/ive/sample_hist
-sample/ive/sample_integ
-sample/ive/sample_lbp
-sample/ive/sample_magandang
-sample/ive/sample_map
-sample/ive/sample_ncc
-sample/ive/sample_normgrad
-sample/ive/sample_or
-sample/ive/sample_ordstatfilter
-sample/ive/sample_query
-sample/ive/sample_resize
-sample/ive/sample_sad
-sample/ive/sample_sobel
-sample/ive/sample_stcandicorner
-sample/ive/sample_sub
-sample/ive/sample_thresh
-sample/ive/sample_thresh_S16
-sample/ive/sample_thresh_U16
-sample/ive/sample_xor
+sample/mipi_tx/lt9611/lt9611
 sample/osdc/sample_osdc
 sample/scene_auto/sample_scene_auto
 sample/sensor_test/sensor_test
+sample/tp2863_tp2803/sample_test_tp2863_tp2803
 
 self_test/cvi_test/cvi_test
 self_test/cvi_test/res
@@ -82,6 +48,9 @@ self_test/rgn_ut/rgn_ut
 self_test/dwa_ut/dwa_ut
 self_test/vb_ut/vb_ut
 self_test/sys_ut/sys_ut
+self_test/vc_test/cvi_h264_enc_test
+self_test/vc_test/cvi_h265_enc_test
+self_test/vc_test/cvi_jpg_codec
 self_test/fast_image_ut/fast_image_ut
 self_test/audio/aud_auto_test_sample/cvi_auto_play
 self_test/audio/aud_auto_test_sample/cvi_auto_record
@@ -91,8 +60,6 @@ self_test/audio/audio_anr/sample_audio_nr
 self_test/audio/audio_pcm/sample_audio_internal
 self_test/audio/audio_resample/sample_audio_resample
 self_test/audio/audio_transcode/sample_audio_transcode
-
-
 
 modules/venc/vc/jpeg/driver/bm_jpg_test
 modules/venc/vc/jpeg/driver/bmjpuapi/bmjpegdec
@@ -108,4 +75,4 @@ modules/venc/vc/jpeg/driver/include/version.h
 .vscode/settings.json
 
 modules/isp
-ko
+

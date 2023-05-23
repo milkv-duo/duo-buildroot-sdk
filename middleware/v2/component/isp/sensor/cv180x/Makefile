@@ -28,6 +28,8 @@ brigates_bg0808:
 
 gcore_gc02m1:
 	$(call MAKE_SENSOR, ${@})
+gcore_gc0312:
+	$(call MAKE_SENSOR, ${@})
 
 gcore_gc0329:
 	$(call MAKE_SENSOR, ${@})
@@ -134,13 +136,25 @@ sms_sc3335:
 sms_sc3336:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc2331_1L:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc2335:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc2336:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc2336p:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc4336:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc4336p:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc5336_2L:
 	$(call MAKE_SENSOR, ${@})
 
 soi_f23:
@@ -153,6 +167,9 @@ soi_f37p:
 	$(call MAKE_SENSOR, ${@})
 
 soi_q03:
+	$(call MAKE_SENSOR, ${@})
+
+soi_q03p:
 	$(call MAKE_SENSOR, ${@})
 
 soi_k06:
@@ -189,6 +206,9 @@ techpoint_tp2825:
 	$(call MAKE_SENSOR, ${@})
 	
 techpoint_tp2863:
+	$(call MAKE_SENSOR, ${@})
+
+lontium_lt6911:
 	$(call MAKE_SENSOR, ${@})
 
 all_sensor:

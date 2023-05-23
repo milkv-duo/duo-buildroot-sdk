@@ -117,6 +117,7 @@ typedef struct _ISP_SNS_OBJ_S {
 
 extern ISP_SNS_OBJ_S stSnsBG0808_Obj;
 extern ISP_SNS_OBJ_S stSnsGc02m1b_Obj;
+extern ISP_SNS_OBJ_S stSnsGc0312_Obj;
 extern ISP_SNS_OBJ_S stSnsGc0329_Obj;
 extern ISP_SNS_OBJ_S stSnsGc1054_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2053_Obj;
@@ -163,10 +164,14 @@ extern ISP_SNS_OBJ_S stSnsSC3332_Obj;
 extern ISP_SNS_OBJ_S stSnsSC3335_Obj;
 extern ISP_SNS_OBJ_S stSnsSC3335_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsSC3336_Obj;
+extern ISP_SNS_OBJ_S stSnsSC2331_1L_Obj;
 extern ISP_SNS_OBJ_S stSnsSC2335_Obj;
 extern ISP_SNS_OBJ_S stSnsSC2336_Obj;
+extern ISP_SNS_OBJ_S stSnsSC2336P_Obj;
 extern ISP_SNS_OBJ_S stSnsSC4210_Obj;
 extern ISP_SNS_OBJ_S stSnsSC4336_Obj;
+extern ISP_SNS_OBJ_S stSnsSC4336P_Obj;
+extern ISP_SNS_OBJ_S stSnsSC5336_2L_Obj;
 extern ISP_SNS_OBJ_S stSnsSC8238_Obj;
 extern ISP_SNS_OBJ_S stSnsF23_Obj;
 extern ISP_SNS_OBJ_S stSnsF35_Obj;
@@ -175,6 +180,7 @@ extern ISP_SNS_OBJ_S stSnsF37P_Obj;
 extern ISP_SNS_OBJ_S stSnsH65_Obj;
 extern ISP_SNS_OBJ_S stSnsK06_Obj;
 extern ISP_SNS_OBJ_S stSnsQ03_Obj;
+extern ISP_SNS_OBJ_S stSnsQ03P_Obj;
 extern ISP_SNS_OBJ_S stSnsImx290_2l_Obj;
 extern ISP_SNS_OBJ_S stSnsImx307_Obj;
 extern ISP_SNS_OBJ_S stSnsImx307_Slave_Obj;
@@ -195,6 +201,7 @@ extern ISP_SNS_OBJ_S stSnsTP2863_Obj;
 extern ISP_SNS_OBJ_S stSnsMCS369_Obj;
 extern ISP_SNS_OBJ_S stSnsMCS369Q_Obj;
 extern ISP_SNS_OBJ_S stSnsMM308M2_Obj;
+extern ISP_SNS_OBJ_S stSnsLT6911_Obj;
 
 #define CMOS_CHECK_POINTER(ptr)\
 	do {\
