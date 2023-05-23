@@ -308,6 +308,12 @@ config USB_DWC2_BUFFER_SIZE
 	  that size it is possible to shrink it. Smaller sizes should be fine
 	  because larger transactions could be split in smaller ones.
 
+config USB_DWC2_REG_ADDR
+	hex "dwc2 register address"
+	default 0x4340000
+	---help---
+	  set usb dwc2 register address
+
 endif # USB_DWC2
 
 config USB_R8A66597_HCD

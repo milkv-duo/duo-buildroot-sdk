@@ -207,6 +207,7 @@ struct dwc2_core_regs {
 #define DWC2_GRSTCTL_TXFFLSH_OFFSET			5
 #define DWC2_GRSTCTL_TXFNUM_MASK			(0x1F << 6)
 #define DWC2_GRSTCTL_TXFNUM_OFFSET			6
+#define DWC2_GRSTCTL_GSFTRST_DONE			(1 << 29)
 #define DWC2_GRSTCTL_DMAREQ				(1 << 30)
 #define DWC2_GRSTCTL_DMAREQ_OFFSET			30
 #define DWC2_GRSTCTL_AHBIDLE				(1 << 31)
@@ -735,6 +736,7 @@ struct dwc2_core_regs {
 #define DWC2_PCGCCTL_DEEP_SLEEP_OFFSET			7
 #define DWC2_SNPSID_DEVID_VER_2xx			(0x4f542 << 12)
 #define DWC2_SNPSID_DEVID_VER_3xx			(0x4f543 << 12)
+#define DWC2_SNPSID_DEVID_VER_4xx			(0x4f544 << 12)
 #define DWC2_SNPSID_DEVID_MASK				(0xfffff << 12)
 #define DWC2_SNPSID_DEVID_OFFSET			12
 

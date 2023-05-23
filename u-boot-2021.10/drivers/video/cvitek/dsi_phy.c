@@ -112,7 +112,7 @@ int ilog2(int x)
 	return result;
 }
 
-void _cal_pll_reg(u32 clkkHz, u32 VCOR_10000, u32 *reg_txpll, u32 *reg_set)
+void _cal_pll_reg(u32 clkkHz, u32 VCOR_10000, u32 *reg_txpll, u32 *reg_set, u32 factor)
 {
 	u8 gain = 1 << ilog2(max((u32)1, (u32)(25000000UL / VCOR_10000)));
 	u32 VCOC_1000 = VCOR_10000 * gain / 10;
@@ -121,7 +121,7 @@ void _cal_pll_reg(u32 clkkHz, u32 VCOR_10000, u32 *reg_txpll, u32 *reg_set)
 	u8 reg_divout_sel = min((u8)3, dig_dig);
 	u8 reg_div_sel = dig_dig - reg_divout_sel;
 	u8 loop_gain = (((VCOC_1000 / 266000) + 7) >> 3) << 3;
-	*reg_set = ((u64)(1200000 * loop_gain) << 26) / VCOC_1000;
+	*reg_set = ((u64)(factor * loop_gain) << 26) / VCOC_1000;
 
 	*reg_txpll = (reg_div_sel << 10) | (reg_divout_sel << 8) | reg_disp_div_sel;
 
@@ -137,7 +137,7 @@ void dphy_lvds_set_pll(u32 clkkHz, u8 link)
 	u32 VCOR_10000 = clkkHz * 70 / link;
 	u32 reg_txpll, reg_set;
 
-	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set);
+	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set, 1200000);
 
 	_reg_write_mask(reg_base + REG_DSI_PHY_TXPLL, 0x7ff, reg_txpll);
 	_reg_write(reg_base + REG_DSI_PHY_REG_SET, reg_set);
@@ -148,7 +148,7 @@ void dphy_dsi_set_pll(u32 clkkHz, u8 lane, u8 bits)
 	u32 VCOR_10000 = clkkHz * bits * 10 / lane;
 	u32 reg_txpll, reg_set;
 
-	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set);
+	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set, 900000);
 
 	_reg_write_mask(reg_base + REG_DSI_PHY_TXPLL, 0x7ff, reg_txpll);
 	_reg_write(reg_base + REG_DSI_PHY_REG_SET, reg_set);

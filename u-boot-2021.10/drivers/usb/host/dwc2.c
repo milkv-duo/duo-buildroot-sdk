@@ -159,6 +159,7 @@ static void dwc_otg_core_reset(struct udevice *dev,
 			       struct dwc2_core_regs *regs)
 {
 	int ret;
+	uint32_t snpsid, greset;
 
 	/* Wait for AHB master IDLE state. */
 	ret = wait_for_bit_le32(&regs->grstctl, DWC2_GRSTCTL_AHBIDLE,
@@ -167,9 +168,19 @@ static void dwc_otg_core_reset(struct udevice *dev,
 		dev_info(dev, "%s: Timeout!\n", __func__);
 
 	/* Core Soft Reset */
+	snpsid = readl(&regs->gsnpsid);
 	writel(DWC2_GRSTCTL_CSFTRST, &regs->grstctl);
-	ret = wait_for_bit_le32(&regs->grstctl, DWC2_GRSTCTL_CSFTRST,
-				false, 1000, false);
+	if ((snpsid & DWC2_SNPSID_DEVID_MASK) < DWC2_SNPSID_DEVID_VER_4xx) {
+		ret = wait_for_bit_le32(&regs->grstctl, DWC2_GRSTCTL_CSFTRST,
+					false, 1000, false);
+	} else {
+		ret = wait_for_bit_le32(&regs->grstctl, DWC2_GRSTCTL_GSFTRST_DONE,
+					true, 1000, false);
+		greset = readl(&regs->grstctl);
+		greset &= ~DWC2_GRSTCTL_CSFTRST;
+		greset |= DWC2_GRSTCTL_GSFTRST_DONE;
+		writel(greset, &regs->grstctl);
+	}
 	if (ret)
 		dev_info(dev, "%s: Timeout!\n", __func__);
 
@@ -440,8 +451,9 @@ static void dwc_otg_core_init(struct udevice *dev)
 		usbcfg |= DWC2_GUSBCFG_ULPI_CLK_SUS_M;
 	}
 #endif
-	if (priv->hnp_srp_disable)
-		usbcfg |= DWC2_GUSBCFG_FORCEHOSTMODE;
+	// if (priv->hnp_srp_disable)
+	usbcfg &= ~DWC2_GUSBCFG_FORCEDEVMODE;
+	usbcfg |= DWC2_GUSBCFG_FORCEHOSTMODE;
 
 	writel(usbcfg, &regs->gusbcfg);
 
@@ -1179,7 +1191,7 @@ static int dwc2_reset(struct udevice *dev)
 static int dwc2_init_common(struct udevice *dev, struct dwc2_priv *priv)
 {
 	struct dwc2_core_regs *regs = priv->regs;
-	uint32_t snpsid;
+	uint32_t snpsid, val;
 	int i, j;
 	int ret;
 
@@ -1192,7 +1204,8 @@ static int dwc2_init_common(struct udevice *dev, struct dwc2_priv *priv)
 		 snpsid >> 12 & 0xf, snpsid & 0xfff);
 
 	if ((snpsid & DWC2_SNPSID_DEVID_MASK) != DWC2_SNPSID_DEVID_VER_2xx &&
-	    (snpsid & DWC2_SNPSID_DEVID_MASK) != DWC2_SNPSID_DEVID_VER_3xx) {
+	    (snpsid & DWC2_SNPSID_DEVID_MASK) != DWC2_SNPSID_DEVID_VER_3xx &&
+	    (snpsid & DWC2_SNPSID_DEVID_MASK) != DWC2_SNPSID_DEVID_VER_4xx) {
 		dev_info(dev, "SNPSID invalid (not DWC2 OTG device): %08x\n",
 			 snpsid);
 		return -ENODEV;
@@ -1204,14 +1217,13 @@ static int dwc2_init_common(struct udevice *dev, struct dwc2_priv *priv)
 	priv->ext_vbus = 0;
 #endif
 
-	dwc_otg_core_init(dev);
+	val = readl((void *)REG_TOP_USB_PHY_CTRL);
+	val &= ~0xC0;
+	val |= 0x40;
+	writel(val, (void *)REG_TOP_USB_PHY_CTRL);
 
-	if (usb_get_dr_mode(dev_ofnode(dev)) == USB_DR_MODE_PERIPHERAL) {
-		dev_dbg(dev, "USB device %s dr_mode set to %d. Skipping host_init.\n",
-			dev->name, usb_get_dr_mode(dev_ofnode(dev)));
-	} else {
-		dwc_otg_core_host_init(dev, regs);
-	}
+	dwc_otg_core_init(dev);
+	dwc_otg_core_host_init(dev, regs);
 
 	clrsetbits_le32(&regs->hprt0, DWC2_HPRT0_PRTENA |
 			DWC2_HPRT0_PRTCONNDET | DWC2_HPRT0_PRTENCHNG |
@@ -1473,6 +1485,7 @@ static const struct udevice_id dwc2_usb_ids[] = {
 	{ .compatible = "brcm,bcm2835-usb" },
 	{ .compatible = "brcm,bcm2708-usb" },
 	{ .compatible = "snps,dwc2" },
+	{ .compatible = "cvitek,cv182x-usb" },
 	{ }
 };
 
