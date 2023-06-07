@@ -4,3 +4,8 @@ cvitek/task/isp/isp
 cvitek/build/
 cvitek/install/bin
 cvitek/install/lib
+
+cvitek/install/lib/libaudio.a
+cvitek/install/lib/libcomm.a
+cvitek/install/lib/librgn.a
+

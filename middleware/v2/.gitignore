@@ -5,6 +5,8 @@
 *.dep
 *.dwo
 
+ko
+
 lib
 bin
 include
