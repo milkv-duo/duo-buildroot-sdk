@@ -114,23 +114,6 @@ function milkv_duo_pack()
   image_count=`ls ${install_dir}/*.img | wc -l`
   if [ ${image_count} -ge 0 ]; then
     mv ${install_dir}/*.img out/
-    pushd out
-
-    for img in sophpi*.img
-    do
-      #echo $img
-      milkv_img=$(echo $img | sed -e 's/sophpi/milkv/')
-      #echo $milkv_img
-      if [ -f $img ]; then
-        mv ${img} ${milkv_img}
-        if [ $? -ne 0 ]; then
-          print_err "Rename failed!"
-          exit 1
-        fi
-      fi
-    done
-
-    popd
 
     # show latest img
     latest_img=`ls -t out/*.img | head -n1`
@@ -176,6 +159,8 @@ if [ -z "${MILKV_BOARD// }" ]; then
   print_err "No board specified!"
   exit 1
 fi
+
+export MILKV_BOARD="${MILKV_BOARD}"
 
 MILKV_BOARD_CONFIG=${MILKV_BOARD_DIR}/boardconfig-${MILKV_BOARD}.sh
 

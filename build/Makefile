@@ -602,7 +602,11 @@ ifeq ($(CONFIG_BUILDROOT_FS),y)
 else
 	${Q}ln -s $(OUTPUT_DIR)/rootfs $(OUTPUT_DIR)/fs
 endif
+ifeq ($(MV_VENDOR), milkv)
+	$(TOP_DIR)/$(MV_VENDOR)/gen_burn_image_sd.sh $(OUTPUT_DIR)
+else
 	$(COMMON_TOOLS_PATH)/sd_tools/sd_gen_burn_image.sh $(OUTPUT_DIR)
+endif
 
 jffs2:
 	$(call print_target)
