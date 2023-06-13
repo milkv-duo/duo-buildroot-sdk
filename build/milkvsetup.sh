@@ -521,7 +521,7 @@ function cvi_setup_env()
   # buildroot config
   export BR_DIR="$TOP_DIR"/buildroot-2021.05
   export BR_BOARD=milkv_duo_${SDK_VER}
-  export BR_OVERLAY_DIR=${BR_DIR}/board/milkv/${CHIP_ARCH}/overlay
+  export BR_OVERLAY_DIR=${BR_DIR}/board/milkv/duo/overlay
   export BR_DEFCONFIG=${BR_BOARD}_defconfig
   export BR_ROOTFS_DIR="$OUTPUT_DIR"/tmp-rootfs
 }
