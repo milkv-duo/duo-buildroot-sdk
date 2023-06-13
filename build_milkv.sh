@@ -77,15 +77,16 @@ function prepare_env()
 
   source build/${MV_BUILD_ENV} > /dev/null 2>&1
   defconfig ${MV_BOARD_LINK} > /dev/null 2>&1
+
+  echo "OUTPUT_DIR: ${OUTPUT_DIR}"  # @build/milkvsetup.sh
 }
 
 function milkv_duo_build()
 {
   # clean old img
-  install_dir="install/soc_${MV_BOARD_LINK}"
-  old_image_count=`ls ${install_dir}/*.img* | wc -l`
+  old_image_count=`ls ${OUTPUT_DIR}/*.img* | wc -l`
   if [ ${old_image_count} -ge 0 ]; then
-    pushd ${install_dir}
+    pushd ${OUTPUT_DIR}
     rm -rf *.img*
     popd
   fi
@@ -102,18 +103,23 @@ function milkv_duo_build()
 
 function milkv_duo_pack()
 {
-  if [ "$(id -u)" -ne 0 ]; then
-    print_info "Creating sd card img requires root privileges"
-    sudo echo "Running with root privileges now"
-  fi
-
   pack_sd_image
 
   [ ! -d out ] && mkdir out
 
-  image_count=`ls ${install_dir}/*.img | wc -l`
+  image_count=`ls ${OUTPUT_DIR}/*.img | wc -l`
   if [ ${image_count} -ge 0 ]; then
-    mv ${install_dir}/*.img out/
+    mv ${OUTPUT_DIR}/*.img out/
+
+    # rename milkv-duo.img file with time
+    pushd out
+    for img in *.img
+    do
+      if [ "${img}" == "${MILKV_BOARD}.img" ]; then
+        mv $img ${MILKV_BOARD}-`date +%Y%m%d-%H%M`.img
+      fi
+    done
+    popd
 
     # show latest img
     latest_img=`ls -t out/*.img | head -n1`

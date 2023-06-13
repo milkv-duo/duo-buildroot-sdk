@@ -1,82 +1,44 @@
 #!/bin/bash
 
-# sd image generator
+# milkv sd image generator
 
 # usage
 if [ "$#" -ne "1" ]; then
-  echo "usage: sudo ${0} OUTPUT_DIR"
+  echo "usage: ${0} OUTPUT_DIR"
   echo ""
   echo "       The script is used to create a sdcard image with two partitions, "
   echo "       one is fat32 with 128MB, the other is ext4 with 256MB."
-  echo "       You can modify the capacities in this script as you wish!"
+  echo "       You can modify the capacities in genimage cfg as you wish!"
+  echo "       genimage cfg: milkv/genimage-milkv-duo.cfg"
   echo ""
   echo "Note:  Please backup you sdcard files before using this image!"
 
   exit
 fi
 
-vfat_cap=128M
-vfat_label="boot"
-ext4_cap=256M
-ext4_label="rootfs"
+echo "BR_DIR: $BR_DIR"
+echo "BR_BOARD: $BR_BOARD"
+
+# genimage command in buildroot host bin
+BR_HOST_BIN="${BR_DIR}/output/${BR_BOARD}/host/bin"
+if [ ! -d ${BR_HOST_BIN} ]; then
+  echo "host/bin not found, check buildroot output dir!"
+  exit 1
+fi
+
+export PATH=${BR_HOST_BIN}:${PATH}
 
 output_dir=$1
 echo ${output_dir}
 pushd ${output_dir}
 
-# gen a empty image
-image=${MILKV_BOARD}-`date +%Y%m%d-%H%M`.img
-echo ${image}
-dd if=/dev/zero of=./${image} bs=1M count=512
+[ -d tmp ] && rm -rf tmp
 
-################################
-# Note: do not change this flow
-################################
-sudo fdisk ./${image} << EOF
-n
-p
-1
-
-+${vfat_cap}
-n
-p
-2
-
-+${ext4_cap}
-w
-EOF
-# Note end
-################################
-
-dev_name=`sudo losetup -f`
-echo ${dev_name}
-echo ""
-
-sudo losetup ${dev_name} ./${image}
-sudo partprobe ${dev_name}
-
-sudo mkfs.vfat -F 32 -n ${vfat_label} ${dev_name}p1
-sudo mkfs.ext4 -L ${ext4_label} ${dev_name}p2
-
-# mount partitions
-rm ./tmp1 ./tmp2 -rf
-mkdir tmp1 tmp2
-sudo mount -t vfat ${dev_name}p1 tmp1/
-sudo mount -t ext4 ${dev_name}p2 tmp2/
-
-# copy boot file and rootfs
-sudo cp ${output_dir}/fip.bin ./tmp1/
-sudo cp ${output_dir}/rawimages/boot.sd ./tmp1/
-sudo cp -raf ${output_dir}/fs/* ./tmp2
-
-sync
-
-# umount
-sudo umount tmp1 tmp2
-sudo losetup -d ${dev_name}
-rmdir tmp1 tmp2
-
-echo "Gen image successful: ${image}"
-echo ""
+genimage --config ${TOP_DIR}/milkv/genimage-${MILKV_BOARD}.cfg --rootpath fs/ --inputpath ${PWD} --outputpath ${PWD}
+if [ $? -eq 0 ]; then
+    echo "gnimage for ${MILKV_BOARD} success!"
+else
+    echo "gnimage for ${MILKV_BOARD} failed!"
+fi
 
 popd
