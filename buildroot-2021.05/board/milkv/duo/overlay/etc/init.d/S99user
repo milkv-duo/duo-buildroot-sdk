@@ -15,9 +15,14 @@ case "$1" in
 
         echo "Starting app..."
 
+        if [ -f $SYSTEMPATH/blink.sh ]; then
+                . $SYSTEMPATH/blink.sh &
+        fi
+
 	if [ -f $SYSTEMPATH/rndis.sh ]; then
                 . $SYSTEMPATH/rndis.sh &
         fi
+
         if [ -f $USERDATAPATH/auto.sh ]; then
                 usleep 30000
                 . $USERDATAPATH/auto.sh &
