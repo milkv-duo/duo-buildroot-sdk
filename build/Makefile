@@ -561,6 +561,11 @@ endif
 # copy ko and mmf libs
 	${Q}mkdir -p $(BR_ROOTFS_DIR)/mnt/system
 	${Q}cp -arf ${SYSTEM_OUT_DIR}/* $(BR_ROOTFS_DIR)/mnt/system/
+
+# copy milkv overlay files
+ifeq ($(MV_VENDOR), milkv)
+	${Q}cp -arf $(TOP_DIR)/$(MV_VENDOR)/overlay/* $(BR_ROOTFS_DIR)/
+endif
 # strip
 	${Q}find $(BR_ROOTFS_DIR) -name "*.ko" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-unneeded {} \;
 	${Q}find $(BR_ROOTFS_DIR) -name "*.so*" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-all {} \;
