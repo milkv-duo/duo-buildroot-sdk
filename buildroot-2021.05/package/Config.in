@@ -1,6 +1,7 @@
 menu "Target packages"
 
 	source "package/busybox/Config.in"
+	source "package/wiringx/Config.in"
 	source "package/skeleton/Config.in"
 	source "package/skeleton-custom/Config.in"
 	source "package/skeleton-init-common/Config.in"
