@@ -61,7 +61,7 @@ cmake version 3.26.4
 
 ## 获取SDK
 ```
-git clone https://github.com/milkv-duo/milkv-duo-buildroot-sdk.git
+git clone https://github.com/milkv-duo/duo-buildroot-sdk.git
 ```
 
 ## 一键编译
