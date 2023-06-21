@@ -67,7 +67,7 @@ git clone https://github.com/milkv-duo/duo-buildroot-sdk.git
 ## 一键编译
 - 执行一键编译脚本`build_milkv.sh`
 ```
-cd milkv-duo-buildroot-sdk/
+cd duo-buildroot-sdk/
 ./build_milkv.sh
 ```
 - 编译成功后可以在`out`目录下看到生成的SD卡烧录镜像`milkv-duo-XXX.img`
@@ -88,6 +88,18 @@ cd milkv-duo-buildroot-sdk/
 - 接好串口线
 - 将平台上电，Duo会正常开机进入系统
 - 串口工具中可以看到开机日志，进系统后可通过串口登入终端，执行Linux下的相关命令
+
+<br>
+
+# 常见问题解答
+
+1. 为什么只显示单核?
+
+   CV1800B芯片采用双核设计，当前Linux系统运行在其中的一个核上，另外一个核用来运行实时系统，这个核的SDK尚未公布，待后续更新
+
+2. 为什么查看RAM只显示28M?
+
+   因为有一部分RAM被分配绐了 [ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)，您可以修改这个 [ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43) 的值然后重新编译生成固件.
 
 <br>
 
