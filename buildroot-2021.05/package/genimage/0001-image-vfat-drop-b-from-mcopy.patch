@@ -1,0 +1,59 @@
+From fe74ea1583cb6e2ae7d45acf35bb1bec39d400de Mon Sep 17 00:00:00 2001
+From: Michael Olbrich <m.olbrich@pengutronix.de>
+Date: Sat, 10 Apr 2021 11:51:48 +0200
+Subject: [PATCH] image-vfat: drop '-b' from mcopy
+
+It enables the 'Batch  mode'. It is optimized for huge recursive copies. This is not
+really needed here and fsck.vfat complains about the resulting filesystem.
+
+So drop the option and expand the existing test. Fail if fsck.vfat modifies the
+filesystem.
+
+Fixes #142
+
+Signed-off-by: Michael Olbrich <m.olbrich@pengutronix.de>
+---
+ image-vfat.c           | 4 ++--
+ test/basic-images.test | 4 +++-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/image-vfat.c b/image-vfat.c
+index 9f04c57..ed87b7f 100644
+--- a/image-vfat.c
++++ b/image-vfat.c
+@@ -62,7 +62,7 @@ static int vfat_generate(struct image *image)
+ 
+ 		image_info(image, "adding file '%s' as '%s' ...\n",
+ 				child->file, *target ? target : child->file);
+-		ret = systemp(image, "MTOOLS_SKIP_CHECK=1 %s -bsp -i '%s' '%s' '::%s'",
++		ret = systemp(image, "MTOOLS_SKIP_CHECK=1 %s -sp -i '%s' '%s' '::%s'",
+ 				get_opt("mcopy"), imageoutfile(image),
+ 				file, target);
+ 		if (ret)
+@@ -72,7 +72,7 @@ static int vfat_generate(struct image *image)
+ 		return 0;
+ 
+ 	if (!image->empty)
+-		ret = systemp(image, "MTOOLS_SKIP_CHECK=1 %s -bsp -i '%s' '%s'/* ::",
++		ret = systemp(image, "MTOOLS_SKIP_CHECK=1 %s -sp -i '%s' '%s'/* ::",
+ 				get_opt("mcopy"), imageoutfile(image), mountpath(image));
+ 	return ret;
+ }
+diff --git a/test/basic-images.test b/test/basic-images.test
+index 1c96e1a..9888f49 100755
+--- a/test/basic-images.test
++++ b/test/basic-images.test
+@@ -343,7 +343,9 @@ exec_test_set_prereq mkdosfs
+ exec_test_set_prereq mcopy
+ test_expect_success dd,mkdosfs,mcopy "vfat" "
+ 	run_genimage vfat.config test.vfat &&
+-	check_size images/test.vfat 4193280
++	fsck.fat -p images/test.vfat | tee fsck.log &&
++	test_must_fail grep -q 'Filesystem was changed' fsck.log &&
++	check_size images/test.vfat 4193280 &&
+ 	MTOOLS_SKIP_CHECK=1 mdir -/ -f -b -i images/test.vfat / | sed -e 's;^::/;;' -e 's;/$;;' | sort > '${filelist_test}' &&
+ 	check_filelist
+ "
+-- 
+2.25.1
+
