@@ -140,7 +140,7 @@ https://developer.sophgo.com/thread/473.html
 
 
 # About Milk-V
-Official website
+- [Official website](https://milkv.io/)
 
 # Technology Forum
-MilkV Community
+- [MilkV Community](https://community.milkv.io/)
