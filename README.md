@@ -1,4 +1,4 @@
-# Project Description
+# Project Description (English version)
 Milk-V Duo is an ultra-compact embedded development platform based on the CV1800B chip. It can run Linux and RTOS, providing a reliable, low-cost and high-performance platform for professionals, industrial ODM manufacturers, AIoT enthusiasts, DIY enthusiasts and creators.
 hardware parameters
 Processor: CVITEK CV1800B (C906@1Ghz + C906@700MHz)
