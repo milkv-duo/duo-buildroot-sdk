@@ -1,4 +1,4 @@
-#Project Description
+# Project Description
 Milk-V Duo is an ultra-compact embedded development platform based on the CV1800B chip. It can run Linux and RTOS, providing a reliable, low-cost and high-performance platform for professionals, industrial ODM manufacturers, AIoT enthusiasts, DIY enthusiasts and creators.
 hardware parameters
 Processor: CVITEK CV1800B (C906@1Ghz + C906@700MHz)
@@ -21,7 +21,7 @@ SDK directory structure
 ├── ramdisk             // 存放最小文件系统的prebuilt目录
 └── u-boot-2021.10      // 开源uboot代码
 ```
-#Quick start
+# Quick start
 Prepare the compilation environment
 Use the local Ubuntu system, recommended Ubuntu 20.04 LTS
 (you can also use the Ubuntu system in the virtual machine, the Ubuntu installed in WSL in Windows, and the Ubuntu system based on Docker)
@@ -55,7 +55,7 @@ sudo apt install pkg-config build-essential ninja-build automake autoconf libtoo
 ```
 In addition, the libssl1.1 that the mkimage command in the SDK depends on does not exist in Ubuntu 22.04 and needs to be installed manually. The following two methods are available
 
-#Source installation
+# Source installation
 ```
 echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
 sudo apt update
@@ -65,11 +65,11 @@ wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubun
 sudo dpkg -i libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
 ```
 
-#Get the SDK
+# Get the SDK
 ```
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git
 ```
-One-click compilation
+# One-click compilation
 Execute one-click compilation scriptbuild_milkv.sh
 ```
 cd duo-buildroot-sdk/
@@ -90,7 +90,7 @@ build_all
 pack_sd_image
 Generated firmware location:install/soc_cv1800b_milkv_duo_sd/milkv-duo.img
 ```
-SD card burning
+# SD card burning
 Note: Writing the image to the TF card will erase the original data in the card, remember to back up important data before burning!!!
 
 balenaEtcherUse tools such as or Rufusor Win32 Disk Imagerto write the generated image to the TF card under Windows
@@ -98,7 +98,7 @@ Use commands under Linux ddto write the generated image into the TF card, please
 ```
 sudo dd if=milkv-duo-XXX.img of=/dev/sdX
 ```
-start up
+# Start up
 Insert the TF card with burned image into the TF card slot of Milk-V Duo
 Connect the serial cable (optional)
 Power on the platform, Duo will boot into the system normally
@@ -121,26 +121,26 @@ If you need to restore the LED blinking, change its name back and restart it.
 ```
 mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
 ```
-Frequently Asked Questions
+# Frequently Asked Questions
 Why is it only showing single core?
 
 The CV1800B chip adopts a dual-core design. The current Linux system runs on one of the cores, and the other core is used to run the real-time system. The SDK of this core has not yet been released and will be updated later.
 
-Why does checking RAM only show 28M?
+# Why does checking RAM only show 28M?
 
 Because a part of RAM is allocated to ION , it is the memory that needs to be occupied when using the camera to run the algorithm. If you don't use the camera, you can modify the value of ION_SIZE0 and recompile to generate the firmware
 
 
-Links to some information from the original chip factory
+# Links to some information from the original chip factory
 CV181x/CV180x MMF SDK development document summary
 https://developer.sophgo.com/thread/471.html
 
-CV series chip TPU SDK development data summary
+# CV series chip TPU SDK development data summary
 https://developer.sophgo.com/thread/473.html
 
 
-About Milk-V
+# About Milk-V
 Official website
 
-technology Forum
+# Technology Forum
 MilkV Community
