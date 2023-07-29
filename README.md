@@ -6,20 +6,20 @@ Memory: 64MB
 Network port: 10/100Mbps Ethernet (external expansion board required)
 ```
 SDK directory structure
-├── build               // 编译目录，存放编译脚本以及各board差异化配置
-├── build_milkv.sh      // Milk-V Duo 一键编译脚本
-├── buildroot-2021.05   // buildroot开源工具
-├── freertos            // freertos系统
-├── fsbl                // fsbl启动固件，prebuilt形式存在
-├── install             // 执行一次完整编译后，临时存放各image路径
-├── isp_tuning          // 图像效果调试参数存放路径
-├── linux_5.10          // 开源linux内核
-├── middleware          // 自研多媒体框架，包含so与ko
-├── milkv               // 存放 Milk-V Duo 相关配置及脚本文件的目录
-├── opensbi             // 开源opensbi库
-├── out                 // Milk-V Duo 最终生成的SD卡烧录镜像所在目录
-├── ramdisk             // 存放最小文件系统的prebuilt目录
-└── u-boot-2021.10      // 开源uboot代码
+├── build               // Compilation directory, stores build scripts and board-specific configurations.
+├── build_milkv.sh      // One-click compilation script for Milk-V Duo.
+├── buildroot-2021.05   // Open-source buildroot tool.
+├── freertos            // FreeRTOS operating system.
+├── fsbl                // fsbl startup firmware, available in prebuilt form.
+├── install             // After a complete compilation, temporarily stores paths for various images.
+├── isp_tuning          // Path to store image effect tuning parameters.
+├── linux_5.10          // Open-source Linux kernel.
+├── middleware          // Proprietary multimedia framework, including shared objects (so) and kernel objects (ko).
+├── milkv               // Directory containing Milk-V Duo related configurations and script files.
+├── opensbi             // Open-source opensbi library.
+├── out                 // Directory where final Milk-V Duo SD card burning images are located.
+├── ramdisk             // Prebuilt directory for the minimal file system.
+└── u-boot-2021.10      // Open-source U-Boot code.
 ```
 # Quick start
 Prepare the compilation environment
