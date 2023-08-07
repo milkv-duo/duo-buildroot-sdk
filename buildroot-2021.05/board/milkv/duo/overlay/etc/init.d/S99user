@@ -19,8 +19,8 @@ case "$1" in
                 . $SYSTEMPATH/blink.sh &
         fi
 
-	if [ -f $SYSTEMPATH/rndis.sh ]; then
-                . $SYSTEMPATH/rndis.sh &
+	if [ -f $SYSTEMPATH/usb.sh ]; then
+                . $SYSTEMPATH/usb.sh &
         fi
 
         if [ -f $USERDATAPATH/auto.sh ]; then
