@@ -157,6 +157,43 @@ mv /mnt/system/blink.sh /mnt/system/blink.sh_backup && sync
 mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
 ```
 
+### 使用 IO Board 底板
+
+注意，使用 IO Board 底板时，USB网卡(RNDIS)不可用，如需使用网络功能，请使用底板上的以太网接口
+
+使用底板上的4个USB口，需要修改一下配置，将默认固件中的`usb-rndis`功能修改为`usb-host`
+```
+rm /mnt/system/usb.sh
+ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
+sync
+```
+修改完，重启或重新上电即可生效
+
+比如底板USB口接入U盘后，可以用`ls /dev/sd*`查看是否有检测到设备
+
+挂载到系统中查看U盘中的内容(以/dev/sda1为例):
+```
+mkdir /mnt/udisk
+mount /dev/sda1 /mnt/udisk
+```
+查看`/mnt/udisk`目录中的内容是否符合预期
+```
+ls /mnt/udisk
+```
+
+卸载U盘的命令
+```
+umount /mnt/udisk
+```
+
+不使用底板时，恢复USB网卡(RNDIS)的方法
+```
+rm /mnt/system/usb.sh
+ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
+sync
+```
+修改完，需要重启或重新上电生效
+
 <br>
 
 # 常见问题解答

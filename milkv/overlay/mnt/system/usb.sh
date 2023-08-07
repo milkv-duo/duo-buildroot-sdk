@@ -1,1 +1,1 @@
-rndis.sh
+usb-rndis.sh
