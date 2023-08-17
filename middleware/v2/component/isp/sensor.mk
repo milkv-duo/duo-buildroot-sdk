@@ -2,6 +2,7 @@ ifeq ($(CHIP_ARCH),CV183X)
 sensor-$(CONFIG_SENSOR_GCORE_GC2053)         += gcore_gc2053
 sensor-$(CONFIG_SENSOR_GCORE_GC2053_SLAVE)   += gcore_gc2053_slave
 sensor-$(CONFIG_SENSOR_GCORE_GC2053_1L)      += gcore_gc2053_1L
+sensor-$(CONFIG_SENSOR_GCORE_GC2083)         += gcore_gc2083
 sensor-$(CONFIG_SENSOR_GCORE_GC2093)         += gcore_gc2093
 sensor-$(CONFIG_SENSOR_GCORE_GC2093_SLAVE)   += gcore_gc2093_slave
 sensor-$(CONFIG_SENSOR_GCORE_GC4653)         += gcore_gc4653
@@ -60,6 +61,7 @@ sensor-$(CONFIG_SENSOR_GCORE_GC1054)         += gcore_gc1054
 sensor-$(CONFIG_SENSOR_GCORE_GC2053)         += gcore_gc2053
 sensor-$(CONFIG_SENSOR_GCORE_GC2053_SLAVE)   += gcore_gc2053_slave
 sensor-$(CONFIG_SENSOR_GCORE_GC2053_1L)      += gcore_gc2053_1L
+sensor-$(CONFIG_SENSOR_GCORE_GC2083)         += gcore_gc2083
 sensor-$(CONFIG_SENSOR_GCORE_GC2093)         += gcore_gc2093
 sensor-$(CONFIG_SENSOR_GCORE_GC2145)         += gcore_gc2145
 sensor-$(CONFIG_SENSOR_GCORE_GC4023)         += gcore_gc4023
