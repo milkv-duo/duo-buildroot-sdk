@@ -15,6 +15,10 @@ case "$1" in
 
         echo "Starting app..."
 
+        if [ -f $SYSTEMPATH/duo-init.sh ]; then
+                . $SYSTEMPATH/duo-init.sh &
+        fi
+
         if [ -f $SYSTEMPATH/blink.sh ]; then
                 . $SYSTEMPATH/blink.sh &
         fi
