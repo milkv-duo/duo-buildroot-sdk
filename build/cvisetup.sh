@@ -250,7 +250,9 @@ function build_middleware()
     if [ -d $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ];
     then
         rm -rf ko
+        rm -rf ko_shrink
         ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ko
+        ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko_shrink ko_shrink
     fi
   popd
 
@@ -515,15 +517,6 @@ function cvi_setup_env()
       return 1
     fi
   fi
-
-  export SYSTEM_OUT_DIR
-  export CROSS_COMPILE_PATH
-  # buildroot config
-  export BR_DIR="$TOP_DIR"/buildroot-2021.05
-  export BR_BOARD=cvitek_${CHIP_ARCH}_${SDK_VER}
-  export BR_OVERLAY_DIR=${BR_DIR}/board/cvitek/${CHIP_ARCH}/overlay
-  export BR_DEFCONFIG=${BR_BOARD}_defconfig
-  export BR_ROOTFS_DIR="$OUTPUT_DIR"/tmp-rootfs
 }
 
 cvi_print_env()

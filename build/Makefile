@@ -542,67 +542,10 @@ define raw2cimg
 	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/raw2cimg.py $(OUTPUT_DIR)/rawimages/${1} $(OUTPUT_DIR) $(FLASH_PARTITION_XML)
 endef
 
-
-# BR_OVERLAY_DIR
-# BR_ROOTFS_RAWIMAGE
-br-rootfs-prepare:export CROSS_COMPILE_KERNEL=$(patsubst "%",%,$(CONFIG_CROSS_COMPILE_KERNEL))
-br-rootfs-prepare:export CROSS_COMPILE_SDK=$(patsubst "%",%,$(CONFIG_CROSS_COMPILE_SDK))
-br-rootfs-prepare:
-	$(call print_target)
-ifneq ($(STORAGE_TYPE), sd)
-	${Q}cp -r ${RAMDISK_PATH}/rootfs/buildroot_fs/arm/* $(BR_ROOTFS_DIR)
-	$(call TARGET_PACKAGE_INSTALL_BR_ROOTFS)
-	${Q}mkdir -p $(BR_ROOTFS_DIR)/etc/init.d/
-	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/create_automount.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc/init.d/
-	# Generate /etc/fw_env.config
-	# ${Q}mkdir -p $(BR_ROOTFS_DIR)/etc
-	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/mkcvipart.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc --fw_env
-endif
-# copy ko and mmf libs
-	${Q}mkdir -p $(BR_ROOTFS_DIR)/mnt/system
-	${Q}cp -arf ${SYSTEM_OUT_DIR}/* $(BR_ROOTFS_DIR)/mnt/system/
-# strip
-	${Q}find $(BR_ROOTFS_DIR) -name "*.ko" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-unneeded {} \;
-	${Q}find $(BR_ROOTFS_DIR) -name "*.so*" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-all {} \;
-	${Q}find $(BR_ROOTFS_DIR) -executable -type f ! -name "*.sh" ! -path "*etc*" ! -path "*.ko" -printf 'striping %p\n' -exec $(CROSS_COMPILE_SDK)strip --strip-all {} 2>/dev/null \;
-	${Q}mkdir -p $(BR_OVERLAY_DIR)
-	${Q}cp -arf $(BR_ROOTFS_DIR)/* $(BR_OVERLAY_DIR)
-
-br-rootfs-pack:export TARGET_OUTPUT_DIR=$(BR_DIR)/output/$(BR_BOARD)
-br-rootfs-pack:
-	$(call print_target)
-	${Q}$(MAKE) -C $(BR_DIR) $(BR_DEFCONFIG) BR2_TOOLCHAIN_EXTERNAL_PATH=$(CROSS_COMPILE_PATH)
-	${Q}$(MAKE) -j${NPROC} -C $(BR_DIR)
-	# ${Q}rm -rf $(BR_ROOTFS_DIR)/*
-# copy rootfs to rawimg dir
-	${Q}cp $(TARGET_OUTPUT_DIR)/images/rootfs.ext4 $(OUTPUT_DIR)/rawimages/rootfs_ext4.$(STORAGE_TYPE)
-	$(call raw2cimg ,rootfs_ext4.$(STORAGE_TYPE))
-
-ifeq ($(CONFIG_BUILDROOT_FS),y)
-rootfs:br-rootfs-prepare
-rootfs:br-rootfs-pack
-else
 rootfs:rootfs-pack
 rootfs:
 	$(call print_target)
-ifneq ($(STORAGE_TYPE), sd)
 	$(call raw2cimg ,rootfs.$(STORAGE_TYPE))
-endif
-endif
-
-
-sd_image:
-	$(call print_target)
-	-${Q}rm  $(OUTPUT_DIR)/fs
-ifeq ($(CONFIG_BUILDROOT_FS),y)
-	${Q}rm $(OUTPUT_DIR)/br-rootfs -rf
-	${Q}ln -s $(OUTPUT_DIR)/br-rootfs $(OUTPUT_DIR)/fs
-	${Q}mkdir $(OUTPUT_DIR)/br-rootfs
-	${Q}tar xvf $(BR_DIR)/output/$(BR_BOARD)/images/rootfs.tar.xz -C $(OUTPUT_DIR)/br-rootfs
-else
-	${Q}ln -s $(OUTPUT_DIR)/rootfs $(OUTPUT_DIR)/fs
-endif
-	$(COMMON_TOOLS_PATH)/sd_tools/sd_gen_burn_image.sh $(OUTPUT_DIR)
 
 jffs2:
 	$(call print_target)

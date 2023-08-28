@@ -4,10 +4,6 @@
 #include "cv180x_asic_spinor.dtsi"
 #include "cv180x_default_memmap.dtsi"
 
-&i2c2 {
-	status = "disabled";
-};
-
 / {
 
 };

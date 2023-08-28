@@ -488,12 +488,6 @@ config ROOTFS_OVERLAYFS
 	help
 	  Enable rootfs with overlayfs.
 
-config BUILDROOT_FS
-	bool "Enable buildroot generate rootfs"
-	default n
-	help
-	  Enable buildroot generate rootfs.
-
 config USE_4K_ERASE_SIZE_FOR_JFFS2
 	bool "Use 4K erase size for jffs2 filesystem"
 	default n
