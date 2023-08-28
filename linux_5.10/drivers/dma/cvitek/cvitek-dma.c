@@ -244,6 +244,7 @@ static void dwc_initialize(struct dw_dma_chan *dwc)
 	channel_writeq(dwc, INTSTATUS_ENABLEREG, int_status_reg);
 
 	set_bit(DW_DMA_IS_INITIALIZED, &dwc->flags);
+	dwc->status &= ~DWC_CH_INTSIG_DMA_TRA_DONE;
 }
 
 /* Called with dwc->lock held and bh disabled */
@@ -494,7 +495,7 @@ static void dwc_descriptor_complete(struct dw_dma_chan *dwc, struct dw_desc *des
 
 	spin_lock_irqsave(&dwc->lock, flags);
 	dma_cookie_complete(txd);
-
+	dwc->status &= ~DWC_CH_INTSIG_DMA_TRA_DONE;
 	if (callback_required)
 		dmaengine_desc_get_callback(txd, &cb);
 	else
@@ -713,6 +714,7 @@ static int dwc_stop_cyclic_all(struct dw_dma_chan *dwc)
 
 	spin_lock_irqsave(&dwc->lock, flags);
 	dma_cookie_complete(txd);
+	dwc->status &= ~DWC_CH_INTSIG_DMA_TRA_DONE;
 
 	clear_bit(DW_DMA_IS_CYCLIC, &dwc->flags);
 
@@ -1485,7 +1487,7 @@ static void dwc_free_chan_resources(struct dma_chan *chan)
 
 	/* Disable controller in case it was a last user */
 	dw->in_use &= ~dwc->mask;
-
+	dwc->status &= ~DWC_CH_INTSIG_DMA_TRA_DONE;
 	if (!dw->in_use)
 		dw_dma_off(dw);
 
@@ -1541,17 +1543,20 @@ static void dw_dma_tasklet(unsigned long data)
 	ch_en = dma_readq(dw, CH_EN);
 
 	for (i = 0; i < dw->dma.chancnt; i++) {
+
 		dwc = &dw->chan[i];
 		if (test_bit(DW_DMA_IS_CYCLIC, &dwc->flags)) {
 			if ((ch_en >> i) & 0x1)
 				dwc_handle_cyclic(dw, dwc);
-		} else
-			dwc_scan_descriptors(dw, dwc);
-
+		} else{
+		    if(dwc->status == DWC_CH_INTSIG_DMA_TRA_DONE)
+				dwc_scan_descriptors(dw, dwc);
+        }
 		//dwc_interrupts_set(dwc, true);
 	}
 }
 #endif
+
 
 static void dw_dma_off(struct dw_dma *dw)
 {
@@ -1601,7 +1606,7 @@ static void instead_of_tasklet(struct dw_dma *dw)
 static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
 {
 	int i;
-	u64 status, dwc_status;
+	u64 status,dwc_status;
 	struct dw_dma *dw = dev_id;
 	struct dw_dma_chan *dwc;
 
@@ -1614,10 +1619,13 @@ static irqreturn_t dw_dma_interrupt(int irq, void *dev_id)
 	if (!status)
 		return IRQ_NONE;
 
+
 	dma_writeq(dw, COMM_INTCLEAR, 0x10f); /* clear all common interrupts */
 	for (i = 0; i < dw->dma.chancnt; i++) {
 		dwc = &dw->chan[i];
 		dwc_status = channel_readq(dwc, INTSTATUS);
+		if(dwc_status == DWC_CH_INTSIG_DMA_TRA_DONE)
+			dwc->status = DWC_CH_INTSIG_DMA_TRA_DONE;
 		channel_writeq(dwc, INTCLEARREG, dwc_status);
 		//dwc_interrupts_set(dwc, false);
 	}

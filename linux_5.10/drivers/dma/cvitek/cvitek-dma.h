@@ -324,6 +324,7 @@ struct dw_dma_chan {
 
 	/* these other elements are all protected by lock */
 	unsigned long flags;
+	unsigned long status;
 	struct list_head active_list;
 	struct list_head queue;
 	struct dw_cyclic_desc *cdesc;

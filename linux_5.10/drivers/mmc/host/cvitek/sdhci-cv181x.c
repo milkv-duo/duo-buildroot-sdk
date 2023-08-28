@@ -33,6 +33,10 @@
 #include <linux/of_gpio.h>
 #include <linux/mmc/slot-gpio.h>
 #include <linux/ktime.h>
+#include <linux/clk.h>
+#include <linux/sizes.h>
+#include <linux/dma-mapping.h>
+#include <linux/kernel.h>
 
 #include "../../core/card.h"
 #include "../sdhci-pltfm.h"
@@ -61,6 +65,9 @@
 		__res |= resp[__off - 1] << ((32 - __shft) % 32);   \
 	__res & __mask;                                         \
 	})
+
+#define BOUNDARY_OK(addr, len) \
+	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
 
 static struct proc_dir_entry *proc_cvi_dir;
 
@@ -1032,6 +1039,25 @@ static void sdhci_cv181x_sd_dump_vendor_regs(struct sdhci_host *host)
 	}
 }
 
+static void cvi_adma_write_desc(struct sdhci_host *host, void **desc,
+		dma_addr_t addr, int len, unsigned int cmd)
+{
+	int tmplen, offset;
+
+	if (likely(!len || BOUNDARY_OK(addr, len))) {
+		sdhci_adma_write_desc(host, desc, addr, len, cmd);
+		return;
+	}
+
+	offset = addr & (SZ_128M - 1);
+	tmplen = SZ_128M - offset;
+	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
+
+	addr += tmplen;
+	len -= tmplen;
+	sdhci_adma_write_desc(host, desc, addr, len, cmd);
+}
+
 static const struct sdhci_ops sdhci_cv181x_emmc_ops = {
 	.reset = sdhci_cv181x_emmc_reset,
 	.set_clock = sdhci_set_clock,
@@ -1042,6 +1068,7 @@ static const struct sdhci_ops sdhci_cv181x_emmc_ops = {
 	.platform_execute_tuning = sdhci_cv181x_general_execute_tuning,
 	.select_drive_strength = sdhci_cv181x_general_select_drive_strength,
 	.dump_vendor_regs = sdhci_cv181x_emmc_dump_vendor_regs,
+	.adma_write_desc = cvi_adma_write_desc,
 };
 
 static const struct sdhci_ops sdhci_cv181x_sd_ops = {
@@ -1055,6 +1082,7 @@ static const struct sdhci_ops sdhci_cv181x_sd_ops = {
 	.platform_execute_tuning = sdhci_cv181x_general_execute_tuning,
 	.select_drive_strength = sdhci_cv181x_general_select_drive_strength,
 	.dump_vendor_regs = sdhci_cv181x_sd_dump_vendor_regs,
+	.adma_write_desc = cvi_adma_write_desc,
 };
 
 static const struct sdhci_ops sdhci_cv181x_sdio_ops = {
@@ -1066,6 +1094,7 @@ static const struct sdhci_ops sdhci_cv181x_sdio_ops = {
 	.set_uhs_signaling = sdhci_cvi_general_set_uhs_signaling,
 	.select_drive_strength = sdhci_cv181x_general_select_drive_strength,
 	.platform_execute_tuning = sdhci_cv181x_general_execute_tuning,
+	.adma_write_desc = cvi_adma_write_desc,
 };
 
 static const struct sdhci_ops sdhci_cv181x_fpga_emmc_ops = {
@@ -1203,8 +1232,10 @@ static int sdhci_cvi_probe(struct platform_device *pdev)
 	struct sdhci_cvi_host *cvi_host;
 	const struct of_device_id *match;
 	const struct sdhci_pltfm_data *pdata;
+	struct clk *clk_sd;
 	int ret;
 	int gpio_cd = -EINVAL;
+	u32 extra;
 
 	pr_info(DRIVER_NAME ":%s\n", __func__);
 
@@ -1270,6 +1301,13 @@ static int sdhci_cvi_probe(struct platform_device *pdev)
 			}
 		}
 	}
+	/*
+	 * extra adma table cnt for cross 128M boundary handling.
+	 */
+	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+	if (extra > SDHCI_MAX_SEGS)
+		extra = SDHCI_MAX_SEGS;
+	host->adma_table_cnt += extra;
 
 	ret = sdhci_add_host(host);
 	if (ret)

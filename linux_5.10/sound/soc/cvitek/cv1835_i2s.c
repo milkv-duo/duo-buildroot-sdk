@@ -592,8 +592,10 @@ static int cvi_i2s_hw_params(struct snd_pcm_substream *substream,
 			break;
 		}
 	} else {
-		if ((audio_clk == CVI_24576_MHZ) || (audio_clk == CVI_22579_MHZ))
+		if ((audio_clk == CVI_24576_MHZ) || (audio_clk == CVI_22579_MHZ)){
 			clk_ctrl1 |= MCLK_DIV(2);
+			mclk_div = 2;
+		}
 		else
 			dev_err(dev->dev, "Get unexpected audio system clk=%d\n", audio_clk);
 	}

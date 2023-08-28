@@ -191,26 +191,27 @@ static int cv182xa_phy_config_init(struct phy_device *phydev)
 
 	// En TX_Rterm
 	writel((0x0001 | readl(reg_ephy_base + 0x40)), reg_ephy_base + 0x40);
-
+	//Change rx vcm
+	writel((0x820 |readl(reg_ephy_base + 0x4c)), reg_ephy_base + 0x4c);
 //	Link Pulse
 	// Switch to MII-page10
 	writel(0x0a00, reg_ephy_base + 0x7c);
-
+#if 1
 	// Set Link Pulse
-	// writel(0x3e00, reg_ephy_base + 0x40);
-	// writel(0x7864, reg_ephy_base + 0x44);
-	// writel(0x6470, reg_ephy_base + 0x48);
-	// writel(0x5f62, reg_ephy_base + 0x4c);
-	// writel(0x5a5a, reg_ephy_base + 0x50);
-	// writel(0x5458, reg_ephy_base + 0x54);
-	// writel(0xb23a, reg_ephy_base + 0x58);
-	// writel(0x94a0, reg_ephy_base + 0x5c);
-	// writel(0x9092, reg_ephy_base + 0x60);
-	// writel(0x8a8e, reg_ephy_base + 0x64);
-	// writel(0x8688, reg_ephy_base + 0x68);
-	// writel(0x8484, reg_ephy_base + 0x6c);
-	// writel(0x0082, reg_ephy_base + 0x70);
-
+	writel(0x3e00, reg_ephy_base + 0x40);
+	writel(0x7864, reg_ephy_base + 0x44);
+	writel(0x6470, reg_ephy_base + 0x48);
+	writel(0x5f62, reg_ephy_base + 0x4c);
+	writel(0x5a5a, reg_ephy_base + 0x50);
+	writel(0x5458, reg_ephy_base + 0x54);
+	writel(0xb23a, reg_ephy_base + 0x58);
+	writel(0x94a0, reg_ephy_base + 0x5c);
+	writel(0x9092, reg_ephy_base + 0x60);
+	writel(0x8a8e, reg_ephy_base + 0x64);
+	writel(0x8688, reg_ephy_base + 0x68);
+	writel(0x8484, reg_ephy_base + 0x6c);
+	writel(0x0082, reg_ephy_base + 0x70);
+#else 
 	// from sean
 	// Fix err: the status is still linkup when removed the network cable.
 	writel(0x2000, reg_ephy_base + 0x40);
@@ -226,7 +227,7 @@ static int cv182xa_phy_config_init(struct phy_device *phydev)
 	writel(0x8283, reg_ephy_base + 0x68);
 	writel(0x8182, reg_ephy_base + 0x6c);
 	writel(0x0081, reg_ephy_base + 0x70);
-
+#endif
 // TP_IDLE
 	// Switch to MII-page11
 	writel(0x0b00, reg_ephy_base + 0x7c);
