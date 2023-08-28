@@ -26,8 +26,12 @@ prepare:
 brigates_bg0808:
 	$(call MAKE_SENSOR, ${@})
 
+cvsens_cv4001:
+	$(call MAKE_SENSOR, ${@})
+
 gcore_gc02m1:
 	$(call MAKE_SENSOR, ${@})
+
 gcore_gc0312:
 	$(call MAKE_SENSOR, ${@})
 
@@ -35,6 +39,12 @@ gcore_gc0329:
 	$(call MAKE_SENSOR, ${@})
 
 gcore_gc1054:
+	$(call MAKE_SENSOR, ${@})
+
+gcore_gc1084:
+	$(call MAKE_SENSOR, ${@})
+
+gcore_gc1084_slave:
 	$(call MAKE_SENSOR, ${@})
 
 gcore_gc2053:
@@ -59,6 +69,9 @@ gcore_gc4653:
 	$(call MAKE_SENSOR, ${@})
 
 imgds_mis2008:
+	$(call MAKE_SENSOR, ${@})
+
+imgds_mis2008_1L:
 	$(call MAKE_SENSOR, ${@})
 
 nextchip_n5:
@@ -145,6 +158,9 @@ sms_sc2335:
 sms_sc2336:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc2336_1L:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc2336p:
 	$(call MAKE_SENSOR, ${@})
 
@@ -204,7 +220,7 @@ sony_imx335:
 
 techpoint_tp2825:
 	$(call MAKE_SENSOR, ${@})
-	
+
 techpoint_tp2863:
 	$(call MAKE_SENSOR, ${@})
 

@@ -119,6 +119,9 @@ CVI_S32 CVI_GDC_SetMeshSize(int nMeshHor, int nMeshVer);
 CVI_S32 CVI_GDC_GenLDCMesh(CVI_U32 u32Width, CVI_U32 u32Height, const LDC_ATTR_S *pstLDCAttr
 	, const char *name, CVI_U64 *pu64PhyAddr, CVI_VOID **ppVirAddr);
 
+CVI_S32 CVI_GDC_LoadLDCMesh(CVI_U32 u32Width, CVI_U32 u32Height, const char *fileNname
+	, const char *tskName, CVI_U64 *pu64PhyAddr, CVI_VOID **ppVirAddr);
+
 /**
  * @brief set GDC wrap buf attribute
  *

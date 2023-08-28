@@ -7,6 +7,7 @@
 
 #define VB_POOL_NAME_LEN        (32)
 #define VB_COMM_POOL_MAX_CNT    (16)
+#define VB_POOL_MAX_BLK         (64)
 
 enum VB_IOCTL {
 	VB_IOCTL_SET_CONFIG,
@@ -14,6 +15,7 @@ enum VB_IOCTL {
 	VB_IOCTL_INIT,
 	VB_IOCTL_EXIT,
 	VB_IOCTL_CREATE_POOL,
+	VB_IOCTL_CREATE_EX_POOL,
 	VB_IOCTL_DESTROY_POOL,
 	VB_IOCTL_PHYS_TO_HANDLE,
 	VB_IOCTL_GET_BLK_INFO,
@@ -41,6 +43,12 @@ struct cvi_vb_pool_cfg {
 	char pool_name[VB_POOL_NAME_LEN];
 	__u32 pool_id;
 	__u64 mem_base;
+};
+
+struct cvi_vb_pool_ex_cfg {
+	__u32 blk_cnt;
+	__u64 au64PhyAddr[VB_POOL_MAX_BLK][3];
+	__u32 pool_id;
 };
 
 /*

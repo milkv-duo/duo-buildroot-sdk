@@ -223,7 +223,7 @@ struct vpss_scene {
 #define CVI_VPSS_SET_CHN_LDC _IOW('S', 0x29, struct vpss_chn_ldc_cfg)
 #define CVI_VPSS_GET_CHN_LDC _IOWR('S', 0x2a, struct vpss_chn_ldc_cfg)
 #define CVI_VPSS_GET_CHN_FRAME _IOWR('S', 0x2b, struct vpss_chn_frm_cfg)
-#define CVI_VPSS_RELEASE_CHN_RAME _IOWR('S', 0x2c, struct vpss_chn_frm_cfg)
+#define CVI_VPSS_RELEASE_CHN_FRAME _IOWR('S', 0x2c, struct vpss_chn_frm_cfg)
 #define CVI_VPSS_SET_CHN_ALIGN _IOW('S', 0x2d, struct vpss_chn_align_cfg)
 #define CVI_VPSS_GET_CHN_ALIGN _IOWR('S', 0x2e, struct vpss_chn_align_cfg)
 #define CVI_VPSS_SET_CHN_YRATIO _IOW('S', 0x2f, struct vpss_chn_yratio_cfg)

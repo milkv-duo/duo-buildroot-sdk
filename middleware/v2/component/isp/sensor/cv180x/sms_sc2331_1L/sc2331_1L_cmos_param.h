@@ -39,12 +39,12 @@ static const SC2331_1L_MODE_S g_astSC2331_1L_mode[SC2331_1L_MODE_NUM] = {
 			},
 		},
 		.f32MaxFps = 30,
-		.f32MinFps = 0.51, /* 1125 * 30 / 0x7FFF */
-		.u32HtsDef = 2560,
-		.u32VtsDef = 1530,
+		.f32MinFps = 0.51, /* 1125 * 30 / 0xFFFF */
+		.u32HtsDef = 2200,
+		.u32VtsDef = 1125,
 		.stExp[0] = {
 			.u16Min = 2,//3
-			.u16Max = 1530*2 - 13,
+			.u16Max = 1125 - 13,
 			.u16Def = 400,
 			.u16Step = 1,
 		},

@@ -857,47 +857,6 @@ static void AE_GainTableLinearTest(CVI_U8 sID, CVI_U8 type, CVI_U32 startIndex, 
 	}
 }
 
-static void AE_SetBlc(CVI_U8 sID, CVI_U8 type)
-{
-	int r = 0, gr = 0, gb = 0, b = 0;
-	ISP_BLACK_LEVEL_ATTR_S stBlackLevelAttr;
-
-	memset(&stBlackLevelAttr, 0, sizeof(ISP_BLACK_LEVEL_ATTR_S));
-	CVI_ISP_GetBlackLevelAttr(sID, &stBlackLevelAttr);
-
-	switch (type) {
-	case 0:
-		stBlackLevelAttr.Enable = CVI_FALSE;
-		break;
-	case 1:
-		stBlackLevelAttr.Enable = CVI_TRUE;
-		stBlackLevelAttr.enOpType = OP_TYPE_AUTO;
-		break;
-	case 2:
-		stBlackLevelAttr.Enable = CVI_TRUE;
-		stBlackLevelAttr.enOpType = OP_TYPE_MANUAL;
-		SAMPLE_PRT("Please input offsetR,offsetGr,offsetGb,offsetB\n");
-		scanf("%d %d %d %d", &r, &gr, &gb, &b);
-		stBlackLevelAttr.stManual.OffsetR = (CVI_U16) r;
-		stBlackLevelAttr.stManual.OffsetGr = (CVI_U16) gr;
-		stBlackLevelAttr.stManual.OffsetGb = (CVI_U16) gb;
-		stBlackLevelAttr.stManual.OffsetB = (CVI_U16) b;
-		break;
-	default:
-		break;
-	}
-
-	SAMPLE_PRT("blc info, enable: %d, enOpType: %d, manual offsetR,Gr,Gb,B: %d, %d, %d, %d\n",
-		stBlackLevelAttr.Enable,
-		stBlackLevelAttr.enOpType,
-		stBlackLevelAttr.stManual.OffsetR,
-		stBlackLevelAttr.stManual.OffsetGr,
-		stBlackLevelAttr.stManual.OffsetGb,
-		stBlackLevelAttr.stManual.OffsetB);
-
-	CVI_ISP_SetBlackLevelAttr(sID, &stBlackLevelAttr);
-}
-
 static void AE_WorkFrameCheck(CVI_U8 sID, CVI_U32 expTime, CVI_U32 ISONum1, CVI_U32 ISONum2)
 {
 	CVI_U32 u32CheckCnt = 110;
@@ -964,8 +923,7 @@ CVI_S32 sensor_ae_test(void)
 	SAMPLE_PRT("7:AE_GainLinearTest(sID, time, startISO, endISO)\n");
 	SAMPLE_PRT("8:AE_ShutterLinearTest(sID, fid 0: LE 1: SE, startExpTime, endExpTime)\n");
 	SAMPLE_PRT("9:AE_GainTableLinearTest(sID, type: again 0 dgain 1, startIndex, endIndex)\n");
-	SAMPLE_PRT("10:AE_SetBlc(sID, type: 0:disable 1:auto, 2:manu)\n");
-	SAMPLE_PRT("11:AE_WorkFrameCheck(sID, time, ISO 1, ISO 2)\n");
+	SAMPLE_PRT("10:AE_WorkFrameCheck(sID, time, ISO 1, ISO 2)\n");
 	SAMPLE_PRT("Item/sID/para1/para2/para3\n\n");
 
 	scanf("%d %d %d %d %d", &item, &sID, &para1, &para2, &para3);
@@ -1005,9 +963,6 @@ CVI_S32 sensor_ae_test(void)
 		AE_GainTableLinearTest(sID, para1, para2, para3);
 		break;
 	case 10:
-		AE_SetBlc(sID, para1);
-		break;
-	case 11:
 		AE_WorkFrameCheck(sID, para1, para2, para3);
 	default:
 		break;
