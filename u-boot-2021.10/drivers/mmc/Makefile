@@ -83,4 +83,5 @@ obj-$(CONFIG_TARGET_CVITEK_CV1835) += cvitek/sdhci-cv183x.o
 obj-$(CONFIG_TARGET_CVITEK_CV1822) += cvitek/sdhci-cv182x.o
 obj-$(CONFIG_TARGET_CVITEK_CV181X) += cvitek/sdhci-cv181x.o
 obj-$(CONFIG_TARGET_CVITEK_CV180X) += cvitek/sdhci-cv180x.o
+obj-$(CONFIG_TARGET_CVITEK_ATHENA2) += cvitek/sdhci-athena2.o
 endif

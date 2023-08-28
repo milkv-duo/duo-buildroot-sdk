@@ -109,6 +109,7 @@ source "drivers/serial/Kconfig"
 source "drivers/smem/Kconfig"
 
 source "drivers/sound/Kconfig"
+source "drivers/cvi_sound/Kconfig"
 
 source "drivers/soc/Kconfig"
 
