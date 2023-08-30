@@ -1,0 +1,38 @@
+From 7433bf4b18278080fb2ac22c5828490883066570 Mon Sep 17 00:00:00 2001
+From: Nathan Scott <nathans@redhat.com>
+Date: Mon, 15 Feb 2021 19:32:55 +1100
+Subject: [PATCH] Correctly detect failure to initialize boottime
+
+A zero value for btime (boottime) in /proc/stat is a
+real situation that happens, so deal with this case.
+
+Resolves https://github.com/htop-dev/htop/issues/527
+---
+ linux/LinuxProcessList.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/linux/LinuxProcessList.c b/linux/LinuxProcessList.c
+index 3a0feae0..69e5b75f 100644
+--- a/linux/LinuxProcessList.c
++++ b/linux/LinuxProcessList.c
+@@ -65,7 +65,7 @@ in the source distribution for its full text.
+ # define O_PATH 010000000
+ #endif
+ 
+-static long long btime;
++static long long btime = -1;
+ 
+ static long jiffy;
+ 
+@@ -241,7 +241,7 @@ ProcessList* ProcessList_new(UsersTable* usersTable, Hashtable* pidMatchList, ui
+       }
+       fclose(statfile);
+ 
+-      if (!btime)
++      if (btime == -1)
+          CRT_fatalError("No btime in " PROCSTATFILE);
+    }
+ 
+-- 
+2.25.1
+

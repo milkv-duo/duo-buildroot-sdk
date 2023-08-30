@@ -391,6 +391,7 @@ BR2_PACKAGE_WPA_SUPPLICANT_CTRL_IFACE=y
 #
 # emlog needs a Linux kernel to be built
 #
+BR2_PACKAGE_HTOP=y
 BR2_PACKAGE_INITSCRIPTS=y
 
 #
