@@ -11,7 +11,7 @@
 # Note that the location of spidev_test.c changes from v4.5 onwards.
 
 ifeq ($(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_15),y)
-SPIDEV_TEST_VERSION = 4.10
+SPIDEV_TEST_VERSION = 5.4
 SPIDEV_TEST_PATH = tools/spi
 else
 SPIDEV_TEST_VERSION = 3.0
@@ -36,7 +36,7 @@ define SPIDEV_TEST_EXTRACT_CMDS
 endef
 
 define SPIDEV_TEST_BUILD_CMDS
-	$(TARGET_MAKE_ENV) $(TARGET_CC) $(TARGET_CFLAGS) \
+	$(TARGET_MAKE_ENV) $(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) \
 		-o $(@D)/spidev_test $(@D)/spidev_test.c
 endef
 
