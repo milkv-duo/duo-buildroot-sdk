@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_FREETYPE
+	bool "python-freetype"
+	help
+	  Freetype Python provides bindings for the FreeType library.
+	  Only the high-level API is bound.
+
+	  https://pypi.python.org/pypi/freetype-pi

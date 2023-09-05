@@ -1,0 +1,5 @@
+# md5, sha256 from https://pypi.org/project/freetype-py/
+md5  c63b1ee876bf97be9d2be49745e10be7  freetype-py-2.4.0.zip
+sha256  8ad81195d2f8f339aba61700cebfbd77defad149c51f59b75a2a5e37833ae12e  freetype-py-2.4.0.zip
+# Locally computed sha256 checksums
+sha256  60386caf4d85fb57b5cc5470f1a00de1692fb28e8b731f7f9187f64451dbe641  LICENSE.txt

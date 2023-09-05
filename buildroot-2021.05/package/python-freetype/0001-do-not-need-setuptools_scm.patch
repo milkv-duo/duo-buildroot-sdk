@@ -1,0 +1,41 @@
+From d96035f5c857acc8fdf0fb83152ed781fcf13af4 Mon Sep 17 00:00:00 2001
+From: carbon <carbon@milkv.io>
+Date: Mon, 28 Aug 2023 18:20:15 +0800
+Subject: [PATCH] do not need setuptools_scm
+
+---
+ pyproject.toml | 2 +-
+ setup.py       | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/pyproject.toml b/pyproject.toml
+index cb5ee0c..98ae97a 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,2 +1,2 @@
+ [build-system]
+-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4", "certifi", "cmake"]
++requires = ["setuptools>=42", "wheel", "certifi", "cmake"]
+diff --git a/setup.py b/setup.py
+index af7f101..d4183ca 100644
+--- a/setup.py
++++ b/setup.py
+@@ -102,7 +102,6 @@ description = open(
+ 
+ setup(
+     name='freetype-py',
+-    use_scm_version=True,
+     description='Freetype python bindings',
+     long_description=description,
+     author='Nicolas P. Rougier',
+@@ -127,7 +126,6 @@ setup(
+         'Topic :: Multimedia :: Graphics',
+     ],
+     keywords=['freetype', 'font'],
+-    setup_requires=['setuptools_scm'],
+     entry_points={
+         "pyinstaller40": [
+             "hook-dirs = freetype.__pyinstaller:get_hook_dirs",
+-- 
+2.25.1
+
