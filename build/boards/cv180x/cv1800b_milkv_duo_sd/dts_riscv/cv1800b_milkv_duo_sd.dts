@@ -20,6 +20,11 @@
 	status = "okay";
 };
 
+&i2c1 {
+       status = "okay";
+       clock-frequency = <100000>;
+};
+
 / {
 
 };
