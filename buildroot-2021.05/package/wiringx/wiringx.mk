@@ -10,7 +10,6 @@ define WIRINGX_INSTALL_STAGING_CMDS
 endef
 
 define WIRINGX_INSTALL_TARGET_CMDS
-	$(INSTALL) -D -m 0644 $(@D)/src/wiringx.h $(TARGET_DIR)/usr/include/
 	$(INSTALL) -D -m 0644 $(@D)/src/libwiringx.so $(TARGET_DIR)/usr/lib/
 endef
 
