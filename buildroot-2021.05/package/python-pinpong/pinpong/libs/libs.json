@@ -1,0 +1,272 @@
+{
+"BOARD":
+{
+	"import":"from pinpong.board import Board",
+	"api":"Board(boardname, port)\n  @boardname motherboard  name, currently supported uno leonardo mega2560 microbit\n  @port Serial port name, do not fill in the system will automatically select the appropriate port\nget_i2c_master(bus_num) : Get the I2C host controller\n  @bus_num I2C host controller number"
+},
+
+"PIN":
+{
+	"import":"from pinpong.board import Board,Pin",
+	"api":"Pin(board, pin, mode)\n  @board A motherboard constructed using the Board class\n  @pin   Pin.D0-Pin.Dx or Pin.A0-Pin.Ax\n  @mode  Pin.IN Pin.OUT Pin.PULL_UP Pin.PULL_DOWN\nvalue(v): Set or read the pin level\n  @v: 0 Output low level, 1 Output high level\n Pass no value:  Read pin level in input mode\non(): Output high level\noff(): Output low level\nirq(trigger, handler):Set the pin to interrupt mode\n  @trigger IRQ_RISING: Rising edge trigger. IRQ_FALLING: Falling edge trigger.\n  @handler Callback function after the interrupt is triggered"
+},
+
+"SERVO":
+{
+	"import":"from pinpong.board import Board,Pin\nfrom pinpong.libs.servo import Servo",
+	"api":"Servo(board, pin_obj)\n  @board  A motherboard constructed using the Board class\n  @pin_obj   An object constructed using the Pin class, The servo is connected to the pin\nangle(value): Steering gear rotation Angle\n  @value Steering gear rotation Angle, range(0-180)\n"
+},
+
+"LCD1602_I2C":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.lcd1602 import LCD1602_I2C",
+	"api":"LCD1602_I2C(board, i2c_addr)\n  @board A motherboard constructed using the Board class\n  @i2c_addr   The i2c address of the LCD1602\nclear(): Clear screen\nbacklight(on): Turn: on and off the backlight\n  @on True: Turn on the backlight  False: Turn off the backlight\ndisplay(on):   On/off display\n  @on True: Open display  False: Turn off display\nset_cursor(x, y): Sets the cursor position\n  @x The x-coordinate of the cursor\n  @y The y-coordinate of the cursor\nprint(s): Display content on the LCD1602\n  @s Display content, can be a string, numbers, and other formats\nscroll_left():Scroll left one character width\nscroll_right():Scroll to the right one character width"
+},
+
+"MLX90614":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_mlx90614 import MLX90614",
+	"api":"MLX90614(board, i2c_addr)\n  @board A motherboard constructed using the Board class\n  @i2c_addr   The i2c address of the sensor, if not passed, defaults to 0x5A\nobj_temp_c(): Gets the target temperature in degrees Celsius\nenv_temp_c(): Gets the ambient temperature in degrees Celsius\nobj_temp_f(): Gets the target temperature in degrees Fahrenheit\nenv_temp_f(): Gets the ambient temperature in degrees Fahrenheit"
+},
+
+"TCS34725":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_tcs34725 import TCS34725",
+	"api":"TCS34725(board)\n  @board   A motherboard constructed using the Board class\nbegin(): Initializing sensors\n  return  True: Initialization successful  False: Initialization failure\nget_rgbc(): Get the r,g,b,c values of the target\n  return: tuple of (r,g,b,c)"
+},
+
+"URM09":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_urm09 import URM09",
+	"api":"URM09(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @i2c_addr   The i2c address of the sensor, if not passed, defaults to 0x11\ntemp_c(): Gets the temperature, in degrees Celsius\ndistance_cm(): Gets the distance, in centimeters"
+},
+
+"DHT11":
+{
+	"import":"from pinpong.board import Board,Pin,DHT11",
+	"api":"DHT11(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @pin_obj  An object constructed using the Pin class, The pin connected to DHT11\ntemp_c(): Gets the temperature, in Celsius\nhumidity(): Relative humidity value, range 0-100"
+},
+
+"DHT22":
+{
+	"import":"from pinpong.board import Board,Pin,DHT22",
+	"api":"DHT22(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @pin_obj An object constructed using the Pin class, The pin that connects the DHT22\ntemp_c(): Gets the temperature, in Celsius\nhumidity(): Relative humidity value, range 0-100"
+},
+
+"NEOPIXEL":
+{
+	"import":"from pinpong.board import Board,Pin,NeoPixel",
+	"api":"NeoPixel(board, pin_obj, num)\n  @board A motherboard constructed using the Board class\n  @pin_obj   An object constructed using the Pin class, The pin connected to the lamp belt can be used Pin.D0-Dx or Pin.A0-Pin.Ax\n  @num  The number of connected lamp beads\n[](i,v): Set lamp bead color, usage: np[i]=v\n  @i:The beads are numbered, starting from 0\n  @v: Color value, tuple type (r,g,b) r,g,b range 0-255"
+},
+
+"SR04_URM10":
+{
+	"import":"from pinpong.board import Board,Pin,SR04_URM10",
+	"api":"SR04_URM10(board, trigger_pin_obj, echo_pin_obj)\n  @board A motherboard constructed using the Board class\n  @trigger_pin_obj   An object constructed using the Pin class, Trigger the measurement pin\n  @echo_pin_obj An object constructed using the Pin class, Receive feedback pin\ndistance_cm(): Read the ultrasonic distance in centimeters"
+},
+
+"RGB1602":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.rgb1602 import RGB1602",
+	"api":"RGB1602(board, i2c_addr)\n  @board A motherboard constructed using the Board class\n  @i2c_addr  The i2c address of the RGB1602\nclear(): Clear screen\nset_rgb(r, g, b):Set the backlight color\n  @r Backlight r component value\n  @g   Backlight g component value\n  @b   Backlight b component value\nbacklight(on): Turn on and off the backlight\n  @on  True: Turn on the backlight  False: Turn off the backlight\ndisplay(on):On/off display\n  @on  True: Open display  False:Turn off display\nset_cursor(x, y): Sets the cursor position\n  @x   The x-coordinate of the cursor\n  @y   The y-coordinate of the cursor\nprint(s): Display content on the LCD\n  @s   Display content, can be a string, numbers, and other formats\nscroll_left():Scroll left one character width\nscroll_right():Scroll to the right one character width"
+},
+
+"TONE":
+{
+	"import":"from pinpong.board import Board,Pin,Tone",
+	"api":"Tone(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @pin_obj   An object constructed using the Pin class, The pin that makes the sound\non():  Turn on sound\noff(): Turn off the sound\nfreq(v): Set or get the sound frequency\n  @v  Frequency value set by the user\nReturns the current frequency without passing a value\ntone(freq, duration)：Play a specific frequency for a fixed time\n  @freq Frequency of playback\n  @duration The amount of time, in milliseconds, to play, where 0 means forever"
+},
+
+"SOFTSPI":
+{
+	"import":"from pinpong.board import Board,Pin,SoftSPI",
+	"api":"SoftSPI(self, board, baudrate, polarity, phase, bits, sck, mosi, miso)\n  @board  A motherboard constructed using the Board class\n  @baudrate   An object constructed using the Pin class\n  @polarity   The level of the clk pin when idle\n  @phase SPI starts sampling at the first edge of SCLK (0: start at the first edge; 1: start of the second edge)\n  @bits 8 bits are transmitted by default and cannot be changed\n  @sck Pin object, clock pin\n  @mosi Pin object, data output pin\n  @miso Pin object, data input pin\n\nread(num, default_value=0xff): Read num data\n  @num:The number of bytes read\n  @default_value  Read through the process of sending past values, do not fill in the default send 0xff\nreadinto(buf): Read data from spi bus into buf\n  @buf:A buffer in bytearray format that reads data bytes as long as the size of a buf\nwrite(buf): Write the data in buf to spi bus\nwrite_readinto(wbuf, rbuf): The data in the wbuf is written to the spi bus, while the data is read from the spi bus to the rbuf, and the two BUFs have equal length\n  @wbuf bytearray format buffer, writes wbuf length of data bytes\n  @rbuf bytearray format buffers that read rbuf length of data bytes"
+},
+
+"PWM":
+{
+	"import":"from pinpong.board import Board,Pin,PWM",
+	"api":"PWM(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @pin_obj  An object constructed using the Pin class\nfreq(v): Set the pwm frequency\n  @v Frequency value set by the user\nReturns the current frequency without passing a value\nduty(v): Set the pwm duty cycle\n  @v: The duty cycle range set by the user is 0-100\nReturns the current duty cycle without passing a value\ndeinit(): Disable the secondary pin PWM function"
+},
+
+"ADC":
+{
+	"import":"from pinpong.board import Board,Pin,ADC",
+	"api":"ADC(board, pin_obj)\n  @board A motherboard constructed using the Board class\n  @pin_obj   An object constructed using the Pin class,Only use Pin.A0-Pin.Ax\nread(): Read pin level, range (0-1024)"
+},
+
+"I2C":
+{
+	"import":"from pinpong.board import Board,I2C",
+	"api":"I2C()\n  @board A motherboard constructed using the Board class\n  @scan():Get the I2C address\n  @writeto(i2c_addr,value):I2C address write data i2c_addr:I2C address value: data\n  @readfrom(i2c_addr,value):Read data from I2C i2c_addr:I2C address value: data\n  @readfrom_mem(i2c_addr,value): Read data from I2C i2c_addr:I2C address value: data\n  @writeto_mem(i2c_addr,value): I2C address write data i2c_addr:I2C address value: data"
+},
+
+"IR":
+{
+	"import":"from pinpong.board import Board,IRRecv,Pin",
+	"api":"IRRecv(Pin(Pin.D2))\n  @board A motherboard constructed using the Board class\n  @Pin  Pin class, pin.D2 is the Pin\n  @read():Get the value of the infrared\n"
+},
+
+"DS1307":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ds1307 import DS1307",
+	"api":"DS1307()  Building objects\n  @board A motherboard constructed using the Board class\n  @set_time():Setup time\n  @get_time():Getting the time\n  @set_output():SQW/OUT pin set high level, low level, square wave output function\n"
+},
+
+"PAJ7620U2":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_paj7620u2 import PAJ7620U2,Gesture",
+	"api":"PAJ7620U2()  Building objects\n  @board A motherboard constructed using the Board class\n  @set_gesture_high/low_rate():Set high or low speed mode\n  @get_gesture():Get the gesture description and gesture code\n"
+},
+
+"BNO055":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bno055 import BNO055",
+	"api":"BNO055()  Building objects\n  @board A motherboard constructed using the Board class\n  @begin():The sensor starts and returns True on success\n  @get_axis_acc():Getting the acceleration\n  @get_axis_mag():Get magnetic acceleration\n  @get_axis_gyr():Get the gyroscope data\n  @get_axis_lia():Getting linear acceleration\n  @get_axis_grv():Getting the gravity vector\n  @get_eul():Get the Euler Angle\n  @get_qua():Getting four elements\n"
+},
+
+"BMP280":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bmp280 import BMP280",
+	"api":"BMP280()  Building objects\n  @board A motherboard constructed using the Board class\n  @begin():The sensor starts and returns True on success\n  @temp_c():Get the temperature value data\n  @pressure_p():Get the pressure data\n  @altitude_m():Getting altitude data\n  "
+},
+
+"PN532":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_pn532 import PN532",
+	"api":"PN532()  Building objects\n  @board A motherboard constructed using the Board class\n  @begin():The sensor starts and returns True on success\n  @get_information():Getting card information\n  @read_data():Fetching memory data\n  @write_data():Write data to storage\n  "
+},
+
+"DS18B20":
+{
+	"import":"from pinpong.board import Board,Pin,DS18B20",
+	"api":"DS18B20(Pin(Pin.D12))  Building objects\n  @board A motherboard constructed using the Board class\n  @Pin():Pin object, Pin.D12 pin\n  @temp_c():Get the temperature value\n  "
+},
+
+"HX711":
+{
+	"import":"from pinpong.board import Board,Pin,HX711",
+	"api":"HX711(dout_pin, sck_pin, scale)  Building objects  dout_pin: pin  sck_pin: pin  scale: Check value\n  @board A motherboard constructed using the Board class\n  @read_weight():Get the weight value of the object\n  "
+},
+
+"TDS":
+{
+	"import":"from pinpong.board import Board,Pin\nfrom pinpong.libs.dfrobot_tds import TDS",
+	"api":"TDS(Pin(Pin.A2))  Building objects  dout_pin: pin  Pin.A2: pin\n  @board A motherboard constructed using the Board class\n  @get_value():Get the value of water quality\n  "
+},
+
+"HEARTRATE":
+{
+	"import":"from pinpong.board import Board,Pin\nfrom pinpong.libs.dfrobot_heartrate import HEARTRATE",
+	"api":"HEARTRATE(DIGITAL_MODE or ANALOG_MODE, Pin.A1)  Building objects  DIGITAL_MODE or ANALOG_MODE mode  Pin.A1: Analog pin\n  @board A motherboard constructed using the Board class\n  "
+},
+
+"BME280":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bme280 import BME280",
+	"api":"BME280()  Building objects\n  @board A motherboard constructed using the Board class\n  @temp_c():Get the value of the temperature\n  @press_pa():Get the value of the pressure\n  @cal_altitudu():Retrieves the altitude value\n  @humidity():Get the value of humidity\n"
+},
+
+"VL53L0":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_vl53l0 import VL53L0",
+	"api":"VL53L0()  Building objects\n  @board A motherboard constructed using the Board class\n  @get_distance_mm():Getting distance values\n  "
+},
+
+"LIS2DH":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_lis2dh import LIS2DH",
+	"api":"lis=LIS2DH()  Building objects\n  @board A motherboard constructed using the Board class\n  @init(lis.LIS2DH12_RANGE_8GA):Initialization  lis.LIS2DH12_RANGE_8GA: Configuration range\n  @read_XYZ():Get the value of XYZ\n  "
+},
+
+"BMP388":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bmp388 import BMP388",
+	"api":"BMP388()  Building objects\n  @board A motherboard constructed using the Board class\n  @cal_altitude_m():Getting the altitude  \n  @pressure_pa():Get the value of the pressure\n  @temp_C():Get the value of the temperature\n"
+},
+
+"INA219":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ina219 import INA219",
+	"api":"INA219(i2c_addr=0x45)  Building objects  i2c_addr: IIC address\n  @board A motherboard constructed using the Board class\n  @get_bus_voltage_mv():Relative GND voltage  \n  @get_shunt_voltage_mv():The terminal voltage of IN+ relative to IN-, that is, the terminal voltage of the sampling resistor\n @get_current_ma():The current flowing through IN+ and IN-\n  @get_power_mw():power\n  "
+},
+
+"CCS811":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ccs811 import CCS811, CCS811_Ecycle, CCS811_Emode",
+	"api":"CCS811()  Building objects\n  @board A motherboard constructed using the Board class\n  @check_data_ready():Check if there is data to read  \n  @CO2_PPM():Read the value of CO2\n  @TVOC_PPB():Read the value of TVOC\n  @read_baseline():Read the value of the baseline\n"
+},
+
+"ADS1115":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ads1115 import ADS1115",
+	"api":"ADS1115()  Building objects\n  @board A motherboard constructed using the Board class\n  @read_voltage(0):Read the analog value of channel 0  \n  @comparator_voltage('01'):Compare the voltage of channel 01\n  "
+},
+
+"HUSKYLENS":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_huskylens import Huskylens",
+	"api":"Huskylens()  Building objects\n  @board A motherboard constructed using the Board class\n  @command_request():Get the box or arrow data for the huskylens screen\n  @command_request_custom_text():Display text\n  @command_request_customnames():Customize learned ID names\n  @command_request_forget():Forget all data for the current algorithm\n  @command_request_load_model_from_SD_card():Load (save) the model\n  @command_request_learn_once():The Husky automatically learns once\n  @command_request_photo():Husky photo saved to SD card\n  @command_request_screenshot():Husky screenshot saved to SD card\n  @command_request_algorthim():Husky switching algorithm\n"
+},
+
+"BME680":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bme680 import DFRobot_BME680",
+	"api":"DFRobot_BME680()  Building objects\n  @board A motherboard constructed using the Board class\n  @get_sensor_data():Get the data, and then if it doesn't return null, print the data as follows (sensor is a constructed object) :\n  sensor.data.temperature Printing temperature\n  sensor.data.pressure Printing pressure\n  sensor.data.humidity Humidity of printing\n  sensor.data.altitudu Print altitude\n  sensor.data.gas_resistance Print the gas resistance value\n"
+},
+
+"MAX17043":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_max17043 import MAX17043",
+	"api":"MAX17043()  Building objects\n  @board A motherboard constructed using the Board class\n  @begin():Initialization  \n  @read_voltage():Reading voltage values\n  @read_percentage():Read the voltage percentage value\n  "
+},
+
+"MCP4725":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_mcp4725 import MCP472",
+	"api":"MCP4725()  Building objects\n  @board A motherboard constructed using the Board class\n  @init():Initialization  \n  @output_Sin():Sine wave analog voltage output\n  @output_triangle():Triangular wave analog voltage output\n  @output_voltage():Calibration with adjustable analog voltage output\n  @output_voltage_EEPROM():The DAC value is stored in the EEPROM\n  "
+},
+
+"BMI160":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_bmi160 import BMI160",
+	"api":"BMI160()  Building objects\n  @board A motherboard constructed using the Board class\n  @begin():Initialize the step count or accelerometer gyroscope  \n  @get_acc_x():Get the acceleration x\n  @get_gyr_x():Get the acceleration y\n  @get_gyr_x():Get the acceleration z\n  @get_gyr_x():Get the gyroscope x\n  @get_gyr_y():Get the gyroscope y\n  @get_gyr_z():Get the gyroscope z\n  @get_step():Returns the value of the step count\n  "
+},
+
+"PANEL":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_rgb_panel import RGBpanel",
+	"api":"RGBpanel()  Building objects\n  @board A motherboard constructed using the Board class\n  @clear():Clear the expression  \n  @display():Show the x expression, the color\n  @scroll():Set scroll to the left\n  @print():Sets the characters to be displayed\n  @pixel():x,y coordinate display, display color\n  @fillScreen():The screen is all xx color\n  "
+},
+
+"DS0469":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ds0469 import DS0469",
+	"api":"DS0469()  Building objects\n  @board A motherboard constructed using the Board class\n  @adjust_aotu():Automatic time adjustment  \n  @adjust_rtc():Set the time, year, month, day, week, hour, minute and second\n  "
+},
+
+"TM1650":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_tm1650 import TM1650",
+	"api":"TM1650()  Building objects\n  @board A motherboard constructed using the Board class\n  @display_string():Four digit tube display string xxxx  \n  @clear():Four digit tube screen clearing\n  @set_dot():The number of decimal points that are lit or extinguished by the four digit digit tube\n  "
+},
+
+"SHT31":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_sht31 import SHT31",
+	"api":"SHT31()  Building objects\n  @board A motherboard constructed using the Board class\n  @temp_c():Gets the temperature value Celsius  \n  @temp_f():Get the temperature value in Fahrenheit\n  @humidity():Humidity acquisition\n  "
+},
+
+"OZONE":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_ozone import Ozone",
+	"api":"Ozone()  Building objects\n  @board A motherboard constructed using the Board class\n  @set_mode():Set mode, active mode or passive mode \n  @read_ozone_data():Reading ozone values\n  "
+},
+
+"ID809":
+{
+	"import":"from pinpong.board import Board\nfrom pinpong.libs.dfrobot_id809 import ID809",
+	"api":"ID809()  Building objects\n  @board A motherboard constructed using the Board class\n  @connected():Check whether the fingerprint module is connected  \n  @get_deviceID():Get module ID  \n  @set_security_level():Set security level\n  @get_security_level():Obtaining the security level\n  @get_baudrate():Get module baud,IIC baud rate can only be 115200\n  @get_self_learn():Get the module self-learning function to know if it is enabled\n  @get_enroll_count():Read the number of registered fingerprints within the module\n  @get_broken_quantity():Obtain the number of fingerprint damage\n  @get_brokenID():Get the first corrupted ID\n  @get_empty_id():Retrieves an unregistered ID number\n  @collection_fingerprint():Collecting fingerprints\n  @ctrl_led():Set the fingerprint light ring color\n  @store_fingerprint():The fingerprint information is saved to an unregistered number\n  @search():The collected fingerprint is compared with the fingerprint with the specified number, and the fingerprint number (1-80) is returned on success, and 0 is returned on failure\n  @del_fingerprint():Delete the ID you want to delete\n  "
+}
+
+}
