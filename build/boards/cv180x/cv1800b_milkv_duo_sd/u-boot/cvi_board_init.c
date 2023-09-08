@@ -5,8 +5,6 @@ int cvi_board_init(void)
 	PINMUX_CONFIG(PAD_MIPIRX1N, XGPIOC_8);  // Camera Reset
 
 	// all default gpio
-	PINMUX_CONFIG(IIC0_SCL, XGPIOA_28);      // Duo Pin 1
-	PINMUX_CONFIG(IIC0_SDA, XGPIOA_29);      // Duo Pin 2
 	PINMUX_CONFIG(SD0_PWR_EN, XGPIOA_14);    // Duo Pin 19
 	PINMUX_CONFIG(SPK_EN, XGPIOA_15);        // Duo Pin 20
 	PINMUX_CONFIG(SPINOR_MISO, XGPIOA_23);   // Duo Pin 21
@@ -20,6 +18,10 @@ int cvi_board_init(void)
 	// ADC pins set to gpio
 	PINMUX_CONFIG(ADC1, XGPIOB_3);           // ADC1
 	PINMUX_CONFIG(USB_VBUS_DET, XGPIOB_6);   // ADC2
+
+	// I2C0
+	PINMUX_CONFIG(IIC0_SCL, IIC0_SCL);
+	PINMUX_CONFIG(IIC0_SDA, IIC0_SDA);
 
 	// I2C1
 	PINMUX_CONFIG(PAD_MIPIRX1P, IIC1_SDA);
