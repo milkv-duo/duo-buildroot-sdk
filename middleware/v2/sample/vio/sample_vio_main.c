@@ -54,6 +54,7 @@ void SAMPLE_VIO_Usage(char *sPrgNm)
 	printf("\t17)VI (IMX307 + PR2020) - online/offline VPSS - VO.\n");
 	printf("\t18)VI (IMX307) - onthefly online to VPSS - VO.\n");
 #endif
+	printf("\t50)VO (OT07007) - lvds colorbar test.\n");
 }
 
 int main(int argc, char *argv[])
@@ -161,6 +162,9 @@ int main(int argc, char *argv[])
 		s32Ret = SAMPLE_IMX307_ONTHEFLY_ONLINE_SC_TEST();
 		break;
 #endif
+	case 50:
+		s32Ret = SAMPLE_VO_LVDS_TEST();
+		break;
 	default:
 		SAMPLE_PRT("the index %d is invaild!\n", s32Index);
 		SAMPLE_VIO_Usage(argv[0]);

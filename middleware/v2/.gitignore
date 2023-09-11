@@ -6,6 +6,8 @@
 *.dwo
 
 lib
+ko
+ko_shrink
 bin
 include
 tags
@@ -35,6 +37,7 @@ sample/osdc/sample_osdc
 sample/scene_auto/sample_scene_auto
 sample/sensor_test/sensor_test
 sample/tp2863_tp2803/sample_test_tp2863_tp2803
+sample/sample_panel/sample_panel
 
 self_test/cvi_test/cvi_test
 self_test/cvi_test/res

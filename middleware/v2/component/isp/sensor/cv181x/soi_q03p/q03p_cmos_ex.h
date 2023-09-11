@@ -28,6 +28,7 @@ enum q03p_linear_regs_e {
 	LINEAR_AGAIN_DATA,
 	LINEAR_VMAX_0_DATA,
 	LINEAR_VMAX_1_DATA,
+	LINEAR_FLIP_MIRROR,
 	LINEAR_REGS_NUM
 };
 
@@ -64,7 +65,6 @@ extern CVI_U16 g_au16Q03P_L2SMode[];
 extern CVI_U8 q03p_i2c_addr;
 extern const CVI_U32 q03p_addr_byte;
 extern const CVI_U32 q03p_data_byte;
-extern void q03p_mirror_flip(VI_PIPE ViPipe, ISP_SNS_MIRRORFLIP_TYPE_E eSnsMirrorFlip);
 extern void q03p_init(VI_PIPE ViPipe);
 extern void q03p_exit(VI_PIPE ViPipe);
 extern void q03p_standby(VI_PIPE ViPipe);

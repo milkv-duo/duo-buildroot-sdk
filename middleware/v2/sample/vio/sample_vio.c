@@ -5218,3 +5218,150 @@ ERR_VPSS_COMBINE:
 	SAMPLE_COMM_SYS_Exit();
 	return s32Ret;
 }
+
+CVI_S32 SAMPLE_VO_LVDS_TEST(CVI_VOID)
+{
+	VB_CONFIG_S	   stVbConf;
+	CVI_U32		   u32BlkSize;
+	CVI_S32		   s32Ret = CVI_SUCCESS;
+	SAMPLE_VO_CONFIG_S stVoConfig;
+	VO_CHN_ATTR_S stChnAttr;
+	RECT_S stDefDispRect  = {0, 0, 1024, 600};
+	SIZE_S stDefImageSize = {1024, 600};
+	SIZE_S stSize = stDefImageSize;
+	VO_DEV VoDev = 0;
+	VO_LAYER VoLayer = VoDev;
+	VO_CHN VoChn = 0;
+
+	const VO_LVDS_ATTR_S lvds_ot07007_cfg = {
+		.mode = VO_LVDS_MODE_VESA,
+		.out_bits = VO_LVDS_OUT_6BIT,
+		.chn_num = 1,
+		.data_big_endian = 0,
+		.lane_id = {VO_LVDS_LANE_0, VO_LVDS_LANE_1, VO_LVDS_LANE_2, VO_LVDS_LANE_CLK, -1},
+		.lane_pn_swap = {false, false, false, false, false},
+		.stSyncInfo = {
+			.u16Hpw = 40,
+			.u16Hbb = 180,
+			.u16Hfb = 100,
+			.u16Hact = 1024,
+			.u16Vpw = 4,
+			.u16Vbb = 20,
+			.u16Vfb = 11,
+			.u16Vact = 600,
+			.bIvs = 0,
+			.bIhs = 0,
+			.bIop = 1,
+			.u16FrameRate = 60
+		},
+		.pixelclock = 51206,
+	};
+
+	system("devmem 0x03001100 32 0x3"); // set pinmux to GPIOB5
+	// set GPIOB5 to high
+	SAMPLE_COMM_GPIO_SetValue(453, 1);
+	// set GPIOE0 to low and GPIOE1 to high
+	system("devmem 0x05021000 32 0x2");
+
+	memset(&stVbConf, 0, sizeof(VB_CONFIG_S));
+	stVbConf.u32MaxPoolCnt = 1;
+
+	u32BlkSize = COMMON_GetPicBufferSize(stSize.u32Width, stSize.u32Height,
+						PIXEL_FORMAT_NV21,
+						DATA_BITWIDTH_8, COMPRESS_MODE_NONE, DEFAULT_ALIGN);
+	stVbConf.astCommPool[0].u32BlkSize	= u32BlkSize;
+	stVbConf.astCommPool[0].u32BlkCnt	= 3;
+	SAMPLE_PRT("common pool[%d] BlkSize %d\n", 0, u32BlkSize);
+
+	s32Ret = SAMPLE_COMM_SYS_Init(&stVbConf);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("system init failed with %#x\n", s32Ret);
+		return s32Ret;
+	}
+
+	stVoConfig.VoDev	 = VoDev;
+	stVoConfig.stVoPubAttr.enIntfType  = VO_INTF_LCD_18BIT;
+	stVoConfig.stVoPubAttr.enIntfSync  = VO_OUTPUT_USER; //
+	stVoConfig.stVoPubAttr.stSyncInfo = lvds_ot07007_cfg.stSyncInfo;
+	stVoConfig.stVoPubAttr.u32BgColor = COLOR_10_RGB_BLUE;
+	stVoConfig.stDispRect	 = stDefDispRect;
+	stVoConfig.stImageSize	 = stDefImageSize;
+	stVoConfig.enPixFormat	 = PIXEL_FORMAT_NV21;
+	stVoConfig.u32DisBufLen  = 3;
+	stVoConfig.enVoMode	 = VO_MODE_1MUX;
+
+	/********************************
+	 * Set and start VO device VoDev#.
+	 ********************************/
+
+	stVoConfig.stVoPubAttr.stLvdsAttr = lvds_ot07007_cfg;
+
+	s32Ret = CVI_VO_SetPubAttr(VoDev, &stVoConfig.stVoPubAttr);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_SETPUBATTR;
+	}
+
+	s32Ret = CVI_VO_Enable(VoDev);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_ENABLE;
+	}
+
+	/******************************
+	 * Set and start layer VoDev#.
+	 ********************************/
+	VO_VIDEO_LAYER_ATTR_S stLayerAttr = { 0 };
+
+	stLayerAttr.stDispRect.s32X = 0;
+	stLayerAttr.stDispRect.s32Y = 0;
+	stLayerAttr.stDispRect = stDefDispRect;
+	stLayerAttr.enPixFormat = stVoConfig.enPixFormat;
+
+	stLayerAttr.stImageSize = stDefImageSize;
+
+	if (stVoConfig.u32DisBufLen) {
+		s32Ret = CVI_VO_SetDisplayBufLen(VoLayer, stVoConfig.u32DisBufLen);
+		if (s32Ret != CVI_SUCCESS) {
+			SAMPLE_PRT("CVI_VO_SetDisplayBufLen failed with %#x!\n", s32Ret);
+			goto ERR_VO_ENABLE;
+		}
+	}
+
+	s32Ret = CVI_VO_SetVideoLayerAttr(VoLayer, &stLayerAttr);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_ENABLE;
+	}
+
+	s32Ret = CVI_VO_EnableVideoLayer(VoLayer);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_ENABLE;
+	}
+
+	stChnAttr.stRect = stDefDispRect;
+	s32Ret = CVI_VO_SetChnAttr(VoLayer, VoChn, &stChnAttr);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_ENABLE_VIDEOLAYER;
+	}
+
+	s32Ret = CVI_VO_EnableChn(VoLayer, VoChn);
+	if (s32Ret != CVI_SUCCESS) {
+		SAMPLE_PRT("failed with %#x!\n", s32Ret);
+		goto ERR_VO_ENABLE_VIDEOLAYER;
+	}
+
+	system("devmem 0x0a088094 32 0x0701000a"); //colorbar
+	PAUSE();
+
+	CVI_VO_DisableChn(VoLayer, VoChn);
+ERR_VO_ENABLE_VIDEOLAYER:
+	CVI_VO_DisableVideoLayer(VoLayer);
+ERR_VO_ENABLE:
+	CVI_VO_Disable(VoDev);
+ERR_VO_SETPUBATTR:
+	SAMPLE_COMM_SYS_Exit();
+	return s32Ret;
+}

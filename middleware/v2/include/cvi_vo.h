@@ -262,6 +262,16 @@ CVI_S32 CVI_VO_ShowChn(VO_LAYER VoLayer, VO_CHN VoChn);
 CVI_S32 CVI_VO_HideChn(VO_LAYER VoLayer, VO_CHN VoChn);
 
 /**
+ * @brief Show vo Pattern.
+ *
+ * @param VoDev(In), VoDev ID.
+ * @param PatternId(In), PatternId ID.
+ *
+ * @return CVI_S32 Return CVI_SUCCESS if succeed.
+ */
+CVI_S32 CVI_VO_ShowPattern(VO_DEV VoDev, enum VO_PATTERN_MODE PatternId);
+
+/**
  * @brief Send frame to vo channel.
  *
  * @param VoLayer(In), Videolayer ID.

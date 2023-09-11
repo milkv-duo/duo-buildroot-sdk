@@ -5,12 +5,14 @@
 #define LANE_MAX_NUM   5
 #endif
 
-#define MAX_BT_PINS 20
+#define MAX_VO_PINS 32
+#define MAX_MCU_INSTR 256
 
 enum cvi_disp_intf {
 	CVI_VIP_DISP_INTF_DSI = 0,
 	CVI_VIP_DISP_INTF_BT,
 	CVI_VIP_DISP_INTF_I80,
+	CVI_VIP_DISP_INTF_HW_MCU,
 	CVI_VIP_DISP_INTF_LVDS,
 	CVI_VIP_DISP_INTF_MAX,
 };
@@ -56,7 +58,7 @@ struct cvi_lvds_intf_cfg {
 	__s8 backlight_avtive;
 };
 
-enum sclr_top_vo_mux {
+enum sclr_top_vo_bt_mux {
 	SCLR_VO_MUX_BT_VS = 0,
 	SCLR_VO_MUX_BT_HS,
 	SCLR_VO_MUX_BT_HDE,
@@ -78,7 +80,23 @@ enum sclr_top_vo_mux {
 	SCLR_VO_MUX_BT_DATA15,
 	SCLR_VO_MUX_TG_HS_TILE = 30,
 	SCLR_VO_MUX_TG_VS_TILE,
-	SCLR_VO_MUX_MAX,
+	SCLR_VO_BT_MUX_MAX,
+};
+
+enum sclr_top_vo_mcu_mux {
+	SCLR_VO_MUX_MCU_CS = 0,
+	SCLR_VO_MUX_MCU_RS,
+	SCLR_VO_MUX_MCU_WR,
+	SCLR_VO_MUX_MCU_RD,
+	SCLR_VO_MUX_MCU_DATA0,
+	SCLR_VO_MUX_MCU_DATA1,
+	SCLR_VO_MUX_MCU_DATA2,
+	SCLR_VO_MUX_MCU_DATA3,
+	SCLR_VO_MUX_MCU_DATA4,
+	SCLR_VO_MUX_MCU_DATA5,
+	SCLR_VO_MUX_MCU_DATA6,
+	SCLR_VO_MUX_MCU_DATA7,
+	SCLR_VO_MCU_MUX_MAX,
 };
 
 enum sclr_top_vo_sel {
@@ -151,12 +169,12 @@ enum sclr_top_vo_d_sel {
 
 struct vo_d_remap {
 	enum sclr_top_vo_d_sel sel;
-	enum sclr_top_vo_mux mux;
+	__u32 mux;
 };
 
-struct bt_pins {
+struct vo_pins {
 	unsigned char pin_num;
-	struct vo_d_remap d_pins[MAX_BT_PINS];
+	struct vo_d_remap d_pins[MAX_VO_PINS];
 };
 
 enum BT_MODE {
@@ -166,22 +184,43 @@ enum BT_MODE {
 	BT_MODE_MAX,
 };
 
-enum BT_CLK_MODE {
-	BT_CLK_MODE_27M = 0,
-	BT_CLK_MODE_36M,
-	BT_CLK_MODE_37P125M,
-	BT_CLK_MODE_72M,
-	BT_CLK_MODE_74P25M,
-	BT_CLK_MODE_148P5M,
-};
-
 /*
  * @pixelclock: pixel clock in kHz
  */
 struct cvi_bt_intf_cfg {
-	__u8 bt_clk;
+	__u32 pixelclock;
 	enum BT_MODE mode;
-	struct bt_pins pins;
+	struct vo_pins pins;
+};
+
+struct cvi_i80_instr {
+	__u8	delay;
+	__u8  data_type;
+	__u8	data;
+};
+
+enum MCU_MODE {
+	MCU_MODE_RGB565 = 0,
+	MCU_MODE_RGB888,
+	MCU_MODE_MAX,
+};
+
+struct MCU_INSTRS {
+	unsigned char instr_num;
+	struct cvi_i80_instr instr_cmd[MAX_MCU_INSTR];
+};
+
+struct cvi_hw_mcu_intf_cfg {
+	enum MCU_MODE mode;
+	struct vo_pins pins;
+	__u32 lcd_power_gpio_num;
+	__s8 lcd_power_avtive;
+	__u32 backlight_gpio_num;
+	__s8 backlight_avtive;
+	__u32 reset_gpio_num;
+	__s8 reset_avtive;
+	struct MCU_INSTRS instrs;
+	__u32 pixelclock;
 };
 
 struct cvi_disp_intf_cfg {
@@ -190,6 +229,7 @@ struct cvi_disp_intf_cfg {
 		struct cvi_dsi_intf_cfg dsi_cfg;
 		struct cvi_lvds_intf_cfg lvds_cfg;
 		struct cvi_bt_intf_cfg bt_cfg;
+		struct cvi_hw_mcu_intf_cfg mcu_cfg;
 	};
 };
 

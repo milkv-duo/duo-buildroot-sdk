@@ -64,10 +64,11 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
 #define Q03P_FULL_LINES_MAX  (0xFFFF)
 
 /*****Q03P Register Address*****/
-#define Q03P_SHS1_ADDR		0x01
-#define Q03P_GAIN_ADDR		0x00
-#define Q03P_VMAX_ADDR		0x22
-#define Q03P_TABLE_END		0xff
+#define Q03P_SHS1_ADDR			0x01
+#define Q03P_GAIN_ADDR			0x00
+#define Q03P_VMAX_ADDR			0x22
+#define Q03P_FLIP_MIRROR_ADDR	0x12
+#define Q03P_TABLE_END			0xff
 
 #define Q03P_RES_IS_1296P(w, h)      ((w) <= 2304 && (h) <= 1296)
 
@@ -500,6 +501,8 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 			pstI2c_data[LINEAR_VMAX_1_DATA].u32RegAddr = Q03P_VMAX_ADDR + 1;
 			pstI2c_data[LINEAR_VMAX_1_DATA].u8DelayFrmNum = 2;
 
+			pstI2c_data[LINEAR_FLIP_MIRROR].u32RegAddr = Q03P_FLIP_MIRROR_ADDR;
+
 			break;
 		default:
 			CVI_TRACE_SNS(CVI_DBG_ERR, "Not support WDR: %d\n", pstSnsState->enWDRMode);
@@ -529,6 +532,7 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 	memcpy(pstSnsSyncInfo, &pstSnsState->astSyncInfo[0], sizeof(ISP_SNS_SYNC_INFO_S));
 	memcpy(&pstSnsState->astSyncInfo[1], &pstSnsState->astSyncInfo[0], sizeof(ISP_SNS_SYNC_INFO_S));
 	pstSnsState->au32FL[1] = pstSnsState->au32FL[0];
+	pstCfg0->snsCfg.astI2cData[LINEAR_FLIP_MIRROR].bDropFrm = CVI_FALSE;
 
 	return CVI_SUCCESS;
 }
@@ -579,12 +583,38 @@ static CVI_S32 cmos_set_image_mode(VI_PIPE ViPipe, ISP_CMOS_SENSOR_IMAGE_MODE_S 
 
 static CVI_VOID sensor_mirror_flip(VI_PIPE ViPipe, ISP_SNS_MIRRORFLIP_TYPE_E eSnsMirrorFlip)
 {
+	CVI_U8 value = q03p_read_register(ViPipe, Q03P_FLIP_MIRROR_ADDR) & ~0x30;
+
 	ISP_SNS_STATE_S *pstSnsState = CVI_NULL;
+	ISP_SNS_REGS_INFO_S *pstSnsRegsInfo = CVI_NULL;
 
 	Q03P_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER_VOID(pstSnsState);
+
+	pstSnsRegsInfo = &pstSnsState->astSyncInfo[0].snsCfg;
+
+	/* Apply the setting on the fly  */
 	if (pstSnsState->bInit == CVI_TRUE && g_aeQ03P_MirrorFip[ViPipe] != eSnsMirrorFlip) {
-		q03p_mirror_flip(ViPipe, eSnsMirrorFlip);
+		switch (eSnsMirrorFlip) {
+		case ISP_SNS_NORMAL:
+			value |= 0x00;
+			break;
+		case ISP_SNS_MIRROR:
+			value |= 0x20;
+			break;
+		case ISP_SNS_FLIP:
+			value |= 0x10;
+			break;
+		case ISP_SNS_MIRROR_FLIP:
+			value |= 0x30;
+			break;
+		default:
+			return;
+		}
+
+		pstSnsRegsInfo->astI2cData[LINEAR_FLIP_MIRROR].u32Data = value;
+		pstSnsRegsInfo->astI2cData[LINEAR_FLIP_MIRROR].bDropFrm = 1;
+		pstSnsRegsInfo->astI2cData[LINEAR_FLIP_MIRROR].u8DropFrmNum = 2;
 		g_aeQ03P_MirrorFip[ViPipe] = eSnsMirrorFlip;
 	}
 }

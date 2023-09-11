@@ -19,9 +19,10 @@
 
 #define CV4001_CHIP_ID_ADDR_H	0x3003
 #define CV4001_CHIP_ID_ADDR_L	0x3002
-#define CV4001_CHIP_ID		0x4001
+#define CV4001_CHIP_ID			0x4001
 
 static void cv4001_linear_1440p25_init(VI_PIPE ViPipe);
+static void cv4001_wdr_1440p15_2to1_init(VI_PIPE ViPipe);
 
 CVI_U8 cv4001_i2c_addr = 0x35;
 const CVI_U32 cv4001_addr_byte = 2;
@@ -198,9 +199,23 @@ int cv4001_probe(VI_PIPE ViPipe)
 
 void cv4001_init(VI_PIPE ViPipe)
 {
+	WDR_MODE_E        enWDRMode;
+	CVI_U8            u8ImgMode;
+
+	enWDRMode   = g_pastCV4001[ViPipe]->enWDRMode;
+	u8ImgMode   = g_pastCV4001[ViPipe]->u8ImgMode;
+
 	cv4001_i2c_init(ViPipe);
 
-	cv4001_linear_1440p25_init(ViPipe);
+	if (enWDRMode == WDR_MODE_2To1_LINE) {
+		if (u8ImgMode == CV4001_MODE_2560X1440P15_WDR) {
+			cv4001_wdr_1440p15_2to1_init(ViPipe);
+		}
+	} else {
+		if (u8ImgMode == CV4001_MODE_2560X1440P25) {
+			cv4001_linear_1440p25_init(ViPipe);
+		}
+	}
 
 	g_pastCV4001[ViPipe]->bInit = CVI_TRUE;
 }
@@ -292,3 +307,99 @@ static void cv4001_linear_1440p25_init(VI_PIPE ViPipe)
 
 	printf("ViPipe:%d,===CV4001 1440P 25fps 12bit LINEAR Init OK!===\n", ViPipe);
 }
+
+static void cv4001_wdr_1440p15_2to1_init(VI_PIPE ViPipe)
+{
+	cv4001_write_register(ViPipe, 0x3028, 0x08);
+	cv4001_write_register(ViPipe, 0x3029, 0x17);
+	cv4001_write_register(ViPipe, 0x302C, 0xF8);
+	cv4001_write_register(ViPipe, 0x302D, 0x04);
+	cv4001_write_register(ViPipe, 0x3908, 0x4B);
+	cv4001_write_register(ViPipe, 0x3304, 0x01);
+	cv4001_write_register(ViPipe, 0x3305, 0x02);
+	cv4001_write_register(ViPipe, 0x3306, 0x01);
+	cv4001_write_register(ViPipe, 0x343E, 0x00);
+	cv4001_write_register(ViPipe, 0x3401, 0x03);
+	cv4001_write_register(ViPipe, 0x3035, 0x01);
+	cv4001_write_register(ViPipe, 0x3036, 0x01);
+	cv4001_write_register(ViPipe, 0x3020, 0x04);
+	cv4001_write_register(ViPipe, 0x3048, 0x44);
+	cv4001_write_register(ViPipe, 0x3049, 0x00);
+	cv4001_write_register(ViPipe, 0x304A, 0x00);
+	cv4001_write_register(ViPipe, 0x304B, 0x0A);
+	cv4001_write_register(ViPipe, 0x3054, 0x2C);
+	cv4001_write_register(ViPipe, 0x3056, 0xA8);
+	cv4001_write_register(ViPipe, 0x3057, 0x05);
+	cv4001_write_register(ViPipe, 0x3030, 0x05);
+	cv4001_write_register(ViPipe, 0x3060, 0x2C);
+	cv4001_write_register(ViPipe, 0x3064, 0x12);
+	cv4001_write_register(ViPipe, 0x3070, 0x1A);//62
+	cv4001_write_register(ViPipe, 0x3071, 0x00);
+	cv4001_write_register(ViPipe, 0x343C, 0x01);
+	cv4001_write_register(ViPipe, 0x3930, 0x00);
+	cv4001_write_register(ViPipe, 0x3040, 0x01);
+	cv4001_write_register(ViPipe, 0x3044, 0x04);
+	cv4001_write_register(ViPipe, 0x3046, 0xA0);
+	cv4001_write_register(ViPipe, 0x3047, 0x05);
+	cv4001_write_register(ViPipe, 0x362A, 0x00);
+	cv4001_write_register(ViPipe, 0x3625, 0x01);
+	cv4001_write_register(ViPipe, 0x35A4, 0x09);
+	cv4001_write_register(ViPipe, 0x35A8, 0x09);
+	cv4001_write_register(ViPipe, 0x35AE, 0x07);
+	cv4001_write_register(ViPipe, 0x35AF, 0x07);
+	cv4001_write_register(ViPipe, 0x34A2, 0x2C);
+	cv4001_write_register(ViPipe, 0x3416, 0x0F);
+	cv4001_write_register(ViPipe, 0x3418, 0x9F);
+	cv4001_write_register(ViPipe, 0x341A, 0x57);
+	cv4001_write_register(ViPipe, 0x341C, 0x57);
+	cv4001_write_register(ViPipe, 0x341E, 0x6F);
+	cv4001_write_register(ViPipe, 0x341F, 0x01);
+	cv4001_write_register(ViPipe, 0x3420, 0x57);
+	cv4001_write_register(ViPipe, 0x3422, 0x9F);
+	cv4001_write_register(ViPipe, 0x3424, 0x57);
+	cv4001_write_register(ViPipe, 0x3426, 0x8F);
+	cv4001_write_register(ViPipe, 0x3428, 0x47);
+	cv4001_write_register(ViPipe, 0x3348, 0x00);
+	cv4001_write_register(ViPipe, 0x3000, 0x00);
+	cv4001_write_register(ViPipe, 0x3220, 0x03);
+	cv4001_write_register(ViPipe, 0x3347, 0x01);
+	cv4001_write_register(ViPipe, 0x3348, 0x00);
+	cv4001_write_register(ViPipe, 0x3804, 0x0F);
+	cv4001_write_register(ViPipe, 0x3576, 0x06);
+	cv4001_write_register(ViPipe, 0x350F, 0x18);
+	cv4001_write_register(ViPipe, 0x3513, 0x07);
+	cv4001_write_register(ViPipe, 0x3517, 0x07);
+	cv4001_write_register(ViPipe, 0x351A, 0x05);
+	cv4001_write_register(ViPipe, 0x351E, 0x0B);
+	cv4001_write_register(ViPipe, 0x357A, 0x0B);
+	cv4001_write_register(ViPipe, 0x3244, 0x08);
+	cv4001_write_register(ViPipe, 0x3270, 0x60);
+	cv4001_write_register(ViPipe, 0x3271, 0x00);
+	cv4001_write_register(ViPipe, 0x3272, 0x00);
+	cv4001_write_register(ViPipe, 0x3890, 0x01);
+	cv4001_write_register(ViPipe, 0x3894, 0x05);
+	cv4001_write_register(ViPipe, 0x3690, 0x00);
+	cv4001_write_register(ViPipe, 0x3898, 0x20);
+	cv4001_write_register(ViPipe, 0x3899, 0x20);
+	cv4001_write_register(ViPipe, 0x389a, 0x20);
+	cv4001_write_register(ViPipe, 0x389b, 0x20);
+	cv4001_write_register(ViPipe, 0x389c, 0x20);
+	cv4001_write_register(ViPipe, 0x389d, 0x15);
+	cv4001_write_register(ViPipe, 0x389e, 0x05);
+	cv4001_write_register(ViPipe, 0x3583, 0x2f);
+	cv4001_write_register(ViPipe, 0x3b75, 0x00);
+	cv4001_write_register(ViPipe, 0x3b5E, 0x01);
+	cv4001_write_register(ViPipe, 0x3a10, 0x06);
+	cv4001_write_register(ViPipe, 0x3a11, 0x06);
+	cv4001_write_register(ViPipe, 0x316C, 0x64);
+	cv4001_write_register(ViPipe, 0x3162, 0x01);
+	cv4001_write_register(ViPipe, 0x3180, 0x00);
+	cv4001_write_register(ViPipe, 0x3178, 0x40);
+	cv4001_write_register(ViPipe, 0x3179, 0x00);
+
+	cv4001_default_reg_init(ViPipe);
+	delay_ms(100);
+
+	printf("ViPipe:%d,===CV4001 1440P 15fps 12bit WDR2TO1 Init OK!===\n", ViPipe);
+}
+

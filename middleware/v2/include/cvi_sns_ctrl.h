@@ -133,6 +133,7 @@ extern ISP_SNS_OBJ_S stSnsGc4023_Obj;
 extern ISP_SNS_OBJ_S stSnsGc4653_Obj;
 extern ISP_SNS_OBJ_S stSnsGc4653_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsMIS2008_Obj;
+extern ISP_SNS_OBJ_S stSnsMIS2008_1L_Obj;
 extern ISP_SNS_OBJ_S stSnsN5_Obj;
 extern ISP_SNS_OBJ_S stSnsN6_Obj;
 extern ISP_SNS_OBJ_S stSnsOs02d10_Obj;
