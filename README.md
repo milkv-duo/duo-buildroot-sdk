@@ -1,89 +1,89 @@
 
 
-简体中文 | [English](./README-en.md)
+English | [简体中文](./README-zh.md)
 
 <br>
 
-# 项目简介
-- Milk-V Duo是一个基于CV1800B芯片的超紧凑嵌入式开发平台。它可以运行Linux和RTOS，为专业人士、工业ODM厂商、AIoT爱好者、DIY爱好者和创作者提供了一个可靠、低成本和高性能的平台。
+# Project Introduction
+- Milk-V Duo is an ultra-compact embedded development platform based on the CV1800B chip. It can run Linux and RTOS, providing a reliable, low-cost, and high-performance platform for professionals, industrial ODMs, AIoT enthusiasts, DIY hobbyists, and creators.
 
-## 硬件参数
-- 处理器: CVITEK CV1800B (C906@1Ghz + C906@700MHz)
-- 内存: 64MB
-- 网口: 10/100Mbps 以太网 (需外接扩展板)
+## Hardware
+- CPU: CVITEK CV1800B (C906@1Ghz + C906@700MHz)
+- Dual RV64 Core up to 1GHz
+- 64MB RAM
+- Provides 10/100Mbps Ethernet via optional add-on board
 
 <br>
 
-# SDK目录结构
+# SDK Directory Structure
 ```
-├── build               // 编译目录，存放编译脚本以及各board差异化配置
-├── build_milkv.sh      // Milk-V Duo 一键编译脚本
-├── buildroot-2021.05   // buildroot开源工具
-├── freertos            // freertos系统
-├── fsbl                // fsbl启动固件，prebuilt形式存在
-├── install             // 执行一次完整编译后，临时存放各image路径
-├── isp_tuning          // 图像效果调试参数存放路径
-├── linux_5.10          // 开源linux内核
-├── middleware          // 自研多媒体框架，包含so与ko
-├── milkv               // 存放 Milk-V Duo 相关配置及脚本文件的目录
-├── opensbi             // 开源opensbi库
-├── out                 // Milk-V Duo 最终生成的SD卡烧录镜像所在目录
-├── ramdisk             // 存放最小文件系统的prebuilt目录
-└── u-boot-2021.10      // 开源uboot代码
+├── build               // compilation scripts and board configs
+├── build_milkv.sh      // one-click compilation script
+├── buildroot-2021.05   // buildroot source code
+├── freertos            // freertos system
+├── fsbl                // fsbl firmware in prebuilt form
+├── install             // temporary images stored here
+├── isp_tuning          // camera effect parameters
+├── linux_5.10          // linux kernel
+├── middleware          // self-developed multimedia framework
+├── milkv               // configuration files for milkv
+├── opensbi             // opensbi library
+├── out                 // final image for SD card
+├── ramdisk             // prebuilt ramdisk
+└── u-boot-2021.10      // u-boot source code
 ```
 
 <br>
 
-# 快速开始
+# Quick Start
 
-## 准备编译环境
-- 使用本地的Ubuntu系统，推荐 `Ubuntu 20.04 LTS`
-  <br>
-  (也可以使用虚拟机中的Ubuntu系统、Windows中WSL安装的Ubuntu、基于Docker的Ubuntu系统)
-- 安装串口工具： `mobarXterm` 或者 `Xshell` 或者其他
+## Prepare the compilation environment
+- Using a local Ubuntu system, `Ubuntu 20.04 LTS` is recommended  
+  (You can also use Ubuntu installed in a virtual machine, Ubuntu installed through WSL on Windows, or Ubuntu-based systems using Docker)
+- Install a serial port tool: `mobaXterm` or `Xshell` or others
 
-### Ubuntu 20.04 LTS 下需要安装的工具
-安装编译依赖的工具:
+### Tools to be installed on Ubuntu 20.04 LTS
+Install the tools that compile dependencies:
 ```
 sudo apt install pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tclsh ssh-client android-sdk-ext4-utils
 ```
-注意：`cmake` 版本最低要求 `3.16.5`
+Note：`cmake` minimum version requirement is `3.16.5`
 
-查看系统中 `cmake` 的版本号
+Check the version of `cmake` in the system
 ```
 cmake --version
 ```
-当前`Ubuntu 20.04`中用apt安装的cmake版本号为
+The version of `cmake` installed using apt in the current `Ubuntu 20.04` is
 ```
 cmake version 3.16.3
 ```
-不满足此SDK最低要求，需要手动安装目前最新的`3.26.4`版本
+The minimum requirement of this SDK is not met. Manual installation of the latest version `3.26.4` is needed
 ```
 wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.sh
 chmod +x cmake-3.26.4-linux-x86_64.sh
 sudo sh cmake-3.26.4-linux-x86_64.sh --skip-license --prefix=/usr/local/
 ```
-手动安装的`cmake`在`/usr/local/bin`中，此时用`cmake --version`命令查看其版本号, 应为
+When manually installed, `cmake` is located in `/usr/local/bin`. To check its version, use the command `cmake --version`, which should display
 ```
 cmake version 3.26.4
 ```
 
-### Ubuntu 22.04 LTS 下需要安装的工具
+### Tools to be installed on Ubuntu 20.04 LTS
 
-安装编译依赖的工具:
+Install the tools that compile dependencies:
 ```
 sudo apt install pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
 
-另外，SDK中的mkimage命令依赖的libssl1.1，在Ubuntu22.04中已不存在，需要手动安装，以下两种方法都可以
+Additionally, the mkimage command in the SDK relies on `libssl1.1`, which is no longer available in Ubuntu 22.04. It needs to be manually installed. The following two methods are both applicable:
 
-1. 补源安装
+1. Installation with additional repositories
    ```
    echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
    sudo apt update
    sudo apt install libssl1.1
    ```
-2. 手动下载deb包安装
+2. Manual download and installation of the deb package
    ```
    wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
    sudo dpkg -i libssl1.1_1.1.1-1ubuntu2.1~18.04.23_amd64.deb
@@ -91,22 +91,22 @@ sudo apt install pkg-config build-essential ninja-build automake autoconf libtoo
 
 <br>
 
-## 获取SDK
+## Get SDK source code
 ```
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git
 ```
 
-## 一键编译
-- 执行一键编译脚本`build_milkv.sh`
+## One-click compilation
+- Execute the one-click compilation script `build_milkv.sh`
 ```
 cd duo-buildroot-sdk/
 ./build_milkv.sh
 ```
-- 编译成功后可以在`out`目录下看到生成的SD卡烧录镜像`milkv-duo-XXX.img`
+- After a successful compilation, you can find the generated SD card burning image `milkv-duo-XXX.img` in the `out` directory
 
-*注: 第一次编译会自动下载所需的工具链，大小为840M左右，下载完会自动解压到SDK目录下的`host-tools`目录，下次编译时检测到已存在`host-tools`目录，就不会再次下载了*
+*Note: The first compilation will automatically download the required toolchain, which is approximately 840MB in size. Once downloaded, it will be automatically extracted to the `host-tools` directory in the SDK directory. For subsequent compilations, if the `host-tools` directory is detected, the download will not be performed again*
 
-如有需要分步编译，可依次输入如下命令
+If you need to perform step-by-step compilation, you can enter the following commands sequentially
 ```
 export MILKV_BOARD=milkv-duo
 source milkv/boardconfig-milkv-duo.sh
@@ -117,117 +117,121 @@ clean_all
 build_all
 pack_sd_image
 ```
-生成的固件位置: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`
+Location of the generated image: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`
 
-## SD卡烧录
+## SD card burning
 
-> 注意: 将镜像写入TF卡会擦除卡中原有数据，记得在烧录前备份重要的数据!!!
-- Window下使用`balenaEtcher`或者`Rufus`或者`Win32 Disk Imager`等工具将生成的镜像写入TF卡中
-- Linux下使用`dd`命令将生成的镜像写入TF卡中，**请务必仔细确认`of`设备`/dev/sdX`为要烧录的TF卡**
+> Note: Writing the image to the microSD card will erase the existing data on the card. Remember to back up important data before burning!!!
+- To write the generated image to a microSD card on Windows, you can use tools like `balenaEtcher`, `Rufus`, or `Win32 Disk Imager`
+- To write the generated image to a microSD card on Linux, use the `dd` command. **Please make sure to carefully confirm that the `of` device `/dev/sdX` corresponds to the microSD card you want to burn**
   ```
   sudo dd if=milkv-duo-XXX.img of=/dev/sdX
   ```
 
-## 开机
-- 将烧录好镜像的TF卡插入 Milk-V Duo 的TF卡槽中
-- 接好串口线(可选)
-- 将平台上电，Duo会正常开机进入系统
-- 如有接串口线，在串口工具中可以看到开机日志，进系统后可通过串口登入终端，执行Linux下的相关命令
+## Power ON
+- Insert the microSD card into the microSD card slot of the Milk-V Duo
+- Connect the serial cable (optional)
+- Power on, the Duo will boot up and enter the system normally
+- If a serial cable is connected, you can view the boot logs in the serial console. After entering the system, you can use the serial console to log in to the terminal and execute relevant Linux commands
 
-### 登陆到Duo终端的方法
-- 通过串口线
-- 通过USB网卡(RNDIS)方式
-- 通过以太网接口(需要扩展板支持)
+### The method to log in to the Duo terminal
+- Using a serial cable
+- Using a USB network (RNDIS)
+- Using the Ethernet interface (requires the IO-Board)
 
-登陆Duo终端的用户名和密码分别为
+The username and password for logging into the Duo terminal are as follows:
 ```
 root
 milkv
 ```
 
-### 禁用LED闪烁
-上电后LED会自动闪烁，这个是通过开机脚本实现的，如果需要禁用LED闪烁功能，在Duo的终端中执行:
+### To disable LED blinking
+If you want to disable the LED blinking feature on the Duo, you can execute the following command in the Duo terminal:
 ```
 mv /mnt/system/blink.sh /mnt/system/blink.sh_backup && sync
 ```
-也就是将LED闪烁脚本改名，重启Duo后，LED就不闪了
-<br>
-如果需要恢复LED闪烁，再将其名字改回来，重启即可
+This means renaming the LED blinking script, and after restarting the Duo, the LED will no longer blink  
+
+If you want to restore LED blinking, rename it back to its original name and restart the device
 ```
 mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
 ```
 
-### 使用 IO Board 底板
+### Using the IO-Board baseboard
 
-注意，使用 IO Board 底板时，USB网卡(RNDIS)不可用，如需使用网络功能，请使用底板上的以太网接口
+Note that when using the IO-Board, the USB network (RNDIS) is not available, Please use the Ethernet interface on the IO-Board
 
-使用底板上的4个USB口，需要修改一下配置，将默认固件中的`usb-rndis`功能修改为`usb-host`
+If you need to assign a fixed MAC address to the Ethernet port of the IO-Board, please execute the following command(**Replace the MAC address in the command with the MAC address you want to set, and please note that MAC addresses of different devices within the same network segment must not be duplicated**)
+```
+echo "pre-up ifconfig eth0 hw ether 78:01:B3:FC:E8:55" >> /etc/network/interfaces
+```
+then reboot the board  
+
+Enable the 4 USB ports on the IO-Board:
 ```
 rm /mnt/system/usb.sh
 ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
 sync
 ```
-修改完，重启或重新上电即可生效
+then reboot the board
 
-比如底板USB口接入U盘后，可以用`ls /dev/sd*`查看是否有检测到设备
+For example, if a USB flash drive is connected to the USB port on the IO-Board, you can use the command `ls /dev/sd*` to check if the device is detected
 
-挂载到系统中查看U盘中的内容(以/dev/sda1为例):
+To mount the USB drive and view its contents in the system (taking /dev/sda1 as an example):
 ```
 mkdir /mnt/udisk
 mount /dev/sda1 /mnt/udisk
 ```
-查看`/mnt/udisk`目录中的内容是否符合预期
+Verify if the contents in the `/mnt/udisk` directory match the expectations
 ```
 ls /mnt/udisk
 ```
 
-卸载U盘的命令
+The command to unmount a USB flash drive
 ```
 umount /mnt/udisk
 ```
 
-不使用底板时，恢复USB网卡(RNDIS)的方法
+To restore the functionality of the USB network (RNDIS) when not using the IO-Board, you can follow these steps
 ```
 rm /mnt/system/usb.sh
 ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
 sync
 ```
-修改完，需要重启或重新上电生效
+then reboot the board
 
 <br>
 
-# 常见问题解答
+# FAQs
 
-1. 为什么只显示单核?
+1. Why is only a single core being displayed?
 
-   CV1800B芯片采用双核设计，当前Linux系统运行在其中的一个核上，另外一个核用来运行实时系统，这个核的SDK尚未公布，待后续更新
+   The CV1800B chip adopts a dual-core design. Currently, the Linux system runs on one of the cores, while the other core is used for running a real-time system. The SDK for this core has not been released yet and will be updated in the future
 
-2. 为什么查看RAM只显示28M?
-
-   因为有一部分RAM被分配绐了 [ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)，是在使用摄像头跑算法时需要占用的内存。如果不使用摄像头，您可以修改这个 [ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43) 的值为`0`然后重新编译生成固件
+2. Why does it only show 28M when viewing the RAM?
+ 
+   Because a portion of the RAM is allocated to [ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15), which is the memory used when running algorithms with the camera. If you're not using the camera, you can modify the value of this [ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43) to 0 and then recompile to generate the image
 
 <br>
 
-## 芯片原厂一些资料的链接
+## Links to some documentation from the chip manufacturer
 
-- CV181x/CV180x MMF SDK 开发文档汇总
+- CV181x/CV180x MMF SDK Development Documents
   <br>
   [https://developer.sophgo.com/thread/471.html](https://developer.sophgo.com/thread/471.html)
 
-- CV系列芯片 TPU SDK 开发资料汇总
+- CV Series Chip TPU SDK Development Documentation Compilation
   <br>
   [https://developer.sophgo.com/thread/473.html](https://developer.sophgo.com/thread/473.html)
 
 
 <br>
 
-# 关于 Milk-V
+# About Milk-V
 
-- [官方网站](https://milkv.io/)
+- [Official Website](https://milkv.io/)
 
 <br>
 
-# 技术论坛
+# FORUM
 - [MilkV Community](https://community.milkv.io/)
-
-
