@@ -114,22 +114,30 @@ int ilog2(int x)
 
 void _cal_pll_reg(u32 clkkHz, u32 VCOR_10000, u32 *reg_txpll, u32 *reg_set, u32 factor)
 {
-	u8 gain = 1 << ilog2(max((u32)1, (u32)(25000000UL / VCOR_10000)));
+	u8 gain = 1 << (u8)ilog2(max((u32)1, (u32)(25000000UL / VCOR_10000)));
 	u32 VCOC_1000 = VCOR_10000 * gain / 10;
 	u8 reg_disp_div_sel = VCOC_1000 / clkkHz;
-	u8 dig_dig = ilog2(gain);
+	u8 dig_dig = (u8)ilog2(gain);
 	u8 reg_divout_sel = min((u8)3, dig_dig);
 	u8 reg_div_sel = dig_dig - reg_divout_sel;
-	u8 loop_gain = (((VCOC_1000 / 266000) + 7) >> 3) << 3;
+	u8 loop_gain = (((VCOC_1000 / 133000) + 7) >> 3) << 3;
+	bool bt_div = reg_disp_div_sel > 0x7f;
+	u32 loop_c = 8 * ((VCOC_1000 / 133 / 8) + 500) / 1000;
+	u8 div_loop = loop_c > 32 ? 3 : loop_c / 8;
+
 	*reg_set = ((u64)(factor * loop_gain) << 26) / VCOC_1000;
 
-	*reg_txpll = (reg_div_sel << 10) | (reg_divout_sel << 8) | reg_disp_div_sel;
+	_reg_write_mask(reg_base + REG_DSI_PHY_TXPLL, 0x300000, div_loop << 20);
 
+	*reg_txpll = (reg_div_sel << 10) | (reg_divout_sel << 8) | reg_disp_div_sel;
 #if 0
-	pr_info("clkkHz(%d) VCORx10000(%d) gain(%d)\n", clkkHz, VCOR_10000, gain);
-	pr_info("VCOCx1000(%d) dig_dig(%d) loop_gain(%d)\n", VCOC_1000, dig_dig, loop_gain);
-	pr_info("regs: disp_div_sel(%d), divout_sel(%d), set(%#x)\n", reg_disp_div_sel, reg_divout_sel, *reg_set);
+	pr_info("clkkHz(%d) VCOR_10000(%d) gain(%d)\n", clkkHz, VCOR_10000, gain);
+	pr_info("VCOC_1000(%d) dig_dig(%d) loop_gain(%d)\n", VCOC_1000, dig_dig, loop_gain);
+	pr_info("loop_c(%d) div_loop(%d) loop_gain1(%d)\n", loop_c, div_loop, div_loop * 2);
+	pr_info("regs: disp_div_sel(%d), divout_sel(%d), div_sel(%d), set(%#x)\n",
+		reg_disp_div_sel, reg_divout_sel, reg_div_sel, *reg_set);
 #endif
+	pr_info("vip_sy : bt_div(%d)\n", bt_div);
 }
 
 void dphy_lvds_set_pll(u32 clkkHz, u8 link)

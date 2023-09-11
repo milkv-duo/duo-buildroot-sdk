@@ -20,8 +20,8 @@
 #define JPEG_INTRPT_REQ 75
 
 #define NPT_REG_SIZE 0x300
-#define NPT_REG_BASE (0x10000000 + 0x3000)
-#define VC_REG_BASE (0x0B000000 + 0x30000)
+#define NPT_REG_BASE (void *)(0x10000000 + 0x3000)
+#define VC_REG_BASE (void *)(0x0B000000 + 0x30000)
 
 #define NPT_BASE 0x00
 

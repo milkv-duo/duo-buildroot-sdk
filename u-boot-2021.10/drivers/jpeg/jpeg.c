@@ -130,7 +130,7 @@ int jpeg_decoder(void *bs_addr, void *yuv_addr, int size)
 	int idx, ret = 0, all = 0;
 
 	mmio_write_32((void *)TOP_DDR_ADDR_MODE_REG, (1 << DAMR_REG_VD_REMAP_ADDR_39_32_OFFSET));
-	mmio_write_32((void *)VC_REG_BASE, (mmio_read_32(VC_REG_BASE) | (0x1f)));
+	mmio_write_32((void *)VC_REG_BASE, (mmio_read_32((void *)VC_REG_BASE) | (0x1f)));
 
 #ifdef SUPPORT_INTERRUPT
 	request_irq(JPEG_CODEC_INTR_NUM, irq_handler_jpeg_codec, 0, "jpeg int", NULL);
