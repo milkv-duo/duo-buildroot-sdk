@@ -1,0 +1,60 @@
+name: Bulid Milk-V Duo Image
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build with build_milkv.sh
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      run: |
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: Initialization libssl1.1
+      run: |
+        if [ "$(dpkg -s libssl1.1 | grep 'Status:')" != "Status: install ok installed" ]; then wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb ; sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb ; fi
+
+    - name: Run build_milkv.sh
+      id: compile
+      run: |
+        echo $PWD
+        echo $GITHUB_WORKSPACE
+        bash ./build_milkv.sh
+
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+
+    - name: Check Image Path
+      id: imgpath
+      run: |
+        echo "path=$(ls ${{ github.workspace }}/out/milkv-duo-*-*.img)" >> "$GITHUB_OUTPUT"
+
+    - name: Generate Hash
+      working-directory: ${{ github.workspace }}/out
+      run: |
+        echo "$(sha256sum milkv-duo-*-*.img)" >> milk-v.hash
+
+    - name: Upload Image
+      uses: actions/upload-artifact@main
+      with:
+        name: milkv-duo-img-${{ github.run_id }}
+        path: |
+          ${{ steps.imgpath.outputs.path }}
+          ${{ github.workspace }}/out/milk-v.hash
+        if-no-files-found: error
