@@ -6,7 +6,9 @@ SIZE_1K = 1024
 class MemoryMap:
     # No prefix "CVIMMAP_" for the items in _no_prefix[]
     _no_prefix = [
-        "CONFIG_SYS_TEXT_BASE"  # u-boot's CONFIG_SYS_TEXT_BASE is used without CPP.
+        "CONFIG_SYS_TEXT_BASE",  # u-boot's CONFIG_SYS_TEXT_BASE is used without CPP.
+        "CONFIG_SPL_SIZE_LIMIT",
+        "CONFIG_SPL_TEXT_BASE",
     ]
 
     DRAM_BASE = 0x80000000
@@ -83,3 +85,7 @@ class MemoryMap:
     CONFIG_SYS_TEXT_BASE = DRAM_BASE + 2 * SIZE_1M
     # u-boot's init stack point is only used before board_init_f()
     CONFIG_SYS_INIT_SP_ADDR = UIMAG_ADDR + UIMAG_SIZE
+
+    # uboot-spl
+    CONFIG_SPL_SIZE_LIMIT = SIZE_1M
+    CONFIG_SPL_TEXT_BASE = BOOTLOGO_ADDR - CONFIG_SPL_SIZE_LIMIT

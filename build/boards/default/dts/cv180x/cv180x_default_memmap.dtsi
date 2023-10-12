@@ -19,7 +19,6 @@
 
 		ion_reserved: ion {
 			compatible = "ion-region";
-			alloc-ranges = <0x0 CVIMMAP_ION_ADDR 0 CVIMMAP_ION_SIZE>;
 			size = <0x0 CVIMMAP_ION_SIZE>;
 		};
 	};

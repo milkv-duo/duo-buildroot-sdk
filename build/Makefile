@@ -100,6 +100,10 @@ else
 UBOOT_CONFIG_NAME := ${BRAND}_${PROJECT_FULLNAME}_rls_defconfig
 endif
 
+ifeq ($(CONFIG_UBOOT_SPL_CUSTOM),y)
+UBOOT-SPL_CONFIG_NAME := ${BRAND}_${PROJECT_FULLNAME}_spl_defconfig
+endif
+
 ifeq (${RELEASE_VERSION},1)
 uboot_release_action := ${Q}sed -i "s/CONFIG_BOOTDELAY=1/CONFIG_BOOTDELAY=-2/g" ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/.config
 endif
@@ -139,14 +143,20 @@ ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}:
 
 UBOOT_OUTPUT_CONFIG_PATH := ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/.config
 UBOOT_DEFAULT_CONFIG_PATH := ${BUILD_PATH}/boards/${CHIP_ARCH_L}/${PROJECT_FULLNAME}/u-boot/${UBOOT_CONFIG_NAME}
+ifeq ($(CONFIG_UBOOT_SPL_CUSTOM),y)
+UBOOT-SPL_DEFAULT_CONFIG_PATH := ${BUILD_PATH}/boards/${CHIP_ARCH_L}/${PROJECT_FULLNAME}/u-boot/${UBOOT-SPL_CONFIG_NAME}
+endif
 
 # Make a copy to .config~
-${UBOOT_OUTPUT_CONFIG_PATH}: ${UBOOT_DEFAULT_CONFIG_PATH} ${BUILD_PATH}/.config
+${UBOOT_OUTPUT_CONFIG_PATH}: ${UBOOT_DEFAULT_CONFIG_PATH} ${UBOOT-SPL_DEFAULT_CONFIG_PATH} ${BUILD_PATH}/.config
 	$(call print_target)
 	${Q}echo "u-boot's defconfig is updated. Use it."
 	${Q}mkdir -p $(dir ${UBOOT_OUTPUT_CONFIG_PATH})
 	${Q}cmp -s ${UBOOT_DEFAULT_CONFIG_PATH} ${UBOOT_OUTPUT_CONFIG_PATH} || \
 		${Q}cp -vb ${UBOOT_DEFAULT_CONFIG_PATH} ${UBOOT_OUTPUT_CONFIG_PATH}
+ifeq ($(CONFIG_UBOOT_SPL_CUSTOM),y)
+		${Q}-cat ${UBOOT-SPL_DEFAULT_CONFIG_PATH} >> ${UBOOT_OUTPUT_CONFIG_PATH}
+endif
 	$(call uboot_release_action)
 	$(call uboot_bootlogo_action)
 ifeq ($(STORAGE_TYPE), spinor)
@@ -199,6 +209,9 @@ u-boot-build: ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER} ${UBOOT_CVIPART_DEP} ${UBOOT_
 	${Q}$(MAKE) -j${NPROC} -C ${UBOOT_PATH} olddefconfig
 	${Q}$(MAKE) -j${NPROC} -C ${UBOOT_PATH} all
 	${Q}cat ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/u-boot.bin > ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/u-boot-raw.bin
+ifeq (${CONFIG_UBOOT_SPL_CUSTOM},y)
+	${Q}cat ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/spl/u-boot-spl.bin > ${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/spl/u-boot-spl-raw.bin
+endif
 
 u-boot: u-boot-dep
 
