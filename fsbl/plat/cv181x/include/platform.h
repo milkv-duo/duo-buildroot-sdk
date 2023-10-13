@@ -51,6 +51,12 @@ enum CHIP_CONF_CMD {
 	CHIP_CONF_CMD_DELAY_MS = 0xFFFFFFFD
 };
 
+enum CHIP_CLK_MODE {
+	CLK_ND = 0,
+	CLK_OD,
+	CLK_VC_OD
+};
+
 void apply_chip_conf(const struct chip_conf chip_conf[], uint32_t size, enum CHIP_CONF_CMD scan_start,
 		     enum CHIP_CONF_CMD scan_end);
 
@@ -112,14 +118,12 @@ void set_rtc_en_registers(void);
 
 void apply_analog_trimming_data(void);
 
-void sys_pll_init(void);
-void sys_pll_init_od_sel(void);
+void sys_pll_init(enum CHIP_CLK_MODE mode);
 void sys_switch_all_to_pll(void);
 
 void lock_efuse_chipsn(void);
 int load_ddr(void);
-int load_rest(void);
-int load_rest_od_sel(void);
+int load_rest(enum CHIP_CLK_MODE mode);
 
 #endif /* __ASSEMBLY__ */
 
