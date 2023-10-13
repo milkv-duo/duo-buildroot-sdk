@@ -1,7 +1,7 @@
 menu "SPL / TPL"
 
 config SUPPORT_SPL
-	bool
+	bool "SUPPORT_SPL"
 
 config SUPPORT_TPL
 	bool
@@ -34,12 +34,13 @@ config SPL_FRAMEWORK_BOARD_INIT_F
 	  - initialize the serial (preloader_console_init)
 	  Unless you want to provide your own board_init_f, you should say Y.
 
+# Don't use here, use the value from memmap.py
 config SPL_SIZE_LIMIT
-	hex "Maximum size of SPL image"
+#	hex "Maximum size of SPL image"
 	depends on SPL
 	default 0x11000 if ARCH_MX6 && !MX6_OCRAM_256KB
 	default 0x31000 if ARCH_MX6 && MX6_OCRAM_256KB
-	default 0x0
+#	default 0x0
 	help
 	  Specifies the maximum length of the U-Boot SPL image.
 	  If this value is zero, it is ignored.
@@ -156,14 +157,15 @@ config SPL_LDSCRIPT
 	  U-Boot stage.	 Set this to the path of the linker-script to
 	  be used for SPL.
 
+# Don't use here, use the value from memmap.py
 config SPL_TEXT_BASE
-	hex "SPL Text Base"
+#	hex "SPL Text Base"
 	default ISW_ENTRY_ADDR if AM43XX || AM33XX || OMAP54XX || ARCH_KEYSTONE
 	default 0x10060 if MACH_SUN50I || MACH_SUN50I_H5 || MACH_SUN9I
 	default 0x20060 if SUN50I_GEN_H6
 	default 0x00060 if ARCH_SUNXI
 	default 0xfffc0000 if ARCH_ZYNQMP
-	default 0x0
+#	default 0x0
 	help
 	  The address in memory that SPL will be running from.
 
@@ -918,9 +920,9 @@ config SPL_OS_BOOT
 	  for more info read doc/README.falcon
 
 if SPL_OS_BOOT
+# Don't use here, use the value from memmap.py
 config SYS_OS_BASE
-	hex "addr, where OS is found"
-	depends on SPL_NOR_SUPPORT
+	default 0x10100000 if SPL_NOR_SUPPORT
 	help
 	  Specify the address, where the OS image is found, which
 	  gets booted.

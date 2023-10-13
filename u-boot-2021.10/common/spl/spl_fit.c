@@ -17,6 +17,10 @@
 #include <asm/cache.h>
 #include <asm/global_data.h>
 #include <linux/libfdt.h>
+#include <lzma/LzmaTypes.h>
+#include <lzma/LzmaDec.h>
+#include <lzma/LzmaTools.h>
+#include <lz4.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -258,7 +262,7 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 			debug("%s ", genimg_get_type_name(type));
 	}
 
-	if (IS_ENABLED(CONFIG_SPL_GZIP)) {
+	if (IS_ENABLED(CONFIG_SPL_GZIP) || IS_ENABLED(CONFIG_SPL_LZMA) || IS_ENABLED(CONFIG_SPL_LZ4)) {
 		fit_image_get_comp(fit, node, &image_comp);
 		debug("%s ", genimg_get_comp_name(image_comp));
 	}
@@ -330,6 +334,19 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 			return -EIO;
 		}
 		length = size;
+	} else if (IS_ENABLED(CONFIG_SPL_LZMA) && image_comp == IH_COMP_LZMA) {
+		__maybe_unused SizeT lzma_len = 0x4000000;
+		if (lzmaBuffToBuffDecompress((void *)load_ptr, &lzma_len, src, length)) {
+			printf("error [%s : %d] load_ptr=0x%p, lzma_len=0x%lx, src=0x%p, length=0x%lx\n",
+				__func__, __LINE__, load_ptr, lzma_len, src, length);
+		}
+		length = lzma_len;
+	} else if (IS_ENABLED(CONFIG_SPL_LZ4) && image_comp == IH_COMP_LZ4) {
+		size_t lz4_len = 0x4000000;
+		if (ulz4fn(src, length, (void *)load_ptr, &lz4_len)) {
+			printf("error [%s : %d] load_ptr=0x%p, lz4_len=0x%lx, src=0x%p, length=0x%lx\n",
+				__func__, __LINE__, load_ptr, lz4_len, src, length);
+		}
 	} else {
 		memcpy(load_ptr, src, length);
 	}
@@ -346,6 +363,8 @@ static int spl_load_fit_image(struct spl_load_info *info, ulong sector,
 			image_info->entry_point = FDT_ERROR;
 	}
 
+	// lmb_reserve(&images->lmb, images->os.load, (load_end -
+	// 					    images->os.load));
 	return 0;
 }
 
@@ -361,6 +380,94 @@ static bool os_takes_devicetree(uint8_t os)
 	}
 }
 
+
+static int spl_image_setup_libfdt(struct spl_image_info image_info, const struct spl_fit_info *ctx)
+{
+	bootm_headers_t images;
+	void *blob = (void *)image_info.load_addr;
+	int of_size = image_info.size;
+	debug("error ctx->fit=0x%p, of_size=0x%x, image_info->size=0x%x\n", blob, of_size, image_info.size);
+	struct lmb *lmb;
+	images.initrd_start = 0;
+	images.initrd_end = 0;
+
+	ulong *initrd_start = &images.initrd_start;
+	ulong *initrd_end = &images.initrd_end;
+	int ret = -EPERM;
+	int fdt_ret;
+
+	if (fdt_chosen(blob) < 0) {
+		printf("ERROR: /chosen node create failed\n");
+		goto err;
+	}
+
+	if (arch_fixup_fdt(blob) < 0) {
+		printf("ERROR: arch-specific fdt fixup failed\n");
+		goto err;
+	}
+
+	/* Update ethernet nodes */
+	// fdt_fixup_ethernet(blob);
+#if CONFIG_IS_ENABLED(CMD_PSTORE)
+	/* Append PStore configuration */
+	fdt_fixup_pstore(blob);
+#endif
+
+	if (IMAGE_OF_BOARD_SETUP) {
+		const char *skip_board_fixup;
+
+		skip_board_fixup = env_get("skip_board_fixup");
+		if (skip_board_fixup && ((int)simple_strtol(skip_board_fixup, NULL, 10) == 1)) {
+			printf("skip board fdt fixup\n");
+		} else {
+			fdt_ret = ft_board_setup(blob, gd->bd);
+			if (fdt_ret) {
+				printf("ERROR: board-specific fdt fixup failed: %s\n",
+				       fdt_strerror(fdt_ret));
+				goto err;
+			}
+		}
+	}
+
+	if (IMAGE_OF_SYSTEM_SETUP) {
+		fdt_ret = ft_system_setup(blob, gd->bd);
+		if (fdt_ret) {
+			printf("ERROR: system-specific fdt fixup failed: %s\n",
+			       fdt_strerror(fdt_ret));
+			goto err;
+		}
+	}
+
+	/* Delete the old LMB reservation */
+	if (lmb)
+		lmb_free(lmb, (phys_addr_t)(u32)(uintptr_t)blob,
+			 (phys_size_t)fdt_totalsize(blob));
+
+	ret = fdt_shrink_to_minimum(blob, 0);
+	if (ret < 0)
+		goto err;
+	of_size = ret;
+
+	/* Create a new LMB reservation */
+	if (lmb)
+		lmb_reserve(lmb, (ulong)blob, of_size);
+
+	fdt_initrd(blob, *initrd_start, *initrd_end);
+	if (!ft_verify_fdt(blob))
+		goto err;
+
+#if defined(CONFIG_SOC_KEYSTONE)
+	if (IMAGE_OF_BOARD_SETUP)
+		ft_board_setup_ex(blob, gd->bd);
+#endif
+
+	return 0;
+err:
+	printf(" - must RESET the board to recover.\n\n");
+
+	return ret;
+}
+
 static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 			      struct spl_load_info *info, ulong sector,
 			      const struct spl_fit_info *ctx)
@@ -372,8 +479,10 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 	 * Use the address following the image as target address for the
 	 * device tree.
 	 */
-	image_info.load_addr = spl_image->load_addr + spl_image->size;
-
+#ifndef CVI_SPL_FDT_SIZE
+#define CVI_SPL_FDT_SIZE 0x100000
+#endif
+	image_info.load_addr = (uintptr_t)malloc(CVI_SPL_FDT_SIZE);
 	/* Figure out which device tree the board wants to use */
 	node = spl_fit_get_image_node(ctx, FIT_FDT_PROP, index++);
 	if (node < 0) {
@@ -458,6 +567,7 @@ static int spl_fit_append_fdt(struct spl_image_info *spl_image,
 	if (ret < 0)
 		return ret;
 
+	spl_image_setup_libfdt(image_info, ctx);
 	return ret;
 }
 
@@ -528,6 +638,8 @@ static int spl_fit_image_get_os(const void *fit, int noffset, uint8_t *os)
 static void *spl_get_fit_load_buffer(size_t size)
 {
 	void *buf;
+
+	return (void *)UIMAG_ADDR;
 
 	buf = malloc(size);
 	if (!buf) {
@@ -718,7 +830,8 @@ int spl_load_simple_fit(struct spl_image_info *spl_image,
 		      __func__, node);
 		return -1;
 	}
-
+	// Save decompression start time
+	board_save_time_record(TIME_RECORDS_FIELD_DECOMPRESS_KERNEL_START);
 	/* Load the image and set up the spl_image structure */
 	ret = spl_load_fit_image(info, sector, &ctx, node, spl_image);
 	if (ret)

@@ -87,10 +87,11 @@ __weak int dram_init_banksize(void)
 #ifdef CONFIG_SPL_OS_BOOT
 __weak int spl_start_uboot(void)
 {
-	puts(SPL_TPL_PROMPT
-	     "Please implement spl_start_uboot() for your board\n");
-	puts(SPL_TPL_PROMPT "Direct Linux boot not active!\n");
-	return 1;
+	// puts(SPL_TPL_PROMPT
+	//      "Please implement spl_start_uboot() for your board\n");
+	// puts(SPL_TPL_PROMPT "Direct Linux boot not active!\n");
+	// return 1;
+	return 0;
 }
 
 /*
@@ -165,6 +166,22 @@ ulong spl_get_image_text_base(void)
 __weak void spl_board_prepare_for_linux(void)
 {
 	/* Nothing to do! */
+	cleanup_before_linux();
+}
+
+__weak void __noreturn jump_to_image_linux(struct spl_image_info *spl_image)
+{
+	typedef void (*image_entry_arg_t)(ulong, void *) __attribute__ ((noreturn));
+	image_entry_arg_t image_entry = (image_entry_arg_t)spl_image->entry_point;
+	// Save kernel start time
+	board_save_time_record(TIME_RECORDS_FIELD_KERNEL_START);
+#if CONFIG_IS_ENABLED(LOAD_FIT) || CONFIG_IS_ENABLED(LOAD_FIT_FULL)
+	debug("flags=%d, entry_point=0x%lx, fdt_addr=0x%p\n",
+		spl_image->flags, spl_image->entry_point, spl_image->fdt_addr);
+	image_entry(0, spl_image->fdt_addr);
+#else
+	image_entry(spl_image->flags,  0);
+#endif
 }
 
 __weak void spl_board_prepare_for_optee(void *fdt)
@@ -556,7 +573,8 @@ int spl_init(void)
 
 __weak void board_boot_order(u32 *spl_boot_list)
 {
-	spl_boot_list[0] = spl_boot_device();
+	// spl_boot_list[0] = spl_boot_device();
+	 spl_boot_list[0] = BOOT_DEVICE_NOR;
 }
 
 static struct spl_image_loader *spl_ll_find_loader(uint boot_device)
@@ -627,7 +645,7 @@ static int boot_from_devices(struct spl_image_info *spl_image,
 		    CONFIG_IS_ENABLED(LIBCOMMON_SUPPORT) &&
 		    !IS_ENABLED(CONFIG_SILENT_CONSOLE)) {
 			if (loader)
-				printf("Trying to boot from %s\n",
+				debug("Trying to boot from %s\n",
 				       spl_loader_name(loader));
 			else if (CONFIG_IS_ENABLED(SHOW_ERRORS))
 				printf(SPL_TPL_PROMPT
@@ -647,6 +665,15 @@ static int boot_from_devices(struct spl_image_info *spl_image,
 #if defined(CONFIG_SPL_FRAMEWORK_BOARD_INIT_F)
 void board_init_f(ulong dummy)
 {
+	board_save_time_record(TIME_RECORDS_FIELD_UBOOT_START);
+#ifdef CONFIG_ARM64
+	extern ulong __image_copy_start;
+	gd->relocaddr = (ulong)&__image_copy_start;
+	arch_reserve_mmu();
+	icache_enable();
+	dcache_enable();
+	debug("%s : %d  cache enable\n", __func__, __LINE__);
+#endif
 	if (CONFIG_IS_ENABLED(OF_CONTROL)) {
 		int ret;
 
@@ -676,6 +703,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	debug(">>" SPL_TPL_PROMPT "board_init_r()\n");
 
 	spl_set_bd();
+	board_init();
 
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
@@ -683,8 +711,9 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	gd->flags |= GD_FLG_FULL_MALLOC_INIT;
 #endif
 	if (!(gd->flags & GD_FLG_SPL_INIT)) {
-		if (spl_init())
+		if (spl_init()) {
 			hang();
+		}
 	}
 #if !defined(CONFIG_PPC) && !defined(CONFIG_ARCH_MX6)
 	/*
@@ -720,12 +749,12 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 	initr_watchdog();
 #endif
 
-	if (IS_ENABLED(CONFIG_SPL_OS_BOOT) || CONFIG_IS_ENABLED(HANDOFF) ||
-	    IS_ENABLED(CONFIG_SPL_ATF))
-		dram_init_banksize();
+//	if (IS_ENABLED(CONFIG_SPL_OS_BOOT) || CONFIG_IS_ENABLED(HANDOFF) ||
+//		IS_ENABLED(CONFIG_SPL_ATF))
+//			dram_init_banksize();
 
 	bootcount_inc();
-
+	board_save_time_record(TIME_RECORDS_FIELD_BOOTCMD_START);
 	memset(&spl_image, '\0', sizeof(spl_image));
 #ifdef CONFIG_SYS_SPL_ARGS_ADDR
 	spl_image.arg = (void *)CONFIG_SYS_SPL_ARGS_ADDR;

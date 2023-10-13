@@ -42,6 +42,13 @@ void dphy_dsi_lane_en(bool clk_en, bool *data_en, bool preamble_en)
 	_reg_write_mask(reg_base + REG_DSI_PHY_EN, 0x3f, val);
 }
 
+int dphy_dsi_disable_lanes(void)
+{
+	_reg_write_mask(reg_base + REG_DSI_PHY_EN, 0x3f, 0);
+	_reg_write_mask(reg_base + REG_DSI_PHY_LANE_SEL, 0xfffff, 0xfffff);
+	return 0;
+}
+
 /**
  * dphy_dsi_set_lane - dsi-lanes control.
  *                     setup before dphy_dsi_lane_en().
@@ -82,8 +89,23 @@ void dphy_lvds_enable(bool en)
  */
 void dphy_init(enum sclr_vo_intf intf)
 {
+	int lptrx = 0, lptx_rx = 0, hstx = 0, i;
+
+	for (i = 0; i < DSI_LANE_MAX; ++i) {
+		if (((_reg_read(reg_base + REG_DSI_PHY_LANE_SEL) >> i * 4) & 0x0F) > 4) {
+			lptrx |= ((1 << i) | (1 << (8 + i)));
+			lptx_rx  |= ((1 << i) | (1 << (16 + i)));
+			hstx  |= ((1 << i) | (1 << (8 + i)) | (1 << (16 + i)) | (1 << (24 + i)));
+		}
+	}
+
 	_reg_write(reg_base + REG_DSI_PHY_PD, (intf == SCLR_VO_INTF_MIPI || intf == SCLR_VO_INTF_LVDS
-		) ? 0x0 : 0x1f1f);
+		) ? lptrx : 0x1f1f);
+	_reg_write(reg_base + REG_DSI_PHY_LPTX_OV, lptx_rx);
+	_reg_write(reg_base + REG_DSI_PHY_PD_EN_TX, lptrx);
+	_reg_write(reg_base + REG_DSI_PHY_PD_TXDRV, hstx);
+	_reg_write(reg_base + REG_DSI_PHY_GPO, lptrx);
+	_reg_write(reg_base + REG_DSI_PHY_GPI, lptrx);
 	_reg_write(reg_base + REG_DSI_PHY_ESC_INIT, 0x100);
 	_reg_write(reg_base + REG_DSI_PHY_ESC_WAKE, 0x100);
 
@@ -120,20 +142,27 @@ void _cal_pll_reg(u32 clkkHz, u32 VCOR_10000, u32 *reg_txpll, u32 *reg_set, u32 
 	u8 dig_dig = (u8)ilog2(gain);
 	u8 reg_divout_sel = min((u8)3, dig_dig);
 	u8 reg_div_sel = dig_dig - reg_divout_sel;
-	u8 loop_gain = (((VCOC_1000 / 133000) + 7) >> 3) << 3;
+	u32 loop_gainx1000 = VCOC_1000 / 133;
 	bool bt_div = reg_disp_div_sel > 0x7f;
-	u32 loop_c = 8 * ((VCOC_1000 / 133 / 8) + 500) / 1000;
+	u32 loop_c = 8 * ((loop_gainx1000 / 8) / 1000);
 	u8 div_loop = loop_c > 32 ? 3 : loop_c / 8;
+	u8 loop_gain1 = div_loop * 8;
 
-	*reg_set = ((u64)(factor * loop_gain) << 26) / VCOC_1000;
+	*reg_set = ((u64)(factor * loop_gain1) << 26) / VCOC_1000;
+
+	if (bt_div) {
+		vip_sys_reg_write_mask(VIP_SYS_VIP_CLK_CTRL0, 0x10, 0);
+		reg_disp_div_sel >>= 1;
+	} else
+		vip_sys_reg_write_mask(VIP_SYS_VIP_CLK_CTRL0, 0x10, 0x10);
 
 	_reg_write_mask(reg_base + REG_DSI_PHY_TXPLL, 0x300000, div_loop << 20);
 
 	*reg_txpll = (reg_div_sel << 10) | (reg_divout_sel << 8) | reg_disp_div_sel;
 #if 0
 	pr_info("clkkHz(%d) VCOR_10000(%d) gain(%d)\n", clkkHz, VCOR_10000, gain);
-	pr_info("VCOC_1000(%d) dig_dig(%d) loop_gain(%d)\n", VCOC_1000, dig_dig, loop_gain);
-	pr_info("loop_c(%d) div_loop(%d) loop_gain1(%d)\n", loop_c, div_loop, div_loop * 2);
+	pr_info("VCOC_1000(%d) dig_dig(%d) loop_gain(%d)\n", VCOC_1000, dig_dig, loop_gainx1000);
+	pr_info("loop_c(%d) div_loop(%d) loop_gain1(%d)\n", loop_c, div_loop, loop_gain1);
 	pr_info("regs: disp_div_sel(%d), divout_sel(%d), div_sel(%d), set(%#x)\n",
 		reg_disp_div_sel, reg_divout_sel, reg_div_sel, *reg_set);
 #endif
@@ -145,10 +174,13 @@ void dphy_lvds_set_pll(u32 clkkHz, u8 link)
 	u32 VCOR_10000 = clkkHz * 70 / link;
 	u32 reg_txpll, reg_set;
 
-	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set, 1200000);
+	_cal_pll_reg(clkkHz, VCOR_10000, &reg_txpll, &reg_set, 900000);
 
 	_reg_write_mask(reg_base + REG_DSI_PHY_TXPLL, 0x7ff, reg_txpll);
 	_reg_write(reg_base + REG_DSI_PHY_REG_SET, reg_set);
+	// update
+	_reg_write_mask(reg_base + REG_DSI_PHY_REG_8C, BIT(0), 0);
+	_reg_write_mask(reg_base + REG_DSI_PHY_REG_8C, BIT(0), 1);
 }
 
 void dphy_dsi_set_pll(u32 clkkHz, u8 lane, u8 bits)

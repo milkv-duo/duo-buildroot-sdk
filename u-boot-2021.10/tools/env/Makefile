@@ -7,7 +7,6 @@
 # built with cross tools. Although it may look weird, we only replace "HOSTCC"
 # with "CC" here for the maximum code reuse of scripts/Makefile.host.
 override HOSTCC = $(CC)
-
 # Compile for a hosted environment on the target
 HOST_EXTRACFLAGS  = -I$(srctree)/tools \
 		$(patsubst -I%,-idirafter%, $(filter -I%, $(UBOOTINCLUDE))) \
@@ -33,5 +32,7 @@ quiet_cmd_crosstools_strip = STRIP   $^
 
 $(obj)/.strip: $(obj)/fw_printenv
 	$(call cmd,crosstools_strip)
+	rm -rf $(obj)/fw_setenv
+	ln -s fw_printenv $(obj)/fw_setenv
 
 always += .strip

@@ -93,8 +93,9 @@ int _prgImage(char *file, uint32_t chunk_header_size, char *file_name)
 	snprintf(cmd, 255, "nand write %p 0x%x 0x%x",
 		 (void *)file + chunk_header_size, offset, size);
 #elif defined(CONFIG_SPI_FLASH)
-	if (update_magic == SD_UPDATE_MAGIC && (!strcmp(file_name, "fip.bin") ||
-						!strcmp(file_name, "boot.spinor"))) {
+	if (update_magic == SD_UPDATE_MAGIC && (!strcmp(file_name, "fip_spl.bin")
+		|| !strcmp(file_name, "fip.bin")
+		|| !strcmp(file_name, "boot.spinor"))) {
 		snprintf(cmd, 255, "sf update %p 0x%x 0x%x",
 			 (void *)file + chunk_header_size, offset, size);
 	} else {
@@ -180,6 +181,7 @@ static int _storage_update(enum storage_type_e type)
 	char cmd[255] = { '\0' };
 	char strStorage[10] = { '\0' };
 	uint8_t sd_index = 0;
+	uint8_t fip_name[16] = {0};
 
 	if (type == sd_dl) {
 		printf("Start SD downloading...\n");
@@ -193,8 +195,13 @@ static int _storage_update(enum storage_type_e type)
 #endif
 		snprintf(cmd, 255, "mmc dev %u:1 SD_HS", sd_index);
 		run_command(cmd, 0);
-		snprintf(cmd, 255, "fatload %s %p fip.bin;", strStorage,
-			 (void *)HEADER_ADDR);
+#if defined(CONFIG_SPL)
+		strcpy(fip_name, "fip_spl.bin");
+#else
+		strcpy(fip_name, "fip.bin");
+#endif
+		snprintf(cmd, 255, "fatload %s %p %s;", strStorage,
+			 (void *)HEADER_ADDR, fip_name);
 		ret = run_command(cmd, 0);
 		if (ret) {
 			// Consider SD card without MBR
@@ -208,8 +215,8 @@ static int _storage_update(enum storage_type_e type)
 #endif
 			snprintf(cmd, 255, "mmc dev %u:0 SD_HS", sd_index);
 			run_command(cmd, 0);
-			snprintf(cmd, 255, "fatload %s %p fip.bin;", strStorage,
-				 (void *)HEADER_ADDR);
+			snprintf(cmd, 255, "fatload %s %p %s;", strStorage,
+				 (void *)HEADER_ADDR, fip_name);
 			ret = run_command(cmd, 0);
 			if (ret)
 				return ret;

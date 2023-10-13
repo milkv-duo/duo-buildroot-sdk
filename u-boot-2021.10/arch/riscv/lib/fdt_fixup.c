@@ -164,10 +164,11 @@ int arch_fixup_fdt(void *blob)
 		return log_msg_ret("could not set boot-hartid", err);
 #endif
 
+#ifndef CONFIG_SPL_BUILD
 	/* Copy the reserved-memory node to the DT used by OS */
 	err = riscv_fdt_copy_resv_mem_node(gd->fdt_blob, blob);
 	if (err < 0)
 		return err;
-
+#endif
 	return 0;
 }

@@ -12,7 +12,11 @@
 	.word 0x33334c42  /* b'BL33' */
 	.word 0xdeadbeea  /* CKSUM */
 	.word 0xdeadbeeb  /* SIZE */
-	.quad CONFIG_SYS_TEXT_BASE /* RUNADDR */
+#ifdef CONFIG_SPL_BUILD
+	.quad	CONFIG_SPL_TEXT_BASE
+#else
+	.quad   CONFIG_SYS_TEXT_BASE
+#endif
 	.word 0xdeadbeec
 	.balign 4
 	j boot0_time_recode

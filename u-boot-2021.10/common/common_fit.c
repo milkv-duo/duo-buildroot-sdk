@@ -68,10 +68,10 @@ int fit_find_config_node(const void *fdt)
 				dflt_conf_desc = name;
 			}
 		}
-
+#ifndef CONFIG_SPL_BUILD
 		if (board_fit_config_name_match(name))
 			continue;
-
+#endif
 		debug("Selecting config '%s'\n", name);
 
 		return node;
