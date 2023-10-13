@@ -82,7 +82,7 @@ cmake version 3.27.6
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
 
-另外，SDK中的mkimage命令依赖的`libssl1.1`，在 Ubuntu22.04 中已启用，需要手动安装，以下两种方法都可以
+另外，SDK中的mkimage命令依赖的`libssl1.1`，在 Ubuntu22.04 中已弃用，需要手动安装，以下两种方法都可以
 
 1. 补源安装
 
