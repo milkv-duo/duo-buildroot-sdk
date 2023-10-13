@@ -1,0 +1,3 @@
+ifeq ($(CONFIG_TARGET_PACKAGE_HAASUI),y)
+TARGET_PACKAGES += haasui
+endif

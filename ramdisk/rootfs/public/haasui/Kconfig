@@ -1,0 +1,4 @@
+config TARGET_PACKAGE_HAASUI
+	bool "Target package haasui"
+	help
+	  target package haasui

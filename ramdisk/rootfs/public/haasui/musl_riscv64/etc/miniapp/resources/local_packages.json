@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "PackageList": [
+    {
+      "id": "8080251822789980",
+      "Name": "桌面",
+      "Category": "HOME",
+      "Path": "resources/presetpkgs/8080251822789980.amr"
+    },
+    {
+      "id": "8001641807316750",
+      "Name": "软键盘",
+      "Category": "IM_PANEL",
+      "Path": "resources/presetpkgs/8001641807316750.amr"
+    },
+    {
+      "id": "8001670482645701",
+      "Name": "benchmark",
+      "Category": "",
+      "Path": "resources/presetpkgs/8001670482645701.amr"
+    }
+  ,
+    {
+      "id": "8001668739267612",
+      "Name": "JQ jsapi demo",
+      "Category": "",
+      "Path": "resources/presetpkgs/8001668739267612.amr"
+    }
+  ]
+}
+

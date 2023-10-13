@@ -1,0 +1,26 @@
+{
+	"screen": {
+		"width": 720,
+		"height": 1280
+	},
+	"device": {
+		"fb": "/dev/fb0",
+		"tp": "/dev/input/event0",
+		"mouse": "/dev/input/mouse0"
+	},
+	"debugger": {
+		"enable": true
+	},
+	"linksdk": {
+		"one_device_one_secret": false,
+		"one_type_one_secret_pre_registration": false,
+		"one_type_one_secret_no_pre_registration": false
+	},
+	"filemanager": {
+		"max_cache_size": 4194304,
+		"big_file_size": 524288
+	},
+	"imageloader": {
+		"image_cache_size": 4194304
+	}
+}
