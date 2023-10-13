@@ -32,7 +32,7 @@ void prvRGNRunTask(void *pvParameters)
 	(void)pvParameters;
 	cmdqu_t rtos_cmdq;
 
-	int i, j, delta_x, delta_y;
+	int i;
 	void *pvAddr = NULL;
 	unsigned char obj_num = 0, line_num = 0;
 	int bs_size, status;
@@ -40,7 +40,6 @@ void prvRGNRunTask(void *pvParameters)
 	RGN_CMPR_OBJ_ATTR_S *obj_attr = NULL;
 	OSDC_Canvas_Attr_S canvas;
 	OSDC_DRAW_OBJ_S *obj_vec = NULL;
-	RGN_LINE_ATTR_S *line_attr = NULL;
 
 	rgn_printf("%s run\n", __func__);
 	xQueueRGN = main_GetMODHandle(E_QUEUE_RGN);
@@ -84,13 +83,6 @@ void prvRGNRunTask(void *pvParameters)
 			goto WRONG_CMD_IP_ID;
 		}
 
-		line_attr = (RGN_LINE_ATTR_S *)pvPortMalloc((obj_num ? obj_num : 1) * sizeof(RGN_LINE_ATTR_S));
-		if (line_attr == NULL) {
-			rgn_printf("(%s) malloc failed!\n", __func__);
-			vPortFree(obj_vec);
-			goto WRONG_CMD_IP_ID;
-		}
-
 		obj_attr = (RGN_CMPR_OBJ_ATTR_S *)((CVI_U8 *)rtos_cmdq.param_ptr + sizeof(RGN_CANVAS_CMPR_ATTR_S));
 		if (obj_num) {
 			for (i = 0; i < obj_num; ++i) {
@@ -102,7 +94,6 @@ void prvRGNRunTask(void *pvParameters)
 						obj_attr[i].stLine.stPointEnd.s32Y,
 						obj_attr[i].stLine.u32Thick,
 						obj_attr[i].stLine.u32Color);
-					line_attr[line_num] = obj_attr[i].stLine;
 					line_num++;
 				} else if (obj_attr[i].enObjType == RGN_CMPR_RECT) {
 					rgn_printf("xywh(%d %d %d %d) Thick(%d) Color(0x%x) is_fill(%d)\n",
@@ -124,51 +115,18 @@ void prvRGNRunTask(void *pvParameters)
 			}
 		}
 
-		// workaroud to fix draw line issue for now
-		j = 0;
-		while (j++ < 5) {
-			for (i = 0; i < line_num; ++i) {
-				delta_x = abs(line_attr[i].stPointStart.s32X - line_attr[i].stPointEnd.s32X);
-				delta_y = abs(line_attr[i].stPointStart.s32Y - line_attr[i].stPointEnd.s32Y);
-				if (delta_y < line_attr[i].u32Thick) {
-					if (i < line_num - 1) {
-						line_attr[i + 1].stPointStart.s32Y = line_attr[i].stPointEnd.s32Y
-								= line_attr[i].stPointStart.s32Y;
-					} else {
-						line_attr[0].stPointStart.s32Y = line_attr[i].stPointEnd.s32Y
-								= line_attr[i].stPointStart.s32Y;
-					}
-				}
-				if (delta_x < line_attr[i].u32Thick) {
-					if (i < line_num - 1) {
-						line_attr[i + 1].stPointStart.s32X = line_attr[i].stPointEnd.s32X
-								= line_attr[i].stPointStart.s32X;
-					} else {
-						line_attr[0].stPointStart.s32X = line_attr[i].stPointEnd.s32X
-								= line_attr[i].stPointStart.s32X;
-					}
-				}
-			}
-			delta_x = abs(line_attr[0].stPointStart.s32X - line_attr[0].stPointEnd.s32X);
-			delta_y = abs(line_attr[0].stPointStart.s32Y - line_attr[0].stPointEnd.s32Y);
-			if ((delta_x > line_attr[0].u32Thick || delta_x == 0) &&
-					(delta_y > line_attr[0].u32Thick || delta_y == 0))
-				break;
-		}
-
 		if (obj_num) {
-			for (i = 0, j = 0; i < obj_num; ++i) {
+			for (i = 0; i < obj_num; ++i) {
 				if (obj_attr[i].enObjType == RGN_CMPR_LINE) {
 					CVI_OSDC_SetLineObjAttr(
 						&canvas,
 						&obj_vec[i],
-						line_attr[j].u32Color,
-						line_attr[j].stPointStart.s32X,
-						line_attr[j].stPointStart.s32Y,
-						line_attr[j].stPointEnd.s32X,
-						line_attr[j].stPointEnd.s32Y,
-						line_attr[j].u32Thick);
-					j++;
+						obj_attr[i].stLine.u32Color,
+						obj_attr[i].stLine.stPointStart.s32X,
+						obj_attr[i].stLine.stPointStart.s32Y,
+						obj_attr[i].stLine.stPointEnd.s32X,
+						obj_attr[i].stLine.stPointEnd.s32Y,
+						obj_attr[i].stLine.u32Thick);
 				} else if (obj_attr[i].enObjType == RGN_CMPR_RECT) {
 					CVI_OSDC_SetRectObjAttr(
 						&canvas,
@@ -256,7 +214,6 @@ void prvRGNRunTask(void *pvParameters)
 			rgn_printf("%s rtos_cmdq.cmd_id(%d)!\n", __func__, rtos_cmdq.cmd_id);
 		break;
 		}
-		vPortFree(line_attr);
 		vPortFree(obj_vec);
 
 WRONG_CMD_IP_ID:

@@ -205,6 +205,35 @@ int CviAud_Algo_Process(void *pHandle,  uint64_t mic_in,
 }
 
 /**************************************************************************************
+ * Function:    CviAud_Algo_Fun_Config
+ *
+ * Description: free platform-specific data allocated by CviAud_Algo_Init
+ *
+ * Inputs:      instance pointer (pHandle)
+ * Outputs:	none
+ *
+ * Return:      CVI_SUCCESS / CVI_FAILURE
+ **************************************************************************************/
+int CviAud_Algo_Fun_Config(void *pHandle, int u32OpenMask)
+{
+	int ret = 0;
+
+	if (pHandle == NULL) {
+		printf("Null input [%s][%d]\n", __func__, __LINE__);
+		return -1;
+	}
+
+	ret = audio_ssp_fun_config(pHandle, u32OpenMask);
+	if (ret != 0) {
+		printf("audio_ssp_process error ret(%d).\n", ret);
+		return -1;
+	}
+
+	return ret;
+
+}
+
+/**************************************************************************************
  * Function:    CviAud_Algo_DeInit
  *
  * Description: free platform-specific data allocated by CviAud_Algo_Init

@@ -165,7 +165,7 @@ void prvAudioRunTask(void *pvParameters)
 	#endif
 
 	cvi_audio_init_test();
-	printf("pAudioRunTask run Version:20220519\n");
+	aud_info("pAudioRunTask run Version:20220519\n");
 
 	xQueueAudioCmdqu = main_GetMODHandle(E_QUEUE_CMDQU);
 	xQueueAudio = main_GetMODHandle(E_QUEUE_AUDIO);
@@ -514,10 +514,10 @@ void prvAudioRunTask(void *pvParameters)
 						aud_debug("[Rtos][%s][%d]....xxxxxxxcounter[%d]\n", __func__, __LINE__, counter);
 						aud_debug("[Rtos]keep waiting....\n");
 					} else {
-						//printf("[Rtos][%s][%d]index[%d]not full\n", __func__, __LINE__, index);
+						//aud_info("[Rtos][%s][%d]index[%d]not full\n", __func__, __LINE__, index);
 						//count += 1;
 						//if (count % 1000000 == 0) {
-						//	printf("[Rtos][%s][%d]out count[%d]index[%d]\n", __func__, __LINE__, count, index);
+						//	aud_info("[Rtos][%s][%d]out count[%d]index[%d]\n", __func__, __LINE__, count, index);
 						//}
 					}
 					bCheck_input_full = 1; //reset the check flag
@@ -550,14 +550,14 @@ void prvAudioRunTask(void *pvParameters)
 			_pstVqeConfig = (AI_TALKVQE_CONFIG_S_RTOS *)pstAudBlockMailBox->AinVqeCfgPhy;
 			inv_dcache_range((uintptr_t)_pstVqeConfig, sizeof(AI_TALKVQE_CONFIG_S_RTOS));
 
-			printf("SSP_INIT dump-----------------------------------------------------\n");
-			printf("para_client_config[%d]\n", _pstVqeConfig->para_client_config);
-			printf("u32OpenMask[0x%x]\n", _pstVqeConfig->u32OpenMask);
-			printf("s32WorkSampleRate[%d]\n", _pstVqeConfig->s32WorkSampleRate);
-			printf("stAecCfg.para_aec_filter_len[%d]\n", _pstVqeConfig->stAecCfg.para_aec_filter_len);
-			printf("stAecCfg.para_aes_std_thrd[%d]\n", _pstVqeConfig->stAecCfg.para_aes_std_thrd);
-			printf("stAecCfg.para_aes_supp_coeff[%d]\n", _pstVqeConfig->stAecCfg.para_aes_supp_coeff);
-			printf("SSP_INIT dump-----------------------------------------------------[end]\n");
+			aud_info("SSP_INIT dump-----------------------------------------------------\n");
+			aud_info("para_client_config[%d]\n", _pstVqeConfig->para_client_config);
+			aud_info("u32OpenMask[0x%x]\n", _pstVqeConfig->u32OpenMask);
+			aud_info("s32WorkSampleRate[%d]\n", _pstVqeConfig->s32WorkSampleRate);
+			aud_info("stAecCfg.para_aec_filter_len[%d]\n", _pstVqeConfig->stAecCfg.para_aec_filter_len);
+			aud_info("stAecCfg.para_aes_std_thrd[%d]\n", _pstVqeConfig->stAecCfg.para_aes_std_thrd);
+			aud_info("stAecCfg.para_aes_supp_coeff[%d]\n", _pstVqeConfig->stAecCfg.para_aes_supp_coeff);
+			aud_info("SSP_INIT dump-----------------------------------------------------[end]\n");
 
 			AI_TALKVQE_CONFIG_S VqeConfig;
 			AI_TALKVQE_CONFIG_S *pVqeConfigSsp = &VqeConfig;
@@ -592,6 +592,39 @@ void prvAudioRunTask(void *pvParameters)
 					break;
 				} else
 					aud_info("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK init success!!\n");
+			} else
+				aud_error("warning paudio_ssp_blcok not Null..\n");
+
+			xQueueSend(xQueueAudioCmdqu, &rtos_cmdq, 0U);
+			}
+			break;
+		case CVIAUDIO_RTOS_CMD_SSP_CONFIG_BLOCK:
+			{
+			aud_info("CVIAUDIO_RTOS_CMD_SSP_CONFIG_BLOCK\n");
+			ST_CVIAUDIO_MAILBOX_BLOCK *pstAudBlockMailBox =
+						(ST_CVIAUDIO_MAILBOX_BLOCK *)rtos_cmdq.param_ptr;
+			AI_TALKVQE_CONFIG_S_RTOS *_pstVqeConfig = NULL;
+
+			inv_dcache_range((uintptr_t)pstAudBlockMailBox, sizeof(ST_CVIAUDIO_MAILBOX_BLOCK));
+			aud_debug("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK phy[0x%x]\n", rtos_cmdq.param_ptr);
+			if (pstAudBlockMailBox->u64RevMask != CVIAUDIO_RTOS_MAGIC_WORD_USERSPACE_BLOCK_MODE) {
+				aud_error("[CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK]magic word mismatch[0x%lx]\n",
+						pstAudBlockMailBox->u64RevMask);
+				rtos_cmdq.param_ptr = CVIAUDIO_RTOS_BLOCK_MODE_FAILURE_FLAG;
+				clean_dcache_range((uintptr_t)pstAudBlockMailBox, sizeof(ST_CVIAUDIO_MAILBOX_BLOCK));
+				xQueueSend(xQueueAudioCmdqu, &rtos_cmdq, 0U);
+				break;
+			} else
+				aud_debug("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK magic word matched\n");
+
+			_pstVqeConfig = (AI_TALKVQE_CONFIG_S_RTOS *)pstAudBlockMailBox->AinVqeCfgPhy;
+			inv_dcache_range((uintptr_t)_pstVqeConfig, sizeof(AI_TALKVQE_CONFIG_S_RTOS));
+
+			aud_debug("u32OpenMask[0x%x]\n", _pstVqeConfig->u32OpenMask);
+
+			if (paudio_ssp_block != NULL) {
+				CviAud_Algo_Fun_Config(paudio_ssp_block, _pstVqeConfig->u32OpenMask);
+				aud_info("CVIAUDIO_RTOS_CMD_SSP_INIT_BLOCK init success!!\n");
 			} else
 				aud_error("warning paudio_ssp_blcok not Null..\n");
 
@@ -656,7 +689,7 @@ void prvAudioRunTask(void *pvParameters)
 				xTimer3AProcEnd = xTaskGetTickCount();
 				total_diff += xTimer3AProcEnd - xTimer3AProcStart;
 				if (frame_count == 8000/CVIAUDIO_BASIC_AEC_LENGTH*3) {
-					printf("total_diff = %ld, cpu = %ld, portTICK_PERIOD_MS=%d\n",
+					aud_info("total_diff = %ld, cpu = %ld, portTICK_PERIOD_MS=%d\n",
 							total_diff,
 							total_diff*portTICK_PERIOD_MS/30,
 							portTICK_PERIOD_MS);
@@ -666,7 +699,7 @@ void prvAudioRunTask(void *pvParameters)
 				#endif
 			}
 			//pvincent = (short *)pstBlockFrm->output_addr;
-			//printf("CVIAUDIO_RTOS_CMD_SSP_PROC_BLOCK---success[0x%x][0x%x][0x%x]\n", pvincent[0], pvincent[1], pvincent[2]);
+			//aud_info("CVIAUDIO_RTOS_CMD_SSP_PROC_BLOCK---success[0x%x][0x%x][0x%x]\n", pvincent[0], pvincent[1], pvincent[2]);
 			clean_dcache_range((uintptr_t)pstBlockFrm, sizeof(ST_CVIAUDIO_BLOCK_FRAME));
 			clean_dcache_range((uintptr_t)pstBlockFrm->mic_in_addr, 1280);
 			clean_dcache_range((uintptr_t)pstBlockFrm->output_addr, 1280);

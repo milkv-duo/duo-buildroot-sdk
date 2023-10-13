@@ -5,6 +5,7 @@
 void *CviAud_Algo_Init(int s32FunctMask, void *param_info);
 int CviAud_Algo_Process(void *pHandle,  uint64_t mic_in,
 			uint64_t ref_in, uint64_t out, int iLength);
+int CviAud_Algo_Fun_Config(void *pHandle, int u32OpenMask);
 void CviAud_Algo_DeInit(void *pHandle);
 void  CviAud_Algo_GetVersion(char *pstrVersion);
 #ifdef NEXT_SSP_ALGO

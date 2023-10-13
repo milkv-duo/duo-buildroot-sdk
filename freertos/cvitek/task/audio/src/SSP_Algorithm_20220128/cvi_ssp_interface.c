@@ -326,7 +326,26 @@ void *audio_ssp_init(void *para_obj, unsigned int sample_rate)
 	return (void *)pst3Ainfo;
 }
 
+int audio_ssp_fun_config(void *handle, int u32OpenMask)
+{
+	struct st3AInfo *pst3Ainfo = (struct st3AInfo *)handle;
 
+	if (!pst3Ainfo) {
+		LOG_PRINTF("audio_ssp_process error.\n");
+		return -1;
+	}
+
+	if(!(pst3Ainfo && pst3Ainfo->bInitOk))
+	{
+		LOG_ERROR("audio_ssp_process error params.\n");
+		return -1;
+	}
+
+	pst3Ainfo->para_obj.para_fun_config = u32OpenMask;
+	printf("para_fun_config  = %d\n", pst3Ainfo->para_obj.para_fun_config);
+
+	return 0;
+}
 
 int audio_ssp_process(void *handle, short *mic_in, short *ref_in, short *dataout, int iLength)
 {
