@@ -1,0 +1,4 @@
+config BR2_PACKAGE_DUO_PINMUX
+    bool "Duo pinmux"
+    help
+      Pinmux for Milk-V Duo
