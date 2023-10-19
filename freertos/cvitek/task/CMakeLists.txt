@@ -17,37 +17,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SAFETY_FLAGS}")
 include(${TOP_DIR}/scripts/ParseConfiguration.cmake)
 ParseConfiguration("${BUILD_ENV_PATH}/.config")
 
-if (RUN_TYPE STREQUAL "BLINKY_DEMO")
-    add_subdirectory(demo/Blinky_Demo)
-elseif (RUN_TYPE STREQUAL "FULL_DEMO")
-    add_subdirectory(demo/Full_Demo)
-elseif (RUN_TYPE STREQUAL "POSIX_DEMO")
-    add_subdirectory(demo/POSIX_Demo)
-elseif (RUN_TYPE STREQUAL "CVIRTOS")
 if (CHIP STREQUAL "cv1835")
     add_subdirectory(comm)
-    
-    add_subdirectory(vip)
-    add_subdirectory(display)
-    add_subdirectory(vcodec)
 elseif (CHIP STREQUAL "cv181x" OR CHIP STREQUAL "cv180x")
     add_subdirectory(comm)
-    add_subdirectory(rgn)
-    add_subdirectory(audio)
-if (CONFIG_FAST_IMAGE_TYPE STRGREATER "0")
-    add_subdirectory(vi)
-    
-    add_subdirectory(camera)
-    add_subdirectory(vcodec)
-    # add_subdirectory(vip)
-endif()
 endif()
 
 if(CONFIG_BOARD STREQUAL "cv181x_fpga" OR CONFIG_BOARD STREQUAL "cv181x_fpga_c906")
 	add_compile_definitions(FPGA_PORTING)
 endif()
 
-endif()
 add_subdirectory(main)
 
 add_custom_target(cvirtos.bin

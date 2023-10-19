@@ -1,0 +1,23 @@
+#ifndef XPARAMETERS_H /* prevent circular inclusions */
+#define XPARAMETERS_H /* by using protection macros */
+
+/* Definition for CPU ID */
+#define XPAR_CPU_ID 1U
+
+#define XPAR_CPU_CORTEXA53_0_TIMESTAMP_CLK_FREQ 25000000
+#define XPAR_XSCUGIC_NUM_INSTANCES 1U
+
+/* Definitions for GIC */
+#define XPAR_PSU_ACPU_GIC_DEVICE_ID 0U
+#define XPAR_PSU_ACPU_GIC_BASEADDR 0x01F02000U
+#define XPAR_PSU_ACPU_GIC_HIGHADDR 0x01F02FFFU
+#define XPAR_PSU_ACPU_GIC_DIST_BASEADDR 0x01F01000U
+
+#define XPAR_SCUGIC_NUM_INSTANCES 1U
+/* Physical Timer-ID for PPI*/
+#define CNTP_TIMER_0_INT_ID (30U)
+#define XPAR_SCUGIC_SINGLE_DEVICE_ID 0U
+#define XPAR_SCUGIC_CPU_BASEADDR (XPS_SCU_PERIPH_BASE + 0x00001000U)
+#define XPAR_SCUGIC_DIST_BASEADDR (XPS_SCU_PERIPH_BASE + 0x00002000)
+
+#endif /* end of protection macro */

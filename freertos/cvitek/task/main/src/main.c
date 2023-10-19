@@ -94,12 +94,6 @@ static void prvSetupHardware(void);
  */
 #ifdef CVIRTOS
 extern void main_cvirtos(void);
-#elif defined BLINKY_DEMO
-extern void main_blinky(void);
-#elif defined FULL_DEMO
-extern void main_full(void);
-#elif defined POSIX_DEMO
-extern void main_posix(void);
 #else
 #error Invalid RUN_TYPE setting in build.sh.  See the comments at the top of this file and above the RUN_TYPE definition.
 #endif
@@ -109,7 +103,6 @@ within this file. */
 void vApplicationMallocFailedHook(void);
 void vApplicationIdleHook(void);
 void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName);
-void vApplicationTickHook(void);
 
 /* configAPPLICATION_ALLOCATED_HEAP is set to 1 in FreeRTOSConfig.h so the
 application can define the array used as the FreeRTOS heap.  This is done so the
@@ -138,18 +131,6 @@ int main(void)
 #ifdef CVIRTOS
 	{
 		main_cvirtos();
-	}
-#elif defined BLINKY_DEMO
-	{
-		main_blinky();
-	}
-#elif defined FULL_DEMO
-	{
-		main_full();
-	}
-#elif defined POSIX_DEMO
-	{
-		main_posix();
 	}
 #else
 #error "Not correct running definition"
@@ -201,7 +182,6 @@ void vApplicationMallocFailedHook(void)
 	timers, and semaphores.  The size of the FreeRTOS heap is set by the
 	configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h. */
 	taskDISABLE_INTERRUPTS();
-	dump_uart_disable();
 	printf("vApplicationMallocFailedHook\n");
 	for (;;)
 		;
@@ -212,7 +192,6 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
 {
 	(void)pcTaskName;
 	(void)pxTask;
-	dump_uart_disable();
 	printf("%s %s\n", __func__, pcTaskName);
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
@@ -241,17 +220,6 @@ void vApplicationIdleHook(void)
 }
 /*-----------------------------------------------------------*/
 
-void vApplicationTickHook(void)
-{
-#ifdef FULL_DEMO
-	{
-		/* Only the comprehensive demo actually uses the tick hook. */
-		extern void vFullDemoTickHook(void);
-		vFullDemoTickHook();
-	}
-#endif
-}
-/*-----------------------------------------------------------*/
 
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
 implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
@@ -309,7 +277,6 @@ the stack and so not exists after this function exits. */
 
 void vMainAssertCalled(const char *pcFileName, uint32_t ulLineNumber)
 {
-	dump_uart_disable(); 
 	printf("ASSERT!  Line %d of file %s\r\n", ulLineNumber, pcFileName);
 	taskENTER_CRITICAL();
 	for (;;)
