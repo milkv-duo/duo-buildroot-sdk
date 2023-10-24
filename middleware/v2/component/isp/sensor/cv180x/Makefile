@@ -26,6 +26,9 @@ prepare:
 brigates_bg0808:
 	$(call MAKE_SENSOR, ${@})
 
+byd_bf2253l:
+	$(call MAKE_SENSOR, ${@})
+
 cvsens_cv4001:
 	$(call MAKE_SENSOR, ${@})
 
@@ -54,6 +57,9 @@ gcore_gc2053_slave:
 	$(call MAKE_SENSOR, ${@})
 
 gcore_gc2053_1L:
+	$(call MAKE_SENSOR, ${@})
+
+gcore_gc2083:
 	$(call MAKE_SENSOR, ${@})
 
 gcore_gc2093:
@@ -114,6 +120,9 @@ sms_sc035gs_1L:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc035hgs:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc1336_1L:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc1346_1L:

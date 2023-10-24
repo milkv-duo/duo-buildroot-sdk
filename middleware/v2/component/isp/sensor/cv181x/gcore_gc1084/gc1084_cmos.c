@@ -227,15 +227,15 @@ static CVI_S32 cmos_inttime_update(VI_PIPE ViPipe, CVI_U32 *u32IntTime)
 }
 
 
-static CVI_U32 regValTable[25][6] = {
+static CVI_U32 regValTable[21][6] = {
 	/* [reg]  0x00d1,   0x00d0,   0x0dc1,   0x00b8,   0x00b9,   0x155
 	 * [name] AGAIN_M,  AGAIN_L,  AGAIN_H,  COLGA_H,  COLGA_L,  REG_0x0155
 	 */
 	{0x00, 0x00, 0x00, 0x01, 0x00, 0x00},
-	{0x0A, 0x00, 0x00, 0x01, 0x0c, 0x00},
-	{0x00, 0x01, 0x00, 0x01, 0x1a, 0x00},
-	{0x0A, 0x01, 0x00, 0x01, 0x2a, 0x00},
-	{0x00, 0x02, 0x00, 0x02, 0x00, 0x00},
+	// {0x0A, 0x00, 0x00, 0x01, 0x0c, 0x00},
+	// {0x00, 0x01, 0x00, 0x01, 0x1a, 0x00},
+	// {0x0A, 0x01, 0x00, 0x01, 0x2a, 0x00},
+	// {0x00, 0x02, 0x00, 0x02, 0x00, 0x00},
 	{0x0A, 0x02, 0x00, 0x02, 0x18, 0x00},
 	{0x00, 0x03, 0x00, 0x02, 0x33, 0x00},
 	{0x0A, 0x03, 0x00, 0x03, 0x14, 0x00},
@@ -257,9 +257,11 @@ static CVI_U32 regValTable[25][6] = {
 	{0x19, 0x66, 0x01, 0x35, 0x06, 0x14},
 	{0x20, 0x06, 0x01, 0x3f, 0x3f, 0x15},
 };
-
-static CVI_U32 gain_table[25] = {
-	1024,    1216,    1440,    1696,    2048,    2432,    2864,    3392,
+//1024-2048 gain use ispdgain
+static CVI_U32 gain_table[21] = {
+	1024,
+	// 1168,    1440,    1696,    2014,
+	2432,    2864,    3392,
 	4096,    4848,    5728,    6800,    8192,    9712,    11472,   13584,
 	16384,   19408,   22944,   27184,   32768,   38832,   45872,   54368,
 	65536
@@ -291,7 +293,11 @@ static CVI_S32 cmos_again_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32AgainLin, CVI_
 	// set the Db as the AE algo gain, we need this to do gain update
 	*pu32AgainDb = *pu32AgainLin;
 	// set the Lin as the closest sensor gain for AE algo reference
-	*pu32AgainLin = pregain * gain_table[i] / 64;
+	if (*pu32AgainLin < 2432) {
+		*pu32AgainDb = *pu32AgainLin = 1024;
+	} else {
+		*pu32AgainLin = pregain * gain_table[i] / 64;
+	}
 
 	return CVI_SUCCESS;
 }

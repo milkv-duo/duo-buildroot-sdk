@@ -277,7 +277,9 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x0103, 0x01);
 	SC5336_2l_write_register(ViPipe, 0x36e9, 0x80);
 	SC5336_2l_write_register(ViPipe, 0x37f9, 0x80);
-	SC5336_2l_write_register(ViPipe, 0x301f, 0x01);
+	SC5336_2l_write_register(ViPipe, 0x301f, 0x03);
+	SC5336_2l_write_register(ViPipe, 0x3207, 0x5b);
+	SC5336_2l_write_register(ViPipe, 0x320b, 0x52);
 	SC5336_2l_write_register(ViPipe, 0x320e, 0x07);
 	SC5336_2l_write_register(ViPipe, 0x320f, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x3213, 0x04);
@@ -333,15 +335,16 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x34a8, 0x18);
 	SC5336_2l_write_register(ViPipe, 0x34a9, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x34aa, 0x00);
-	SC5336_2l_write_register(ViPipe, 0x34ab, 0xe8);
+	SC5336_2l_write_register(ViPipe, 0x34ab, 0xe0);
 	SC5336_2l_write_register(ViPipe, 0x34ac, 0x01);
-	SC5336_2l_write_register(ViPipe, 0x34ad, 0x08);
+	SC5336_2l_write_register(ViPipe, 0x34ad, 0x00);
 	SC5336_2l_write_register(ViPipe, 0x34f8, 0x1f);
 	SC5336_2l_write_register(ViPipe, 0x34f9, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x3630, 0xc0);
 	SC5336_2l_write_register(ViPipe, 0x3631, 0x83);
 	SC5336_2l_write_register(ViPipe, 0x3632, 0x54);
 	SC5336_2l_write_register(ViPipe, 0x3633, 0x33);
+	SC5336_2l_write_register(ViPipe, 0x363f, 0xc0);
 	SC5336_2l_write_register(ViPipe, 0x3641, 0x20);
 	SC5336_2l_write_register(ViPipe, 0x3670, 0x56);
 	SC5336_2l_write_register(ViPipe, 0x3674, 0xc0);
@@ -375,7 +378,7 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x3727, 0x14);
 	SC5336_2l_write_register(ViPipe, 0x3771, 0x89);
 	SC5336_2l_write_register(ViPipe, 0x3772, 0x85);
-	SC5336_2l_write_register(ViPipe, 0x3773, 0x85);
+	SC5336_2l_write_register(ViPipe, 0x3773, 0xc5);
 	SC5336_2l_write_register(ViPipe, 0x377a, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x377b, 0x1f);
 	SC5336_2l_write_register(ViPipe, 0x37fa, 0x0c);

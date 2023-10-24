@@ -116,6 +116,7 @@ typedef struct _ISP_SNS_OBJ_S {
 } ISP_SNS_OBJ_S;
 
 extern ISP_SNS_OBJ_S stSnsBG0808_Obj;
+extern ISP_SNS_OBJ_S stSnsBF2253L_Obj;
 extern ISP_SNS_OBJ_S stSnsCV4001_Obj;
 extern ISP_SNS_OBJ_S stSnsGc02m1b_Obj;
 extern ISP_SNS_OBJ_S stSnsGc0312_Obj;
@@ -126,6 +127,7 @@ extern ISP_SNS_OBJ_S stSnsGc1084_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2053_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2053_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2053_1l_Obj;
+extern ISP_SNS_OBJ_S stSnsGc2083_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2093_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2093_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsGc2145_Obj;
@@ -155,6 +157,7 @@ extern ISP_SNS_OBJ_S stSnsPR2100_Obj;
 extern ISP_SNS_OBJ_S stSnsSC035GS_Obj;
 extern ISP_SNS_OBJ_S stSnsSC035GS_1L_Obj;
 extern ISP_SNS_OBJ_S stSnsSC035HGS_Obj;
+extern ISP_SNS_OBJ_S stSnsSC1336_1L_Obj;
 extern ISP_SNS_OBJ_S stSnsSC1346_1L_Obj;
 extern ISP_SNS_OBJ_S stSnsSC1346_1L_Slave_Obj;
 extern ISP_SNS_OBJ_S stSnsSC200AI_Obj;

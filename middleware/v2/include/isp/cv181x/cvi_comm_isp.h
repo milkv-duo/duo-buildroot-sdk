@@ -869,7 +869,7 @@ typedef struct _ISP_AWB_EXTRA_LIGHTSOURCE_INFO_S {
 	CVI_U8 u8Radius; /*RW; Range:[0x1, 0xFF]*/
 } ISP_AWB_EXTRA_LIGHTSOURCE_INFO_S;
 
-struct ST_ISP_AWB_INTERFERNCE_S {
+struct ST_ISP_AWB_INTERFERENCE_S {
 	CVI_U8 u8Mode;	/*RW; Range:[0x0, 0x1]*/
 	CVI_U8 u8Limit; /*RW; Range:[0x32, 0x64]*/
 	CVI_U8 u8Radius; /*RW; Range:[0x1, 0xFF]*/
@@ -976,12 +976,15 @@ typedef struct _ISP_AWB_ATTR_EX_S {
 	CVI_BOOL bMultiLightSourceEn;
 	ISP_AWB_MULTI_LS_TYPE_E enMultiLSType;
 	CVI_U16 u16MultiLSScaler; /*RW; Range:[0x0, 0x100]*/
+	CVI_U16 u16MultiLSThr; /*RW; Range:[0x20, 0x200]*/
+	CVI_U16 u16CALumaDiff; /*RW; Range:[0x0, 0x100]*/
+	CVI_U16 u16CAAdjustRatio; /*RW; Range:[0x0, 0x10]*/
 	CVI_U16 au16MultiCTBin[AWB_CT_BIN_NUM]; /*RW; Range:[0x0, 0xFFFF]*/
 	CVI_U16 au16MultiCTWt[AWB_CT_BIN_NUM]; /*RW; Range:[0x0, 0x400]*/
 	CVI_BOOL bFineTunEn;
 	CVI_U8 u8FineTunStrength;
 	//AWB Algo 6
-	struct ST_ISP_AWB_INTERFERNCE_S stInterfernce;
+	struct ST_ISP_AWB_INTERFERENCE_S stInterference;
 	struct ST_ISP_AWB_SKIN_S stSkin;
 	struct ST_ISP_AWB_SKY_S stSky;
 	struct ST_ISP_AWB_GRASS_S stGrass;
@@ -989,7 +992,6 @@ typedef struct _ISP_AWB_ATTR_EX_S {
 	struct ST_ISP_AWB_SHIFT_LV_S stShiftLv;
 	struct ST_ISP_AWB_REGION_S stRegion;
 	CVI_U8 adjBgainMode;
-	CVI_U8 reserve[239];
 } ISP_AWB_ATTR_EX_S;//keep size to 512 bytes
 
 typedef struct _ISP_MWB_ATTR_S {
