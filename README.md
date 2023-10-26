@@ -139,6 +139,21 @@ pack_sd_image
 
 Location of the generated image: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`
 
+### Compiling with Windows Linux Subsystem (WSL)
+
+If you wish to perform the compilation with WSL, there's an small issue building the image.
+The $PATH, due Windows interoperability, has Windows environment variables which include some spaces between the paths.
+
+To solve this problem you need to change the `/etc/wsl.conf` file and add the following lines:
+
+```bash
+[interop]
+appendWindowsPath = false
+```
+
+After that, you need to reboot the WSL with `wsl.exe --reboot`. Then you able to run the `./build_milkv.sh` script or the `build_all` line in the step-by-step compilation method.
+To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true.  To reboot the WSL, can you use the Windows PowerShell command `wsl.exe --shutdown` then `wsl.exe`, after that the Windows environment variables become avaliable again in $PATH.
+
 ## SD card burning
 
 > Note: Writing the image to the microSD card will erase the existing data on the card. Remember to back up important data before burning!!!
