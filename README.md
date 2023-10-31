@@ -1,4 +1,4 @@
-English | [简体中文](./README-zh.md)
+English | [简体中文](./README-zh.md) | [日本語](./README-ja.md)
 
 # Project Introduction
 
