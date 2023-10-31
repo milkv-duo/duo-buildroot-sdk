@@ -97,8 +97,8 @@ If not, the following two methods are both applicable:
 2. Manual download and installation of the deb package
 
    ```bash
-   wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
-   sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
+   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+   sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
    ```
 
 ## Compile the Image
