@@ -97,8 +97,8 @@ SDKのmkimageコマンドは`libssl1.1`に依存しています。`dpkg -s libss
 2. debパッケージを手動でダウンロードしてインストール
 
    ```bash
-   wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
-   sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
+   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+   sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
    ```
 
 ## イメージのコンパイル
