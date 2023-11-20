@@ -263,7 +263,7 @@ then reboot the board
 
 ## Links to some documentation from the chip manufacturer
 
-- CV181x/CV180x MMF SDK Development Documents (Chinese): [MultiMedia Framework Software Development Document](https://developer.sophgo.com/thread/471.html)
+- CV181x/CV180x MMF SDK Development Documents (English and Chinese): [MultiMedia Framework Software Development Document](https://developer.sophgo.com/thread/471.html)
 - CV Series Chip TPU SDK Development Documentation Compilation (Chinese): [CV series chip TPU SDK development data summary](https://developer.sophgo.com/thread/473.html)
 
 # About Milk-V

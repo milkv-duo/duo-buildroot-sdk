@@ -1,4 +1,4 @@
-[English] | 简体中文 | [日本語](./README-ja.md)
+[English](./README.md) | 简体中文 | [日本語](./README-ja.md)
 
 
 # 项目简介
@@ -235,9 +235,9 @@ sync
 
 ## 芯片原厂一些资料的链接
 
-- CV181x/CV180x MMF SDK 开发文档汇总：[CV181x/CV180x MMF SDK 开发文档汇总](https://developer.sophgo.com/thread/471.html)
+- CV181x/CV180x MMF SDK 开发文档汇总 (英文和中文)：[CV181x/CV180x MMF SDK 开发文档汇总](https://developer.sophgo.com/thread/471.html)
 
-- CV系列芯片 TPU SDK 开发资料汇总：[CV系列芯片 TPU SDK 开发资料汇总](https://developer.sophgo.com/thread/473.html)
+- CV系列芯片 TPU SDK 开发资料汇总 (中文)：[CV系列芯片 TPU SDK 开发资料汇总](https://developer.sophgo.com/thread/473.html)
 
 # 关于 Milk-V
 

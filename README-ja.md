@@ -249,7 +249,7 @@ sync
 
 ## チップ製造元のドキュメント
 
-- CV181x/CV180x MMF SDK開発ドキュメント (中国語): [MultiMedia Framework Software Development Document](https://developer.sophgo.com/thread/471.html)
+- CV181x/CV180x MMF SDK開発ドキュメント (英語と中国語): [MultiMedia Framework Software Development Document](https://developer.sophgo.com/thread/471.html)
 - CVシリーズのTPU SDK開発ドキュメント (中国語): [CV series chip TPU SDK development data summary](https://developer.sophgo.com/thread/473.html)
 
 # Milk-Vについて
