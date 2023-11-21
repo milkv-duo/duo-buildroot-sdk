@@ -34,72 +34,17 @@ Milk-V Duo is an ultra-compact embedded development platform based on the CV1800
 
 ## Prepare the Compilation Environment
 
-- Using a local Ubuntu system, `Ubuntu 20.04 LTS` is recommended.
-  <br>
-  (You can also use Ubuntu installed in a virtual machine, Ubuntu installed through WSL on Windows, or Ubuntu-based systems using Docker)
+- Using a local Ubuntu system, the officially supported compilation environment is `Ubuntu Jammy 22.04.x amd64` only!
 - Install a serial port tool: `mobaXterm` or `Xshell` or others.
 
-### Tools to be installed on Ubuntu 20.04 LTS
+### Packages to be installed on Ubuntu 22.04 LTS
 
-Install the tools that compile dependencies:
-
-```bash
-sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tclsh ssh-client android-sdk-ext4-utils
-```
-
-Note：`cmake` minimum version requirement is `3.16.5`
-
-Check the version of `cmake` in the system
-
-```bash
-cmake --version
-```
-
-The version of `cmake` installed using apt in the current `Ubuntu 20.04` is
-
-```text
-cmake version 3.16.3
-```
-
-The minimum requirement of this SDK is not met. Manual installation of the latest version `3.27.6` is needed.
-
-```bash
-wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
-chmod +x cmake-3.27.6-linux-x86_64.sh
-sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
-```
-
-When manually installed, `cmake` is located in `/usr/local/bin`. To check its version, use the command `cmake --version`, which should display
-
-```
-cmake version 3.27.6
-```
-
-### Tools to be installed on Ubuntu 22.04 LTS
-
-Install the tools that compile dependencies:
+Install the packages that compile dependencies:
 
 ```bash
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
-Additionally, the mkimage command in the SDK relies on `libssl1.1`. Sometimes the system won't contain that because it has been deprecated, use `dpkg -s libssl1.1` to check if you have installed it.
 
-If not, the following two methods are both applicable:
-
-1. Installation with additional repositories
-
-   ```bash
-   echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
-   sudo apt update
-   sudo apt install libssl1.1
-   ```
-
-2. Manual download and installation of the deb package
-
-   ```bash
-   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   ```
 ### Compiling with Windows Linux Subsystem (WSL)
 
 If you wish to perform the compilation with WSL, there's an small issue building the image.

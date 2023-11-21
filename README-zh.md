@@ -34,70 +34,16 @@ Milk-V Duo是一个基于CV1800B芯片的超紧凑嵌入式开发平台。它可
 
 ## 准备编译环境
 
-- 使用本地的Ubuntu系统，推荐 `Ubuntu 20.04 LTS`
-  <br>
-  (也可以使用虚拟机中的Ubuntu系统、Windows中WSL安装的Ubuntu、基于Docker的Ubuntu系统)
+- 使用本地的Ubuntu系统，官方支持的编译环境是 `Ubuntu Jammy 22.04.x amd64`
 - 安装串口工具： `mobarXterm` 或者 `Xshell` 或者其他。
 
-### Ubuntu 20.04 LTS 下需要安装的工具
+### Ubuntu 22.04 LTS 下需要安装的工具包
 
-安装编译依赖的工具:
-
-```
-sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tclsh ssh-client android-sdk-ext4-utils
-```
-
-注意：`cmake` 版本最低要求 `3.16.5`
-
-查看系统中 `cmake` 的版本号
-
-```bash
-cmake --version
-```
-
-当前`Ubuntu 20.04`中用 apt 安装的 cmake 版本号为
-
-```text
-cmake version 3.16.3
-```
-
-不满足此SDK最低要求，需要手动安装目前最新的`3.27.6`版本
-
-```
-wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
-chmod +x cmake-3.27.6-linux-x86_64.sh
-sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
-```
-手动安装的`cmake`在`/usr/local/bin`中，此时用`cmake --version`命令查看其版本号, 应为
-
-```
-cmake version 3.27.6
-```
-
-### Ubuntu 22.04 LTS 下需要安装的工具
-
-安装编译依赖的工具:
+安装编译依赖的工具包:
 
 ```bash
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
-
-另外，SDK中的mkimage命令依赖的`libssl1.1`，在 Ubuntu22.04 中已弃用，需要手动安装，以下两种方法都可以
-
-1. 补源安装
-
-   ```bash
-   echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
-   sudo apt update
-   sudo apt install libssl1.1
-   ```
-
-2. 手动下载deb包安装
-
-   ```bash
-   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   ```
 
 ## 编译
 

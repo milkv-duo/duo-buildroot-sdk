@@ -34,45 +34,8 @@ Milk-V DuoはCV1800Bをベースにした超小型の組み込みプラットフ
 
 ## コンパイル環境の準備
 
-- ローカルのUbuntuを使う場合`Ubuntu 20.04 LTS`をお勧めします。
-  <br>
-  (仮想マシンにインストールされたUbuntuやWSLやUbuntuのDockerも使えます。)
+- 公式にサポートされているコンパイル環境は、`Ubuntu Jammy 22.04.x amd64` のみです。
 - `mobaXterm`とか`Xshell`のようなシリアルポートツールをインストールしてください
-
-### Ubuntu 20.04 LTSに必要なツール
-
-依存関係をコンパイルするためにインストールするもの
-
-```bash
-sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tclsh ssh-client android-sdk-ext4-utils
-```
-
-注意: `cmake`は最低でも`3.16.5`以降が必要です。
-
-システムにインストールされている`cmake`のバージョンを確認してください
-
-```bash
-cmake --version
-```
-
-`Ubuntu 20.04`のaptでデフォルトでインストールされている`cmake`のバージョンは
-
-```text
-cmake version 3.16.3
-```
-です。条件を満たしていないので手動で最新の`cmake`をインストールしてください
-
-```bash
-wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
-chmod +x cmake-3.27.6-linux-x86_64.sh
-sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
-```
-
- 手動でインストールした`cmake`は`/usr/local/bin`に配置されます。`cmake --version`すると以下のように出力されるはずです。
-
-```
-cmake version 3.27.6
-```
 
 ### Ubuntu 22.04 LTSに必要なツール
 
@@ -81,25 +44,6 @@ cmake version 3.27.6
 ```bash
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
-
-SDKのmkimageコマンドは`libssl1.1`に依存しています。`dpkg -s libssl1.1`でインストールされているか確認してください
-
-インストールされていない場合、2通りの方法でインストールできます。
-
-1. 追加のリポジトリからインストール
-
-   ```bash
-   echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
-   sudo apt update
-   sudo apt install libssl1.1
-   ```
-
-2. debパッケージを手動でダウンロードしてインストール
-
-   ```bash
-   wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb
-   ```
 
 ## イメージのコンパイル
 
