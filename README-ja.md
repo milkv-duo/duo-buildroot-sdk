@@ -38,7 +38,7 @@ If you are using other Linux distributions, we strongly recommend that you use t
 
 The following describes the compilation methods in the two environments.
 
-## 1. Compiled using Ubuntu 20.04
+## 1. Compiled using Ubuntu 22.04
 
 ### Packages to be installed
 
