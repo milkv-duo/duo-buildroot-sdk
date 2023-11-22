@@ -3,7 +3,7 @@
 
 # 项目简介
 
-Milk-V Duo是一个基于CV1800B芯片的超紧凑嵌入式开发平台。它可以运行Linux和RTOS，为专业人士、工业ODM厂商、AIoT爱好者、DIY爱好者和创作者提供了一个可靠、低成本和高性能的平台。
+Milk-V Duo 是一个基于 CV1800B 芯片的超紧凑嵌入式开发平台。它可以运行 Linux 和RTOS，为专业人士、工业 ODM 厂商、AIoT 爱好者、DIY 爱好者和创作者提供了一个可靠、低成本和高性能的平台。
 
 ## 硬件参数
 
@@ -16,58 +16,57 @@ Milk-V Duo是一个基于CV1800B芯片的超紧凑嵌入式开发平台。它可
 ```text
 ├── build               // 编译目录，存放编译脚本以及各board差异化配置
 ├── build_milkv.sh      // Milk-V Duo 一键编译脚本
-├── buildroot-2021.05   // buildroot开源工具
-├── freertos            // freertos系统
-├── fsbl                // fsbl启动固件，prebuilt形式存在
-├── install             // 执行一次完整编译后，临时存放各image路径
+├── buildroot-2021.05   // buildroot 开源工具
+├── freertos            // freertos 系统
+├── fsbl                // fsbl启动固件，prebuilt 形式存在
+├── install             // 执行一次完整编译后，临时存放各 image 路径
 ├── isp_tuning          // 图像效果调试参数存放路径
-├── linux_5.10          // 开源linux内核
-├── middleware          // 自研多媒体框架，包含so与ko
+├── linux_5.10          // 开源 linux 内核
+├── middleware          // 自研多媒体框架，包含 so 与 ko
 ├── milkv               // 存放 Milk-V Duo 相关配置及脚本文件的目录
-├── opensbi             // 开源opensbi库
-├── out                 // Milk-V Duo 最终生成的SD卡烧录镜像所在目录
-├── ramdisk             // 存放最小文件系统的prebuilt目录
-└── u-boot-2021.10      // 开源uboot代码
+├── opensbi             // 开源 opensbi 库
+├── out                 // Milk-V Duo 最终生成的 SD 卡烧录镜像所在目录
+├── ramdisk             // 存放最小文件系统的 prebuilt 目录
+└── u-boot-2021.10      // 开源 uboot 代码
 ```
 
 # 快速开始
 
-## 准备编译环境
+准备编译环境，使用本地的 Ubuntu 系统，官方支持的编译环境为 `Ubuntu Jammy 22.04.x amd64`。
 
-- 使用本地的Ubuntu系统，官方支持的编译环境是 `Ubuntu Jammy 22.04.x amd64`
-- 安装串口工具： `mobarXterm` 或者 `Xshell` 或者其他。
+如果您使用的是其他的 Linux 发行版，我们强烈建议您使用 Docker 环境来编译，以降低编译出错的概率。
 
-### Ubuntu 22.04 LTS 下需要安装的工具包
+以下分别介绍两种环境下的编译方法。
 
-安装编译依赖的工具包:
+## 一、使用 Ubuntu 20.04 编译
+
+### 安装编译依赖的工具包
 
 ```bash
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
 
-## 编译
-
-### 获取SDK
+### 获取 SDK
 
 ```
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
 ```
 
-### 一键编译
+### 1、一键编译
 
-- 执行一键编译脚本`build_milkv.sh`
+- 执行一键编译脚本 `build_milkv.sh`
 
 ```bash
 cd duo-buildroot-sdk/
 ./build_milkv.sh
 ```
-- 编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`。
+- 编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`
 
-*注: 第一次编译会自动下载所需的工具链，大小为 840M 左右，下载完会自动解压到 SDK 目录下的`host-tools`目录，下次编译时检测到已存在`host-tools`目录，就不会再次下载了*
+*注: 第一次编译会自动下载所需的工具链，大小为 840M 左右，下载完会自动解压到 SDK 目录下的 `host-tools` 目录，下次编译时检测到已存在 `host-tools` 目录，就不会再次下载了*
 
-### 分步编译
+### 2、分步编译
 
-可依次输入如下命令
+可依次输入如下命令：
 
 ```bash
 export MILKV_BOARD=milkv-duo
@@ -80,31 +79,158 @@ build_all
 pack_sd_image
 ```
 
-生成的固件位置: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`
+生成的固件位置: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`。
+
+## 二、使用 Docker 编译
+
+需要在运行 Linux 系统的主机上支持 Docker。 Docker 的使用方法请参考[官方文档](https://docs.docker.com/)或其他教程。
+
+我们将 SDK 代码放在 Linux 主机系统上，调用 Milk-V 提供的 Docker 镜像环境来编译。
+
+### 在 Linux 主机上拉 SDK 代码
+
+```
+git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
+```
+
+### 进入 SDK 代码目录
+
+```
+cd duo-buildroot-sdk
+```
+
+### 拉取 Docker 镜像并运行
+
+```
+docker run -itd --name duodocker -v $(pwd):/home/work milkvtech/milkv-duo:latest /bin/bash
+```
+
+命令中部分参数说明:
+- `duodocker` docker 运行时名字，可以使用自己想用的名字
+- `$(pwd)` 当前目录，这里是上一步 cd 到的 duo-buildroot-sdk 目录
+- `-v $(pwd):/home/work`  将当前的代码目录绑定到 Docker 镜像里的 /home/work 目录
+- `milkvtech/milkv-duo:latest` Milk-V 提供的 Docker 镜像，第一次会自动从 hub.docker.com 下载
+
+Docker 运行成功后，可以用 `docker ps -a` 命令查看运行状态：
+```
+$ docker ps -a
+CONTAINER ID   IMAGE                        COMMAND       CREATED       STATUS       PORTS     NAMES
+8edea33c2239   milkvtech/milkv-duo:latest   "/bin/bash"   2 hours ago   Up 2 hours             duodocker
+```
+
+### 1. 使用 Docker 一键编译
+
+```
+docker exec duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build_milkv.sh"
+```
+
+命令中部分参数说明:
+- `duodocker` 运行的 Docker 名字, 与上一步中设置的名字要保持一致
+- `"*"` 双引号中是要在 Docker 镜像中运行的 Shell 命令
+- `cd /home/work` 是切换到 /home/work 目录，由于运行时已经将该目录绑定到主机的代码目录，所以在 Docker 中 /home/work 目录就是该 SDK 的源码目录
+- `cat /etc/issue` 显示 Docker 使用的镜像的版本号，目前是 Ubuntu 22.04.3 LTS，调试用
+- `./build_milkv.sh` 执行一键编译脚本
+
+编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`
+
+### 2. 使用 Docker 分步编译
+
+分步编译需要登陆到 Docker 中进行操作，用命令 `docker ps -a` 查看并记录容器的 ID 号，比如 8edea33c2239。
+
+登陆到 Docker 中:
+```
+docker exec -it 8edea33c2239 /bin/bash
+```
+
+进入 Docker 中绑定的代码目录：
+```
+root@8edea33c2239:/# cd /home/work/
+```
+
+分步编译：
+```bash
+export MILKV_BOARD=milkv-duo
+source milkv/boardconfig-milkv-duo.sh
+
+source build/milkvsetup.sh
+defconfig cv1800b_milkv_duo_sd
+clean_all
+build_all
+pack_sd_image
+```
+
+生成的固件位置: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`。
+
+编译完成后可以用 `exit` 命令退出 Docker 环境：
+```
+root@8edea33c2239:/home/work# exit
+```
+在主机代码目录中同样也可以看到生成的固件。
+
+### 停用 Docker
+
+编译完成后，如果不再需要以上的 Docker 运行环境，可先将其停止，再删除:
+```
+docker stop 8edea33c2239
+docker rm 8edea33c2239
+```
+
+## 其他编译注意事项
+
+如果您想尝试在以上两种环境之外的环境下编译本 SDK，下面是可能需要注意的事项，仅供参考。
+
+### cmake 版本号
+
+注意：`cmake` 版本最低要求 `3.16.5`
+
+查看系统中 `cmake` 的版本号
+
+```bash
+cmake --version
+```
+
+比如在`Ubuntu 20.04`中用 apt 安装的 cmake 版本号为
+
+```text
+cmake version 3.16.3
+```
+
+不满足此SDK最低要求，需要手动安装目前最新的 `3.27.6` 版本
+
+```
+wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
+chmod +x cmake-3.27.6-linux-x86_64.sh
+sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
+```
+手动安装的 `cmake` 在 `/usr/local/bin` 中，此时用 `cmake --version` 命令查看其版本号, 应为
+
+```
+cmake version 3.27.6
+```
 
 ## SD卡烧录
 
-> 注意: 将镜像写入TF卡会擦除卡中原有数据，记得在烧录前备份重要的数据!!!
-- Window下使用`balenaEtcher`或者`Rufus`或者`Win32 Disk Imager`等工具将生成的镜像写入TF卡中
-- Linux下使用`dd`命令将生成的镜像写入TF卡中，**请务必仔细确认`of`设备`/dev/sdX`为要烧录的TF卡**
+> 注意: 将镜像写入 TF 卡会擦除卡中原有数据，记得在烧录前备份重要的数据!!!
+- Window 下使用 `balenaEtcher` 或者 `Rufus` 或者 `Win32 Disk Imager` 等工具将生成的镜像写入 TF 卡中
+- Linux 下使用 `dd` 命令将生成的镜像写入 TF 卡中，**请务必仔细确认 `of` 设备 `/dev/sdX` 为要烧录的 TF 卡**
   ```bash
   sudo dd if=milkv-duo-XXX.img of=/dev/sdX
   ```
 
 ## 开机
 
-- 将烧录好镜像的TF卡插入 Milk-V Duo 的TF卡槽中
+- 将烧录好镜像的 TF 卡插入 Milk-V Duo 的 TF 卡槽中
 - 接好串口线(可选)
-- 将平台上电，Duo会正常开机进入系统
-- 如有接串口线，在串口工具中可以看到开机日志，进系统后可通过串口登入终端，执行Linux下的相关命令
+- 将平台上电，Duo 会正常开机进入系统
+- 如有接串口线，在串口工具(`mobarXterm`, `Xshell` 或者其他)中可以看到开机日志，进系统后可通过串口登入终端，执行 Linux 下的相关命令
 
 ### 登陆到 Duo 终端的方法
 
 - 通过串口线
-- 通过USB网卡(RNDIS)方式
+- 通过 USB 网卡 (RNDIS) 方式
 - 通过以太网接口(需要扩展板支持)
 
-登陆Duo终端的用户名和密码分别为
+登陆 Duo 终端的用户名和密码分别为：
 
 ```
 root
@@ -118,48 +244,48 @@ milkv
 ```bash
 mv /mnt/system/blink.sh /mnt/system/blink.sh_backup && sync
 ```
-也就是将 LED 闪烁脚本改名，重启 Duo 后，LED 就不闪了
+也就是将 LED 闪烁脚本改名，重启 Duo 后，LED 就不闪了。
 
-如果需要恢复 LED 闪烁，再将其名字改回来，重启即可
+如果需要恢复 LED 闪烁，再将其名字改回来，重启即可：
 ```bash
 mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
 ```
 
 ### 使用 IO Board 底板
 
-注意，使用 IO Board 底板时，USB网卡(RNDIS)不可用，如需使用网络功能，请使用底板上的以太网接口
+注意，使用 IO Board 底板时，USB 网卡 (RNDIS) 不可用，如需使用网络功能，请使用底板上的以太网接口。
 
-使用底板上的4个USB口，需要修改一下配置，将默认固件中的`usb-rndis`功能修改为`usb-host`
+使用底板上的 4 个 USB 口，需要修改一下配置，将默认固件中的 `usb-rndis` 功能修改为 `usb-host`：
 
 ```bash
 rm /mnt/system/usb.sh
 ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
 sync
 ```
-修改完，重启或重新上电即可生效
+修改完，重启或重新上电即可生效。
 
-比如底板USB口接入U盘后，可以用`ls /dev/sd*`查看是否有检测到设备
+比如底板 USB 口接入 U 盘后，可以用 `ls /dev/sd*` 查看是否有检测到设备。
 
-挂载到系统中查看U盘中的内容(以/dev/sda1为例):
+挂载到系统中查看U盘中的内容(以 `/dev/sda1` 为例)：
 
 ```bash
 mkdir /mnt/udisk
 mount /dev/sda1 /mnt/udisk
 ```
 
-查看`/mnt/udisk`目录中的内容是否符合预期
+查看 `/mnt/udisk` 目录中的内容是否符合预期：
 
 ```bash
 ls /mnt/udisk
 ```
 
-卸载U盘的命令
+卸载U盘的命令：
 
 ```bash
 umount /mnt/udisk
 ```
 
-不使用底板时，恢复USB网卡(RNDIS)的方法
+不使用底板时，恢复 USB 网卡 (RNDIS) 的方法：
 
 ```bash
 rm /mnt/system/usb.sh
@@ -167,17 +293,17 @@ ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
 sync
 ```
 
-修改完，需要重启或重新上电生效
+修改完，需要重启或重新上电生效。
 
 # 常见问题解答
 
 1. 为什么只显示单核?
 
-   CV1800B芯片采用双核设计，当前Linux系统运行在其中的一个核上，另外一个核用来运行实时系统，这个核的SDK尚未公布，待后续更新
+   CV1800B 芯片采用双核设计，当前 Linux 系统运行在其中的一个核上，另外一个核用来运行实时系统，这个核的 SDK 尚未公布，待后续更新。
 
-2. 为什么查看RAM只显示28M?
+2. 为什么查看 RAM 只显示 28M?
 
-   因为有一部分RAM被分配绐了 [ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)，是在使用摄像头跑算法时需要占用的内存。如果不使用摄像头，您可以修改这个 [ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43) 的值为`0`然后重新编译生成固件。
+   因为有一部分RAM被分配绐了 [ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)，是在使用摄像头跑算法时需要占用的内存。如果不使用摄像头，您可以修改这个 [ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43) 的值为 `0` 然后重新编译生成固件。
 
 ## 芯片原厂一些资料的链接
 
