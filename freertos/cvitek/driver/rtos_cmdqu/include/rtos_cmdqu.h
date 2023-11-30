@@ -9,12 +9,18 @@
 #define NR_RTOS_CMD            127
 #define NR_RTOS_IP        IP_LIMIT
 
-
 enum SYS_CMD_ID {
 	CMD_TEST_A	= 0x10,
 	CMD_TEST_B,
 	CMD_TEST_C,
+	CMD_DUO_LED,
 	SYS_CMD_INFO_LIMIT,
+};
+
+enum DUO_LED_STATUS {
+	DUO_LED_ON	= 0x02,
+	DUO_LED_OFF,
+	DUO_LED_DONE,
 };
 
 struct valid_t {

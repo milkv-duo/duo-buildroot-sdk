@@ -33,13 +33,6 @@ enum SYSTEM_CMD_TYPE {
 	CMDQU_SYSTEM_LIMIT = NR_SYSTEM_CMD,
 };
 
-enum SYS_CMD_ID {
-	CMD_TEST_A	= 0x10,
-	CMD_TEST_B,
-	CMD_TEST_C,
-	SYS_CMD_INFO_LIMIT,
-};
-
 #define RTOS_CMDQU_DEV_NAME "cvi-rtos-cmdqu"
 #define RTOS_CMDQU_SEND                         _IOW('r', CMDQU_SEND, unsigned long)
 #define RTOS_CMDQU_SEND_WAIT                    _IOW('r', CMDQU_SEND_WAIT, unsigned long)

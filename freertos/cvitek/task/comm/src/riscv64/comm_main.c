@@ -18,6 +18,8 @@
 #include "comm.h"
 #include "cvi_spinlock.h"
 
+/* Milk-V Duo */
+#include "milkv_duo_io.h"
 
 // #define __DEBUG__
 #ifdef __DEBUG__
@@ -94,7 +96,6 @@ void main_cvirtos(void)
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
 
-
     /* If all is well, the scheduler will now be running, and the following
     line will never be reached.  If the following line does execute, then
     there was either insufficient FreeRTOS heap memory available for the idle
@@ -154,6 +155,19 @@ void prvCmdQuRunTask(void *pvParameters)
 			case CMD_TEST_C:
 				rtos_cmdq.cmd_id = CMD_TEST_C;
 				rtos_cmdq.param_ptr = 0x55aa;
+				rtos_cmdq.resv.valid.rtos_valid = 1;
+				rtos_cmdq.resv.valid.linux_valid = 0;
+				printf("recv cmd(%d) from C906B...send [0x%x] to C906B\n", rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
+				goto send_label;
+			case CMD_DUO_LED:
+				rtos_cmdq.cmd_id = CMD_DUO_LED;
+				printf("recv cmd(%d) from C906B, param_ptr [0x%x]\n", rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
+				if (rtos_cmdq.param_ptr == DUO_LED_ON) {
+					duo_led_control(1);
+				} else {
+					duo_led_control(0);
+				}
+				rtos_cmdq.param_ptr = DUO_LED_DONE;
 				rtos_cmdq.resv.valid.rtos_valid = 1;
 				rtos_cmdq.resv.valid.linux_valid = 0;
 				printf("recv cmd(%d) from C906B...send [0x%x] to C906B\n", rtos_cmdq.cmd_id, rtos_cmdq.param_ptr);
