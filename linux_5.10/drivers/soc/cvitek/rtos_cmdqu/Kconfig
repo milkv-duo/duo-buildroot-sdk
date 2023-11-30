@@ -1,0 +1,4 @@
+config CVI_MAILBOX
+	tristate "cv180x/cv181x mailbox dirver"
+	help
+		"cv180x/cv181x mailbox driver"

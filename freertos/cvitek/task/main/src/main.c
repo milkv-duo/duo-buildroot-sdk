@@ -103,6 +103,7 @@ within this file. */
 void vApplicationMallocFailedHook(void);
 void vApplicationIdleHook(void);
 void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName);
+void vApplicationTickHook(void);
 
 /* configAPPLICATION_ALLOCATED_HEAP is set to 1 in FreeRTOSConfig.h so the
 application can define the array used as the FreeRTOS heap.  This is done so the
@@ -220,6 +221,17 @@ void vApplicationIdleHook(void)
 }
 /*-----------------------------------------------------------*/
 
+void vApplicationTickHook(void)
+{
+#ifdef FULL_DEMO
+	{
+		/* Only the comprehensive demo actually uses the tick hook. */
+		extern void vFullDemoTickHook(void);
+		vFullDemoTickHook();
+	}
+#endif
+}
+/*-----------------------------------------------------------*/
 
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
 implementation of vApplicationGetIdleTaskMemory() to provide the memory that is

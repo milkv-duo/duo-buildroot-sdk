@@ -30,4 +30,5 @@ config CVI_BT_PIN
 	  GPIO number to do certain action, ex. power on
 	  or wakeup pin.
 
+source "drivers/soc/cvitek/rtos_cmdqu/Kconfig"
 endmenu
