@@ -126,30 +126,30 @@ CONTAINER ID   IMAGE                        COMMAND       CREATED       STATUS  
 docker exec duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build_milkv.sh"
 ```
 
-Description of some parameters in the command:
-- `duodocker` The name of the running Docker must be consistent with the name set in the previous step.
-- `"*"` In quotes is the shell command to be run in the Docker image.
-- `cd /home/work` Switch to the /home/work directory. Since this directory has been bound to the host's code directory during runtime, the /home/work directory in Docker is the source code directory of the SDK.
-- `cat /etc/issue` Displays the version number of the image used by Docker. It is currently Ubuntu 22.04.3 LTS and is used for debugging.
-- `./build_milkv.sh` Execute one-click compilation script.
+コマンド中のパラメータについて:
+- `duodocker` 実行中のDockerの名前です。先程設定したものと同じである必要があります。
+- `"*"` クオートの中にDockerイメージ中で実行したいコマンドが入ります。
+- `cd /home/work` /home/workディレクトリに移動します。このディレクトリは実行時にホストのコードディレクトリに紐付けられているため、Docker中の/home/workディレクトリはSDKのコードディレクトリになります。
+- `cat /etc/issue` Dockerで実行されているイメージのバージョンを表示します。これはいまのところ「Ubuntu 22.04.3 LTS」で、デバッグに使われます。
+- `./build_milkv.sh` 自動コンパイルスクリプトを実行します。
 
-After successful compilation, you can see the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
+コンパイルが成功すると、`out`ディレクトリの中に`milkv-duo-*-*.img`が出てきます。
 
-### <2>. Compile step by step using Docker
+### <2>. Dockerを使用して手動コンパイル
 
-Step-by-step compilation requires logging into Docker to operate. Use the command `docker ps -a` to view and record the ID number of the container, such as 8edea33c2239.
+手動コンパイルをする場合はDockerにログインする必要があります。`docker ps -a`コマンドを使用して8edea33c2239みたいな形式のコンテナのIDを表示します。
 
-Enter Docker:
+Dockerに入る:
 ```
 docker exec -it 8edea33c2239 /bin/bash
 ```
 
-Enter the code directory bound in Docker：
+Dockerに紐付けられたコードディレクトリに入る：
 ```
 root@8edea33c2239:/# cd /home/work/
 ```
 
-Compile step by step：
+手動でコンパイルする：
 ```bash
 export MILKV_BOARD=milkv-duo
 source milkv/boardconfig-milkv-duo.sh
@@ -161,43 +161,42 @@ build_all
 pack_sd_image
 ```
 
-Generated firmware location: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`.
+生成されたイメージは`install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`に出てきます。
 
-After compilation is completed, you can use the `exit` command to exit the Docker environment:
+コンパイルが完了したら`exit`コマンドでDockerから抜けれます:
 ```
 root@8edea33c2239:/home/work# exit
 ```
-The generated firmware can also be seen in the host code directory.
+生成されたイメージはホストのコードディレクトリからも見れます。
 
-### Stop Docker
+### Dockerを停止する
 
-After compilation is completed, if the above Docker running environment is no longer needed, you can stop it first and then delete it:
+コンパイルが完了して、もし上のDocker環境がもう必要ないなら止めて削除できます:
 ```
 docker stop 8edea33c2239
 docker rm 8edea33c2239
 ```
 
-## Other compilation considerations
+## その他の環境でのコンパイルに関する注意
 
-If you want to try to compile this SDK in an environment other than the above two environments, the following are things you may need to pay attention to, for reference only.
+もしこのSDKを上の2つの環境以外で行いたいなら、参考までに以下のことに注意してください。
 
-### cmake version
+### Cmakeのバージョン
 
-Note：`cmake` minimum version requirement is `3.16.5`.
+注意：`cmake`は最低でもバージョン`3.16.5`以降が必要です。
 
-Check the version of `cmake` in the system:
+システムの`cmake`バージョンの確認
 
 ```bash
 cmake --version
 ```
 
-For example, the version of `cmake` installed using apt in the `Ubuntu 20.04` is:
+例として、`Ubuntu 20.04`のaptでインストールされる`cmake`のバージョンは
 
-```
+```text
 cmake version 3.16.3
 ```
-
-The minimum requirement of this SDK is not met. Manual installation of the latest version `3.27.6` is needed:
+です。条件を満たしていないので手動で最新の`cmake`をインストールしてください
 
 ```bash
 wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
@@ -205,26 +204,26 @@ chmod +x cmake-3.27.6-linux-x86_64.sh
 sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
 ```
 
-When manually installed, `cmake` is located in `/usr/local/bin`. To check its version, use the command `cmake --version`, which should display:
+手動でインストールした`cmake`は`/usr/local/bin`に配置されます。`cmake --version`すると以下のように出力されるはずです。
 
 ```
 cmake version 3.27.6
 ```
 
-### Compiling with Windows Linux Subsystem (WSL)
+### Windows Subsystem for Linux(WSL)を使用してコンパイル
 
-If you wish to perform the compilation with WSL, there's an small issue building the image.
-The $PATH, due Windows interoperability, has Windows environment variables which include some spaces between the paths.
+WSLでコンパイルするには少し問題があります。
+互換性のために$PATHにいくつかのスペース文字を含むWindows用の環境変数が入っています。
 
-To solve this problem you need to change the `/etc/wsl.conf` file and add the following lines:
+解決するには`/etc/wsl.conf`ファイルに以下を追記します。
 
 ```
 [interop]
 appendWindowsPath = false
 ```
 
-After that, you need to reboot the WSL with `wsl.exe --reboot`. Then you able to run the `./build_milkv.sh` script or the `build_all` line in the step-by-step compilation method.
-To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true. To reboot the WSL, can you use the Windows PowerShell command `wsl.exe --shutdown` then `wsl.exe`, after that the Windows environment variables become avaliable again in $PATH.
+その後、`wsl.exe --reboot`でWSLを再起動する必要があります。そうすれば、自動コンパイルスクリプトを実行するか、手動コンパイルのを行うことができます。
+変更を元に戻すには、`/etc/wsl.conf`の`appendWindowsPath`をtrueに設定します。Powershellから`wsl.exe --shutdown`を実行してから`wsl.exe`すれば、また$PATHからWindowsの環境変数が使えるようになります。
 
 ## SDカードへの書き込み
 
@@ -280,8 +279,7 @@ IO-BoardのEthernetポートに固定MACアドレスを割り当てる必要が�
    ```bash
    echo "pre-up ifconfig eth0 hw ether 78:01:B3:FC:E8:55" >> /etc/network/interfaces"
    ```
-
-それからボードを再起動してください。
+   - それからボードを再起動してください。
 
 IO-Board上の4発のUSBポートを有効化する：
 
@@ -290,8 +288,7 @@ IO-Board上の4発のUSBポートを有効化する：
    ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
    sync
    ```
-
-それからボードを再起動してください。
+   - それからボードを再起動してください。
 
 たとえば、USBフラッシュドライブがIO-Board上のUSBポートに接続されている場合`ls /dev/sd*`で認識していることを確認できます。
 
