@@ -14,62 +14,62 @@ Milk-V DuoはCV1800Bをベースにした超小型の組み込みプラットフ
 # SDKのディレクトリ構造
 
 ```text
-├── build               // compilation scripts and board configs コンパイルスクリプトとボード設定
-├── build_milkv.sh      // one-click compilation script 自動コンパイルスクリプト
-├── buildroot-2021.05   // buildroot source code Buildrootのソースコード
-├── freertos            // freertos system freeRTOSのシステム
-├── fsbl                // fsbl firmware in prebuilt form 完成済みfsblファームウェア
-├── install             // temporary images stored here 一時イメージの仮置き場
-├── isp_tuning          // camera effect parameters カメラ効果パラメータ
-├── linux_5.10          // linux kernel Linuxカーネル
-├── middleware          // self-developed multimedia framework 自家製マルチメディアフレームワーク
-├── milkv               // configuration files for milkv Milk-Vのコンフィグレーションファイル
-├── opensbi             // opensbi library opensbiライブラリ
-├── out                 // final image for SD card 完成したSDカード用イメージはここに出てきます
-├── ramdisk             // prebuilt ramdisk 完成済みramsidk
-└── u-boot-2021.10      // u-boot source code u-bootのソースコード
+├── build               // コンパイルスクリプトとボード設定
+├── build_milkv.sh      // 自動コンパイルスクリプト
+├── buildroot-2021.05   // Buildrootのソースコード
+├── freertos            // FreeRTOSのシステム
+├── fsbl                // 完成済みfsblファームウェア
+├── install             // 一時イメージの仮置き場
+├── isp_tuning          // カメラ効果パラメータ
+├── linux_5.10          // Linuxカーネル
+├── middleware          // 自家製マルチメディアフレームワーク
+├── milkv               // Milk-Vのコンフィグレーションファイル
+├── opensbi             // opensbiライブラリ
+├── out                 // 完成したSDカード用イメージはここに出てきます
+├── ramdisk             // 完成済みramsidk
+└── u-boot-2021.10      // u-bootのソースコード
 ```
 
 # クイックスタート
 
-Prepare the Compilation Environment. Using a local Ubuntu system, the officially supported compilation environment is `Ubuntu Jammy 22.04.x amd64` only!
+コンパイル環境を準備する前に、ローカルのubuntuを使用する際にサポートされているのは`「Ubuntu Jammy 22.04.x amd64」`のみです。
 
-If you are using other Linux distributions, we strongly recommend that you use the Docker environment to compile to reduce the probability of compilation errors.
+他のLinuxディストロを使用している場合、問題を回避するためにDocker環境を使用することを強くお勧めします。
 
-The following describes the compilation methods in the two environments.
+2つの環境でのコンパイル方法について解説します。
 
-## 1. Compiled using Ubuntu 22.04
+## 1. Ubuntu 22.04を使用してコンパイル
 
-### Packages to be installed
+### インストールするパッケージ
 
-Install the packages that compile dependencies:
+コンパイルに必要なパッケージをインストールします。
 
 ```bash
 sudo apt install -y pkg-config build-essential ninja-build automake autoconf libtool wget curl git gcc libssl-dev bc slib squashfs-tools android-sdk-libsparse-utils jq python3-distutils scons parallel tree python3-dev python3-pip device-tree-compiler ssh cpio fakeroot libncurses5 flex bison libncurses5-dev genext2fs rsync unzip dosfstools mtools tcl openssh-client cmake
 ```
 
-### Get SDK Source Code
+### SDKのソースコードを入手
 
 ```bash
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
 ```
 
-### <1>. One-click Compilation
+### <1>. 自動コンパイル
 
-- Execute the one-click compilation script `build_milkv.sh`:
+- 自動コンパイルスクリプト`build_milkv.sh`を実行
 
 ```
 cd duo-buildroot-sdk/
 ./build_milkv.sh
 ```
 
-- After a successful compilation, you can find the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
+- 正常にコンパイルされるとSDカード用イメージ`milkv-duo-*-*.img`が`out`ディレクトリの中に出てきます。
 
-*Note: The first compilation will automatically download the required toolchain, which is approximately 840MB in size. Once downloaded, it will be automatically extracted to the `host-tools` directory in the SDK directory. For subsequent compilations, if the `host-tools` directory is detected, the download will not be performed again*.
+*注意：最初のコンパイル時に必要なツールチェーン(およそ840MB)が自動でダウンロードされます。一度ダウンロードされると`host-tools`内に自動で展開されます。以後のコンパイルでは`host-tools`ディレクトリがある場合再びダウンロードはされません。*
 
-### <2>. Step-by-step Compilation
+### <2>. 手動コンパイル
 
-If you wish to perform step-by-step compilation, you can enter the following commands sequentially:
+手動コンパイルをしたい場合は以下のコマンドを順に実行します。
 
 ```bash
 export MILKV_BOARD=milkv-duo
@@ -82,75 +82,74 @@ build_all
 pack_sd_image
 ```
 
-Location of the generated image: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`.
+生成されたイメージは`install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`に出てきます。
 
-## 2. Compiled using Docker
+## 2. Dockerを使用してコンパイル
 
-Docker support is required on hosts running Linux systems. For how to use Docker, please refer to the [official documentation](https://docs.docker.com/) or other tutorials.
+DockerはホストのLinuxシステムからサポートされている必要があります。Dockerの使い方については[公式ドキュメント](https://docs.docker.com/)とか他の使い方を見てください。
 
-We put the SDK source code on the Linux host system and call the Docker image environment provided by Milk-V to compile it.
+SDKのソースコードをLinuxホストシステムに置いて、Milk-Vから提供されているコンパイル用イメージをDockerで呼び出してコンパイルします。
 
-### Pull SDK code on Linux host
+### SDKのソースコードをホストに持ってくる
 
 ```
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
 ```
 
-### Enter the SDK code directory
+### SDKのコードディレクトリに入る
 
 ```
 cd duo-buildroot-sdk
 ```
 
-### Pull the Docker image and run
+### Dockerイメージを持ってきて実行する
 
 ```
 docker run -itd --name duodocker -v $(pwd):/home/work milkvtech/milkv-duo:latest /bin/bash
 ```
 
-Description of some parameters in the command:
-- `duodocker` Docker name, you can use the name you want to use.
-- `$(pwd)` The current directory, here is the duo-buildroot-sdk directory that was 'cd' to in the previous step.
-- `-v $(pwd):/home/work`  Bind the current code directory to the /home/work directory in the Docker image.
-- `milkvtech/milkv-duo:latest` The Docker image provided by Milk-V will be automatically downloaded from hub.docker.com for the first time.
+コマンド中のパラメータについて:
+- `duodocker` Dockerの名前です。好きな名前を使えます。
+- `$(pwd)` カレントディレクトリです。ここでは先程cdしたduo-buildroot-sdkを指しています。
+- `-v $(pwd):/home/work` 現在のコードディレクトリをDockerイメージの/home/workに結びつけます。
+- `milkvtech/milkv-duo:latest` Milk-VによるDockerイメージです。最初にhub.docker.comから自動でダウンロードされます。
 
-After Docker runs successfully, you can use the `docker ps -a` command to view the running status:
+Dockerが正常に実行されたら`docker ps -a`コマンドで実行状態を見ることができます。
 ```
 $ docker ps -a
 CONTAINER ID   IMAGE                        COMMAND       CREATED       STATUS       PORTS     NAMES
 8edea33c2239   milkvtech/milkv-duo:latest   "/bin/bash"   2 hours ago   Up 2 hours             duodocker
 ```
 
-### <1>. One-click compilation using Docker
-
+### <1>. Dockerを使用して自動コンパイル
 ```
 docker exec duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build_milkv.sh"
 ```
 
-Description of some parameters in the command:
-- `duodocker` The name of the running Docker must be consistent with the name set in the previous step.
-- `"*"` In quotes is the shell command to be run in the Docker image.
-- `cd /home/work` Switch to the /home/work directory. Since this directory has been bound to the host's code directory during runtime, the /home/work directory in Docker is the source code directory of the SDK.
-- `cat /etc/issue` Displays the version number of the image used by Docker. It is currently Ubuntu 22.04.3 LTS and is used for debugging.
-- `./build_milkv.sh` Execute one-click compilation script.
+コマンド中のパラメータについて:
+- `duodocker` 実行中のDockerの名前です。先程設定したものと同じである必要があります。
+- `"*"` クオートの中にDockerイメージ中で実行したいコマンドが入ります。
+- `cd /home/work` /home/workディレクトリに移動します。このディレクトリは実行時にホストのコードディレクトリに紐付けられているため、Docker中の/home/workディレクトリはSDKのコードディレクトリになります。
+- `cat /etc/issue` Dockerで実行されているイメージのバージョンを表示します。これはいまのところ「Ubuntu 22.04.3 LTS」で、デバッグに使われます。
+- `./build_milkv.sh` 自動コンパイルスクリプトを実行します。
 
-After successful compilation, you can see the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
+コンパイルが成功すると、`out`ディレクトリの中に`milkv-duo-*-*.img`が出てきます。
 
-### <2>. Compile step by step using Docker
+### <2>. Dockerを使用して手動コンパイル
 
-Step-by-step compilation requires logging into Docker to operate. Use the command `docker ps -a` to view and record the ID number of the container, such as 8edea33c2239.
+手動コンパイルをする場合はDockerにログインする必要があります。`docker ps -a`コマンドを使用して8edea33c2239みたいな形式のコンテナのIDを表示します。
 
-Enter Docker:
+Dockerに入る:
 ```
 docker exec -it 8edea33c2239 /bin/bash
 ```
 
-Enter the code directory bound in Docker：
+Dockerに紐付けられたコードディレクトリに入る：
 ```
 root@8edea33c2239:/# cd /home/work/
 ```
 
-Compile step by step：
+手動でコンパイルする：
 ```bash
 export MILKV_BOARD=milkv-duo
 source milkv/boardconfig-milkv-duo.sh
@@ -162,43 +161,42 @@ build_all
 pack_sd_image
 ```
 
-Generated firmware location: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`.
+生成されたイメージは`install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`に出てきます。
 
-After compilation is completed, you can use the `exit` command to exit the Docker environment:
+コンパイルが完了したら`exit`コマンドでDockerから抜けれます:
 ```
 root@8edea33c2239:/home/work# exit
 ```
-The generated firmware can also be seen in the host code directory.
+生成されたイメージはホストのコードディレクトリからも見れます。
 
-### Stop Docker
+### Dockerを停止する
 
-After compilation is completed, if the above Docker running environment is no longer needed, you can stop it first and then delete it:
+コンパイルが完了して、もし上のDocker環境がもう必要ないなら止めて削除できます:
 ```
 docker stop 8edea33c2239
 docker rm 8edea33c2239
 ```
 
-## Other compilation considerations
+## その他の環境でのコンパイルに関する注意
 
-If you want to try to compile this SDK in an environment other than the above two environments, the following are things you may need to pay attention to, for reference only.
+もしこのSDKを上の2つの環境以外で行いたいなら、参考までに以下のことに注意してください。
 
-### cmake version
+### Cmakeのバージョン
 
-Note：`cmake` minimum version requirement is `3.16.5`.
+注意：`cmake`は最低でもバージョン`3.16.5`以降が必要です。
 
-Check the version of `cmake` in the system:
+システムの`cmake`バージョンの確認
 
 ```bash
 cmake --version
 ```
 
-For example, the version of `cmake` installed using apt in the `Ubuntu 20.04` is:
+例として、`Ubuntu 20.04`のaptでインストールされる`cmake`のバージョンは
 
-```
+```text
 cmake version 3.16.3
 ```
-
-The minimum requirement of this SDK is not met. Manual installation of the latest version `3.27.6` is needed:
+です。条件を満たしていないので手動で最新の`cmake`をインストールしてください
 
 ```bash
 wget https://github.com/Kitware/CMake/releases/download/v3.27.6/cmake-3.27.6-linux-x86_64.sh
@@ -206,26 +204,26 @@ chmod +x cmake-3.27.6-linux-x86_64.sh
 sudo sh cmake-3.27.6-linux-x86_64.sh --skip-license --prefix=/usr/local/
 ```
 
-When manually installed, `cmake` is located in `/usr/local/bin`. To check its version, use the command `cmake --version`, which should display:
+手動でインストールした`cmake`は`/usr/local/bin`に配置されます。`cmake --version`すると以下のように出力されるはずです。
 
 ```
 cmake version 3.27.6
 ```
 
-### Compiling with Windows Linux Subsystem (WSL)
+### Windows Subsystem for Linux(WSL)を使用してコンパイル
 
-If you wish to perform the compilation with WSL, there's an small issue building the image.
-The $PATH, due Windows interoperability, has Windows environment variables which include some spaces between the paths.
+WSLでコンパイルするには少し問題があります。
+互換性のために$PATHにいくつかのスペース文字を含むWindows用の環境変数が入っています。
 
-To solve this problem you need to change the `/etc/wsl.conf` file and add the following lines:
+解決するには`/etc/wsl.conf`ファイルに以下を追記します。
 
 ```
 [interop]
 appendWindowsPath = false
 ```
 
-After that, you need to reboot the WSL with `wsl.exe --reboot`. Then you able to run the `./build_milkv.sh` script or the `build_all` line in the step-by-step compilation method.
-To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true. To reboot the WSL, can you use the Windows PowerShell command `wsl.exe --shutdown` then `wsl.exe`, after that the Windows environment variables become avaliable again in $PATH.
+その後、`wsl.exe --reboot`でWSLを再起動する必要があります。そうすれば、自動コンパイルスクリプトを実行するか、手動コンパイルのを行うことができます。
+変更を元に戻すには、`/etc/wsl.conf`の`appendWindowsPath`をtrueに設定します。Powershellから`wsl.exe --shutdown`を実行してから`wsl.exe`すれば、また$PATHからWindowsの環境変数が使えるようになります。
 
 ## SDカードへの書き込み
 
@@ -261,69 +259,66 @@ milkv
 
 もしDuoに載っているLEDの点滅を無効にしたいならDuoのターミナルで以下のコマンドを実行してください。
 
-```bash
-mv /mnt/system/blink.sh /mnt/system/blink.sh_backup && sync
-```
+   ```bash
+   mv /mnt/system/blink.sh /mnt/system/blink.sh_backup && sync
+   ```
 
 以上のコマンドはLEDの点滅スクリプトをリネームしています。そしてDuoを再起動するとLEDは点滅しなくなります。
 
 DuoのLEDをまた点滅させたい場合、スクリプトのファイル名を元に戻します。
 
-```bash
-mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
-```
+   ```bash
+   mv /mnt/system/blink.sh_backup /mnt/system/blink.sh && sync
+   ```
 
 ### IO-Boardを使う
 
 IO-Boardを使用する場合、USBネットワーク(RNDIS)は使用できないので、IO-Boardのイーサネットインターフェースを使用してください。
 IO-BoardのEthernetポートに固定MACアドレスを割り当てる必要がある場合は、以下のコマンドを実行してください(**コマンド中のMACアドレスは設定したいMACアドレスに置き換えてください。また、同一ネットワークセグメント内の異なるデバイスのMACアドレスは重複してはいけません**)。
 
-```bash
-echo "pre-up ifconfig eth0 hw ether 78:01:B3:FC:E8:55" >> /etc/network/interfaces"
-```
-
-それからボードを再起動してください。
+   ```bash
+   echo "pre-up ifconfig eth0 hw ether 78:01:B3:FC:E8:55" >> /etc/network/interfaces"
+   ```
+   - それからボードを再起動してください。
 
 IO-Board上の4発のUSBポートを有効化する：
 
-```bash
-rm /mnt/system/usb.sh
-ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
-sync
-```
-
-それからボードを再起動してください。
+   ```bash
+   rm /mnt/system/usb.sh
+   ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
+   sync
+   ```
+   - それからボードを再起動してください。
 
 たとえば、USBフラッシュドライブがIO-Board上のUSBポートに接続されている場合`ls /dev/sd*`で認識していることを確認できます。
 
 USBフラッシュドライブをマウントしてその内容を見る(/dev/sda1を例に)。
 
-```bash
-mkdir /mnt/udisk
-mount /dev/sda1 /mnt/udisk
-```
+   ```bash
+   mkdir /mnt/udisk
+   mount /dev/sda1 /mnt/udisk
+   ```
 
 `/mnt/udisk`ディレクトリの内容が予想と一致するか確認する。
 
-```bash
-ls /mnt/udisk
-```
+   ```bash
+   ls /mnt/udisk
+   ```
 
-USBフラッシュドライブをアンマウントするコマンド
+USBフラッシュドライブをアンマウントするコマンド。
 
-```bash
-umount /mnt/udisk
-```
+   ```bash
+   umount /mnt/udisk
+   ```
 
-USBネットワーク(RNDIS)の機能をIO-Board不使用時に使う場合は以下のコマンドを実行してください
+USBネットワーク(RNDIS)の機能をIO-Board不使用時に使う。
 
-```bash
-rm /mnt/system/usb.sh
-ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
-sync
-```
-
-それからボードを再起動してください。
+   ```bash
+   rm /mnt/system/usb.sh
+   ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
+   sync
+   ```
+   - それからボードを再起動してください。
 
 # よくある質問
 
@@ -333,7 +328,7 @@ sync
 
 2. なぜ28MBしかRAMが使えないのですか。
  
-   RAMの一部が[ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)に割り当てられており、カメラを使ってアルゴリズムを実行するときに使用するメモリだからです。カメラを使用しない場合は、この[ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43)の値を0に変更し、再コンパイルしてください。
+   RAMの一部が[ION](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/default/dts/cv180x/cv180x_default_memmap.dtsi#L15)に割り当てられており、カメラを使ってアルゴリズムを実行するときに使用するメモリに割り当てられているからです。カメラを使用しない場合は、この[ION_SIZE](https://github.com/milkv-duo/duo-buildroot-sdk/blob/develop/build/boards/cv180x/cv1800b_milkv_duo_sd/memmap.py#L43)の値を0に変更し、再コンパイルしてください。
 
 ## チップ製造元のドキュメント
 
