@@ -66,7 +66,13 @@ cd duo-buildroot-sdk/
 
 ### 2、分步编译
 
-可依次输入如下命令：
+如果未执行过一键编译脚本，需要先手动下载工具链 [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)，并解压到 SDK 根目录：
+
+```
+tar -xf host-tools.tar.gz -C /your/sdk/path/
+```
+
+再依次输入如下命令完成分步编译：
 
 ```bash
 export MILKV_BOARD=milkv-duo

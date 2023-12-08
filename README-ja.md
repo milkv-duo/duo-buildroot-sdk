@@ -69,7 +69,13 @@ cd duo-buildroot-sdk/
 
 ### <2>. 手動コンパイル
 
-手動コンパイルをしたい場合は以下のコマンドを順に実行します。
+If you have not executed the one-click compilation script, you need to manually download the toolchain [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz) and extract it to the SDK root directory:
+
+```
+tar -xf host-tools.tar.gz -C /your/sdk/path/
+```
+
+Then enter the following commands sequentially:
 
 ```bash
 export MILKV_BOARD=milkv-duo
