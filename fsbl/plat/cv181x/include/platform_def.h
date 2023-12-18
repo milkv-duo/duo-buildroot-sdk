@@ -322,6 +322,7 @@ extern struct _time_records *time_records;
 #define BOOT_SOURCE_FLAG_SIZE 4
 #define MAGIC_NUM_USB_DL 0x4D474E31 // MGN1
 #define MAGIC_NUM_SD_DL 0x4D474E32 // MGN2
+#define MAGIC_NUM_UART_DL 0x4D474E33 // MGN3
 
 #define BOOT_LOG_LEN_ADDR (BOOT_SOURCE_FLAG_ADDR + BOOT_SOURCE_FLAG_SIZE) // 0x0E000008
 #define BOOT_LOG_LEN_SIZE 4
@@ -461,6 +462,7 @@ extern struct _time_records *time_records;
  */
 #define UART_DL_MAGIC 0x5552444c // "URDL"
 #define UART_DL_KERMIT_TIMEROUT 10000 // ms
+#define UART_DL_BAUDRATE 1500000
 
 /*
  * SD/EMMC definitions
