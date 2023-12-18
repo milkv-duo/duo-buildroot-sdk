@@ -495,7 +495,7 @@ struct nand_ecc_info {
 	uint8_t ecc_bits;
 	uint8_t ecc_bit_shift;
 	uint8_t uncorr_val;
-	char *remap;
+	short *remap;
 };
 
 struct spi_nand_driver {
