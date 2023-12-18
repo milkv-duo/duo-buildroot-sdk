@@ -559,18 +559,47 @@ config FAST_IMAGE_TYPE
 		E_FAST_H264 : 2
 		E_FAST_H265 : 3
 
-config ENABLE_ALIOS
-	bool "Enable ALIOS"
-	default n
+choice
+	prompt "Alios source selection"
+	default DISABLE_ALIOS
+	config DISABLE_ALIOS
+		bool "disable alios"
+		help
+			Disable alios update tool
+			We usually choose this configuration
+			This configuration is required to compile the boot kernel uboot
+			This configuration does not support alios upgrades
+	config ENABLE_ALIOS_UPDATE
+		bool "mars/phobos alios update"
+		help
+			Enable alios update tool
+			We don't usually choose this configuration
+			This configuration is required to compile the tools that update mars/phobos alios
+			This configuration does not support booting the kernel
+	config ENABLE_ALIOS
+		bool "mercury alios"
+		help
+			Enable mercury alios update tool
+			We don't usually choose this configuration
+			This configuration is required to compile the tools that update mercury alios
+			This configuration does not support booting the kernel
+endchoice
+
+config ALIOS_SOURCE
+	string
+	default "mars_alios" if ENABLE_ALIOS_UPDATE
+	default "alios" if ENABLE_ALIOS
+	default "" if DISABLE_ALIOS
 	help
-	  Enable alios.
+		Select build alios source.
 
 config ALIOS_SOLUTION
-	string "Select alios solution"
-	default "cv182x_helloworld"
-	depends on ENABLE_ALIOS
+	string
+	default "helloworld" if ENABLE_ALIOS_UPDATE
+	default "cv182x_helloworld" if ENABLE_ALIOS
+	default "" if DISABLE_ALIOS
 	help
-	  Select solution to build alios.
+		Select solution to build alios.
 
 endmenu
 
