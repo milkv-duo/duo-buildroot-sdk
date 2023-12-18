@@ -295,10 +295,12 @@
 				UBOOT_VBOOT_BOOTM_COMMAND \
 				"fi;"
 
-	#ifndef CONFIG_SD_BOOT
-		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
-	#else
+	#ifdef CONFIG_ENABLE_ALIOS_UPDATE
+		#define CONFIG_BOOTCOMMAND	"cvi_update_rtos"
+	#elif CONFIG_SD_BOOT
 		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "run sdboot"
+	#else
+		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
 	#endif
 
 	#if defined(CONFIG_NAND_SUPPORT)

@@ -72,6 +72,7 @@ obj-$(CONFIG_CMD_CVI_JPEG) += cvi_jpeg.o
 obj-$(CONFIG_CMD_CVI_VO) += cvi_vo.o
 obj-$(CONFIG_CMD_CVI_UPDATE) += cvi_update.o
 obj-$(CONFIG_CMD_CVI_UPDATE) += cvi_utask.o
+obj-$(CONFIG_ENABLE_ALIOS_UPDATE) += cvi_update_rtos.o
 obj-$(CONFIG_NAND_SUPPORT) += cvi_sd_update.o cvi_sd_update_spinand_v3.o
 obj-$(CONFIG_CMD_FPGA) += fpga.o
 obj-$(CONFIG_CMD_FPGAD) += fpgad.o

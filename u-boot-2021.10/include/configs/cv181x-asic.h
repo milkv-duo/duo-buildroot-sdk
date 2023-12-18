@@ -294,9 +294,11 @@
 				"if test $? -eq 0; then " \
 				UBOOT_VBOOT_BOOTM_COMMAND \
 				"fi;"
-
-	#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
-
+	#ifdef CONFIG_ENABLE_ALIOS_UPDATE
+		#define CONFIG_BOOTCOMMAND	"cvi_update_rtos"
+	#else
+		#define CONFIG_BOOTCOMMAND	SHOWLOGOCMD "cvi_update || run norboot || run nandboot ||run emmcboot"
+	#endif
 	#if defined(CONFIG_NAND_SUPPORT)
 	/* For spi nand boot, need to reset DMA and its setting before exiting uboot */
 	/* 0x4330058 : DMA reset */
