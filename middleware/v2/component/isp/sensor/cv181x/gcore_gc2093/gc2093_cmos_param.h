@@ -61,6 +61,47 @@ static const GC2093_MODE_S g_astGc2093_mode[GC2093_MODE_NUM] = {
 			.u32Step = 10*16,
 		},
 	},
+	[GC2093_MODE_1920X1080P60] = {
+		.name = "1920X1080P60",
+		.astImg[0] = {
+			.stSnsSize = {
+				.u32Width = 1920,
+				.u32Height = 1080,
+			},
+			.stWndRect = {
+				.s32X = 0,
+				.s32Y = 0,
+				.u32Width = 1920,
+				.u32Height = 1080,
+			},
+			.stMaxSize = {
+				.u32Width = 1920,
+				.u32Height = 1080,
+			},
+		},
+		.f32MaxFps = 60,
+		.f32MinFps = 2.07, /* 1125 * 30 / 0x3FFF */
+		.u32HtsDef = 2200,
+		.u32VtsDef = 1250,
+		.stExp[0] = {
+			.u16Min = 1,
+			.u16Max = 0x3fff,
+			.u16Def = 0x2000,
+			.u16Step = 1,
+		},
+		.stAgain[0] = {
+			.u32Min = 64,
+			.u32Max = 62977,
+			.u32Def = 64,
+			.u32Step = 1,
+		},
+		.stDgain[0] = {
+			.u32Min = 64*16,
+			.u32Max = 7073*16,
+			.u32Def = 581*16,
+			.u32Step = 10*16,
+		},
+	},
 	[GC2093_MODE_1920X1080P30_WDR] = {
 		.name = "1920X1080P30_WDR",
 		.astImg[0] = {

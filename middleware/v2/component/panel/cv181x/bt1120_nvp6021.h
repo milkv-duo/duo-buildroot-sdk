@@ -1,0 +1,34 @@
+#ifndef _BT1120_NVP6021_H_
+#define _BT1120_NVP6021_H_
+
+#include <linux/cvi_comm_vo.h>
+
+const struct VO_PINMUX nvp6021_pins_cfg = {
+	.pin_num = 17,
+	.d_pins = {
+		{VO_MIPI_TXM2, VO_MUX_BT_DATA0},
+		{VO_MIPI_TXP1, VO_MUX_BT_DATA1},
+		{VO_MIPI_TXM1, VO_MUX_BT_DATA2},
+		{VO_MIPI_TXP0, VO_MUX_BT_DATA3},
+		{VO_MIPI_TXM0, VO_MUX_BT_DATA4},
+		{VO_MIPI_RXP0, VO_MUX_BT_DATA5},
+		{VO_MIPI_TXP3, VO_MUX_BT_DATA6},
+		{VO_MIPI_TXM3, VO_MUX_BT_DATA7},
+
+		{VO_MIPI_TXP4, VO_MUX_BT_DATA8},
+		{VO_VIVO_D0, VO_MUX_BT_DATA9},
+		{VO_VIVO_D1, VO_MUX_BT_DATA10},
+		{VO_VIVO_D2, VO_MUX_BT_DATA11},
+		{VO_VIVO_D3, VO_MUX_BT_DATA12},
+		{VO_VIVO_D4, VO_MUX_BT_DATA13},
+		{VO_VIVO_D9, VO_MUX_BT_DATA14},
+		{VO_VIVO_D10, VO_MUX_BT_DATA15},
+		{VO_VIVO_CLK, VO_MUX_BT_CLK}
+	}
+};
+
+const VO_BT_ATTR_S stNVP6021Cfg = {
+	.pins = nvp6021_pins_cfg,
+};
+
+#endif // _BT1120_NVP6021_H_

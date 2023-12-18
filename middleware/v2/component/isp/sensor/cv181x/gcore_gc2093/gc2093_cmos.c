@@ -131,7 +131,7 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	switch (pstSnsState->enWDRMode) {
 	default:
 	case WDR_MODE_NONE:   /*linear mode*/
-		pstAeSnsDft->f32Fps = g_astGc2093_mode[GC2093_MODE_1920X1080P30].f32MaxFps;
+		pstAeSnsDft->f32Fps = g_astGc2093_mode[GC2093_MODE_1920X1080P60].f32MaxFps;
 		pstAeSnsDft->f32MinFps = g_astGc2093_mode[GC2093_MODE_1920X1080P30].f32MinFps;
 		pstAeSnsDft->au8HistThresh[0] = 0xd;
 		pstAeSnsDft->au8HistThresh[1] = 0x28;
@@ -923,6 +923,17 @@ static CVI_S32 cmos_set_image_mode(VI_PIPE ViPipe, ISP_CMOS_SENSOR_IMAGE_MODE_S 
 				      pstSnsState->enWDRMode);
 			return CVI_FAILURE;
 		}
+	} else if (pstSensorImageMode->f32Fps > 30) {
+		if (GC2093_RES_IS_1080P(pstSensorImageMode->u16Width, pstSensorImageMode->u16Height))
+			u8SensorImageMode = GC2093_MODE_1920X1080P60;
+		else {
+			CVI_TRACE_SNS(CVI_DBG_ERR, "Not support! Width:%d, Height:%d, Fps:%f, WDRMode:%d\n",
+						pstSensorImageMode->u16Width,
+						pstSensorImageMode->u16Height,
+						pstSensorImageMode->f32Fps,
+						pstSnsState->enWDRMode);
+			return CVI_FAILURE;
+			}
 	} else {
 		CVI_TRACE_SNS(CVI_DBG_ERR, "Not support this Fps:%f\n", pstSensorImageMode->f32Fps);
 		return CVI_FAILURE;

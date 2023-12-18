@@ -2655,7 +2655,7 @@ typedef struct _ISP_INNER_STATE_INFO_S {
 
 typedef struct _ISP_VC_ATTR_S {
 	CVI_U8 UpdateInterval; /*RW; Range:[0x1, 0xFF]*/
-	CVI_U8 MotionThreshold; /*RW; Range:[0x0, 0xff] */
+	CVI_U8 MotionThreshold[ISP_AUTO_ISO_STRENGTH_NUM]; /*RW; Range:[0x0, 0xff] */
 } ISP_VC_ATTR_S;
 
 #ifdef __cplusplus

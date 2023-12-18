@@ -25,6 +25,47 @@ static const SC5336_2L_MODE_S g_astSC5336_2L_mode[SC5336_2L_MODE_NUM] = {
 		.astImg[0] = {
 			.stSnsSize = {
 				.u32Width = 2880,
+				.u32Height = 1620,
+			},
+			.stWndRect = {
+				.s32X = 0,
+				.s32Y = 0,
+				.u32Width = 2880,
+				.u32Height = 1620,
+			},
+			.stMaxSize = {
+				.u32Width = 2880,
+				.u32Height = 1620,
+			},
+		},
+		.f32MaxFps = 30,
+		.f32MinFps = 1.65, /* 1800 * 30 / 0x7FFF*/
+		.u32HtsDef = 2560, /* NA */
+		.u32VtsDef = 1800,
+		.stExp[0] = {
+			.u16Min = 2,
+			.u16Max = 1796,/* vts-4 */
+			.u16Def = 400,
+			.u16Step = 1,
+		},
+		.stAgain[0] = {
+			.u32Min = 1024,
+			.u32Max = 32768,
+			.u32Def = 1024,
+			.u32Step = 1,
+		},
+		.stDgain[0] = {
+			.u32Min = 1024,
+			.u32Max = 16128,
+			.u32Def = 1024,
+			.u32Step = 1,
+		},
+	},
+	[SC5336_2L_MODE_1618P30] = {
+		.name = "1618p30",
+		.astImg[0] = {
+			.stSnsSize = {
+				.u32Width = 2880,
 				.u32Height = 1618,
 			},
 			.stWndRect = {

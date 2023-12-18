@@ -328,7 +328,7 @@ static void q03p_linear_1296p30_init(VI_PIPE ViPipe)
 	q03p_write_register(ViPipe, 0xBC,0x11);
 	q03p_write_register(ViPipe, 0x82,0x00);
 	q03p_write_register(ViPipe, 0x19,0x20);
-	q03p_write_register(ViPipe, 0x1B,0x4F);
+	q03p_write_register(ViPipe, 0x1B,0x4B);
 	q03p_write_register(ViPipe, 0x12,0x00);
 	q03p_write_register(ViPipe, 0x48,0x96);
 	q03p_write_register(ViPipe, 0x48,0x16);

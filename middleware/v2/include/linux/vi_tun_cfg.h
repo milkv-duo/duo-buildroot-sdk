@@ -21,6 +21,9 @@ enum cvi_isp_raw {
 	ISP_PRERAW_B,
 	ISP_PRERAW_C,
 	ISP_PRERAW_MAX,
+	ISP_PRERAW_VIRT_A = ISP_PRERAW_MAX,
+	ISP_PRERAW_VIRT_B,
+	ISP_PRERAW_VIRT_MAX,
 };
 
 enum cvi_isp_chn_num {
@@ -1445,20 +1448,20 @@ struct cvi_vip_isp_post_cfg {
 };
 
 struct isp_tuning_cfg {
-	uint64_t  fe_addr[ISP_PRERAW_MAX];
-	void	  *fe_vir[ISP_PRERAW_MAX];
+	uint64_t  fe_addr[ISP_PRERAW_VIRT_MAX];
+	void	  *fe_vir[ISP_PRERAW_VIRT_MAX];
 #ifdef __arm__
-	__u32	  fe_padding[ISP_PRERAW_MAX];
+	__u32	  fe_padding[ISP_PRERAW_VIRT_MAX];
 #endif
-	uint64_t  be_addr[ISP_PRERAW_MAX];
-	void	  *be_vir[ISP_PRERAW_MAX];
+	uint64_t  be_addr[ISP_PRERAW_VIRT_MAX];
+	void	  *be_vir[ISP_PRERAW_VIRT_MAX];
 #ifdef __arm__
-	__u32	  be_padding[ISP_PRERAW_MAX];
+	__u32	  be_padding[ISP_PRERAW_VIRT_MAX];
 #endif
-	uint64_t  post_addr[ISP_PRERAW_MAX];
-	void      *post_vir[ISP_PRERAW_MAX];
+	uint64_t  post_addr[ISP_PRERAW_VIRT_MAX];
+	void      *post_vir[ISP_PRERAW_VIRT_MAX];
 #ifdef __arm__
-	__u32	  post_padding[ISP_PRERAW_MAX];
+	__u32	  post_padding[ISP_PRERAW_VIRT_MAX];
 #endif
 };
 

@@ -98,6 +98,7 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"GCORE_GC2053_1L_MIPI_2M_30FPS_10BIT",
 	"GCORE_GC2083_MIPI_2M_30FPS_10BIT",
 	"GCORE_GC2093_MIPI_2M_30FPS_10BIT",
+	"GCORE_GC2093_MIPI_2M_60FPS_10BIT",
 	"GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT",
 	"GCORE_GC2145_MIPI_2M_12FPS_8BIT",
 	"GCORE_GC4023_MIPI_4M_30FPS_10BIT",
@@ -136,6 +137,7 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"SMS_SC035GS_MIPI_480P_120FPS_12BIT",
 	"SMS_SC035GS_1L_MIPI_480P_120FPS_10BIT",
 	"SMS_SC035HGS_MIPI_480P_120FPS_12BIT",
+	"SMS_SC035HGS_1L_MIPI_480P_120FPS_10BIT",
 	"SMS_SC1336_1L_MIPI_1M_30FPS_10BIT",
 	"SMS_SC1336_1L_MIPI_1M_60FPS_10BIT",
 	"SMS_SC1346_1L_MIPI_1M_30FPS_10BIT",
@@ -155,11 +157,18 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"SMS_SC3335_MIPI_3M_30FPS_10BIT",
 	"SMS_SC3335_SLAVE_MIPI_3M_30FPS_10BIT",
 	"SMS_SC3336_MIPI_3M_30FPS_10BIT",
+	"SMS_SC3336P_MIPI_3M_30FPS_10BIT",
 	"SMS_SC2331_1L_MIPI_2M_30FPS_10BIT",
+	"SMS_SC2331_1L_SLAVE_MIPI_2M_30FPS_10BIT",
+	"SMS_SC2331_1L_SLAVE1_MIPI_2M_30FPS_10BIT",
 	"SMS_SC2335_MIPI_2M_30FPS_10BIT",
 	"SMS_SC2336_MIPI_2M_30FPS_10BIT",
+	"SMS_SC2336_SLAVE_MIPI_2M_30FPS_10BIT",
+	"SMS_SC2336_SLAVE1_MIPI_2M_30FPS_10BIT",
 	"SMS_SC2336_1L_MIPI_2M_30FPS_10BIT",
 	"SMS_SC2336P_MIPI_2M_30FPS_10BIT",
+	"SMS_SC2336P_1L_MIPI_2M_30FPS_10BIT",
+	"SMS_SC223A_1L_MIPI_2M_30FPS_10BIT",
 	"SMS_SC4210_MIPI_4M_30FPS_12BIT",
 	"SMS_SC4336_MIPI_4M_30FPS_10BIT",
 	"SMS_SC4336P_MIPI_4M_30FPS_10BIT",
@@ -255,8 +264,6 @@ static const char *snsr_type_name[SAMPLE_SNS_TYPE_BUTT] = {
 	"SONY_IMX335_MIPI_4M_30FPS_10BIT_WDR2TO1",
 	"SONY_IMX335_MIPI_4M_1600P_30FPS_10BIT_WDR2TO1",
 	"SONY_IMX335_MIPI_5M_30FPS_10BIT_WDR2TO1",
-	"SONY_IMX347_MIPI_4M_30FPS_12BIT_WDR2TO1",
-	"SONY_IMX385_MIPI_2M_30FPS_12BIT_WDR2TO1",
 	/* ------ WDR 2TO1 END ------*/
 };
 
@@ -341,6 +348,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetSize(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *penSize)
 	case GCORE_GC2053_1L_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2083_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT:
+	case GCORE_GC2093_MIPI_2M_60FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT_WDR2TO1:
@@ -354,10 +362,16 @@ CVI_S32 SAMPLE_COMM_SNS_GetSize(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *penSize)
 	case PIXELPLUS_PR2020_2M_30FPS_8BIT:
 	case PIXELPLUS_PR2100_2M_25FPS_8BIT:
 	case SMS_SC2331_1L_MIPI_2M_30FPS_10BIT:
+	case SMS_SC2331_1L_SLAVE_MIPI_2M_30FPS_10BIT:
+	case SMS_SC2331_1L_SLAVE1_MIPI_2M_30FPS_10BIT:
 	case SMS_SC2335_MIPI_2M_30FPS_10BIT:
 	case SMS_SC2336_MIPI_2M_30FPS_10BIT:
+	case SMS_SC2336_SLAVE_MIPI_2M_30FPS_10BIT:
+	case SMS_SC2336_SLAVE1_MIPI_2M_30FPS_10BIT:
 	case SMS_SC2336_1L_MIPI_2M_30FPS_10BIT:
 	case SMS_SC2336P_MIPI_2M_30FPS_10BIT:
+	case SMS_SC2336P_1L_MIPI_2M_30FPS_10BIT:
+	case SMS_SC223A_1L_MIPI_2M_30FPS_10BIT:
 	case SMS_SC200AI_MIPI_2M_30FPS_10BIT:
 	case SMS_SC200AI_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case SOI_F23_MIPI_2M_30FPS_10BIT:
@@ -434,6 +448,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetSize(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *penSize)
 	case SMS_SC3335_MIPI_3M_30FPS_10BIT:
 	case SMS_SC3335_SLAVE_MIPI_3M_30FPS_10BIT:
 	case SMS_SC3336_MIPI_3M_30FPS_10BIT:
+	case SMS_SC3336P_MIPI_3M_30FPS_10BIT:
 	case SOI_Q03_MIPI_3M_30FPS_10BIT:
 	case SOI_Q03P_MIPI_3M_30FPS_10BIT:
 		*penSize = PIC_2304x1296;
@@ -470,7 +485,8 @@ CVI_S32 SAMPLE_COMM_SNS_GetSize(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *penSize)
 		*penSize = PIC_2880x1620;
 		break;
 	case SMS_SC5336_2L_MIPI_5M_30FPS_10BIT:
-		*penSize = PIC_2880x1618;
+		// *penSize = PIC_2880x1618;
+		*penSize = PIC_2880x1620;
 		break;
 	case OV_OS08A20_MIPI_8M_30FPS_10BIT:
 	case OV_OS08A20_MIPI_8M_30FPS_10BIT_WDR2TO1:
@@ -488,6 +504,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetSize(SAMPLE_SNS_TYPE_E enMode, PIC_SIZE_E *penSize)
 	case SMS_SC035GS_MIPI_480P_120FPS_12BIT:
 	case SMS_SC035GS_1L_MIPI_480P_120FPS_10BIT:
 	case SMS_SC035HGS_MIPI_480P_120FPS_12BIT:
+	case SMS_SC035HGS_1L_MIPI_480P_120FPS_10BIT:
 	case GCORE_GC0312_MIPI_480P_20FPS_8BIT:
 	case GCORE_GC0329_MIPI_480P_10FPS_8BIT:
 		*penSize = PIC_640x480;
@@ -848,6 +865,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetDevAttr(SAMPLE_SNS_TYPE_E enSnsType, VI_DEV_ATTR_S *p
 	case GCORE_GC2053_1L_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2083_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT:
+	case GCORE_GC2093_MIPI_2M_60FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT_WDR2TO1:
@@ -862,6 +880,8 @@ CVI_S32 SAMPLE_COMM_SNS_GetDevAttr(SAMPLE_SNS_TYPE_E enSnsType, VI_DEV_ATTR_S *p
 	case BRIGATES_BG0808_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case SMS_SC4336_MIPI_4M_30FPS_10BIT:
 	case SMS_SC4336P_MIPI_4M_30FPS_10BIT:
+		pstViDevAttr->enBayerFormat = BAYER_FORMAT_BG;
+		break;
 	case GCORE_GC1084_MIPI_1M_30FPS_10BIT:
 	case GCORE_GC1084_SLAVE_MIPI_1M_30FPS_10BIT:
 	case GCORE_GC4653_MIPI_4M_30FPS_10BIT:
@@ -967,6 +987,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 	case SMS_SC035GS_MIPI_480P_120FPS_12BIT:
 	case SMS_SC035GS_1L_MIPI_480P_120FPS_10BIT:
 	case SMS_SC035HGS_MIPI_480P_120FPS_12BIT:
+	case SMS_SC035HGS_1L_MIPI_480P_120FPS_10BIT:
 	case OV_OV6211_MIPI_400P_120FPS_10BIT:
 	case OV_OV7251_MIPI_480P_120FPS_10BIT:
 		pstPubAttr->f32FrameRate = 120;
@@ -983,6 +1004,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 	case SONY_IMX335_MIPI_4M_60FPS_10BIT:
 	case SONY_IMX335_MIPI_5M_60FPS_10BIT:
 	case SONY_IMX347_MIPI_4M_60FPS_12BIT:
+	case GCORE_GC2093_MIPI_2M_60FPS_10BIT:
 		pstPubAttr->f32FrameRate = 60;
 		break;
 	case TECHPOINT_TP2850_MIPI_2M_30FPS_8BIT:
@@ -994,6 +1016,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 	case SMS_SC1346_1L_MIPI_1M_30FPS_10BIT:
 	case SMS_SC1346_1L_MIPI_1M_30FPS_10BIT_WDR2TO1:
 	case SMS_SC1346_1L_SLAVE_MIPI_1M_30FPS_10BIT:
+	case SMS_SC223A_1L_MIPI_2M_30FPS_10BIT:
 	case SONY_IMX335_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case SONY_IMX347_MIPI_4M_30FPS_12BIT_WDR2TO1:
 	case OV_OV5647_MIPI_2M_30FPS_10BIT:
@@ -1085,6 +1108,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 	case GCORE_GC2053_1L_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2083_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT:
+	case GCORE_GC2093_MIPI_2M_60FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT_WDR2TO1:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT:
 	case GCORE_GC2093_SLAVE_MIPI_2M_30FPS_10BIT_WDR2TO1:
@@ -1182,6 +1206,7 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 #endif
 #if defined(SENSOR_GCORE_GC2093)
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT:
+	case GCORE_GC2093_MIPI_2M_60FPS_10BIT:
 	case GCORE_GC2093_MIPI_2M_30FPS_10BIT_WDR2TO1:
 		return &stSnsGc2093_Obj;
 #endif
@@ -1337,6 +1362,11 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 		pSnsObj = &stSnsSC035HGS_Obj;
 		break;
 #endif
+#if defined(SENSOR_SMS_SC035HGS_1L)
+	case SMS_SC035HGS_1L_MIPI_480P_120FPS_10BIT:
+		pSnsObj = &stSnsSC035HGS_1L_Obj;
+		break;
+#endif
 #if defined(SENSOR_SMS_SC1336_1L)
 	case SMS_SC1336_1L_MIPI_1M_30FPS_10BIT:
 	case SMS_SC1336_1L_MIPI_1M_30FPS_10BIT_WDR2TO1:
@@ -1420,9 +1450,24 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 		pSnsObj = &stSnsSC3336_Obj;
 		break;
 #endif
+#if defined(SENSOR_SMS_SC3336P)
+	case SMS_SC3336P_MIPI_3M_30FPS_10BIT:
+		pSnsObj = &stSnsSC3336P_Obj;
+		break;
+#endif
 #if defined(SENSOR_SMS_SC2331_1L)
 	case SMS_SC2331_1L_MIPI_2M_30FPS_10BIT:
 		pSnsObj = &stSnsSC2331_1L_Obj;
+		break;
+#endif
+#if defined(SENSOR_SMS_SC2331_1L_SLAVE)
+	case SMS_SC2331_1L_SLAVE_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC2331_1L_Slave_Obj;
+		break;
+#endif
+#if defined(SENSOR_SMS_SC2331_1L_SLAVE1)
+	case SMS_SC2331_1L_SLAVE1_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC2331_1L_Slave1_Obj;
 		break;
 #endif
 #if defined(SENSOR_SMS_SC2335)
@@ -1435,6 +1480,16 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 		pSnsObj = &stSnsSC2336_Obj;
 		break;
 #endif
+#if defined(SENSOR_SMS_SC2336_SLAVE)
+	case SMS_SC2336_SLAVE_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC2336_Slave_Obj;
+		break;
+#endif
+#if defined(SENSOR_SMS_SC2336_SLAVE1)
+	case SMS_SC2336_SLAVE1_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC2336_Slave1_Obj;
+		break;
+#endif
 #if defined(SENSOR_SMS_SC2336_1L)
 	case SMS_SC2336_1L_MIPI_2M_30FPS_10BIT:
 		pSnsObj = &stSnsSC2336_1L_Obj;
@@ -1443,6 +1498,16 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 #if defined(SENSOR_SMS_SC2336P)
 	case SMS_SC2336P_MIPI_2M_30FPS_10BIT:
 		pSnsObj = &stSnsSC2336P_Obj;
+		break;
+#endif
+#if defined(SENSOR_SMS_SC2336P_1L)
+	case SMS_SC2336P_1L_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC2336P_1L_Obj;
+		break;
+#endif
+#if defined(SENSOR_SMS_SC223A_1L)
+	case SMS_SC223A_1L_MIPI_2M_30FPS_10BIT:
+		pSnsObj = &stSnsSC223A_1L_Obj;
 		break;
 #endif
 #if defined(SENSOR_SMS_SC4210)
@@ -1777,9 +1842,10 @@ static void parse_sensor_name(SAMPLE_INI_CFG_S *cfg, const char *value,
 		}
 	}
 	if (i == SAMPLE_SNS_TYPE_BUTT) {
-		cfg->enSnsType[index] = SONY_IMX327_MIPI_2M_30FPS_12BIT;
+		cfg->enSnsType[index] = SAMPLE_SNS_TYPE_BUTT;
 		cfg->enWDRMode[index] = WDR_MODE_NONE;
 		cfg->u8UseMultiSns = index;
+		SAMPLE_PRT("ERROR: can not find sensor ini in /mnt/data/\n");
 	}
 }
 
@@ -1881,6 +1947,51 @@ static void parse_sensor_orien(SAMPLE_INI_CFG_S *cfg, const char *value,
 	SAMPLE_PRT("orien =  %s\n", value);
 	cfg->u8Orien[index] = atoi(value);
 }
+
+static void parse_sensor_muxdev(SAMPLE_INI_CFG_S *cfg, const char *value,
+				CVI_U32 param0, CVI_U32 param1, CVI_U32 param2)
+{
+	CVI_U32 index = param0;
+
+	(CVI_VOID) param1;
+	(CVI_VOID) param2;
+	SAMPLE_PRT("muxdev =  %s\n", value);
+	cfg->u8MuxDev[index] = atoi(value);
+}
+
+static void parse_sensor_attachdev(SAMPLE_INI_CFG_S *cfg, const char *value,
+				CVI_U32 param0, CVI_U32 param1, CVI_U32 param2)
+{
+	CVI_U32 index = param0;
+
+	(CVI_VOID) param1;
+	(CVI_VOID) param2;
+	SAMPLE_PRT("attach_dev =  %s\n", value);
+	cfg->u8AttachDev[index] = atoi(value);
+}
+
+static void parse_sensor_switchgpio(SAMPLE_INI_CFG_S *cfg, const char *value,
+				CVI_U32 param0, CVI_U32 param1, CVI_U32 param2)
+{
+	CVI_U32 index = param0;
+
+	(CVI_VOID) param1;
+	(CVI_VOID) param2;
+	SAMPLE_PRT("switch_gpio =  %s\n", value);
+	cfg->s16SwitchGpio[index] = atoi(value);
+}
+
+static void parse_sensor_switchpol(SAMPLE_INI_CFG_S *cfg, const char *value,
+				CVI_U32 param0, CVI_U32 param1, CVI_U32 param2)
+{
+	CVI_U32 index = param0;
+
+	(CVI_VOID) param1;
+	(CVI_VOID) param2;
+	SAMPLE_PRT("switch_pol =  %s\n", value);
+	cfg->u8SwitchPol[index] = atoi(value);
+}
+
  /* === Sensor section parser handler end === */
 typedef CVI_VOID(*parser)(SAMPLE_INI_CFG_S *cfg, const char *value,
 		CVI_U32 param0, CVI_U32 param1, CVI_U32 param2);
@@ -1910,6 +2021,10 @@ typedef enum _INI_SENSOR_NAME_E {
 	INI_SENSOR_MCLKEN,
 	INI_SENSOR_MCLK,
 	INI_SENSOR_ORIEN,
+	INI_SENSOR_MUXDEV,
+	INI_SENSOR_ATTACHDEV,
+	INI_SENSOR_SWITCHGPIO,
+	INI_SENSOR_SWITCHPOL,
 	INI_SENSOR_NUM,
 } INI_SENSOR_NAME_E;
 
@@ -1929,6 +2044,10 @@ const INI_HDLR_S stSectionSensor1[INI_SENSOR_NUM] = {
 	[INI_SENSOR_MCLKEN] = {"mclk_en", 0, 0, 0, parse_sensor_mclken},
 	[INI_SENSOR_MCLK] = {"mclk", 0, 0, 0, parse_sensor_mclk},
 	[INI_SENSOR_ORIEN] = {"orien", 0, 0, 0, parse_sensor_orien},
+	[INI_SENSOR_MUXDEV] = {"mux_dev", 0, 0, 0, parse_sensor_muxdev},
+	[INI_SENSOR_ATTACHDEV] = {"attach_dev", 0, 0, 0, parse_sensor_attachdev},
+	[INI_SENSOR_SWITCHGPIO] = {"switch_gpio", 0, 0, 0, parse_sensor_switchgpio},
+	[INI_SENSOR_SWITCHPOL] = {"switch_pol", 0, 0, 0, parse_sensor_switchpol},
 };
 
 const INI_HDLR_S stSectionSensor2[INI_SENSOR_NUM] = {
@@ -1942,6 +2061,10 @@ const INI_HDLR_S stSectionSensor2[INI_SENSOR_NUM] = {
 	[INI_SENSOR_MCLKEN] = {"mclk_en", 1, 0, 0, parse_sensor_mclken},
 	[INI_SENSOR_MCLK] = {"mclk", 1, 0, 0, parse_sensor_mclk},
 	[INI_SENSOR_ORIEN] = {"orien", 1, 0, 0, parse_sensor_orien},
+	[INI_SENSOR_MUXDEV] = {"mux_dev", 1, 0, 0, parse_sensor_muxdev},
+	[INI_SENSOR_ATTACHDEV] = {"attach_dev", 1, 0, 0, parse_sensor_attachdev},
+	[INI_SENSOR_SWITCHGPIO] = {"switch_gpio", 1, 0, 0, parse_sensor_switchgpio},
+	[INI_SENSOR_SWITCHPOL] = {"switch_pol", 1, 0, 0, parse_sensor_switchpol},
 };
 
 const INI_HDLR_S stSectionSensor3[INI_SENSOR_NUM] = {
@@ -1955,6 +2078,10 @@ const INI_HDLR_S stSectionSensor3[INI_SENSOR_NUM] = {
 	[INI_SENSOR_MCLKEN] = {"mclk_en", 2, 0, 0, parse_sensor_mclken},
 	[INI_SENSOR_MCLK] = {"mclk", 2, 0, 0, parse_sensor_mclk},
 	[INI_SENSOR_ORIEN] = {"orien", 2, 0, 0, parse_sensor_orien},
+	[INI_SENSOR_MUXDEV] = {"mux_dev", 2, 0, 0, parse_sensor_muxdev},
+	[INI_SENSOR_ATTACHDEV] = {"attach_dev", 2, 0, 0, parse_sensor_attachdev},
+	[INI_SENSOR_SWITCHGPIO] = {"switch_gpio", 2, 0, 0, parse_sensor_switchgpio},
+	[INI_SENSOR_SWITCHPOL] = {"switch_pol", 2, 0, 0, parse_sensor_switchpol},
 };
 
 CVI_S32 SAMPLE_COMM_SNS_SetIniPath(const CVI_CHAR *iniPath)

@@ -77,6 +77,7 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
 #define SC5336_2L_TABLE_END			0xFFFF
 
 #define SC5336_2L_RES_IS_1620P(w, h)      ((w) <= 2880 && (h) <= 1620)
+#define SC5336_2L_RES_IS_1618P(w, h)      ((w) == 2880 && (h) == 1618)
 
 static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSnsDft)
 {
@@ -85,6 +86,13 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	CMOS_CHECK_POINTER(pstAeSnsDft);
 	SC5336_2L_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
+
 #if 0
 	memset(&pstAeSnsDft->stAERouteAttr, 0, sizeof(ISP_AE_ROUTE_S));
 #endif
@@ -123,20 +131,20 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	switch (pstSnsState->enWDRMode) {
 	default:
 	case WDR_MODE_NONE:   /*linear mode*/
-		pstAeSnsDft->f32Fps = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].f32MaxFps;
-		pstAeSnsDft->f32MinFps = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].f32MinFps;
+		pstAeSnsDft->f32Fps = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].f32MaxFps;
+		pstAeSnsDft->f32MinFps = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].f32MinFps;
 		pstAeSnsDft->au8HistThresh[0] = 0xd;
 		pstAeSnsDft->au8HistThresh[1] = 0x28;
 		pstAeSnsDft->au8HistThresh[2] = 0x60;
 		pstAeSnsDft->au8HistThresh[3] = 0x80;
 
-		pstAeSnsDft->u32MaxAgain = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].stAgain[0].u32Max;
-		pstAeSnsDft->u32MinAgain = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].stAgain[0].u32Min;
+		pstAeSnsDft->u32MaxAgain = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].stAgain[0].u32Max;
+		pstAeSnsDft->u32MinAgain = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].stAgain[0].u32Min;
 		pstAeSnsDft->u32MaxAgainTarget = pstAeSnsDft->u32MaxAgain;
 		pstAeSnsDft->u32MinAgainTarget = pstAeSnsDft->u32MinAgain;
 
-		pstAeSnsDft->u32MaxDgain = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].stDgain[0].u32Max;
-		pstAeSnsDft->u32MinDgain = g_astSC5336_2L_mode[SC5336_2L_MODE_1620P30].stDgain[0].u32Min;
+		pstAeSnsDft->u32MaxDgain = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].stDgain[0].u32Max;
+		pstAeSnsDft->u32MinDgain = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].stDgain[0].u32Min;
 		pstAeSnsDft->u32MaxDgainTarget = pstAeSnsDft->u32MaxDgain;
 		pstAeSnsDft->u32MinDgainTarget = pstAeSnsDft->u32MinDgain;
 
@@ -172,6 +180,12 @@ static CVI_S32 cmos_fps_set(VI_PIPE ViPipe, CVI_FLOAT f32Fps, AE_SENSOR_DEFAULT_
 	SC5336_2L_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
 
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
+
 	u32Vts = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].u32VtsDef;
 	pstSnsRegsInfo = &pstSnsState->astSyncInfo[0].snsCfg;
 	f32MaxFps = g_astSC5336_2L_mode[pstSnsState->u8ImgMode].f32MaxFps;
@@ -179,6 +193,7 @@ static CVI_S32 cmos_fps_set(VI_PIPE ViPipe, CVI_FLOAT f32Fps, AE_SENSOR_DEFAULT_
 
 	switch (pstSnsState->u8ImgMode) {
 	case SC5336_2L_MODE_1620P30:
+	case SC5336_2L_MODE_1618P30:
 		if ((f32Fps <= f32MaxFps) && (f32Fps >= f32MinFps)) {
 			u32VMAX = u32Vts * f32MaxFps / DIV_0_TO_1_FLOAT(f32Fps);
 		} else {
@@ -615,6 +630,13 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg)
 
 	SC5336_2L_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
+
 	pstMode = &g_astSC5336_2L_mode[pstSnsState->u8ImgMode];
 
 	if (pstSnsState->enWDRMode != WDR_MODE_NONE) {
@@ -637,6 +659,12 @@ static CVI_S32 cmos_set_wdr_mode(VI_PIPE ViPipe, CVI_U8 u8Mode)
 	CMOS_CHECK_POINTER(pstSnsState);
 
 	pstSnsState->bSyncInit = CVI_FALSE;
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
 
 	switch (u8Mode) {
 	case WDR_MODE_NONE:
@@ -784,7 +812,9 @@ static CVI_S32 cmos_set_image_mode(VI_PIPE ViPipe, ISP_CMOS_SENSOR_IMAGE_MODE_S 
 
 	if (pstSensorImageMode->f32Fps <= 30) {
 		if (pstSnsState->enWDRMode == WDR_MODE_NONE) {
-			if (SC5336_2L_RES_IS_1620P(pstSensorImageMode->u16Width, pstSensorImageMode->u16Height)) {
+			if (SC5336_2L_RES_IS_1618P(pstSensorImageMode->u16Width, pstSensorImageMode->u16Height)) {
+				u8SensorImageMode = SC5336_2L_MODE_1618P30;
+			} else if (SC5336_2L_RES_IS_1620P(pstSensorImageMode->u16Width, pstSensorImageMode->u16Height)) {
 				u8SensorImageMode = SC5336_2L_MODE_1620P30;
 			} else {
 				CVI_TRACE_SNS(CVI_DBG_ERR, "Not support! Width:%d, Height:%d, Fps:%f, WDRMode:%d\n",
@@ -825,7 +855,13 @@ static CVI_VOID sensor_global_init(VI_PIPE ViPipe)
 
 	pstSnsState->bInit = CVI_FALSE;
 	pstSnsState->bSyncInit = CVI_FALSE;
-	pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
+
 	pstSnsState->enWDRMode = WDR_MODE_NONE;
 	pstMode = &g_astSC5336_2L_mode[pstSnsState->u8ImgMode];
 	pstSnsState->u32FLStd  = pstMode->u32VtsDef;
@@ -843,6 +879,12 @@ static CVI_S32 sensor_rx_attr(VI_PIPE ViPipe, SNS_COMBO_DEV_ATTR_S *pstRxAttr)
 	SC5336_2L_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
 	CMOS_CHECK_POINTER(pstRxAttr);
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1618P30;
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		pstSnsState->u8ImgMode = SC5336_2L_MODE_1620P30;
+	}
 
 	memcpy(pstRxAttr, &SC5336_2l_rx_attr, sizeof(*pstRxAttr));
 

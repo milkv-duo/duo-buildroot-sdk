@@ -1305,26 +1305,6 @@ typedef struct _VENC_FRAME_PARAM_S {
 	CVI_U32 u32FrameBits;
 } VENC_FRAME_PARAM_S;
 
-typedef struct _VENC_SB_Setting_S {
-	unsigned int codec;  // 0x1:h265, 0x2:h264, 0x4:jpeg
-	CVI_U32 sb_mode;
-	CVI_U32 sb_size;
-	CVI_U32 sb_nb;
-	CVI_U32 y_stride;
-	CVI_U32 uv_stride;
-	CVI_U32 src_height;
-	//pri sb address
-	CVI_U32 sb_ybase;
-	CVI_U32 sb_uvbase;
-	CVI_U32 src_ybase;  //[out]
-	CVI_U32 src_uvbase; //[out]
-	// sec sb address
-	CVI_U32 sb_ybase1;
-	CVI_U32 sb_uvbase1;
-	CVI_U32 src_ybase1;  //[out]
-	CVI_U32 src_uvbase1; //[out]
-} VENC_SB_Setting;
-
 #ifdef __cplusplus
 #if __cplusplus
 }

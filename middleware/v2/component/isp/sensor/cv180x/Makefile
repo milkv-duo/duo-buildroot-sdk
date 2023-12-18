@@ -122,6 +122,9 @@ sms_sc035gs_1L:
 sms_sc035hgs:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc035hgs_1L:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc1336_1L:
 	$(call MAKE_SENSOR, ${@})
 
@@ -158,7 +161,16 @@ sms_sc3335:
 sms_sc3336:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc3336p:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc2331_1L:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc2331_1L_slave:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc2331_1L_slave1:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc2335:
@@ -167,10 +179,22 @@ sms_sc2335:
 sms_sc2336:
 	$(call MAKE_SENSOR, ${@})
 
+sms_sc2336_slave:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc2336_slave1:
+	$(call MAKE_SENSOR, ${@})
+
 sms_sc2336_1L:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc2336p:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc2336p_1L:
+	$(call MAKE_SENSOR, ${@})
+
+sms_sc223a_1L:
 	$(call MAKE_SENSOR, ${@})
 
 sms_sc4336:

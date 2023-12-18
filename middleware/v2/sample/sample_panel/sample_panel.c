@@ -55,6 +55,7 @@ typedef enum {
 	DSI_PANEL_ST7701,
 	LVDS_PANEL_LCM185X56,
 	BT_PANEL_TP2803_BT656_1280x720_25FPS_72M,
+	BT_PANEL_NVP6021_BT1120_1920x1080_25FPS_72M,
 	I80_PANEL_ST7789V3_HW_MCU_240x320_60FPS,
 	PANEL_MAX
 } PANEL_MODEL;
@@ -115,6 +116,7 @@ static char *s_panel_model_type_arr[] = {
 	"ST7701",
 	"LCM185X56",
 	"TP2803_BT656_1280x720_25FPS_72M",
+	"BT_PANEL_NVP6021_BT1120_1920x1080_25FPS_72M",
 	"ST7789V3_HW_MCU_RGB565_240x320_60FPS",
 };
 
@@ -484,12 +486,23 @@ void SAMPLE_SET_PANEL_DESC(void)
 		g_panel_desc.panel_type = PANEL_MODE_BT;
 		g_panel_desc.stVoPubAttr.enIntfType = VO_INTF_BT656;
 		g_panel_desc.stVoPubAttr.enIntfSync = VO_OUTPUT_USER;
-		VO_SYNC_INFO_S stTp2803_SyncInfo = {.bSynm = 1, .bIop = 1, .u16FrameRate = 50
+		VO_SYNC_INFO_S stTp2803_SyncInfo = {.bSynm = 1, .bIop = 1, .u16FrameRate = 25
 		, .u16Vact = 720, .u16Vbb = 20, .u16Vfb = 5
 		, .u16Hact = 1280, .u16Hbb = 200, .u16Hfb = 400
 		, .u16Vpw = 5, .u16Hpw = 40, .bIdv = 0, .bIhs = 0, .bIvs = 0};
 		g_panel_desc.stVoPubAttr.stSyncInfo = stTp2803_SyncInfo;
 		g_panel_desc.stVoPubAttr.stBtAttr = stTP2803Cfg;
+		break;
+	case BT_PANEL_NVP6021_BT1120_1920x1080_25FPS_72M:
+		g_panel_desc.panel_type = PANEL_MODE_BT;
+		g_panel_desc.stVoPubAttr.enIntfType = VO_INTF_BT1120;
+		g_panel_desc.stVoPubAttr.enIntfSync = VO_OUTPUT_USER;
+		VO_SYNC_INFO_S stNvp6021_SyncInfo = {.bSynm = 1, .bIop = 1, .u16FrameRate = 25
+		, .u16Vact = 1080, .u16Vbb = 36, .u16Vfb = 4
+		, .u16Hact = 1920, .u16Hbb = 148, .u16Hfb = 528
+		, .u16Vpw = 5, .u16Hpw = 44, .bIdv = 0, .bIhs = 0, .bIvs = 0};
+		g_panel_desc.stVoPubAttr.stSyncInfo = stNvp6021_SyncInfo;
+		g_panel_desc.stVoPubAttr.stBtAttr = stNVP6021Cfg;
 		break;
 	case I80_PANEL_ST7789V3_HW_MCU_240x320_60FPS:
 		g_panel_desc.panel_type = PANEL_MODE_MCU;

@@ -254,6 +254,7 @@ static void sc2331_1L_linear_1080p30_init(VI_PIPE ViPipe)
 	sc2331_1L_write_register(ViPipe, 0x3018, 0x1a);
 	sc2331_1L_write_register(ViPipe, 0x3019, 0x0e);
 	sc2331_1L_write_register(ViPipe, 0x301f, 0x20);
+	printf("awei 20 hao 11:07 sc2331_1L\n");
 	sc2331_1L_write_register(ViPipe, 0x3258, 0x0e);
 	sc2331_1L_write_register(ViPipe, 0x3301, 0x06);
 	sc2331_1L_write_register(ViPipe, 0x3302, 0x10);
