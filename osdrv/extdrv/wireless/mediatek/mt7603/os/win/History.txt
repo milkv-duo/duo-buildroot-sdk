@@ -1,0 +1,245 @@
+[V0.0.0.49]
+1. Write RMAC_RFCR when init
+2. Enable FPGA compile flag 
+
+[V0.0.0.48]
+1. Fixed the wrong CR Access (0x500c0040~0x500c0040~) => (0x800c0040~0x800c0040~).
+2. Reload Patch will be avoid once Wifi is running => 0x81021250 = 0x3.
+
+[V0.0.0.47]
+1. Fixed the wrong parameter used when UI load FW.
+
+[V0.0.0.46]
+1. Fixed the BSOD when UI set FWImage.
+
+[V0.0.0.45]
+1. 7636/03 add fw7636.h, remove fw7636ilm.h fw7636dlm.h.
+
+[V0.0.0.44]
+1. 7636/03 load FW and 7636 load patch OK.
+
+[V0.0.0.42]
+1. Add _ENUM_MULTI_CR_ACCESS,CMD_MULTI_CR_ACCESS_T,EXT_CMD_CHAN_SWITCH,EXT_CMD_CHAN_SWITCH_T,FW_PKT_EXTEND_ID_RF_TEST,FW_PKT_EXTEND_ID_CHANNEL_SWITCH,FW_PKT_EXTEND_ID_MULTIPLE_REG_ACCESS in CommonDriverUI.h     
+2. Modify RX_STASTIC for APSOC. Fix get wrong FreqOffsetFromRX issue.
+
+[V0.0.0.41]
+1. Add 7636 load FW and load patch function
+
+[V0.0.0.40]
+1. Add 7636 ILD, DLM, Rom Patch
+2. Move bIsWaitFW place
+3. nic.h for NIC using define and macro
+
+[V0.0.0.39]
+1. Driver support FW download command for 7603
+2. Move some init operation from DispatchCreate to HandleDeviceStart
+3. add FW7603.h for default FW image
+
+[V0.0.0.38]
+1. Update x64.
+2. Update EXT_CMD_SEC_ADDREMOVE_KEY_T,
+3. Add CMD_GET_SECURITY_RESULT, CMD_SET_LDPC.
+4. Add SecurityFail.
+
+[V0.0.0.37]
+1. Update CommonDriverUI.h guids.h
+
+[V0.0.0.36]
+1. Modify info length USB_MAC_READ_LONG63.
+
+[V0.0.0.35]
+1. Modify SetTMR parameter.
+
+[V0.0.0.34]
+1. Add command ID CMD_TMR_SETTING 0x2A for new function SetTMR.
+
+[V0.0.0.33]
+1. Add 11v TOD transmit log
+
+[V0.0.0.32]
+1.Don't init PCIe dma sw index in InitDMA function(ATE sometimes can't TX because of DMA busy).
+2.Fix BSOD when using TxSetFrequencyOffset.
+
+[V0.0.0.31]
+1.Add Tssi off set 0x62200D18, 0x62201D18 to 0.
+
+[V0.0.0.30]
+1.Avoid upper layer access invalid CR.(access invalid CR will Cause BSOD, driver do nothing now if access invalid CR)
+2.Fix typo error for  WB_RSSSI0,IB_RSSSI0,WB_RSSSI1,IB_RSSSI1.
+3.Add Chip and FrequencyOffset in EFUSE_SETTINGS.
+4.Fix USB  IOCTL_RESET_TXRX_COUNTER didn't set 	ntStatus = STATUS_SUCCESS.
+5.Avoid read RA_TX_DTX_IDX0~11 0xFFFFFFFF and set wrong 0xFFFFFFFF value to CR.
+6.Fix USB BSOD Due to wrong parameters in hal function and IO_READ, IO_WRITE.
+
+[V0.0.0.29]
+1.Update TxSetFrequencyOffset for manula set
+
+[V0.0.0.28]
+1.Dump TMR.
+2.USB support TX count.
+3.USB support txrx count reset.
+4.Support Calibration Test.
+5.Fix TX power. 
+6.mark write rxv to file.
+
+[V0.0.0.27]
+1.Add Set Tx Frame power.
+2.Add Buffer mode interface for load efuse bin file from dll.
+
+[V0.0.0.26]
+1.Fix USB unload zombie issue.
+2.Add USB reister multi read.
+
+[V0.0.0.25]
+1.Fix DPD, TSSi HAl fubction.
+2.Add some function in DispatchDeviceControl USB part.
+3.Mark TxBufferForIncLenTest for USB.
+
+[V0.0.0.24]
+1.Add WFSelect parameter for TSSI and DPD set.
+2.Modify the MCS from 0~7 for OFDM and 0~3 8~11 for CCK.
+3.Fix Clockwerk issue.
+
+[V0.0.0.23]
+1.Change HAL define to hex.
+2.Move all Rx info function to driver.
+3.Get TX power and TSSI.
+4.Change CMD_GET_STATIC to  CMD_GET_MAC_MDRDY.
+
+[V0.0.0.22]
+1.Print USB bulkin 1
+2.Change PKTCMD_EVENT_BUFFER to 128.
+3.PCIe delete IncSequenceNumber in TransferDMADataBuffer.
+4.Move COUNTER_802_11 and OTHER_STATISTICS to ioctl.h.
+5.Add RTMP_IO_WRITE32_HAL(pDeviceObject,0x1520C,0x80680008) in WF1 StartContinuesTXTest. 
+6.Fix USB read wrong addr in RTMP_IO_READ32_HAL.
+7.USB add IOCTL_USBQA_STOP_TX.
+8.Add HandleRXVector for PCIe and USB for dump RXV.
+
+
+[V0.0.0.21]
+1.Fix USB compile warning.disable : 4995,4996
+2.Print USB tx/rx data.
+3.HAL file all use HAL access R/W.
+
+[V0.0.0.20]
+1. Add continues TX()
+2. Add TSSI set()
+3. Add DPD set()
+4. Fixed clockwerk issues
+
+[V0.0.0.19]
+1.Print USB TX data and RX data.
+2.Add USB init in asic_set_tmac_info_template.
+3.Add CMD_GET_DRIVER_RX_COUNT
+4.Add CMD_GET_FREQOFFSETFROM_RX.
+5.Add PCIe multi read CR for speed up FFT.
+
+[V0.0.0.18]
+1.Fix frequency offset CR.
+2.Fix Channel select struct.
+3.Fix RX_G3ONE_VECTOR.
+4.Set all rate power.
+
+[V0.0.0.17]
+1.Add Some basic R/W file function.
+
+[V0.0.0.16]
+1.M2M work, for 1st link.
+
+[V0.0.0.15]
+1.Add unified code base(Hal.h and Hal.cpp)
+
+
+[V0.0.0.14]
+1.Modify debug message.
+
+[V0.0.0.13]
+1.Fix BSOD in UsbDoBulkOutTransfer.
+2.Delete WaitWakeEnable and SSEnable.
+
+[V0.0.0.12]
+1.Support USB FW download(Verify)
+2.Support eeprom.
+
+[V0.0.0.11]
+1.USB support FW download(Not verify)
+2.Fix BSOD issuw when USer close UI then unplug USB dongle.
+3.Fix driver verify BSOD issue in UsbCancelBulkInIrp.
+4.Fix free build fail.
+5.Disable MSC_OPTIMIZATION.
+
+[V0.0.0.10]
+1.Support USB bulk out/in.
+BulkIn pipe 0 endpoint 0x84
+BulkIn pipe 1 endpoint 0x85
+
+BulkOut pipe 0 endpoint 8
+BulkOut pipe 1 endpoint 4
+BulkOut pipe 2 endpoint 5
+BulkOut pipe 3 endpoint 6
+BulkOut pipe 4 endpoint 7
+BulkOut pipe 5 endpoint 9
+ 
+2.Fix 	ULONG	ucSeqNum:8; -->	ULONG	ucSeqNum:1;
+3.Move some infomation from _UsbQa_DEVICE_EXTENSION to DEVICE_EXTENSION.
+
+[V0.0.0.9]
+1.Support FW download.
+2.Support USB R/W register.
+3.Change USB define from "USB" to "_USB".
+
+[V0.0.0.8]
+1.Add USB structure.
+
+[V0.0.0.7]
+1.Set register 0x4208 to 0x50000875.
+2.Modify compare Tx and Rx content function.
+3.Write RA_RX_CALC_IDX1 to 7 when start RX.
+
+[V0.0.0.6]
+1.Add TxD(TXWI) short format.
+2.RTMP_IO_READ32 replace all RTMP_Real_IO_READ32.
+3.Take off write RA_WPDMA_GLO_CFG 0x500004D5.
+4.Shift all hif register 0x200.
+
+[V0.0.0.5]
+1.) Fix compare patern1 and patern2 content.
+2.) Mark PBF_BASEADDR
+PDMA_BASEADDR
+MAC_BASEADDR 
+RA_FCE_PSE_CTRL.
+MKT_BASEADDR
+SMM_BASEADDR
+PKT_BASEADDR
+DATA_SCOPE_BASEADDR
+MCUCTL_BASEADDR
+WF_PHY_BASEADDR
+WF_MAC_BASEADDR
+3.) Clear g_Pattern1 and g_Pattern2 in RTPCIStartTX.
+
+
+[V0.0.0.4]
+1.) Set value of register 4008 to 0x500004D5.
+2.) Move  INT_Bit_RX0TxDone,  INT_Bit_RX1TxDone to CommonDriverUI.h.
+3.) Add Compare TX/RX data function.
+4.) Add handle AC8~AC11 in TransferDMADataBuffer
+5.) Add LoopBackDbg.
+6.) Add ReceivedCount in OTHER_STATISTIC
+7.) Add CurRx0Index and CurRx1Index, delete CurRxIndex.
+8.) Add Ac8_MAX_TX_PROCESS ~ Ac11_MAX_TX_PROCESS.
+9.) Add RTPCIHandleRx0DoneInterrupt and RTPCIHandleRx1DoneInterrupt, delete RTPCIHandleRxDoneInterrupt.
+
+[V0.0.0.3]
+1.) Add #define TX_START and #define TX_STOP
+2.) Add USHORT g_SequenceNumber_Ac8 ~11
+3.) Add RTMP_Real_IO_WRITE32(pDevExt, RA_RX_CALC_IDX1, 0) in InitDM() and Init RX1
+4.) Take off DebugPrintWhereAmI
+5.) Move "INT bit" to form register.h to CommonDriverUI.h
+
+[V0.0.0.2]
+1.) Take off all non-HIF register
+2.) UI and dll use the same define value with driver.
+
+[V0.0.0.1]
+1.) Support TX loopback

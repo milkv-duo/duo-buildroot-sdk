@@ -1,0 +1,9 @@
+#
+# Touchscreen driver configuration
+#
+
+config TOUCHSCREEN_TSGT9XX
+	tristate "goodix,gt911 tp"
+	default m
+	---help-- -
+	goodix,gt911 fingerprint.

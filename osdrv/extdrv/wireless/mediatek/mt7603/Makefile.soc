@@ -1,0 +1,423 @@
+EXTRA_CFLAGS = -Idrivers/net/wireless/RT8592_ap/include
+
+obj-$(CONFIG_RT8592_AP) += RT8592_ap.o
+RT8592_ap-objs += os/linux/ap_ioctl.o
+RT8592_ap-objs += os/linux/pci_main_dev.o
+RT8592_ap-objs += os/linux/rt_linux.o
+RT8592_ap-objs += os/linux/rt_main_dev.o
+RT8592_ap-objs += os/linux/rt_pci_rbus.o
+RT8592_ap-objs += os/linux/rt_proc.o
+RT8592_ap-objs += os/linux/rt_profile.o
+RT8592_ap-objs += os/linux/rt_rbus_pci_drv.o
+RT8592_ap-objs += os/linux/rt_rbus_pci_util.o
+RT8592_ap-objs += os/linux/multi_main_dev.o
+
+RT8592_ap-objs += common/crypt_md5.o
+RT8592_ap-objs += common/crypt_sha2.o
+RT8592_ap-objs += common/crypt_hmac.o
+RT8592_ap-objs += common/crypt_aes.o
+RT8592_ap-objs += common/crypt_arc4.o
+RT8592_ap-objs += common/mlme.o
+RT8592_ap-objs += common/cmm_wep.o
+RT8592_ap-objs += common/action.o
+RT8592_ap-objs += common/cmm_data.o
+RT8592_ap-objs += common/rtmp_init.o
+RT8592_ap-objs += common/rtmp_init_inf.o
+RT8592_ap-objs += common/cmm_tkip.o
+RT8592_ap-objs += common/cmm_aes.o
+RT8592_ap-objs += common/cmm_sync.o
+RT8592_ap-objs += common/cmm_sanity.o
+RT8592_ap-objs += common/cmm_info.o
+RT8592_ap-objs += common/cmm_cfg.o
+RT8592_ap-objs += common/cmm_wpa.o
+RT8592_ap-objs += common/cmm_radar.o
+RT8592_ap-objs += common/ee_prom.o
+RT8592_ap-objs += common/eeprom.o
+RT8592_ap-objs += common/cmm_mac_pci.o
+RT8592_ap-objs += common/cmm_data_pci.o
+RT8592_ap-objs += common/spectrum.o
+RT8592_ap-objs += common/rtmp_timer.o
+RT8592_ap-objs += common/rt_channel.o
+RT8592_ap-objs += common/cmm_profile.o
+RT8592_ap-objs += common/cmm_asic.o
+RT8592_ap-objs += common/scan.o
+RT8592_ap-objs += common/cmm_cmd.o
+RT8592_ap-objs += common/uapsd.o
+RT8592_ap-objs += common/ps.o
+RT8592_ap-objs += common/txpower.o
+RT8592_ap-objs += common/rt_os_util.o
+RT8592_ap-objs += common/sys_log.o
+
+RT8592_ap-objs += tx_rx/wdev_tx.o
+
+
+RT8592_ap-objs += common/rt_rf.o
+
+
+RT8592_ap-objs += mac/rtmp_mac.o
+
+RT8592_ap-objs += mcu/mcu_and.o
+RT8592_ap-objs += mcu/mcu.o
+
+RT8592_ap-objs += phy/phy.o
+
+RT8592_ap-objs += rate_ctrl/ra_ctrl.o
+RT8592_ap-objs += rate_ctrl/alg_legacy.o
+RT8592_ap-objs += rate_ctrl/alg_ags.o
+
+RT8592_ap-objs += mgmt/mgmt_hw.o
+RT8592_ap-objs += mgmt/mgmt_entrytb.o
+
+
+RT8592_ap-objs += common/ba_action.o
+RT8592_ap-objs += mgmt/mgmt_ht.o
+
+
+RT8592_ap-objs += ap/ap.o
+RT8592_ap-objs += ap/ap_assoc.o
+RT8592_ap-objs += ap/ap_auth.o
+RT8592_ap-objs += ap/ap_connect.o
+RT8592_ap-objs += ap/ap_mlme.o
+RT8592_ap-objs += ap/ap_sanity.o
+RT8592_ap-objs += ap/ap_sync.o
+RT8592_ap-objs += ap/ap_wpa.o
+RT8592_ap-objs += ap/ap_data.o
+RT8592_ap-objs += ap/ap_autoChSel.o
+RT8592_ap-objs += ap/ap_qload.o
+RT8592_ap-objs += ap/ap_cfg.o
+
+ifeq ($(CONFIG_RLT_MAC),y)
+EXTRA_CFLAGS += -DRLT_MAC
+
+RT8592_ap-objs += mac/ral_nmac.o
+RT8592_ap-objs += phy/rlt_phy.o
+endif
+
+ifeq ($(CONFIG_RTMP_MAC),y)
+EXTRA_CFLAGS += -DRTMP_MAC
+
+RT8592_ap-objs += mac/ral_omac.o
+RT8592_ap-objs += phy/rtmp_phy.o
+RT8592_ap-objs += chips/rtxx_dft.o
+endif
+
+RT8592_ap-objs += chips/rtmp_chip.o
+
+ifeq ($(CONFIG_RT5392_AP),y)
+EXTRA_CFLAGS += -DRT5392
+#EXTRA_CFLAGS += -DRT30xx
+EXTRA_CFLAGS += -DRTMP_PCI_SUPPORT \
+                -DRTMP_RF_RW_SUPPORT -DRTMP_EFUSE_SUPPORT \
+                -DNEW_MBSSID_MODE -DSPECIFIC_BCN_BUF_SUPPORT \
+                -DRTMP_TEMPERATURE_COMPENSATION -DRTMP_INTERNAL_TX_ALC \
+                -DIQ_CAL_SUPPORT -DVCORECAL_SUPPORT
+
+RT8592_ap-objs += chips/rt5390.o
+RT8592_ap-objs += common/ee_efuse.o
+endif
+
+ifeq ($(CONFIG_MT7620_AP),y)
+EXTRA_CFLAGS += -DRT6352 -DRTMP_RF_RW_SUPPORT -DRF_BANK -DRTMP_FLASH_SUPPORT -DCONFIG_SWMCU_SUPPORT
+EXTRA_CFLAGS += -DSPECIFIC_BCN_BUF_SUPPORT -DVCORECAL_SUPPORT
+EXTRA_CFLAGS += -DHW_TX_RATE_LOOKUP_SUPPORT
+
+RT8592_ap-objs += chips/rt6352.o
+RT8592_ap-objs += common/cmm_rf_cal.o
+RT8592_ap-objs += common/cmm_loft_cal.o
+endif
+
+
+ifneq ($(CONFIG_RT8592_AP),)
+RT8592_ap-objs += chips/rt65xx.o
+RT8592_ap-objs += chips/rt85592.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_FLASH),y)
+RT8592_ap-objs += common/ee_flash.o
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_WMM_ACM),y)
+#RT8592_ap-objs += common/acm_edca.o
+#RT8592_ap-objs += common/acm_comm.o
+#RT8592_ap-objs += common/acm_iocl.o
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_WSC),y)
+RT8592_ap-objs += common/wsc.o 
+RT8592_ap-objs += common/wsc_tlv.o
+RT8592_ap-objs += common/wsc_ufd.o
+RT8592_ap-objs += common/crypt_biginteger.o
+RT8592_ap-objs += common/crypt_dh.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_WSC_V2),y)
+RT8592_ap-objs += common/wsc_v2.o
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_NINTENDO),y)
+#RT8592_ap-objs += ap/ap_nintendo.o
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_WDS),y)
+RT8592_ap-objs += ap/ap_wds.o
+RT8592_ap-objs += ap/ap_wds_inf.o
+RT8592_ap-objs += common/client_wds.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_MBSS),y)
+RT8592_ap-objs += ap/ap_mbss.o
+RT8592_ap-objs += ap/ap_mbss_inf.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_VIDEO_TURBINE),y)
+RT8592_ap-objs += ../rt2860v2/common/cmm_video.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_INTELLIGENT_RATE_ADAPTION),y)
+EXTRA_CFLAGS += -DNEW_RATE_ADAPT_SUPPORT
+RT8592_ap-objs += rate_ctrl/alg_grp.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_AGS_RATE_ADAPTION),y)
+EXTRA_CFLAGS += -DAGS_SUPPORT
+RT8592_ap-objs += rate_ctrl/alg_ags.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_APCLI),y)
+RT8592_ap-objs += ap/ap_apcli_inf.o
+RT8592_ap-objs += ap/ap_apcli.o
+RT8592_ap-objs += ap/apcli_assoc.o
+RT8592_ap-objs += ap/apcli_auth.o
+RT8592_ap-objs += ap/apcli_ctrl.o
+RT8592_ap-objs += ap/apcli_sync.o
+RT8592_ap-objs += common/cmm_mat.o
+RT8592_ap-objs += common/cmm_mat_iparp.o
+RT8592_ap-objs += common/cmm_mat_pppoe.o
+RT8592_ap-objs += common/cmm_mat_ipv6.o
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_WAPI),y)
+#RT8592_ap-objs += common/wapi.o
+#RT8592_ap-objs += common/wapi_sms4.o
+#RT8592_ap-objs += common/wapi_crypt.o
+#
+##--------SDK release----------------
+##before compiling code
+## RT8592_ap-objs += common/wapi.o
+## RT8592_ap-objs += common/wapi_sms4.o
+## RT8592_ap-objs += common/wapi_crypt.o
+##
+##after compiling code
+## RT8592_ap-objs += common/wapi.obj
+## RT8592_ap-objs += common/wapi_sms4.obj
+## RT8592_ap-objs += common/wapi_crypt.obj
+#endif
+
+#ifeq ($(CONFIG_RT8592_80211R_FT),y)
+#RT8592_ap-objs += common/ft.o
+#RT8592_ap-objs += common/ft_tlv.o
+#RT8592_ap-objs += common/ft_ioctl.o
+#RT8592_ap-objs += common/ft_rc.o
+#RT8592_ap-objs += ap/ap_ftkd.o
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_IGMP_SNOOP),y)
+RT8592_ap-objs += common/igmp_snoop.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_NETIF_BLOCK),y)
+RT8592_ap-objs += common/netif_block.o
+endif
+
+ifeq ($(CONFIG_RT8592_AP_DLS),y)
+RT8592_ap-objs += ap/ap_dls.o
+endif
+
+ifeq ($(CONFIG_RT2860V2_AP_VIDEO_TURBINE),y)
+RT8592_ap-objs += common/cmm_video.o
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_IDS),y)
+#RT8592_ap-objs += ap/ap_ids.o
+#endif
+
+#ifeq ($(CONFIG_RT8592_AP_MESH),y)
+#RT8592_ap-objs += common/mesh_bmpkt.o
+#RT8592_ap-objs += common/mesh_ctrl.o
+#RT8592_ap-objs += common/mesh_link_mng.o
+#RT8592_ap-objs += common/mesh_sanity.o
+#RT8592_ap-objs += common/mesh_tlv.o
+#RT8592_ap-objs += common/mesh.o
+#RT8592_ap-objs += common/mesh_inf.o
+#RT8592_ap-objs += common/mesh_forwarding.o
+#RT8592_ap-objs += common/mesh_path_mng.o
+#endif
+
+#ifeq ($(CONFIG_RT8592_RT3XXX_AP_ANTENNA_DIVERSITY),y)
+#RT8592_ap-objs += os/linux/ap_diversity.o
+#endif
+
+#ifeq ($(CONFIG_RT8592_80211K_RR),y)
+#RT8592_ap-objs += common/rrm_tlv.o
+#RT8592_ap-objs += common/rrm_sanity.o
+#RT8592_ap-objs += common/rrm.o
+#endif
+
+ifeq ($(CONFIG_RT8592_VHT),y)
+EXTRA_CFLAGS += -DDOT11_VHT_AC
+RT8592_ap-objs += common/vht.o
+RT8592_ap-objs += mgmt/mgmt_vht.o
+endif
+
+ifeq ($(CONFIG_RT8592_WORK_QUEUE),y)
+EXTRA_CFLAGS += -DWORKQUEUE_BH
+endif
+
+ifeq ($(CONFIG_RT8592_SKB_RECYCLE),y)
+EXTRA_CFLAGS += -DWLAN_SKB_RECYCLE
+endif
+
+
+ifeq ($(CONFIG_RT8592_ATE),y)
+EXTRA_CFLAGS += -DCONFIG_ATE
+EXTRA_CFLAGS += -DCONFIG_RT2880_ATE_CMD_NEW
+EXTRA_CFLAGS += -DCONFIG_QA
+EXTRA_CFLAGS += -Idrivers/net/wireless/RT8592_ap/ate/include
+RT8592_ap-objs += ate/common/rt_ate.o
+RT8592_ap-objs += ate/common/rt_qa.o
+RT8592_ap-objs += ate/common/ate_pci.o
+RT8592_ap-objs += ate/chips/rt85592_ate.o
+
+ifeq ($(CONFIG_RT5392_AP),y)
+RT8592_ap-objs += ate/chips/rt5390_ate.o
+endif
+
+ifeq ($(CONFIG_RT7620_AP),y)
+RT8592_ap-objs += ate/chips/rt6352_ate.o
+endif
+endif
+
+#RT8592_ap-objs += fpga/verf.o
+
+###################
+#  CFLAGS
+#  ##################
+EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT -DLINUX -Wall -Wstrict-prototypes -Wno-trigraphs
+EXTRA_CFLAGS += -DCONFIG_AP_SUPPORT -DAP_SCAN_SUPPORT -DSCAN_SUPPORT -DUAPSD_SUPPORT -DIAPP_SUPPORT -DDBG -DDOT11_N_SUPPORT -DDOT1X_SUPPORT -DSTATS_COUNT_SUPPORT
+EXTRA_CFLAGS += -DRT65xx -DRT8592 -DRTMP_MAC_PCI -DRTMP_PCI_SUPPORT -DA_BAND_SUPPORT -DRX_DMA_SCATTER -DRTMP_RF_RW_SUPPORT
+EXTRA_CFLAGS += -DVCORECAL_SUPPORT -DIQ_CAL_SUPPORT
+#EXTRA_CFLAGS += -DCONFIG_RA_NAT_NONE
+EXTRA_CFLAGS += -DFIFO_EXT_SUPPORT
+EXTRA_CFLAGS += -DRTMP_TEMPERATURE_COMPENSATION
+#EXTRA_CFLAGS += -DMCS_LUT_SUPPORT
+
+EXTRA_CFLAGS += -DFPGA_MODE 
+#EXTRA_CFLAGS += -DWFA_VHT_PF
+#EXTRA_CFLAGS += -DE3_DBG_FALLBACK
+
+#EXTRA_CFLAGS += -DIP_ASSEMBLY
+#EXTRA_CFLAGS += -DCAPTURE_MODE
+
+#EXTRA_CFLAGS += -DCUSTOMER_DEMO
+EXTRA_CFLAGS += -DUAPSD_DEBUG
+EXTRA_CFLAGS += -DVHT_TXBF_SUPPORT -DSOFT_SOUNDING
+EXTRA_CFLAGS += -DRELEASE_EXCLUDE
+
+
+#ifneq ($(CONFIG_RT8592_AP),)
+#EXTRA_CFLAGS += -DOS_ABL_SUPPORT 
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_LED),y)
+EXTRA_CFLAGS += -DLED_CONTROL_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_FLASH),y)
+RT8592_ap-objs += common/ee_flash.o
+EXTRA_CFLAGS += -DRTMP_FLASH_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_DLS),y)
+EXTRA_CFLAGS += -DQOS_DLS_SUPPORT
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_IDS),y)
+#EXTRA_CFLAGS += -DIDS_SUPPORT
+#endif
+
+#ifeq ($(CONFIG_RT8592_AP_MESH),y)
+#EXTRA_CFLAGS   += -DMESH_SUPPORT -DINTEL_CMPC
+##EXTRA_CFLAGS += -DMLME_EX
+#endif
+
+#ifeq ($(CONFIG_RT8592_RT3XXX_AP_ANTENNA_DIVERSITY),y)
+#EXTRA_CFLAGS   += -DRT3XXX_ANTENNA_DIVERSITY_SUPPORT
+#endif
+
+ifeq ($(CONFIG_RT8592_80211N_DRAFT3),y)
+EXTRA_CFLAGS += -DDOT11N_DRAFT3
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_WMM_ACM),y)
+#EXTRA_CFLAGS += -DWMM_ACM_SUPPORT
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_WSC),y)
+EXTRA_CFLAGS += -DWSC_AP_SUPPORT
+ifeq ($(CONFIG_RT8592_AP_LED),y)
+EXTRA_CFLAGS += -DWSC_LED_SUPPORT
+endif
+ifeq ($(CONFIG_RT8592_AP_WSC_V2),y)
+EXTRA_CFLAGS += -DWSC_V2_SUPPORT
+endif
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_NINTENDO),y)
+#EXTRA_CFLAGS += -DNINTENDO_AP
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_LLTD),y)
+EXTRA_CFLAGS += -DLLTD_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_WDS),y)
+EXTRA_CFLAGS += -DWDS_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_MBSS),y)
+EXTRA_CFLAGS += -DMBSS_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_APCLI),y)
+EXTRA_CFLAGS += -DAPCLI_SUPPORT
+EXTRA_CFLAGS += -DMAT_SUPPORT
+#EXTRA_CFLAGS += -DMLME_EX
+endif
+
+#ifeq ($(CONFIG_RT8592_AP_WAPI),y)
+#EXTRA_CFLAGS   += -DWAPI_SUPPORT -DSOFT_ENCRYPT
+#endif
+
+ifeq ($(CONFIG_RT8592_AP_IGMP_SNOOP),y)
+EXTRA_CFLAGS += -DIGMP_SNOOP_SUPPORT
+endif
+
+ifeq ($(CONFIG_RT8592_AP_NETIF_BLOCK),y)
+EXTRA_CFLAGS += -DBLOCK_NET_IF
+endif
+
+ifeq ($(CONFIG_RT8592_AP_VIDEO_TURBINE),y)
+EXTRA_CFLAGS += -DVIDEO_TURBINE_SUPPORT
+endif
+
+clean:
+	@rm -f `find ./ -name "*.cmd"`
+	@rm -f `find ./ -name "*.ko"`
+	@rm -f `find ./ -name "*.o"`
+	@rm -f *.c
+
+
+
+
+
+

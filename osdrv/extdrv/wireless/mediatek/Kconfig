@@ -1,0 +1,1 @@
+source "osdrv/extdrv/wireless/mediatek/mt7603/Kconfig"

@@ -1,0 +1,18 @@
+TARGETNAME=QAx64
+TARGETTYPE=DRIVER
+
+INCLUDES= $(BASEDIR)\inc;
+
+C_DEFINES=$(C_DEFINES) -DSNIFF \
+                       -DAUTO_RESPONDER \
+                       -DMSI \
+
+SOURCES=..\Main.cpp \
+	..\Eeprom.cpp \
+	..\Dma.cpp \
+	..\TxRx.cpp \
+	..\ComPort.cpp \
+	..\crc32.cpp \
+	..\Power.cpp \
+	..\HwHalProcess.cpp \
+	..\QA.rc \

@@ -1,0 +1,165 @@
+;****************************************************************************************
+;
+; MT62EQ.inf
+;
+;   This installation script supports 2000 & XP for the
+;   MediaTek MT7603 PCI/PCIe series Wireless LAN Card.
+;
+;   Copyright (c)2002 ~ 2013, MediaTek Technology Corp., All Rights Reserved
+;   All Rights Reserved.
+;   Developed by MediaTek Technology, Corp. -- http://www.mediatek.com
+;
+;****************************************************************************************
+
+[Version]
+DriverVer=06/17/2013, 0.00.00.0005
+Signature="$Chicago$"
+Compatible=1
+Class=Net
+ClassGUID={4d36e972-e325-11ce-bfc1-08002be10318}
+Provider=%Provider%
+;CatalogFile=PciDumpr_MT7603.CAT            ;;for WHQL certified
+
+
+[ControlFlags]
+
+
+[Manufacturer]
+%V_Provider%=Adapters
+
+
+[Adapters]
+; DisplayName                Section                DeviceID
+; -----------                -------                --------
+%PciDumpr_MT7603.DeviceDesc%   =PciDumpr_MT7603.ndi,      PCI\VEN_1800&DEV_7603
+
+;*******************************************************************************************
+; Windows 9X specific entries
+;*******************************************************************************************
+
+[PciDumpr_MT7603.ndi]
+AddReg=Common.reg, PciDumpr_MT7603.ndi.reg
+CopyFiles=win9x.CopyFiles
+
+
+;*******************************************************************************************
+; NT specific entries
+;*******************************************************************************************
+
+[PciDumpr_MT7603.ndi.NT]
+AddReg=Common.reg, PciDumpr_MT7603.ndi.NT.reg
+Characteristics=0x84              ; NCF_REMOVABLE | NCF_HAS_UI | NCF_PHYSICAL
+BusType=5
+CopyFiles=NT.CopyFiles
+
+; NT services sections
+[PciDumpr_MT7603.ndi.NT.Services]
+AddService=PciDumpr_MT7603, 2, PciDumpr_MT7603.Service, common.EventLog
+
+
+[PciDumpr_MT7603.ndi.reg]
+HKR, ,                            NTMPDriver,      0, MT62EQ.sys
+HKR, Ndi,                         DeviceID,        0, "PCI\VEN_14C3&DEV_7603"
+
+HKR, ,                            RunningWin9X,    0, "1"
+HKR, ,                            DevLoader,       0, *ndis
+HKR, ,                            DeviceVxDs,      0, MT62EQ.sys
+HKR, ,                            EnumPropPages,   0, "netdi.dll,EnumPropPages"
+
+;
+; NDIS Info
+;
+HKR, NDIS,                        LogDriverName,   0, "MT62EQ"
+HKR, NDIS,                        MajorNdisVersion,1, 03
+HKR, NDIS,                        MinorNdisVersion,1, 0A
+
+HKR, ,                            BusType,         0, 5
+HKR, NDI,                         CardType,        0, "PCI"
+
+;
+; Interfaces
+;
+HKR, Ndi\Interfaces,              DefUpper,        0, "ndis3"
+HKR, Ndi\Interfaces,              DefLower,        0, "ethernet"
+HKR, Ndi\Interfaces,              UpperRange,      0, "ndis3"
+HKR, Ndi\Interfaces,              LowerRange,      0, "ethernet"
+
+;
+; Install sections
+;HKR,Ndi\Install,ndis3,,"PciDumpr_MT7603.install"
+
+
+[win9x.CopyFiles]
+MT62EQ.sys ; Win9x Installation
+
+[PciDumpr_MT7603.ndi.NT.Hw]
+AddReg                  = MSI.Reg
+
+[MSI.Reg]
+HKR, "Interrupt Management", 0x00000010
+HKR, "Interrupt Management\MessageSignaledInterruptProperties", 0x00000010
+HKR, "Interrupt Management\MessageSignaledInterruptProperties", MSISupported, 0x00010001, 1
+HKR, "Interrupt Management\MessageSignaledInterruptProperties", MessageNumberLimit, 0x00010001, 1
+
+;*******************************************************************************************
+; DestinationDirs
+;*******************************************************************************************
+
+[DestinationDirs]
+NT.CopyFiles=12    ; system32\drivers subdirectory on NT
+win9x.CopyFiles=11    ; system32 subdirectory on win9x
+
+[NT.CopyFiles]
+MT62EQ.sys ; NT Installation
+
+[SourceDisksNames]
+1=%INSTALL_DISK_STR%,,,
+
+[SourceDisksFiles] 
+MT62EQ.sys=1
+
+
+;*******************************************************************************************
+; NT specific
+;*******************************************************************************************
+
+[PciDumpr_MT7603.ndi.NT.reg]
+HKR, Ndi,                         Service,         0, "PciDumpr_MT7603"
+HKR, Ndi\Interfaces,              UpperRange,      0, "ndis5"
+HKR, Ndi\Interfaces,              LowerRange,      0, "ethernet"
+
+[PciDumpr_MT7603.Service]
+DisplayName=%PciDumpr_MT7603.Service.DispName%
+ServiceType=1                	;%SERVICE_KERNEL_DRIVER%
+StartType=3                	;%SERVICE_AUTO_START%
+ErrorControl=1                	;%SERVICE_ERROR_NORMAL%
+ServiceBinary=%12%\MT62EQ.sys
+LoadOrderGroup=NDIS
+
+[common.EventLog]
+AddReg=common.AddEventLog.reg
+
+[common.AddEventLog.reg]
+HKR, , EventMessageFile, 0x00020000,"%%SystemRoot%%\System32\netevent.dll,%%SystemRoot%%\System32\drivers\MT62EQ.sys"
+HKR, , TypesSupported,   0x00010001, 7
+
+
+;*******************************************************************************************
+; Strings
+;*******************************************************************************************
+
+[strings]
+Provider=			"MediaTek"
+V_Provider=			"MediaTek Technology Corp."
+
+PciDumpr_MT7603.DeviceDesc     = "MT7603 PCI/PCIe QATest WDM Driver"
+
+PciDumpr_MT7603.Service.DispName=	"MT7603 QATest PCI/PCIe WDM Driver Service"
+INSTALL_DISK_STR=		"PciDumpr_MT7603 QATest Wireless LAN Installation Disk"
+
+;
+; Don't put spaces around=sign otherwise installer will not be able to
+; find these lines.
+SSID_DEF_STR		= ""
+NETWORK_TYPE_DEF_STR	= "1"
+CHANNEL			= "1"
