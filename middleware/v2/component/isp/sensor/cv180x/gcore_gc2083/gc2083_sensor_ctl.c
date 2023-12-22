@@ -18,7 +18,6 @@
 #include "gc2083_cmos_ex.h"
 
 static void gc2083_linear_1080p30_init(VI_PIPE ViPipe);
-static void gc2083_wdr_1080p30_init(VI_PIPE ViPipe);
 
 CVI_U8 gc2083_i2c_addr = 0x37;//0x6e
 const CVI_U32 gc2083_addr_byte = 2;
@@ -149,34 +148,18 @@ void gc2083_standby(VI_PIPE ViPipe)
 	gc2083_write_register(ViPipe, 0x03fc, 0x01);
 	gc2083_write_register(ViPipe, 0x03f9, 0x41);
 
-	printf("%s...", __func__);
+	printf("gc2083_standby\n");
 }
 
 void gc2083_restart(VI_PIPE ViPipe)
 {
-	WDR_MODE_E enWDRMode;
-	CVI_U8     u8ImgMode;
-
-	enWDRMode   = g_pastGc2083[ViPipe]->enWDRMode;
-	u8ImgMode   = g_pastGc2083[ViPipe]->u8ImgMode;
-
-	if (enWDRMode == WDR_MODE_2To1_LINE) {
-		if (u8ImgMode == GC2083_MODE_1920X1080P30_WDR) {
-			gc2083_write_register(ViPipe, 0x03f9, 0x40);
-			usleep(1);
-			gc2083_write_register(ViPipe, 0x03f7, 0x01);
-			gc2083_write_register(ViPipe, 0x03fc, 0x8e);
-			gc2083_write_register(ViPipe, 0x003e, 0x91);
-		}
-	} else {
 		gc2083_write_register(ViPipe, 0x03f9, 0x42);
 		usleep(1);
 		gc2083_write_register(ViPipe, 0x03f7, 0x11);
 		gc2083_write_register(ViPipe, 0x03fc, 0x8e);
 		gc2083_write_register(ViPipe, 0x003e, 0x91);
-	}
 
-	printf("%s...", __func__);
+	printf("gc2083_restart\n");
 }
 
 void gc2083_default_reg_init(VI_PIPE ViPipe)
@@ -243,21 +226,10 @@ int  gc2083_probe(VI_PIPE ViPipe)
 
 void gc2083_init(VI_PIPE ViPipe)
 {
-	WDR_MODE_E       enWDRMode;
-	CVI_U8            u8ImgMode;
-
-	enWDRMode   = g_pastGc2083[ViPipe]->enWDRMode;
-	u8ImgMode   = g_pastGc2083[ViPipe]->u8ImgMode;
 
 	gc2083_i2c_init(ViPipe);
 
-	if (enWDRMode == WDR_MODE_2To1_LINE) {
-		if (u8ImgMode == GC2083_MODE_1920X1080P30_WDR) {
-			gc2083_wdr_1080p30_init(ViPipe);
-		}
-	} else {
-		gc2083_linear_1080p30_init(ViPipe);
-	}
+	gc2083_linear_1080p30_init(ViPipe);
 
 
 	g_pastGc2083[ViPipe]->bInit = CVI_TRUE;
@@ -293,6 +265,8 @@ static void gc2083_linear_1080p30_init(VI_PIPE ViPipe)
 	gc2083_write_register(ViPipe, 0x0db3, 0xd4);
 	gc2083_write_register(ViPipe, 0x0db0, 0x0d);
 	gc2083_write_register(ViPipe, 0x0db5, 0x96);
+	gc2083_write_register(ViPipe, 0x0d03, 0x02);
+	gc2083_write_register(ViPipe, 0x0d04, 0x02);
 	gc2083_write_register(ViPipe, 0x0d05, 0x05);
 	gc2083_write_register(ViPipe, 0x0d06, 0xc9);
 	gc2083_write_register(ViPipe, 0x0d07, 0x00);
@@ -307,8 +281,8 @@ static void gc2083_linear_1080p30_init(VI_PIPE ViPipe)
 	gc2083_write_register(ViPipe, 0x0010, 0x90);
 	gc2083_write_register(ViPipe, 0x0017, 0x0c);
 	gc2083_write_register(ViPipe, 0x0d73, 0x92);
-	gc2083_write_register(ViPipe, 0x0076, 0x00);
 	gc2083_write_register(ViPipe, 0x0d76, 0x00);
+	gc2083_write_register(ViPipe, 0x0076, 0x00);
 	gc2083_write_register(ViPipe, 0x0d41, 0x04);
 	gc2083_write_register(ViPipe, 0x0d42, 0x65);
 	gc2083_write_register(ViPipe, 0x0d7a, 0x10);
@@ -404,17 +378,10 @@ static void gc2083_linear_1080p30_init(VI_PIPE ViPipe)
 	gc2083_write_register(ViPipe, 0x0215, 0x12);
 	gc2083_write_register(ViPipe, 0x0229, 0x05);
 	gc2083_write_register(ViPipe, 0x0237, 0x03);
-	gc2083_write_register(ViPipe, 0x0d03, 0x00);
-	gc2083_write_register(ViPipe, 0x0d04, 0x04);
 	gc2083_write_register(ViPipe, 0x023e, 0x99);
 
 	gc2083_default_reg_init(ViPipe);
 	delay_ms(80);
 
 	printf("ViPipe:%d,===GC2083 1080P 30fps 10bit LINE Init OK!===\n", ViPipe);
-}
-
-static void gc2083_wdr_1080p30_init(VI_PIPE ViPipe)
-{
-	printf("ViPipe = %d\n", ViPipe);
 }

@@ -318,8 +318,6 @@ typedef struct _ISP_AWB_RESULT_S {
 	CVI_U8 u8Saturation[4];
 	ISP_AWB_RAW_STAT_ATTR_S stRawStatAttr;
 	CVI_BOOL bStable;
-	CVI_U8 u8AdjCASaturation;
-	CVI_U8 u8AdjCASatLuma;
 } ISP_AWB_RESULT_S;
 
 typedef struct _ISP_AWB_STAT_1_S {
@@ -419,7 +417,7 @@ typedef enum _ISP_CTRL_CMD_E {
 
 
 #define AWB_DBG_VER	(11)
-#define AWB_SENSOR_NUM (VI_MAX_PIPE_NUM)
+#define AWB_SENSOR_NUM (2)
 #define AWB_DBG_W	(64)
 #define AWB_DBG_H	(32)
 #define AWB_SHIFT_REGION_NUM	(4)

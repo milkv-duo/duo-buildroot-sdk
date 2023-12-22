@@ -196,7 +196,7 @@ extern pthread_t gs_VencTask[VENC_MAX_CHN_NUM];
 	CVI_TRACE(level, CVI_ID_VENC, "%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #else
-#ifndef VC_DEBUG_BASIC_LEVEL
+
 #define CVI_VENC_DEBUG(msg, ...)		\
 	do { \
 		if (vencDbg.currMask & CVI_VENC_MASK_DEBUG) { \
@@ -295,45 +295,6 @@ extern pthread_t gs_VencTask[VENC_MAX_CHN_NUM];
 
 #define CVI_TRACE_VENC(level, fmt, ...)                                           \
 	pr_debug("%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
-
-#else
-#define CVI_VENC_DEBUG(msg, ...)		\
-	do { \
-		if (vencDbg.currMask & CVI_VENC_MASK_DEBUG) { \
-			struct timespec64 ts;	\
-			ktime_get_ts64(&ts);	\
-			pr_info("[DEBUG][%llu] %s = %d," msg, ts.tv_sec * 1000 + ts.tv_nsec / 1000000, __func__, \
-			__LINE__, ## __VA_ARGS__); \
-		} \
-	} while (0)
-#define CVI_VENC_ERR(msg, ...)		\
-	do { \
-		if (vencDbg.currMask & CVI_VENC_MASK_ERR) \
-		pr_err("[ERR] %s = %d, "msg, __func__, __LINE__, ## __VA_ARGS__); \
-	} while (0)
-#define CVI_VENC_WARN(msg, ...)		\
-	do { \
-		if (vencDbg.currMask & CVI_VENC_MASK_WARN) \
-		pr_warn("[WARN] %s = %d, "msg, __func__, __LINE__, ## __VA_ARGS__); \
-	} while (0)
-
-#define CVI_VENC_BS(msg, ...)
-#define CVI_VENC_SRC(msg, ...)
-#define CVI_VENC_PERF(msg, ...)
-#define CVI_VENC_CFG(msg, ...)
-#define CVI_VENC_FRC(msg, ...)
-#define CVI_VENC_BIND(msg, ...)
-#define CVI_VENC_INFO(msg, ...)
-#define CVI_VENC_FLOW(msg, ...)
-#define CVI_VENC_API(msg, ...)
-#define CVI_VENC_DBG(msg, ...)
-#define CVI_VENC_SYNC(msg, ...)
-#define CVI_VENC_TRACE(msg, ...)
-#define CVI_VENC_DUMP_YUV(msg, ...)
-#define CVI_VENC_DUMP_BS(msg, ...)
-#define CVI_TRACE_VENC(level, fmt, ...)
-
-#endif
 #endif
 
 // TODO: refinememt for hardcode
@@ -1304,6 +1265,26 @@ typedef struct _VENC_FRAME_PARAM_S {
 	CVI_U32 u32FrameQp;
 	CVI_U32 u32FrameBits;
 } VENC_FRAME_PARAM_S;
+
+typedef struct _VENC_SB_Setting_S {
+	unsigned int codec;  // 0x1:h265, 0x2:h264, 0x4:jpeg
+	CVI_U32 sb_mode;
+	CVI_U32 sb_size;
+	CVI_U32 sb_nb;
+	CVI_U32 y_stride;
+	CVI_U32 uv_stride;
+	CVI_U32 src_height;
+	//pri sb address
+	CVI_U32 sb_ybase;
+	CVI_U32 sb_uvbase;
+	CVI_U32 src_ybase;  //[out]
+	CVI_U32 src_uvbase; //[out]
+	// sec sb address
+	CVI_U32 sb_ybase1;
+	CVI_U32 sb_uvbase1;
+	CVI_U32 src_ybase1;  //[out]
+	CVI_U32 src_uvbase1; //[out]
+} VENC_SB_Setting;
 
 #ifdef __cplusplus
 #if __cplusplus

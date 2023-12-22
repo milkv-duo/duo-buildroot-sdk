@@ -22,9 +22,6 @@
 #include "dsi_hx8394_evb.h"
 #include "i80_st7789v.h"
 #include "bt656_tp2803.h"
-#include "bt1120_nvp6021.h"
-#include "hw_mcu_st7789v3.h"
-#include "lvds_lcm185x56.h"
 
 static CVI_S32 sample_vo_i2c_file = -1;
 static CVI_S32 sample_vo_i2c_slave_addr;
@@ -176,9 +173,6 @@ CVI_S32 SAMPLE_COMM_VO_FillIntfAttr(VO_PUB_ATTR_S *pstPubAttr)
 	case VO_INTF_I80:
 		pstPubAttr->sti80Cfg = stI80Cfg;
 		break;
-	case VO_INTF_HW_MCU:
-		pstPubAttr->stMcuCfg = st7789v3Cfg;
-		break;
 	case VO_INTF_CVBS:
 	case VO_INTF_YPBPR:
 	case VO_INTF_VGA:
@@ -186,12 +180,9 @@ CVI_S32 SAMPLE_COMM_VO_FillIntfAttr(VO_PUB_ATTR_S *pstPubAttr)
 		pstPubAttr->stBtAttr = stTP2803Cfg;
 		break;
 	case VO_INTF_BT1120:
-		pstPubAttr->stBtAttr = stNVP6021Cfg;
-		break;
 	case VO_INTF_LCD:
 	case VO_INTF_LCD_18BIT:
 	case VO_INTF_LCD_24BIT:
-		pstPubAttr->stLvdsAttr = lvds_lcm185x56_cfg;
 	case VO_INTF_LCD_30BIT:
 	case VO_INTF_HDMI:
 		break;
@@ -459,6 +450,7 @@ CVI_S32 SAMPLE_COMM_VO_StartVO(SAMPLE_VO_CONFIG_S *pstVoConfig)
 	VO_DEV VoDev = 0;
 	VO_LAYER VoLayer = 0;
 	SAMPLE_VO_MODE_E enVoMode = 0;
+	VO_PUB_ATTR_S stVoPubAttr = { 0 };
 	VO_VIDEO_LAYER_ATTR_S stLayerAttr = { 0 };
 	CVI_S32 s32Ret = CVI_SUCCESS;
 
@@ -483,7 +475,7 @@ CVI_S32 SAMPLE_COMM_VO_StartVO(SAMPLE_VO_CONFIG_S *pstVoConfig)
 	 * Set and start layer VoDev#.
 	 ********************************/
 
-	s32Ret = SAMPLE_COMM_VO_GetWH(pstVoConfig->stVoPubAttr.enIntfSync, &stLayerAttr.stDispRect.u32Width,
+	s32Ret = SAMPLE_COMM_VO_GetWH(stVoPubAttr.enIntfSync, &stLayerAttr.stDispRect.u32Width,
 				      &stLayerAttr.stDispRect.u32Height, &stLayerAttr.u32DispFrmRt);
 	if (s32Ret != CVI_SUCCESS) {
 		SAMPLE_PRT("SAMPLE_COMM_VO_GetWH failed!\n");

@@ -28,13 +28,13 @@
 #define DIV_0_TO_1(a)   ((0 == (a)) ? 1 : (a))
 #define DIV_0_TO_1_FLOAT(a) ((((a) < 1E-10) && ((a) > -1E-10)) ? 1 : (a))
 #define GC2083_ID 2083
-#define GC2083_I2C_ADDR_1 0x7e
+#define GC2083_I2C_ADDR_1 0x3f
 #define GC2083_I2C_ADDR_2 0x37
 #define GC2083_I2C_ADDR_IS_VALID(addr)      ((addr) == GC2083_I2C_ADDR_1 || (addr) == GC2083_I2C_ADDR_2)
 
 /****************************************************************************
- * global variables                                                         *
- ***************************************************************************/
+ * global variables                                                            *
+ ****************************************************************************/
 
 ISP_SNS_STATE_S *g_pastGc2083[VI_MAX_PIPE_NUM] = {CVI_NULL};
 
@@ -47,14 +47,15 @@ ISP_SNS_COMMBUS_U g_aunGc2083_BusInfo[VI_MAX_PIPE_NUM] = {
 	[1 ... VI_MAX_PIPE_NUM - 1] = { .s8I2cDev = -1}
 };
 
+GC2083_STATE_S g_astGc2083_State[VI_MAX_PIPE_NUM] = { {0} };
 ISP_SNS_MIRRORFLIP_TYPE_E g_aeGc2083_MirrorFip[VI_MAX_PIPE_NUM] = {0};
 
 CVI_U16 g_au16Gc2083_GainMode[VI_MAX_PIPE_NUM] = {0};
+CVI_U16 g_au16Gc2083_L2SMode[VI_MAX_PIPE_NUM] = {0};
 
 /****************************************************************************
- * local variables and functions                                            *
- ***************************************************************************/
-
+ * local variables and functions                                                           *
+ ****************************************************************************/
 static CVI_U32 g_au32InitExposure[VI_MAX_PIPE_NUM]  = {0};
 static CVI_U32 g_au32LinesPer500ms[VI_MAX_PIPE_NUM] = {0};
 static CVI_U16 g_au16InitWBGain[VI_MAX_PIPE_NUM][3] = {{0} };
@@ -62,24 +63,23 @@ static CVI_U16 g_au16SampleRgain[VI_MAX_PIPE_NUM] = {0};
 static CVI_U16 g_au16SampleBgain[VI_MAX_PIPE_NUM] = {0};
 static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
 /*****Gc2083 Lines Range*****/
-#define GC2083_FULL_LINES_MAX  (0x3fff)
+#define GC2083_FULL_LINES_MAX  (0x3fff) // 0x3FFF(Max VB) + 1080 + 16
 
 /*****Gc2083 Register Address*****/
 #define GC2083_EXP_H_ADDR			0x0d03
 #define GC2083_EXP_L_ADDR			0x0d04
-#define GC2083_SEXP_H_ADDR			0x0001
-#define GC2083_SEXP_L_ADDR			0x0002
-
-#define GC2083_AGAIN_H_ADDR			0x0dc1//
-#define GC2083_AGAIN_L_ADDR			0x00d0//
-#define GC2083_COL_AGAIN_H_ADDR			0x00b8//
-#define GC2083_COL_AGAIN_L_ADDR			0x00b9//
-
-#define GC2083_AGAIN_HOLD			0x031d//no
-
+#define GC2083_AGAIN_H_ADDR			0x0dc1
+#define GC2083_AGAIN_L_ADDR			0x00d0
+#define GC2083_COL_AGAIN_H_ADDR		0x00b8
+#define GC2083_COL_AGAIN_L_ADDR		0x00b9
+#define GC2083_DGAIN_H_ADDR			0x00b1
+#define GC2083_DGAIN_L_ADDR			0x00b2
+#define GC2083_VTS_H_ADDR			0x0d41	//(frame length)
+#define GC2083_VTS_L_ADDR			0x0d42
+#define GC2083_AGAIN_HOLD			0x031d
 #define GC2083_AGAIN_MAG1			0x0155
-#define GC2083_AGAIN_MAG2			0x0410//no
-#define GC2083_AGAIN_MAG3			0x0411//no
+#define GC2083_AGAIN_MAG2			0x0410
+#define GC2083_AGAIN_MAG3			0x0411
 #define GC2083_AGAIN_MAG4			0x0412
 #define GC2083_AGAIN_MAG5			0x0413
 #define GC2083_AGAIN_MAG6			0x0414
@@ -87,12 +87,7 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg);
 #define GC2083_AGAIN_MAG8			0x0416
 #define GC2083_AGAIN_MAG9			0x0417
 
-#define GC2083_DGAIN_H_ADDR			0x00b1
-#define GC2083_DGAIN_L_ADDR			0x00b2
-#define GC2083_VTS_H_ADDR			0x0d41	//(frame length)
-#define GC2083_VTS_L_ADDR			0x0d42
-
-#define GC2083_RES_IS_1080P(w, h)      ((w) <= 1920 && (h) <= 1080)
+#define GC2083_RES_IS_1080P(w, h)      ((w) == 1920 && (h) == 1080)
 
 static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSnsDft)
 {
@@ -127,14 +122,14 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 	switch (pstSnsState->enWDRMode) {
 	default:
 	case WDR_MODE_NONE:   /*linear mode*/
-		pstAeSnsDft->f32Fps = g_astGc2083_mode[GC2083_MODE_1920X1080P30].f32MaxFps;
-		pstAeSnsDft->f32MinFps = g_astGc2083_mode[GC2083_MODE_1920X1080P30].f32MinFps;
+		pstAeSnsDft->f32Fps = g_stGc2083_mode[GC2083_MODE_1920X1080P30].f32MaxFps;
+		pstAeSnsDft->f32MinFps = g_stGc2083_mode[GC2083_MODE_1920X1080P30].f32MinFps;
 		pstAeSnsDft->au8HistThresh[0] = 0xd;
 		pstAeSnsDft->au8HistThresh[1] = 0x28;
 		pstAeSnsDft->au8HistThresh[2] = 0x60;
 		pstAeSnsDft->au8HistThresh[3] = 0x80;
 
-		pstAeSnsDft->u32MaxAgain = 9474*16;
+		pstAeSnsDft->u32MaxAgain = 8028*16;
 		pstAeSnsDft->u32MinAgain = 1024;
 		pstAeSnsDft->u32MaxAgainTarget = pstAeSnsDft->u32MaxAgain;
 		pstAeSnsDft->u32MinAgainTarget = pstAeSnsDft->u32MinAgain;
@@ -150,14 +145,15 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 		pstAeSnsDft->u32AEResponseFrame = 4;
 		pstAeSnsDft->enAeExpMode = AE_EXP_HIGHLIGHT_PRIOR;
 		pstAeSnsDft->u32InitExposure = g_au32InitExposure[ViPipe] ?
-			g_au32InitExposure[ViPipe] : g_astGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Def;
+			g_au32InitExposure[ViPipe] : g_stGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Def;
 
-		pstAeSnsDft->u32MaxIntTime = g_astGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Max;
-		pstAeSnsDft->u32MinIntTime = g_astGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Min;
+		pstAeSnsDft->u32MaxIntTime = g_stGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Max;
+		pstAeSnsDft->u32MinIntTime = g_stGc2083_mode[GC2083_MODE_1920X1080P30].stExp[0].u16Min;
 		pstAeSnsDft->u32MaxIntTimeTarget = 65535;
 		pstAeSnsDft->u32MinIntTimeTarget = 1;
 		break;
 	}
+
 
 	return CVI_SUCCESS;
 }
@@ -165,6 +161,7 @@ static CVI_S32 cmos_get_ae_default(VI_PIPE ViPipe, AE_SENSOR_DEFAULT_S *pstAeSns
 /* the function of sensor set fps */
 static CVI_S32 cmos_fps_set(VI_PIPE ViPipe, CVI_FLOAT f32Fps, AE_SENSOR_DEFAULT_S *pstAeSnsDft)
 {
+
 	ISP_SNS_STATE_S *pstSnsState = CVI_NULL;
 	CVI_U32 u32VMAX;
 	CVI_FLOAT f32MaxFps = 0;
@@ -176,13 +173,14 @@ static CVI_S32 cmos_fps_set(VI_PIPE ViPipe, CVI_FLOAT f32Fps, AE_SENSOR_DEFAULT_
 	GC2083_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
 
-	u32Vts = g_astGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
+	u32Vts = g_stGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
 	pstSnsRegsInfo = &pstSnsState->astSyncInfo[0].snsCfg;
-	f32MaxFps = g_astGc2083_mode[pstSnsState->u8ImgMode].f32MaxFps;
-	f32MinFps = g_astGc2083_mode[pstSnsState->u8ImgMode].f32MinFps;
+	f32MaxFps = g_stGc2083_mode[pstSnsState->u8ImgMode].f32MaxFps;
+	f32MinFps = g_stGc2083_mode[pstSnsState->u8ImgMode].f32MinFps;
 
 	if ((f32Fps <= f32MaxFps) && (f32Fps >= f32MinFps)) {
 		u32VMAX = u32Vts * f32MaxFps / DIV_0_TO_1_FLOAT(f32Fps);
+		CVI_TRACE_SNS(CVI_DBG_ERR, "u32VMAX: %d, Fps: %f\n", u32VMAX, f32Fps);
 	} else {
 		CVI_TRACE_SNS(CVI_DBG_ERR, "Unsupport Fps: %f\n", f32Fps);
 		return CVI_FAILURE;
@@ -219,72 +217,73 @@ static CVI_S32 cmos_inttime_update(VI_PIPE ViPipe, CVI_U32 *u32IntTime)
 
 	pstSnsRegsInfo->astI2cData[LINEAR_EXP_H].u32Data = ((u32IntTime[0] >> 8) & 0x3F);
 	pstSnsRegsInfo->astI2cData[LINEAR_EXP_L].u32Data = (u32IntTime[0] & 0xFF);
+
 	return CVI_SUCCESS;
 }
 
 static CVI_U32 regValTable[29][13] = {
-	//0x00d0 0x0dc1 0x00b8 0x00b9 0x0155 0x0410 0x0411 0x0412 0x0413 0x0414 0x0415 0x0416 0x0417
-	{0x00, 0x00, 0x01, 0x00, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x10, 0x00, 0x01, 0x0c, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x01, 0x00, 0x01, 0x1a, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x11, 0x00, 0x01, 0x2b, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x02, 0x00, 0x02, 0x00, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x12, 0x00, 0x02, 0x18, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x03, 0x00, 0x02, 0x33, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x13, 0x00, 0x03, 0x15, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x04, 0x00, 0x04, 0x00, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x14, 0x00, 0x04, 0xe0, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x05, 0x00, 0x05, 0x26, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x15, 0x00, 0x06, 0x2b, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x44, 0x00, 0x08, 0x00, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x54, 0x00, 0x09, 0x22, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x45, 0x00, 0x0b, 0x0d, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x55, 0x00, 0x0d, 0x16, 0x03, 0x11, 0x11, 0x11, 0x11, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x04, 0x01, 0x10, 0x00, 0x19, 0x16, 0x16, 0x16, 0x16, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x14, 0x01, 0x13, 0x04, 0x19, 0x16, 0x16, 0x16, 0x16, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x24, 0x01, 0x16, 0x1a, 0x19, 0x16, 0x16, 0x16, 0x16, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x34, 0x01, 0x1a, 0x2b, 0x19, 0x16, 0x16, 0x16, 0x16, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x44, 0x01, 0x20, 0x00, 0x36, 0x18, 0x18, 0x18, 0x18, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x54, 0x01, 0x26, 0x07, 0x36, 0x18, 0x18, 0x18, 0x18, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x64, 0x01, 0x2c, 0x33, 0x36, 0x18, 0x18, 0x18, 0x18, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x74, 0x01, 0x35, 0x17, 0x36, 0x18, 0x18, 0x18, 0x18, 0x6f, 0x6f, 0x6f, 0x6f},
-	{0x84, 0x01, 0x35, 0x17, 0x64, 0x16, 0x16, 0x16, 0x16, 0x72, 0x72, 0x72, 0x72},
-	{0x94, 0x01, 0x35, 0x17, 0x64, 0x16, 0x16, 0x16, 0x16, 0x72, 0x72, 0x72, 0x72},
-	{0x85, 0x01, 0x35, 0x17, 0x64, 0x16, 0x16, 0x16, 0x16, 0x72, 0x72, 0x72, 0x72},
-	{0x95, 0x01, 0x35, 0x17, 0x64, 0x16, 0x16, 0x16, 0x16, 0x72, 0x72, 0x72, 0x72},
-	{0xa5, 0x01, 0x35, 0x17, 0x64, 0x16, 0x16, 0x16, 0x16, 0x72, 0x72, 0x72, 0x72},
+  //0x00d0 0x0155 0x0410 0x0411 0x0412 0x0413 0x0414 0x0415 0x0416 0x0417 0x00b8 0x00b9 0x0dc1
+	{0x00,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x01,  0x00, 0x00},
+	{0x10,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x01,  0x0c, 0x00},
+	{0x01,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x01,  0x1a, 0x00},
+	{0x11,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x01,  0x2b, 0x00},
+	{0x02,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x02,  0x00, 0x00},
+	{0x12,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x02,  0x18, 0x00},
+	{0x03,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x02,  0x33, 0x00},
+	{0x13,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x03,  0x15, 0x00},
+	{0x04,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x04,  0x00, 0x00},
+	{0x14,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x04,  0xe0, 0x00},
+	{0x05,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x05,  0x26, 0x00},
+	{0x15,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x06,  0x2b, 0x00},
+	{0x44,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x08,  0x00, 0x00},
+	{0x54,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x09,  0x22, 0x00},
+	{0x45,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x0b,  0x0d, 0x00},
+	{0x55,  0x03,  0x11,  0x11,  0x11,  0x11,  0x6f,  0x6f,  0x6f,  0x6f,  0x0d,  0x16, 0x00},
+	{0x04,  0x19,  0x16,  0x16,  0x16,  0x16,  0x6f,  0x6f,  0x6f,  0x6f,  0x10,  0x00, 0x01},
+	{0x14,  0x19,  0x16,  0x16,  0x16,  0x16,  0x6f,  0x6f,  0x6f,  0x6f,  0x13,  0x04, 0x01},
+	{0x24,  0x19,  0x16,  0x16,  0x16,  0x16,  0x6f,  0x6f,  0x6f,  0x6f,  0x16,  0x1a, 0x01},
+	{0x34,  0x19,  0x16,  0x16,  0x16,  0x16,  0x6f,  0x6f,  0x6f,  0x6f,  0x1a,  0x2b, 0x01},
+	{0x44,  0x36,  0x18,  0x18,  0x18,  0x18,  0x6f,  0x6f,  0x6f,  0x6f,  0x20,  0x00, 0x01},
+	{0x54,  0x36,  0x18,  0x18,  0x18,  0x18,  0x6f,  0x6f,  0x6f,  0x6f,  0x26,  0x07, 0x01},
+	{0x64,  0x36,  0x18,  0x18,  0x18,  0x18,  0x6f,  0x6f,  0x6f,  0x6f,  0x2c,  0x33, 0x01},
+	{0x74,  0x36,  0x18,  0x18,  0x18,  0x18,  0x6f,  0x6f,  0x6f,  0x6f,  0x35,  0x17, 0x01},
+	{0x84,  0x64,  0x16,  0x16,  0x16,  0x16,  0x72,  0x72,  0x72,  0x72,  0x35,  0x17, 0x01},
+	{0x94,  0x64,  0x16,  0x16,  0x16,  0x16,  0x72,  0x72,  0x72,  0x72,  0x35,  0x17, 0x01},
+	{0x85,  0x64,  0x16,  0x16,  0x16,  0x16,  0x72,  0x72,  0x72,  0x72,  0x35,  0x17, 0x01},
+	{0x95,  0x64,  0x16,  0x16,  0x16,  0x16,  0x72,  0x72,  0x72,  0x72,  0x35,  0x17, 0x01},
+	{0xa5,  0x64,  0x16,  0x16,  0x16,  0x16,  0x72,  0x72,  0x72,  0x72,  0x35,  0x17, 0x01},
 };
 
 static CVI_U32 gain_table[29] = {
-								64,
-								77,
-								92,
-								110,
-								128,
-								154,
-								186,
-								223,
-								266,
-								323,
-								387,
-								457,
-								544,
-								653,
-								784,
-								914,
-								1078,
-								1293,
-								1541,
-								1849,
-								2177,
-								2612,
-								3136,
-								3764,
-								4504,
-								5376,
-								6656,
-								7988,
-								9474,
+								64*16,
+								76*16,
+								90*16,
+								107*16,
+								128*16,
+								152*16,
+								179*16,
+								213*16,
+								256*16,
+								305*16,
+								358*16,
+								427*16,
+								512*16,
+								610*16,
+								717*16,
+								854*16,
+								1024*16,
+								1220*16,
+								1434*16,
+								1707*16,
+								2048*16,
+								2439*16,
+								2867*16,
+								3415*16,
+								4096*16,
+								4878*16,
+								5734*16,
+								6830*16,
+								8028*16,
 };
 
 static CVI_S32 cmos_again_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32AgainLin, CVI_U32 *pu32AgainDb)
@@ -292,27 +291,28 @@ static CVI_S32 cmos_again_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32AgainLin, CVI_
 	int i, total;
 	CVI_U32 pregain;
 
+	UNUSED(ViPipe);
 	CMOS_CHECK_POINTER(pu32AgainLin);
 	CMOS_CHECK_POINTER(pu32AgainDb);
-	UNUSED(ViPipe);
+
 	total = sizeof(gain_table) / sizeof(CVI_U32);
 
-	if (*pu32AgainLin >= (gain_table[total - 1] * 16)) {
-		*pu32AgainLin = *pu32AgainDb = gain_table[total - 1] * 16;
+	if (*pu32AgainLin >= gain_table[total - 1]) {
+		*pu32AgainLin = *pu32AgainDb = gain_table[total - 1];
 		return CVI_SUCCESS;
 	}
 
 	for (i = 1; i < total; i++) {
-		if (*pu32AgainLin < (gain_table[i] * 16))
+		if (*pu32AgainLin < gain_table[i])
 			break;
 	}
 	i--;
 	// find the pregain
-	pregain = *pu32AgainLin * 64 / (gain_table[i] * 16);
+	pregain = *pu32AgainLin * 64 / gain_table[i];
 	// set the Db as the AE algo gain, we need this to do gain update
 	*pu32AgainDb = *pu32AgainLin;
 	// set the Lin as the closest sensor gain for AE algo reference
-	*pu32AgainLin = pregain * (gain_table[i] * 16) / 64;
+	*pu32AgainLin = pregain * gain_table[i] / 64;
 
 	return CVI_SUCCESS;
 }
@@ -321,9 +321,10 @@ static CVI_S32 cmos_dgain_calc_table(VI_PIPE ViPipe, CVI_U32 *pu32DgainLin, CVI_
 {
 	CVI_U32 pregain;
 
+	UNUSED(ViPipe);
 	CMOS_CHECK_POINTER(pu32DgainLin);
 	CMOS_CHECK_POINTER(pu32DgainDb);
-	UNUSED(ViPipe);
+
 	// find the pregain
 	pregain = *pu32DgainLin * 64 / 1024;
 	// set the Db as the AE algo gain, we need this to do gain update
@@ -353,44 +354,42 @@ static CVI_S32 cmos_gains_update(VI_PIPE ViPipe, CVI_U32 *pu32Again, CVI_U32 *pu
 	/* only surpport linear mode */
 	u32Again = pu32Again[0];
 	/* To kepp the linearity. we assume AE algo adjusts the dgain only when the again reachs the maximum value */
-	if (u32Again < (9474*16)) {
+	if (u32Again < (8028*16)) {
 		for (i = 1; i < total; i++) {
-			if (*pu32Again < (gain_table[i] * 16))
+			if (*pu32Again < gain_table[i])
 				break;
 		}
 		i--;
 		// find the pregain
-		u32Dgain = u32Again * 64 / (gain_table[i] * 16);
+		u32Dgain = u32Again * 64 / gain_table[i];
 		u32Again = i;
 	} else {
-		// find the pregain
-		u32Dgain = u32Again * 64 / (gain_table[total - 1] * 16);
 		u32Again = total - 1;
-	}
-	// u32Dgain = pu32Dgain[0] * 64 / 1024;
-	if (pstSnsState->enWDRMode == WDR_MODE_NONE) {
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_L].u32Data = regValTable[u32Again][0];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_HOLD].u32Data = 0X2e;
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_H].u32Data = regValTable[u32Again][1];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_REL].u32Data = 0X28;
-		pstSnsRegsInfo->astI2cData[LINEAR_COL_AGAIN_H].u32Data = regValTable[u32Again][2];
-		pstSnsRegsInfo->astI2cData[LINEAR_COL_AGAIN_L].u32Data = regValTable[u32Again][3];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG1].u32Data = regValTable[u32Again][4];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG2].u32Data = regValTable[u32Again][5];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG3].u32Data = regValTable[u32Again][6];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG4].u32Data = regValTable[u32Again][7];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG5].u32Data = regValTable[u32Again][8];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG6].u32Data = regValTable[u32Again][9];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG7].u32Data = regValTable[u32Again][10];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG8].u32Data = regValTable[u32Again][11];
-		pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG9].u32Data = regValTable[u32Again][12];
-
-		pstSnsRegsInfo->astI2cData[LINEAR_DGAIN_H].u32Data = (u32Dgain >> 6);
-		pstSnsRegsInfo->astI2cData[LINEAR_DGAIN_L].u32Data = (u32Dgain & 0x3F) << 2;
-	} else {
-		CVI_TRACE_SNS(CVI_DBG_ERR, "This Mode not support!\n");
+		// find the pregain
+		u32Dgain = pu32Dgain[0] * 64 / 1024;
 	}
 
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_L].u32Data = regValTable[u32Again][0];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG1].u32Data = regValTable[u32Again][1];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG2].u32Data = regValTable[u32Again][2];
+
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG3].u32Data = regValTable[u32Again][3];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG4].u32Data = regValTable[u32Again][4];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG5].u32Data = regValTable[u32Again][5];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG6].u32Data = regValTable[u32Again][6];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG7].u32Data = regValTable[u32Again][7];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG8].u32Data = regValTable[u32Again][8];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_MAG9].u32Data = regValTable[u32Again][9];
+
+	pstSnsRegsInfo->astI2cData[LINEAR_COL_AGAIN_H].u32Data = regValTable[u32Again][10];
+	pstSnsRegsInfo->astI2cData[LINEAR_COL_AGAIN_L].u32Data = regValTable[u32Again][11];
+
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_HOLD_2E].u32Data = 0x2e;
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_H].u32Data = regValTable[u32Again][12];
+	pstSnsRegsInfo->astI2cData[LINEAR_AGAIN_HOLD_28].u32Data = 0x28;
+
+	pstSnsRegsInfo->astI2cData[LINEAR_DGAIN_H].u32Data = (u32Dgain >> 6);
+	pstSnsRegsInfo->astI2cData[LINEAR_DGAIN_L].u32Data = (u32Dgain & 0x3F) << 2;
 	return CVI_SUCCESS;
 }
 
@@ -405,8 +404,8 @@ static CVI_S32 cmos_init_ae_exp_function(AE_SENSOR_EXP_FUNC_S *pstExpFuncs)
 	pstExpFuncs->pfn_cmos_gains_update      = cmos_gains_update;
 	pstExpFuncs->pfn_cmos_again_calc_table  = cmos_again_calc_table;
 	pstExpFuncs->pfn_cmos_dgain_calc_table  = cmos_dgain_calc_table;
-	pstExpFuncs->pfn_cmos_get_inttime_max   = CVI_NULL;
-	pstExpFuncs->pfn_cmos_ae_fswdr_attr_set = CVI_NULL;
+	//pstExpFuncs->pfn_cmos_get_inttime_max   = cmos_get_inttime_max;
+	//pstExpFuncs->pfn_cmos_ae_fswdr_attr_set = cmos_ae_fswdr_attr_set;
 
 	return CVI_SUCCESS;
 }
@@ -415,6 +414,7 @@ static CVI_S32 cmos_get_awb_default(VI_PIPE ViPipe, AWB_SENSOR_DEFAULT_S *pstAwb
 {
 	CMOS_CHECK_POINTER(pstAwbSnsDft);
 	UNUSED(ViPipe);
+
 	memset(pstAwbSnsDft, 0, sizeof(AWB_SENSOR_DEFAULT_S));
 
 	pstAwbSnsDft->u16InitGgain = 1024;
@@ -449,6 +449,7 @@ static CVI_S32 cmos_get_blc_default(VI_PIPE ViPipe, ISP_CMOS_BLACK_LEVEL_S *pstB
 {
 	CMOS_CHECK_POINTER(pstBlc);
 	UNUSED(ViPipe);
+
 	memset(pstBlc, 0, sizeof(ISP_CMOS_BLACK_LEVEL_S));
 
 	memcpy(pstBlc,
@@ -463,8 +464,8 @@ static CVI_S32 cmos_get_wdr_size(VI_PIPE ViPipe, ISP_SNS_ISP_INFO_S *pstIspCfg)
 
 	GC2083_SENSOR_GET_CTX(ViPipe, pstSnsState);
 	CMOS_CHECK_POINTER(pstSnsState);
-	pstMode = &g_astGc2083_mode[pstSnsState->u8ImgMode];
 
+	pstMode = &g_stGc2083_mode[pstSnsState->u8ImgMode];
 	pstIspCfg->frm_num = 1;
 	memcpy(&pstIspCfg->img_size[0], &pstMode->astImg[0], sizeof(ISP_WDR_SIZE_S));
 
@@ -482,13 +483,13 @@ static CVI_S32 cmos_set_wdr_mode(VI_PIPE ViPipe, CVI_U8 u8Mode)
 
 	switch (u8Mode) {
 	case WDR_MODE_NONE:
-		if (pstSnsState->u8ImgMode == GC2083_MODE_1920X1080P30_WDR)
-			pstSnsState->u8ImgMode = GC2083_MODE_1920X1080P30;
-
+		pstSnsState->u8ImgMode = GC2083_MODE_1920X1080P30;
 		pstSnsState->enWDRMode = WDR_MODE_NONE;
-		pstSnsState->u32FLStd = g_astGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
-		//syslog(LOG_INFO, "WDR_MODE_NONE\n");
+		pstSnsState->u32FLStd = g_stGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
+		syslog(LOG_INFO, "WDR_MODE_NONE\n");
 		break;
+
+	case WDR_MODE_2To1_LINE:
 	default:
 		CVI_TRACE_SNS(CVI_DBG_ERR, "Unsupport sensor mode!\n");
 		return CVI_FAILURE;
@@ -558,30 +559,34 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 			pstI2c_data[i].u32DataByteNum = gc2083_data_byte;
 		}
 
-		switch (pstSnsState->enWDRMode) {
-		default:
-			pstI2c_data[LINEAR_EXP_H].u32RegAddr = GC2083_EXP_H_ADDR;
-			pstI2c_data[LINEAR_EXP_L].u32RegAddr = GC2083_EXP_L_ADDR;
-			pstI2c_data[LINEAR_AGAIN_H].u32RegAddr = GC2083_AGAIN_H_ADDR;
-			pstI2c_data[LINEAR_AGAIN_L].u32RegAddr = GC2083_AGAIN_L_ADDR;
-			pstI2c_data[LINEAR_COL_AGAIN_H].u32RegAddr = GC2083_COL_AGAIN_H_ADDR;
-			pstI2c_data[LINEAR_COL_AGAIN_L].u32RegAddr = GC2083_COL_AGAIN_L_ADDR;
-			pstI2c_data[LINEAR_AGAIN_MAG1].u32RegAddr = GC2083_AGAIN_MAG1;
-			pstI2c_data[LINEAR_AGAIN_HOLD].u32RegAddr = GC2083_AGAIN_HOLD;
-			pstI2c_data[LINEAR_AGAIN_MAG2].u32RegAddr = GC2083_AGAIN_MAG2;
-			pstI2c_data[LINEAR_AGAIN_MAG3].u32RegAddr = GC2083_AGAIN_MAG3;
-			pstI2c_data[LINEAR_AGAIN_MAG4].u32RegAddr = GC2083_AGAIN_MAG4;
-			pstI2c_data[LINEAR_AGAIN_MAG5].u32RegAddr = GC2083_AGAIN_MAG5;
-			pstI2c_data[LINEAR_AGAIN_MAG6].u32RegAddr = GC2083_AGAIN_MAG6;
-			pstI2c_data[LINEAR_AGAIN_MAG7].u32RegAddr = GC2083_AGAIN_MAG7;
-			pstI2c_data[LINEAR_AGAIN_MAG8].u32RegAddr = GC2083_AGAIN_MAG8;
-			pstI2c_data[LINEAR_AGAIN_MAG9].u32RegAddr = GC2083_AGAIN_MAG9;
-			pstI2c_data[LINEAR_AGAIN_REL].u32RegAddr = GC2083_AGAIN_HOLD;
-			pstI2c_data[LINEAR_DGAIN_H].u32RegAddr = GC2083_DGAIN_H_ADDR;
-			pstI2c_data[LINEAR_DGAIN_L].u32RegAddr = GC2083_DGAIN_L_ADDR;
-			pstI2c_data[LINEAR_VTS_H].u32RegAddr = GC2083_VTS_H_ADDR;
-			pstI2c_data[LINEAR_VTS_L].u32RegAddr = GC2083_VTS_L_ADDR;
-		}
+		pstI2c_data[LINEAR_EXP_H].u32RegAddr = GC2083_EXP_H_ADDR;
+		pstI2c_data[LINEAR_EXP_L].u32RegAddr = GC2083_EXP_L_ADDR;
+
+		pstI2c_data[LINEAR_AGAIN_L].u32RegAddr = GC2083_AGAIN_L_ADDR;
+
+		pstI2c_data[LINEAR_AGAIN_MAG1].u32RegAddr = GC2083_AGAIN_MAG1;
+		pstI2c_data[LINEAR_AGAIN_MAG2].u32RegAddr = GC2083_AGAIN_MAG2;
+		pstI2c_data[LINEAR_AGAIN_MAG3].u32RegAddr = GC2083_AGAIN_MAG3;
+		pstI2c_data[LINEAR_AGAIN_MAG4].u32RegAddr = GC2083_AGAIN_MAG4;
+		pstI2c_data[LINEAR_AGAIN_MAG5].u32RegAddr = GC2083_AGAIN_MAG5;
+		pstI2c_data[LINEAR_AGAIN_MAG6].u32RegAddr = GC2083_AGAIN_MAG6;
+		pstI2c_data[LINEAR_AGAIN_MAG7].u32RegAddr = GC2083_AGAIN_MAG7;
+		pstI2c_data[LINEAR_AGAIN_MAG8].u32RegAddr = GC2083_AGAIN_MAG8;
+		pstI2c_data[LINEAR_AGAIN_MAG9].u32RegAddr = GC2083_AGAIN_MAG9;
+
+		pstI2c_data[LINEAR_COL_AGAIN_H].u32RegAddr = GC2083_COL_AGAIN_H_ADDR;
+		pstI2c_data[LINEAR_COL_AGAIN_L].u32RegAddr = GC2083_COL_AGAIN_L_ADDR;
+
+		pstI2c_data[LINEAR_AGAIN_HOLD_2E].u32RegAddr = GC2083_AGAIN_HOLD;
+		pstI2c_data[LINEAR_AGAIN_H].u32RegAddr = GC2083_AGAIN_H_ADDR;
+		pstI2c_data[LINEAR_AGAIN_HOLD_28].u32RegAddr = GC2083_AGAIN_HOLD;
+
+		pstI2c_data[LINEAR_DGAIN_H].u32RegAddr = GC2083_DGAIN_H_ADDR;
+		pstI2c_data[LINEAR_DGAIN_L].u32RegAddr = GC2083_DGAIN_L_ADDR;
+
+		pstI2c_data[LINEAR_VTS_H].u32RegAddr = GC2083_VTS_H_ADDR;
+		pstI2c_data[LINEAR_VTS_L].u32RegAddr = GC2083_VTS_L_ADDR;
+
 		pstSnsState->bSyncInit = CVI_TRUE;
 		pstCfg0->snsCfg.need_update = CVI_TRUE;
 		/* recalcualte WDR size */
@@ -589,33 +594,32 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 		pstCfg0->ispCfg.need_update = CVI_TRUE;
 	} else {
 
-		CVI_U32 gainsUpdate = 0;
-		CVI_U32 vtsUpdate = 0;
-		CVI_U32 shutterUpdate = 0;
+		CVI_U32 gainsUpdate = 0, shutterUpdate = 0, vtsUpdate = 0;
 
 		pstCfg0->snsCfg.need_update = CVI_FALSE;
 		for (i = 0; i < pstCfg0->snsCfg.u32RegNum; i++) {
 			if (pstCfg0->snsCfg.astI2cData[i].u32Data == pstCfg1->snsCfg.astI2cData[i].u32Data) {
 				pstCfg0->snsCfg.astI2cData[i].bUpdate = CVI_FALSE;
 			} else {
-				if ((i >= LINEAR_AGAIN_L) && (i <= LINEAR_DGAIN_L))
+
+				if ((i >= LINEAR_AGAIN_H) && (i <= LINEAR_DGAIN_L))
 					gainsUpdate = 1;
-				if ((i >= LINEAR_VTS_H) && (i <= LINEAR_VTS_L))
-					vtsUpdate = 1;
+
 				if (i <= LINEAR_EXP_L)
 					shutterUpdate = 1;
+
+				if ((i >= LINEAR_VTS_H) && (i <= LINEAR_VTS_L))
+					vtsUpdate = 1;
 
 				pstCfg0->snsCfg.astI2cData[i].bUpdate = CVI_TRUE;
 				pstCfg0->snsCfg.need_update = CVI_TRUE;
 			}
 		}
+
 		if (gainsUpdate) {
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_L].bUpdate = CVI_TRUE;
-			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_H].bUpdate = CVI_TRUE;
-			pstCfg0->snsCfg.astI2cData[LINEAR_COL_AGAIN_H].bUpdate = CVI_TRUE;
-			pstCfg0->snsCfg.astI2cData[LINEAR_COL_AGAIN_L].bUpdate = CVI_TRUE;
+
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG1].bUpdate = CVI_TRUE;
-			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_HOLD].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG2].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG3].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG4].bUpdate = CVI_TRUE;
@@ -624,25 +628,35 @@ static CVI_S32 cmos_get_sns_regs_info(VI_PIPE ViPipe, ISP_SNS_SYNC_INFO_S *pstSn
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG7].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG8].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_MAG9].bUpdate = CVI_TRUE;
-			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_REL].bUpdate = CVI_TRUE;
+
+			pstCfg0->snsCfg.astI2cData[LINEAR_COL_AGAIN_H].bUpdate = CVI_TRUE;
+			pstCfg0->snsCfg.astI2cData[LINEAR_COL_AGAIN_L].bUpdate = CVI_TRUE;
+
+			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_HOLD_2E].bUpdate = CVI_TRUE;
+			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_H].bUpdate = CVI_TRUE;
+			pstCfg0->snsCfg.astI2cData[LINEAR_AGAIN_HOLD_28].bUpdate = CVI_TRUE;
+
 			pstCfg0->snsCfg.astI2cData[LINEAR_DGAIN_H].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_DGAIN_L].bUpdate = CVI_TRUE;
 		}
+
 		if (shutterUpdate) {
 			pstCfg0->snsCfg.astI2cData[LINEAR_EXP_H].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_EXP_L].bUpdate = CVI_TRUE;
 		}
+
 		if (vtsUpdate) {
 			pstCfg0->snsCfg.astI2cData[LINEAR_VTS_H].bUpdate = CVI_TRUE;
 			pstCfg0->snsCfg.astI2cData[LINEAR_VTS_L].bUpdate = CVI_TRUE;
 		}
 
-		/* check update isp crop or not */
 		pstCfg0->ispCfg.need_update = (sensor_cmp_wdr_size(&pstCfg0->ispCfg, &pstCfg1->ispCfg) ?
 				CVI_TRUE : CVI_FALSE);
+		// pstCfg0->ispCfg.u8DelayFrmNum = 1;
 	}
 
 	pstSnsRegsInfo->bConfig = CVI_FALSE;
+
 	memcpy(pstSnsSyncInfo, &pstSnsState->astSyncInfo[0], sizeof(ISP_SNS_SYNC_INFO_S));
 	memcpy(&pstSnsState->astSyncInfo[1], &pstSnsState->astSyncInfo[0], sizeof(ISP_SNS_SYNC_INFO_S));
 	pstSnsState->au32FL[1] = pstSnsState->au32FL[0];
@@ -721,9 +735,9 @@ static CVI_VOID sensor_global_init(VI_PIPE ViPipe)
 	pstSnsState->bSyncInit = CVI_FALSE;
 	pstSnsState->u8ImgMode = GC2083_MODE_1920X1080P30;
 	pstSnsState->enWDRMode = WDR_MODE_NONE;
-	pstSnsState->u32FLStd  = g_astGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
-	pstSnsState->au32FL[0] = g_astGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
-	pstSnsState->au32FL[1] = g_astGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
+	pstSnsState->u32FLStd  = g_stGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
+	pstSnsState->au32FL[0] = g_stGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
+	pstSnsState->au32FL[1] = g_stGc2083_mode[pstSnsState->u8ImgMode].u32VtsDef;
 
 	memset(&pstSnsState->astSyncInfo[0], 0, sizeof(ISP_SNS_SYNC_INFO_S));
 	memset(&pstSnsState->astSyncInfo[1], 0, sizeof(ISP_SNS_SYNC_INFO_S));
@@ -739,8 +753,8 @@ static CVI_S32 sensor_rx_attr(VI_PIPE ViPipe, SNS_COMBO_DEV_ATTR_S *pstRxAttr)
 
 	memcpy(pstRxAttr, &gc2083_rx_attr, sizeof(*pstRxAttr));
 
-	pstRxAttr->img_size.width = g_astGc2083_mode[pstSnsState->u8ImgMode].astImg[0].stSnsSize.u32Width;
-	pstRxAttr->img_size.height = g_astGc2083_mode[pstSnsState->u8ImgMode].astImg[0].stSnsSize.u32Height;
+	pstRxAttr->img_size.width = g_stGc2083_mode[pstSnsState->u8ImgMode].astImg[0].stSnsSize.u32Width;
+	pstRxAttr->img_size.height = g_stGc2083_mode[pstSnsState->u8ImgMode].astImg[0].stSnsSize.u32Height;
 	if (pstSnsState->enWDRMode == WDR_MODE_NONE)
 		pstRxAttr->mipi_attr.wdr_mode = CVI_MIPI_WDR_MODE_NONE;
 
@@ -933,6 +947,7 @@ static CVI_S32 sensor_set_init(VI_PIPE ViPipe, ISP_INIT_ATTR_S *pstInitAttr)
 	g_au16SampleRgain[ViPipe] = pstInitAttr->u16SampleRgain;
 	g_au16SampleBgain[ViPipe] = pstInitAttr->u16SampleBgain;
 	g_au16Gc2083_GainMode[ViPipe] = pstInitAttr->enGainMode;
+	g_au16Gc2083_L2SMode[ViPipe] = pstInitAttr->enL2SMode;
 
 	return CVI_SUCCESS;
 }
@@ -952,11 +967,10 @@ ISP_SNS_OBJ_S stSnsGc2083_Obj = {
 	.pfnSetBusInfo          = gc2083_set_bus_info,
 	.pfnSetInit             = sensor_set_init,
 	.pfnMirrorFlip          = sensor_mirror_flip,
-	.pfnPatchRxAttr		= sensor_patch_rx_attr,
+	.pfnPatchRxAttr         = sensor_patch_rx_attr,
 	.pfnPatchI2cAddr        = sensor_patch_i2c_addr,
-	.pfnGetRxAttr		= sensor_rx_attr,
-	.pfnExpSensorCb		= cmos_init_sensor_exp_function,
-	.pfnExpAeCb		= cmos_init_ae_exp_function,
-	.pfnSnsProbe		= sensor_probe,
+	.pfnGetRxAttr           = sensor_rx_attr,
+	.pfnExpSensorCb         = cmos_init_sensor_exp_function,
+	.pfnExpAeCb             = cmos_init_ae_exp_function,
+	.pfnSnsProbe            = sensor_probe,
 };
-

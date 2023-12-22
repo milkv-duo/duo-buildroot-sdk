@@ -705,8 +705,9 @@ CVI_S32 SAMPLE_AUDIO_AI_BIND_AENC(void *argv)
 
 	if (bVqe) {
 		memset(&stAiVqeTalkAttr, 0, sizeof(AI_TALKVQE_CONFIG_S));
-		if ((AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_8000) ||
-			(AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_16000)) {
+		if (((AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_8000) ||
+			(AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_16000)) &&
+			channel == 2) {
 
 			pstAiVqeTalkAttr->s32WorkSampleRate = AudinAttr.enSamplerate;
 			_update_agc_anr_setting(pstAiVqeTalkAttr);
@@ -1582,7 +1583,7 @@ CVI_S32 SAMPLE_AUDIO_PLAY_PCM_FORMAT_FILE(void *argv)
 				 AUDIO_SOUND_MODE_MONO);
 	AudoutAttr.enWorkmode	  = AIO_MODE_I2S_MASTER;
 	AudoutAttr.u32EXFlag	  = 0;
-	AudoutAttr.u32FrmNum	  = 4; /* only use in bind mode */
+	AudoutAttr.u32FrmNum	  = 10; /* only use in bind mode */
 	AudoutAttr.enBitwidth = AUDIO_BIT_WIDTH_16;
 	AudoutAttr.u32PtNumPerFrm =
 		pstAudioparam->preiod_size;/* 20*targetsamplerate/1000 */
