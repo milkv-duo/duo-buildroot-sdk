@@ -8,6 +8,12 @@
 	snsr-reset = <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>, <&portc 17 GPIO_ACTIVE_LOW>;
 };
 
+&mipi_tx {
+	/delete-property/ reset-gpio;
+	/delete-property/ pwm-gpio;
+	/delete-property/ power-ct-gpio;
+};
+
 &i2c0 {
 	status = "disabled";
 };
