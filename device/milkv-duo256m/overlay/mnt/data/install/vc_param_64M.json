@@ -1,0 +1,236 @@
+{
+    "Coding Param": {
+        "items": [
+            {
+                "key": "FrmLostOpen",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "LostMode",
+                "optype": "Manual",
+                "value": 1,
+                "value_type": "int"
+            },
+            {
+                "key": "FrmLostBpsThr",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "EncFrmGaps",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "IntraCost",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            }
+        ],
+        "module": "Coding Param",
+        "optype": "Manual"
+    },
+    "Gop Mode": {
+        "items": [
+            {
+                "key": "GopMode",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "IPQpDelta",
+                "optype": "Manual",
+                "value": 2,
+                "value_type": "int"
+            },
+            {
+                "key": "BgInterval",
+                "optype": "Manual",
+                "value": 250,
+                "value_type": "int"
+            },
+            {
+                "key": "BgQpDelta",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "ViQpDelta",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            }
+        ],
+        "module": "Gop Mode",
+        "optype": "Manual"
+    },
+    "RC Attr": {
+        "items": [
+            {
+                "key": "RcMode",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "Gop",
+                "optype": "Manual",
+                "value": 50,
+                "value_type": "int"
+            },
+            {
+                "key": "VariableFPS",
+                "optype": "Manual",
+                "value": 1,
+                "value_type": "int"
+            },
+            {
+                "key": "SrcFrmRate",
+                "optype": "Manual",
+                "value": 25,
+                "value_type": "int"
+            },
+            {
+                "key": "DstFrmRate",
+                "optype": "Manual",
+                "value": 25,
+                "value_type": "int"
+            },
+            {
+                "key": "StatTime",
+                "optype": "Manual",
+                "value": 2,
+                "value_type": "int"
+            },
+            {
+                "key": "BitRate",
+                "optype": "Manual",
+                "value": 1000,
+                "value_type": "int"
+            },
+            {
+                "key": "MaxBitrate",
+                "optype": "Manual",
+                "value": 8192,
+                "value_type": "int"
+            },
+            {
+                "key": "IQP",
+                "optype": "Manual",
+                "value": 38,
+                "value_type": "int"
+            },
+            {
+                "key": "PQP",
+                "optype": "Manual",
+                "value": 38,
+                "value_type": "int"
+            }
+        ],
+        "module": "RC Attr",
+        "optype": "Manual"
+    },
+    "RC Param": {
+        "items": [
+            {
+                "key": "ThrdLv",
+                "optype": "Manual",
+                "value": 2,
+                "value_type": "int"
+            },
+            {
+                "key": "FirstFrameStartQp",
+                "optype": "Manual",
+                "value": 34,
+                "value_type": "int"
+            },
+            {
+                "key": "InitialDelay",
+                "optype": "Manual",
+                "value": 1000,
+                "value_type": "int"
+            },
+            {
+                "key": "MaxQp",
+                "optype": "Manual",
+                "value": 51,
+                "value_type": "int"
+            },
+            {
+                "key": "MinQp",
+                "optype": "Manual",
+                "value": 20,
+                "value_type": "int"
+            },
+            {
+                "key": "MaxIprop",
+                "optype": "Manual",
+                "value": 10,
+                "value_type": "int"
+            },
+            {
+                "key": "MaxIQp",
+                "optype": "Manual",
+                "value": 51,
+                "value_type": "int"
+            },
+            {
+                "key": "MinIQp",
+                "optype": "Manual",
+                "value": 20,
+                "value_type": "int"
+            },
+            {
+                "key": "ChangePos",
+                "optype": "Manual",
+                "value": 90,
+                "value_type": "int"
+            },
+            {
+                "key": "MinStillPercent",
+                "optype": "Manual",
+                "value": 20,
+                "value_type": "int"
+            },
+            {
+                "key": "MaxStillQP",
+                "optype": "Manual",
+                "value": 38,
+                "value_type": "int"
+            },
+            {
+                "key": "MotionSensitivity",
+                "optype": "Manual",
+                "value": 24,
+                "value_type": "int"
+            },
+            {
+                "key": "PureStillThr",
+                "optype": "Manual",
+                "value": 4,
+                "value_type": "int"
+            },
+            {
+                "key": "AvbrFrmLostOpen",
+                "optype": "Manual",
+                "value": 0,
+                "value_type": "int"
+            },
+            {
+                "key": "AvbrFrmGap",
+                "optype": "Manual",
+                "value": 1,
+                "value_type": "int"
+            }
+        ],
+        "module": "RC Param",
+        "optype": "Manual"
+    }
+}
