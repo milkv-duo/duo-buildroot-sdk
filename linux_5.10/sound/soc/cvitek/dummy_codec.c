@@ -90,7 +90,7 @@ static int dummy_codec_remove(struct platform_device *dev)
 
 static void dummy_codec_release(struct device *dev)
 {
-	return 0;
+	return;
 }
 
 

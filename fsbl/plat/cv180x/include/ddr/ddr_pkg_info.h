@@ -29,6 +29,8 @@
 #define DDR_TYPE_DDR2			1
 #define DDR_TYPE_DDR3			2
 
+extern uint32_t ddr_data_rate;
+
 void read_ddr_pkg_info(void);
 uint8_t get_ddr_vendor(void);
 uint8_t get_ddr_capacity(void);

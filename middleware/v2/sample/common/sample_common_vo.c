@@ -22,6 +22,8 @@
 #include "dsi_hx8394_evb.h"
 #include "i80_st7789v.h"
 #include "bt656_tp2803.h"
+#include "hw_mcu_st7789v3.h"
+#include "lvds_lcm185x56.h"
 
 static CVI_S32 sample_vo_i2c_file = -1;
 static CVI_S32 sample_vo_i2c_slave_addr;
@@ -173,6 +175,9 @@ CVI_S32 SAMPLE_COMM_VO_FillIntfAttr(VO_PUB_ATTR_S *pstPubAttr)
 	case VO_INTF_I80:
 		pstPubAttr->sti80Cfg = stI80Cfg;
 		break;
+	case VO_INTF_HW_MCU:
+		pstPubAttr->stMcuCfg = st7789v3Cfg;
+		break;
 	case VO_INTF_CVBS:
 	case VO_INTF_YPBPR:
 	case VO_INTF_VGA:
@@ -183,6 +188,7 @@ CVI_S32 SAMPLE_COMM_VO_FillIntfAttr(VO_PUB_ATTR_S *pstPubAttr)
 	case VO_INTF_LCD:
 	case VO_INTF_LCD_18BIT:
 	case VO_INTF_LCD_24BIT:
+		pstPubAttr->stLvdsAttr = lvds_lcm185x56_cfg;
 	case VO_INTF_LCD_30BIT:
 	case VO_INTF_HDMI:
 		break;

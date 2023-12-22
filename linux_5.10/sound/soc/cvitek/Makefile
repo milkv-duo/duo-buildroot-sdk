@@ -31,7 +31,7 @@ else
 obj-$(CONFIG_SND_SOC_CV1835DAC) += cv1835dac.o
 endif
 
-obj-$(CONFIG_SND_SOC_CV183x_DUMMY_CARD) += cv1835_dummy_codec.o
+#obj-$(CONFIG_SND_SOC_CV183x_DUMMY_CARD) += cv1835_dummy_codec.o
 obj-$(CONFIG_SND_SOC_CV183x_DUMMY_CARD) += dummy_codec.o
 
 obj-$(CONFIG_SND_SOC_CV182X_CV182XADC) += cv182x_cv182xadc.o

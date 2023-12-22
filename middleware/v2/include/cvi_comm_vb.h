@@ -23,9 +23,10 @@ extern "C" {
 #define VB_INVALID_POOLID (-1U)
 #define VB_INVALID_HANDLE (-1U)
 #define VB_STATIC_POOLID (-2U)
+#define VB_EXTERNAL_POOLID (-3U)
 
 #define VB_MAX_COMM_POOLS       (16)
-#define VB_POOL_MAX_BLK         (128)
+#define VB_POOL_MAX_BLK         (64)
 
 /* user ID for VB */
 #define VB_MAX_USER VB_UID_BUTT
@@ -89,6 +90,22 @@ typedef struct _VB_POOL_CONFIG_S {
 	VB_REMAP_MODE_E enRemapMode;
 	CVI_CHAR acName[MAX_VB_POOL_NAME_LEN];
 } VB_POOL_CONFIG_S;
+
+/*
+ * au64PhyAddr: Y/U/V base addr.
+ */
+typedef struct _VB_USER_BLOCK_S {
+	CVI_U64 au64PhyAddr[3];
+} VB_USER_BLOCK_S;
+
+/*
+ * u32BlkCnt: number of blk in the pool.
+ * VB_USER_BLOCK_S: block addr.
+ */
+typedef struct _VB_POOL_CONFIG_EX_S {
+	CVI_U32 u32BlkCnt;
+	VB_USER_BLOCK_S astUserBlk[VB_POOL_MAX_BLK];
+} VB_POOL_CONFIG_EX_S;
 
 /*
  * u32MaxPoolCnt: number of common pools used.

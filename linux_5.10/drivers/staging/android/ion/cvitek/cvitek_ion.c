@@ -201,11 +201,9 @@ static int cvitek_get_heap_info(struct ion_device *dev, struct cvitek_heap_info 
 			case ION_HEAP_TYPE_CARVEOUT:
 			case ION_HEAP_TYPE_CHUNK:
 			{
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0))
 				info->total_size = heap->total_size;
 				info->avail_size =
 					heap->total_size - heap->num_of_alloc_bytes;
-#endif
 				break;
 			}
 			case ION_HEAP_TYPE_SYSTEM:

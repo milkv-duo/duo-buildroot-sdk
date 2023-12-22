@@ -737,7 +737,7 @@ JpgRet JPU_DecStartOneFrame(JpgDecHandle handle, JpgDecParam *param)
 	JpuWriteReg(MJPEG_GBU_TT_CNT_REG + 4, 0);
 	JpuWriteReg(MJPEG_PIC_ERRMB_REG, 0);
 	val = pDecInfo->huffAcIdx << 10 | pDecInfo->huffDcIdx << 7 | pDecInfo->userHuffTab << 6;
-	val |= (JPU_CHECK_WRITE_RESPONSE_BVALID_SIGNAL << 2) | pDecInfo->usePartial);
+	val |= ((JPU_CHECK_WRITE_RESPONSE_BVALID_SIGNAL << 2) | pDecInfo->usePartial);
 	JpuWriteReg(MJPEG_PIC_CTRL_REG, val);
 
 	JpuWriteReg(MJPEG_PIC_SIZE_REG, (pDecInfo->alignedWidth << 16) | pDecInfo->alignedHeight);
@@ -823,7 +823,7 @@ JpgRet JPU_DecStartOneFrame(JpgDecHandle handle, JpgDecParam *param)
 
 		val = (pDecInfo->frameIdx % (pDecInfo->numFrameBuffers / pDecInfo->bufNum));
 		for (i = 0; i < pDecInfo->bufNum; i++) {
-			addr = pDecInfo->frameBufPool[(val * pDecInfo->bufNum) + i].bufY
+			addr = pDecInfo->frameBufPool[(val * pDecInfo->bufNum) + i].bufY;
 			JpuWriteReg(MJPEG_DPB_BASE00_REG + (i * 12), addr);
 			addr = pDecInfo->frameBufPool[(val * pDecInfo->bufNum) + i].bufCb;
 			JpuWriteReg(MJPEG_DPB_BASE01_REG + (i * 12), addr);

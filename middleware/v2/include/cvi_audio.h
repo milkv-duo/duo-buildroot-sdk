@@ -202,6 +202,14 @@ CVI_S32 CVI_AI_EnableVqe(AUDIO_DEV AiDevId, AI_CHN AiChn);
 CVI_S32 CVI_AI_DisableVqe(AUDIO_DEV AiDevId, AI_CHN AiChn);
 
 /**
+ * @brief Config Vqe(AGC+ANR+AES+AEC)
+ * @param AiDevId the number of audio device
+ * @param AiChn the number of audio channels
+ * @param u32Mask Select mask for vqe function
+ * @return CVI_S32 Return CVI_SUCCESS if succeed
+ */
+CVI_S32 CVI_AI_VqeFunConfig(AUDIO_DEV AiDevId, AI_CHN AiChn, int u32Mask);
+/**
  * @brief Start resample
  * @param AiDevId the number of audio device
  * @param AiChn the number of audio channels

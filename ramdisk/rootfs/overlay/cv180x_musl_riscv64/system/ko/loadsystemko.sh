@@ -5,8 +5,8 @@ ${CVI_SHOPTS}
 #
 insmod /mnt/system/ko/cv180x_sys.ko
 insmod /mnt/system/ko/cv180x_base.ko
-insmod /mnt/system/ko/cv180x_rtos_cmdqu.ko
-insmod /mnt/system/ko/cv180x_fast_image.ko
+#insmod /mnt/system/ko/cv180x_rtos_cmdqu.ko
+#insmod /mnt/system/ko/cv180x_fast_image.ko
 insmod /mnt/system/ko/cvi_mipi_rx.ko
 insmod /mnt/system/ko/snsr_i2c.ko
 insmod /mnt/system/ko/cv180x_vi.ko

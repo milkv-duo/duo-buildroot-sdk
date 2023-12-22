@@ -25,17 +25,17 @@ static const SC5336_2L_MODE_S g_astSC5336_2L_mode[SC5336_2L_MODE_NUM] = {
 		.astImg[0] = {
 			.stSnsSize = {
 				.u32Width = 2880,
-				.u32Height = 1620,
+				.u32Height = 1618,
 			},
 			.stWndRect = {
 				.s32X = 0,
 				.s32Y = 0,
 				.u32Width = 2880,
-				.u32Height = 1620,
+				.u32Height = 1618,
 			},
 			.stMaxSize = {
 				.u32Width = 2880,
-				.u32Height = 1620,
+				.u32Height = 1618,
 			},
 		},
 		.f32MaxFps = 30,
@@ -206,7 +206,7 @@ struct combo_dev_attr_s SC5336_2l_rx_attr = {
 		.wdr_mode = CVI_MIPI_WDR_MODE_VC,
 		.dphy = {
 			.enable = 1,
-			.hs_settle = 14,
+			.hs_settle = 10,
 		},
 	},
 	.mclk = {

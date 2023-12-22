@@ -4,7 +4,7 @@
  *
  * This tool helps to return the size available for SPL image during build
  */
-
+#include <config.h>
 #include <generated/autoconf.h>
 #include <generated/generic-asm-offsets.h>
 

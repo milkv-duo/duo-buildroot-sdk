@@ -175,29 +175,6 @@ void q03p_default_reg_init(VI_PIPE ViPipe)
 	}
 }
 
-void q03p_mirror_flip(VI_PIPE ViPipe, ISP_SNS_MIRRORFLIP_TYPE_E eSnsMirrorFlip)
-{
-	CVI_U8 val = q03p_read_register(ViPipe, 0x12) & ~0x30;
-
-	switch (eSnsMirrorFlip) {
-	case ISP_SNS_NORMAL:
-		break;
-	case ISP_SNS_MIRROR:
-		val |= 0x20;
-		break;
-	case ISP_SNS_FLIP:
-		val |= 0x10;
-		break;
-	case ISP_SNS_MIRROR_FLIP:
-		val |= 0x30;
-		break;
-	default:
-		return;
-	}
-
-	q03p_write_register(ViPipe, 0x12, val);
-}
-
 int q03p_probe(VI_PIPE ViPipe)
 {
 	int nVal;

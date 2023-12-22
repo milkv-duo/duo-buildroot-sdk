@@ -1176,14 +1176,14 @@ int sclr_dsi_dcs_write_buffer(u8 di, const void *data, size_t len, bool sw_mode)
 		return -1;
 	}
 
-	if ((di == 0x06) || (di == 0x05) || (di == 0x04) || (di == 0x03)) {
+	if (di == 0x06 || di == 0x05 || di == 0x04 || di == 0x03) {
 		if (len != 1) {
 			printf("[cvi_mipi_tx] %s: cmd(0x%02x) should has 1 param.\n", __func__, di);
 			return -1;
 		}
 		return sclr_dsi_short_packet(di, data, len, sw_mode);
 	}
-	if ((di == 0x15) || (di == 0x37) || (di == 0x13) || (di == 0x14)) {
+	if (di == 0x15 || di == 0x37 || di == 0x13 || di == 0x14 || di == 0x23) {
 		if (len != 2) {
 			printf("[cvi_mipi_tx] %s: cmd(0x%02x) should has 2 param.\n", __func__, di);
 			return -1;

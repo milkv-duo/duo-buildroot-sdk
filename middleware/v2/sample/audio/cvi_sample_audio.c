@@ -705,9 +705,8 @@ CVI_S32 SAMPLE_AUDIO_AI_BIND_AENC(void *argv)
 
 	if (bVqe) {
 		memset(&stAiVqeTalkAttr, 0, sizeof(AI_TALKVQE_CONFIG_S));
-		if (((AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_8000) ||
-			(AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_16000)) &&
-			channel == 2) {
+		if ((AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_8000) ||
+			(AudinAttr.enSamplerate == AUDIO_SAMPLE_RATE_16000)) {
 
 			pstAiVqeTalkAttr->s32WorkSampleRate = AudinAttr.enSamplerate;
 			_update_agc_anr_setting(pstAiVqeTalkAttr);

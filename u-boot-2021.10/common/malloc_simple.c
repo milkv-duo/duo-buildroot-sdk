@@ -23,10 +23,10 @@ static void *alloc_simple(size_t bytes, int align)
 
 	addr = ALIGN(gd->malloc_base + gd->malloc_ptr, align);
 	new_ptr = addr + bytes - gd->malloc_base;
-	log_debug("size=%zx, ptr=%lx, limit=%lx: ", bytes, new_ptr,
-		  gd->malloc_limit);
+
 	if (new_ptr > gd->malloc_limit) {
-		log_err("alloc space exhausted\n");
+		log_err("alloc space exhausted\n"
+			"size=%lx, ptr=%lx, limit=%lx\n", bytes, new_ptr, gd->malloc_limit);
 		return NULL;
 	}
 

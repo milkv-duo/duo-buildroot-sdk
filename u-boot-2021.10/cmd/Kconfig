@@ -2418,6 +2418,12 @@ config CMD_CVI_JPEG
           and decode jpg file to yuv format to the
           destination address
 
+config CMD_CVISOUND
+        bool "CVI sound"
+        help
+          Support for the audio play
+
+
 config CMD_CVI_UPDATE
 	bool "cvitek update command"
 	default y

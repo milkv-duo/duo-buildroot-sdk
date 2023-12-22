@@ -47,6 +47,7 @@ int dec_verify_image(const void *image, size_t size, size_t dec_skip, struct fip
 
 void bl2_main(void)
 {
+	enum CHIP_CLK_MODE mode;
 	ATF_STATE = ATF_STATE_BL2_MAIN;
 	time_records->fsbl_start = read_time_ms();
 
@@ -68,12 +69,17 @@ void bl2_main(void)
 	set_rtc_en_registers();
 
 	load_ddr();
-#ifdef OD_CLK_SEL
-	load_rest_od_sel();
-#else
-	load_rest();
-#endif
 
+#ifdef OD_CLK_SEL
+	mode = CLK_OD;
+#else
+#ifdef VC_CLK_OVERDRIVE
+	mode = CLK_VC_OD;
+#else
+	mode = CLK_ND;
+#endif
+#endif
+	load_rest(mode);
 	NOTICE("BL2 end.\n");
 
 	while (1)

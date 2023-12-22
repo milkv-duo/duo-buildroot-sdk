@@ -34,10 +34,13 @@ extern "C" {
 #define VO_INTF_MIPI_SLAVE (0x01L << 14)
 #define VO_INTF_HDMI (0x01L << 15)
 #define VO_INTF_I80 (0x01L << 16)
+#define VO_INTF_LVDS (0x01L << 17)
+#define VO_INTF_HW_MCU (0x01L << 18)
 
 #define VO_GAMMA_NODENUM 65
 
-#define MAX_BT_PINS 20
+#define MAX_VO_PINS 32
+#define MAX_MCU_INSTR 256
 
 typedef CVI_U32 VO_INTF_TYPE_E;
 
@@ -96,6 +99,20 @@ typedef enum _VO_CSC_MATRIX_E {
 	VO_CSC_MATRIX_BUTT
 } VO_CSC_MATRIX_E;
 
+enum VO_PATTERN_MODE {
+	VO_PAT_OFF = 0,
+	VO_PAT_SNOW,
+	VO_PAT_AUTO,
+	VO_PAT_RED,
+	VO_PAT_GREEN,
+	VO_PAT_BLUE,
+	VO_PAT_COLORBAR,
+	VO_PAT_GRAY_GRAD_H,
+	VO_PAT_GRAY_GRAD_V,
+	VO_PAT_BLACK,
+	VO_PAT_MAX,
+};
+
 typedef enum _VO_I80_FORMAT {
 	VO_I80_FORMAT_RGB444 = 0,
 	VO_I80_FORMAT_RGB565,
@@ -143,7 +160,8 @@ GPIOA_16,   GPIOA_17,   GPIOA_18,   GPIOA_19,   GPIOA_20,
 GPIOA_21,   GPIOA_22,   GPIOA_23,   GPIOA_24,   GPIOA_25,
 GPIOA_26,   GPIOA_27,   GPIOA_28,   GPIOA_29,   GPIOA_30,
 GPIOA_31,
-#ifdef ARCH_CV182X
+#if 1
+// #ifdef ARCH_CV182X
 GPIOE_00 = 380,
 GPIOE_01,   GPIOE_02,   GPIOE_03,   GPIOE_04,   GPIOE_05,
 GPIOE_06,   GPIOE_07,   GPIOE_08,   GPIOE_09,   GPIOE_10,
@@ -274,14 +292,18 @@ struct VO_LVDS_CTL_PIN_S {
 
 /* Define LVDS's config
  *
- * lvds_vesa_mode: true for VESA mode; false for JEIDA mode
+ * out_bits: 6 bit, 8 bit or 10 bit
+ * mode: LVDS_MODE_VESA for VESA mode; LVDS_MODE_JEIDA for JEIDA mode
+ * chn_num: 2 for dual link, 1 and others for single link
  * data_big_endian: true for big endian; true for little endian
  * lane_id: lane mapping, -1 no used
  * lane_pn_swap: lane pn-swap if true
+ * pixelclock: pixel clock
  */
 typedef struct _VO_LVDS_ATTR_S {
 	enum VO_LVDS_OUT_BIT_E out_bits;
-	uint8_t chn_num;
+	enum VO_LVDS_MODE_E mode;
+	CVI_U8 chn_num;
 	CVI_BOOL data_big_endian;
 	enum VO_LVDS_LANE_ID lane_id[VO_LVDS_LANE_MAX];
 	CVI_BOOL lane_pn_swap[VO_LVDS_LANE_MAX];
@@ -291,7 +313,7 @@ typedef struct _VO_LVDS_ATTR_S {
 	enum VO_LVDS_MODE_E lvds_vesa_mode;
 } VO_LVDS_ATTR_S;
 
-enum VO_TOP_MUX {
+enum VO_TOP_BT_MUX {
 	VO_MUX_BT_VS = 0,
 	VO_MUX_BT_HS,
 	VO_MUX_BT_HDE,
@@ -313,7 +335,23 @@ enum VO_TOP_MUX {
 	VO_MUX_BT_DATA15,
 	VO_MUX_TG_HS_TILE = 30,
 	VO_MUX_TG_VS_TILE,
-	VO_MUX_MAX,
+	VO_BT_MUX_MAX,
+};
+
+enum VO_TOP_MCU_MUX {
+	VO_MUX_MCU_CS = 0,
+	VO_MUX_MCU_RS,
+	VO_MUX_MCU_WR,
+	VO_MUX_MCU_RD,
+	VO_MUX_MCU_DATA0,
+	VO_MUX_MCU_DATA1,
+	VO_MUX_MCU_DATA2,
+	VO_MUX_MCU_DATA3,
+	VO_MUX_MCU_DATA4,
+	VO_MUX_MCU_DATA5,
+	VO_MUX_MCU_DATA6,
+	VO_MUX_MCU_DATA7,
+	VO_MCU_MUX_MAX,
 };
 
 enum VO_TOP_SEL {
@@ -386,41 +424,40 @@ enum VO_TOP_D_SEL {
 
 struct VO_D_REMAP {
 	enum VO_TOP_D_SEL sel;
-	enum VO_TOP_MUX mux;
+	CVI_U32 mux;
 };
 
-struct VO_BT_PINS {
+struct VO_PINMUX {
 	unsigned char pin_num;
-	struct VO_D_REMAP d_pins[MAX_BT_PINS];
+	struct VO_D_REMAP d_pins[MAX_VO_PINS];
 };
 
-enum VO_BT_MODE {
-	VO_BT_MODE_656 = 0,
-	VO_BT_MODE_1120,
-	VO_BT_MODE_601,
-	VO_BT_MODE_MAX,
-};
-
-enum VO_BT_CLK_MODE {
-	VO_BT_CLK_MODE_27M = 0,
-	VO_BT_CLK_MODE_36M,
-	VO_BT_CLK_MODE_37P125M,
-	VO_BT_CLK_MODE_72M,
-	VO_BT_CLK_MODE_74P25M,
-	VO_BT_CLK_MODE_148P5M,
-};
-
-/* Define BT's config
- *
- * bt_clk: bt clk sel
- * mode: bt mode
- * pins: bt pinmux cfg
- */
 typedef struct _VO_BT_ATTR_S {
-	enum VO_BT_CLK_MODE bt_clk;
-	enum VO_BT_MODE mode;
-	struct VO_BT_PINS pins;
+	struct VO_PINMUX pins;
 } VO_BT_ATTR_S;
+
+enum VO_MCU_MODE {
+	VO_MCU_MODE_RGB565 = 0,
+	VO_MCU_MODE_RGB888,
+	VO_MCU_MODE_MAX,
+};
+
+struct VO_MCU_INSTRS {
+	unsigned char instr_num;
+	VO_I80_INSTR_S instr_cmd[MAX_MCU_INSTR];
+};
+
+typedef struct _VO_HW_MCU_CFG_S {
+	enum VO_MCU_MODE mode;
+	struct VO_PINMUX pins;
+	CVI_U32 lcd_power_gpio_num;
+	CVI_S8 lcd_power_avtive;
+	CVI_U32 backlight_gpio_num;
+	CVI_S8 backlight_avtive;
+	CVI_U32 reset_gpio_num;
+	CVI_S8 reset_avtive;
+	struct VO_MCU_INSTRS instrs;
+} VO_HW_MCU_CFG_S;
 
 /*
  * u32BgColor: Background color of a device, in RGB format.
@@ -437,6 +474,7 @@ typedef struct _VO_PUB_ATTR_S {
 	VO_SYNC_INFO_S stSyncInfo;
 	union {
 		VO_I80_CFG_S sti80Cfg;
+		VO_HW_MCU_CFG_S stMcuCfg;
 		VO_LVDS_ATTR_S stLvdsAttr;
 		VO_BT_ATTR_S stBtAttr;
 	};

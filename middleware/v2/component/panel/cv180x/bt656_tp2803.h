@@ -3,7 +3,7 @@
 
 #include <linux/cvi_comm_vo.h>
 
-const struct VO_BT_PINS tp2803_pins_cfg = {
+const struct VO_PINMUX tp2803_pins_cfg = {
 	.pin_num = 9,
 	.d_pins = {
 		{VO_VIVO_D0, VO_MUX_BT_DATA0},
@@ -20,8 +20,6 @@ const struct VO_BT_PINS tp2803_pins_cfg = {
 
 const VO_BT_ATTR_S stTP2803Cfg = {
 	.pins = tp2803_pins_cfg,
-	.mode = VO_BT_MODE_656,
-	.bt_clk = VO_BT_CLK_MODE_72M,
 };
 
 #endif // _I80_PARAM_ST7789V_H_

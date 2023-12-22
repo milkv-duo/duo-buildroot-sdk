@@ -178,6 +178,11 @@ def gen_cvipart_h(output, parser):
                         % (p["label"], int(p["part_size"] / LBA_SIZE))
                     )
 
+        for i, p in enumerate(parts):
+            if p["label"] == 'BOOT':
+                of.write('#define SPL_%s_PART_OFFSET 0x%x\n' % (p["label"], int(p["offset"] / LBA_SIZE)))
+            elif p["label"] == 'jump':
+                of.write('#define SPL_%s_PART_OFFSET 0x%x\n' % ("BOOT", 0))
         of.write("#endif")
         logging.info("Done!")
 

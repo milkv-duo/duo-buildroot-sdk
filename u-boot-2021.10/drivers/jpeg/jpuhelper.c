@@ -12,6 +12,8 @@
 
 extern int sscanf(const char *str, const char *format, ...);
 
+extern int __must_check kstrtoint(const char *s, unsigned int base, int *res);
+
 static int FillSdramBurst(BufInfo *pBufInfo, Uint64 targetAddr,
 			  PhysicalAddress bsBufStartAddr,
 			  PhysicalAddress bsBufEndAddr, Uint32 size,
@@ -947,17 +949,17 @@ int parseJpgCfgFile(ENC_CFG *pEncCfg, char *FileName)
 	// (444 only)
 	if (GetValue(Fp, "FRAME_FORMAT", sLine) == 0)
 		return 0;
-	ret = kstrtoint(sLine, 10, &pEncCfg->FrmFormat);//sscanf(sLine, "%d", &pEncCfg->FrmFormat);
+	pEncCfg->FrmFormat = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->FrmFormat);
 
 	// width
 	if (GetValue(Fp, "PICTURE_WIDTH", sLine) == 0)
 		return 0;
-	ret = kstrtoint(sLine, 10, &pEncCfg->PicX);//sscanf(sLine, "%d", &pEncCfg->PicX);
+	pEncCfg->PicX = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->PicX);
 
 	// height
 	if (GetValue(Fp, "PICTURE_HEIGHT", sLine) == 0)
 		return 0;
-	ret = kstrtoint(sLine, 10, &pEncCfg->PicY);//sscanf(sLine, "%d", &pEncCfg->PicY);
+	pEncCfg->PicY = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->PicY);
 
 	// frame_rate
 	if (GetValue(Fp, "FRAME_RATE", sLine) == 0)
@@ -990,22 +992,22 @@ int parseJpgCfgFile(ENC_CFG *pEncCfg, char *FileName)
 	if (GetValue(Fp, "FRAME_NUMBER_ENCODED", sLine) == 0)
 		return 0;
 
-	ret = kstrtoint(sLine, 10, &pEncCfg->NumFrame);//sscanf(sLine, "%d", &pEncCfg->NumFrame);
+	pEncCfg->NumFrame = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->NumFrame);
 
 	if (GetValue(Fp, "VERSION_ID", sLine) == 0)
 		return 0;
 
-	ret = kstrtoint(sLine, 10, &pEncCfg->VersionID);//sscanf(sLine, "%d", &pEncCfg->VersionID);
+	pEncCfg->VersionID = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->VersionID);
 
 	if (GetValue(Fp, "RESTART_INTERVAL", sLine) == 0)
 		return 0;
 
-	ret = kstrtoint(sLine, 10, &pEncCfg->RstIntval);//sscanf(sLine, "%d", &pEncCfg->RstIntval);
+	pEncCfg->RstIntval = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->RstIntval);
 
 	if (GetValue(Fp, "IMG_FORMAT", sLine) == 0)
 		return 0;
 
-	ret = kstrtoint(sLine, 10, &pEncCfg->SrcFormat);//sscanf(sLine, "%d", &pEncCfg->SrcFormat);
+	pEncCfg->SrcFormat = (int)simple_strtol(sLine, NULL, 10);//sscanf(sLine, "%d", &pEncCfg->SrcFormat);
 
 	if (GetValue(Fp, "QMATRIX_TABLE", sLine) == 0)
 		return 0;

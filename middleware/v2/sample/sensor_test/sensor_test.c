@@ -509,42 +509,10 @@ int sensor_proc(void)
 	return s32Ret;
 }
 
-#ifdef ENABLE_LOAD_ISPD_SO
-
-#include <dlfcn.h>
-
-void load_ispd(void)
-{
-#define ISPD_LIBNAME "libcvi_ispd2.so"
-#define ISPD_CONNECT_PORT 5566
-
-	char *error = NULL;
-	void *handle = NULL;
-
-	dlerror();
-	handle = dlopen(ISPD_LIBNAME, RTLD_NOW);
-
-	if (handle) {
-		void (*daemon_init)(unsigned int port);
-
-		printf("Load dynamic library %s success\n", ISPD_LIBNAME);
-
-		dlerror();
-		daemon_init = dlsym(handle, "isp_daemon2_init");
-		error = dlerror();
-
-		if (error == NULL) {
-			(*daemon_init)(ISPD_CONNECT_PORT);
-		} else {
-			printf("Run daemon initial fail, %s\n", error);
-			dlclose(handle);
-		}
-	} else {
-		error = dlerror();
-		printf("dlopen: %s, error: %s\n", ISPD_LIBNAME, error);
-	}
-}
-#endif
+//#define ENABLE_ISP_TOOL_DAEMON 1
+//#define JSONRPC_PORT	(5566)
+//extern void isp_daemon2_init(unsigned int port);
+//extern void isp_daemon2_uninit(void);
 
 int main(int argc, char **argv)
 {
@@ -558,8 +526,8 @@ int main(int argc, char **argv)
 	if (s32Ret != CVI_SUCCESS)
 		return s32Ret;
 
-#ifdef ENABLE_LOAD_ISPD_SO
-	load_ispd();
+#ifdef ENABLE_ISP_TOOL_DAEMON
+	isp_daemon2_init(JSONRPC_PORT);
 #endif
 
 	usleep(500 * 1000);
@@ -608,6 +576,10 @@ int main(int argc, char **argv)
 			break;
 		}
 	} while (op != 255);
+
+#ifdef ENABLE_ISP_TOOL_DAEMON
+	isp_daemon2_uninit();
+#endif
 
 	sys_vi_deinit();
 

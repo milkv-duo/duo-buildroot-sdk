@@ -1,0 +1,13 @@
+menu "Cvitek Sound support"
+
+config CVI_SOUND_DRIVERS
+	bool "Enable cvitek sound support"
+	help
+	  Support making sounds through an audio codec. This is normally a
+	  beep at a chosen frequency for a selected length of time. However
+	  the drivers support playing arbitrary sound samples using a
+	  PCM interface.
+
+
+endmenu
+

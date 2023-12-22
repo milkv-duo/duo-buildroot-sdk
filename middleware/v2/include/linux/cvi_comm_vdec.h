@@ -115,6 +115,7 @@ extern vdec_dbg vdecDbg;
 	CVI_TRACE(level, CVI_ID_VDEC, "%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
 
 #else
+#ifndef VC_DEBUG_BASIC_LEVEL
 #define CVI_VDEC_PRNT(msg, ...)	\
 			pr_info(msg, ##__VA_ARGS__)
 
@@ -161,7 +162,26 @@ extern vdec_dbg vdecDbg;
 
 #define CVI_TRACE_VDEC(level, fmt, ...)                                           \
 	CVI_TRACE(level, CVI_ID_VDEC, "%s:%d:%s(): " fmt, __FILENAME__, __LINE__, __func__, ##__VA_ARGS__)
-
+#else
+#define CVI_VDEC_PRNT(msg, ...)
+#define CVI_VDEC_ERR(msg, ...)	\
+	do {	\
+		if (vdecDbg.currMask & CVI_VDEC_MASK_ERR) \
+		pr_err("[ERR] %s = %d, "msg, __func__, __LINE__, ## __VA_ARGS__); \
+	} while (0)
+#define CVI_VDEC_WARN(msg, ...)	\
+	do {	\
+		if (vdecDbg.currMask & CVI_VDEC_MASK_WARN) \
+		pr_warn("[WARN] %s = %d, "msg, __func__, __LINE__, ## __VA_ARGS__); \
+	} while (0)
+#define CVI_VDEC_DISP(msg, ...)
+#define CVI_VDEC_INFO(msg, ...)
+#define CVI_VDEC_MEM(msg, ...)
+#define CVI_VDEC_API(msg, ...)
+#define CVI_VDEC_TRACE(msg, ...)
+#define CVI_VDEC_PERF(msg, ...)
+#define CVI_TRACE_VDEC(level, fmt, ...)
+#endif
 #endif
 
 #define CVI_IO_BLOCK CVI_TRUE

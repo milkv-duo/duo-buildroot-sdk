@@ -250,7 +250,9 @@ function build_middleware()
     if [ -d $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ];
     then
         rm -rf ko
+        rm -rf ko_shrink
         ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko ko
+        ln -s $(echo ${CHIP_ARCH} | tr A-Z a-z)/ko_shrink ko_shrink
     fi
   popd
 

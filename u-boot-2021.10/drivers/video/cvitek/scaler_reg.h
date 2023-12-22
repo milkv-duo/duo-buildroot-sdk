@@ -134,6 +134,8 @@
 #define REG_DSI_PHY_DATA_OV        (REG_DSI_WRAP_BASE + 0x44)
 #define REG_DSI_PHY_LPTX_OV        (REG_DSI_WRAP_BASE + 0x4C)
 #define REG_DSI_PHY_LPRX_OV        (REG_DSI_WRAP_BASE + 0x4C)
+#define REG_DSI_PHY_PD_TXDRV       (REG_DSI_WRAP_BASE + 0x50)
+#define REG_DSI_PHY_PD_EN_TX       (REG_DSI_WRAP_BASE + 0x54)
 #define REG_DSI_PHY_PD             (REG_DSI_WRAP_BASE + 0x64)
 #define REG_DSI_PHY_TXPLL          (REG_DSI_WRAP_BASE + 0x6C)
 #define REG_DSI_PHY_REG_74         (REG_DSI_WRAP_BASE + 0x74)
@@ -143,5 +145,7 @@
 #define REG_DSI_PHY_LANE_PN_SWAP   (REG_DSI_WRAP_BASE + 0xA0)
 #define REG_DSI_PHY_LVDS_EN        (REG_DSI_WRAP_BASE + 0xB4)
 #define REG_DSI_PHY_EXT_GPIO       (REG_DSI_WRAP_BASE + 0xC0)
+#define REG_DSI_PHY_GPO            (REG_DSI_WRAP_BASE + 0xC4)
+#define REG_DSI_PHY_GPI            (REG_DSI_WRAP_BASE + 0xC8)
 
 #endif  // _CVI_SCL_REG_H_

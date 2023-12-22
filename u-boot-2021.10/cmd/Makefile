@@ -206,6 +206,7 @@ obj-$(CONFIG_CMD_AVB) += avb.o
 obj-$(CONFIG_CMD_SCP03) += scp03.o
 
 obj-y += efuse.o
+obj-$(CONFIG_CMD_CVISOUND) += cvisound.o
 
 obj-$(CONFIG_ARM) += arm/
 obj-$(CONFIG_RISCV) += riscv/

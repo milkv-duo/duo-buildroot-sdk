@@ -48,6 +48,14 @@ CVI_S32 CVI_VB_Exit(void);
 VB_POOL CVI_VB_CreatePool(VB_POOL_CONFIG_S *pstVbPoolCfg);
 
 /**
+ * @brief Creating external VB pool dynamically.
+ *
+ * @param pstVbPoolCfg(In), vb pool config.
+ * @return pool ID.
+ */
+VB_POOL CVI_VB_CreateExPool(VB_POOL_CONFIG_EX_S *pstVbPoolExCfg);
+
+/**
  * @brief Destroy VB pool.
  *
  * @param Pool(In), vb pool ID.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<familyset>
+    <!-- first font is default -->
+    <family name="PuHuiTi">
+        <font weight="400">Alibaba-PuHuiTi-Regular.otf</font>
+    </family>
+    <!-- icon fonts -->
+    <family name="falcon-icons">
+        <font weight="400">falcon-icons.ttf</font>
+    </family>
+</familyset>

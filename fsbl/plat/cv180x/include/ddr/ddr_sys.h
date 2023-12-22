@@ -90,6 +90,7 @@ enum train_mode {
 
 // void check_rd32(uintptr_t addr, uint32_t expected); //unused
 void ddr_debug_num_write(void);
+void ddr_patch_set(void);
 void cvx16_rdvld_train(void);
 void ddr_sys_suspend(void);
 void ddr_sys_resume(void);

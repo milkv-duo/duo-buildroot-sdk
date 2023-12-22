@@ -228,6 +228,12 @@ config ENABLE_SDK_ASAN
 
 	  If unsure, say N.
 
+config DISABLE_PQBIN_JSON
+	bool "Disable PQbin json"
+	default n
+	help
+	  Make pqbin not include json param
+
 config FLASH_SIZE_SHRINK
 	bool "Do not install sample and self test application"
 	default n
@@ -402,6 +408,13 @@ config UBOOT_SRC
 	string
 	default "u-boot" if UBOOT_2017_07
 	default "u-boot-2021.10" if UBOOT_2021_10
+
+config UBOOT_SPL_CUSTOM
+	bool "Generate the fip_spl.bin contain u-boot-spl"
+	default n
+	depends on UBOOT_2021_10
+	help
+	  Set fip_spl.bin contain u-boot-spl or u-boot.
 endmenu
 
 menu "Kernel options"

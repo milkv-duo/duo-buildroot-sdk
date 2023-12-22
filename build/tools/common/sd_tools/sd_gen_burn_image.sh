@@ -66,7 +66,7 @@ sudo mount -t ext4 ${dev_name}p2 tmp2/
 # copy boot file and rootfs
 sudo cp ${output_dir}/fip.bin ./tmp1/
 sudo cp ${output_dir}/rawimages/boot.sd ./tmp1/
-sudo cp -raf ${output_dir}/fs/* ./tmp2
+sudo cp -raf ${output_dir}/rootfs/* ./tmp2
 
 sync
 

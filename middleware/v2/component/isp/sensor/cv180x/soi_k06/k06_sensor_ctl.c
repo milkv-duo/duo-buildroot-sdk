@@ -160,26 +160,36 @@ void k06_default_reg_init(VI_PIPE ViPipe)
 
 void k06_mirror_flip(VI_PIPE ViPipe, ISP_SNS_MIRRORFLIP_TYPE_E eSnsMirrorFlip)
 {
-	CVI_U8 val = k06_read_register(ViPipe, 0x12) & (~0x30);
+	CVI_U8 val1 = k06_read_register(ViPipe, 0x12);
+	CVI_U8 val2 = k06_read_register(ViPipe, 0xAA);
+	CVI_U8 val3 = k06_read_register(ViPipe, 0x27);
 
 	switch (eSnsMirrorFlip) {
 	case ISP_SNS_NORMAL:
-		val |= 0x30;
+		val1 = 0x30;
+		val2 = 0x84;
 		break;
 	case ISP_SNS_MIRROR:
-		val |= (0x1 << 4);
+		val1 = 0x10;
+		val2 = 0x8B;
+		val3 += 1;
 		break;
 	case ISP_SNS_FLIP:
-		val |= (0x2 << 4);
+		val1 = 0x20;
+		val2 = 0x84;
 		break;
 	case ISP_SNS_MIRROR_FLIP:
-		val &= ~(0x1 << 4);
+		val1 = 0x00;
+		val2 = 0x8B;
+		val3 += 1;
 		break;
 	default:
 		return;
 	}
 
-	k06_write_register(ViPipe, 0x12, val);
+	k06_write_register(ViPipe, 0x12, val1);
+	k06_write_register(ViPipe, 0xAA, val2);
+	k06_write_register(ViPipe, 0x27, val3);
 }
 
 int k06_probe(VI_PIPE ViPipe)
@@ -235,6 +245,7 @@ static void k06_linear_1440p25_init(VI_PIPE ViPipe)
 	k06_write_register(ViPipe, 0x10, 0x48);
 	k06_write_register(ViPipe, 0x11, 0x80);
 	k06_write_register(ViPipe, 0x46, 0x08);
+	k06_write_register(ViPipe, 0x7F, 0x5E);
 	k06_write_register(ViPipe, 0x0D, 0xA0);
 	k06_write_register(ViPipe, 0x57, 0x67);
 	k06_write_register(ViPipe, 0x58, 0x1F);
@@ -247,10 +258,10 @@ static void k06_linear_1440p25_init(VI_PIPE ViPipe)
 	k06_write_register(ViPipe, 0x24, 0x80);
 	k06_write_register(ViPipe, 0x25, 0xA0);
 	k06_write_register(ViPipe, 0x26, 0x52);
-	k06_write_register(ViPipe, 0x27, 0x27);
+	k06_write_register(ViPipe, 0x27, 0x46);
 	k06_write_register(ViPipe, 0x28, 0x15);
 	k06_write_register(ViPipe, 0x29, 0x04);
-	k06_write_register(ViPipe, 0x2A, 0x20);
+	k06_write_register(ViPipe, 0x2A, 0x40);
 	k06_write_register(ViPipe, 0x2B, 0x14);
 	k06_write_register(ViPipe, 0x2C, 0x00);
 	k06_write_register(ViPipe, 0x2D, 0x00);
@@ -263,36 +274,35 @@ static void k06_linear_1440p25_init(VI_PIPE ViPipe)
 	k06_write_register(ViPipe, 0x77, 0x0C);
 	k06_write_register(ViPipe, 0x80, 0x01);
 	k06_write_register(ViPipe, 0xAF, 0x12);
-	k06_write_register(ViPipe, 0xAA, 0x04);
+	k06_write_register(ViPipe, 0xAA, 0x84);
 	k06_write_register(ViPipe, 0x1D, 0x00);
 	k06_write_register(ViPipe, 0x1E, 0x04);
 	k06_write_register(ViPipe, 0x6C, 0x40);
 	k06_write_register(ViPipe, 0x9E, 0xF8);
-	k06_write_register(ViPipe, 0x0C, 0x30);
-	k06_write_register(ViPipe, 0x6F, 0x80);
+	k06_write_register(ViPipe, 0x0C, 0x00);
 	k06_write_register(ViPipe, 0x6E, 0x2C);
 	k06_write_register(ViPipe, 0x70, 0xF9);
 	k06_write_register(ViPipe, 0x71, 0xDD);
 	k06_write_register(ViPipe, 0x72, 0xD5);
 	k06_write_register(ViPipe, 0x73, 0x5A);
 	k06_write_register(ViPipe, 0x74, 0x02);
-	k06_write_register(ViPipe, 0x78, 0x1D);
+	k06_write_register(ViPipe, 0x78, 0x1C);
 	k06_write_register(ViPipe, 0x89, 0x01);
 	k06_write_register(ViPipe, 0x6B, 0x20);
 	k06_write_register(ViPipe, 0x86, 0x40);
+	k06_write_register(ViPipe, 0x6F, 0x00);
 	k06_write_register(ViPipe, 0x30, 0x8D);
 	k06_write_register(ViPipe, 0x31, 0x08);
 	k06_write_register(ViPipe, 0x32, 0x20);
 	k06_write_register(ViPipe, 0x33, 0x5C);
 	k06_write_register(ViPipe, 0x34, 0x30);
 	k06_write_register(ViPipe, 0x35, 0x30);
-	k06_write_register(ViPipe, 0x3A, 0xB6);
+	k06_write_register(ViPipe, 0x3A, 0xB9);
 	k06_write_register(ViPipe, 0x56, 0x92);
-	k06_write_register(ViPipe, 0x59, 0x48);
+	k06_write_register(ViPipe, 0x59, 0x60);
 	k06_write_register(ViPipe, 0x5A, 0x01);
 	k06_write_register(ViPipe, 0x61, 0x00);
 	k06_write_register(ViPipe, 0x64, 0xC0);
-	k06_write_register(ViPipe, 0x7F, 0x46);
 	k06_write_register(ViPipe, 0x85, 0x44);
 	k06_write_register(ViPipe, 0x8A, 0x00);
 	k06_write_register(ViPipe, 0x91, 0x58);
@@ -317,14 +327,14 @@ static void k06_linear_1440p25_init(VI_PIPE ViPipe)
 	k06_write_register(ViPipe, 0x8F, 0x90);
 	k06_write_register(ViPipe, 0xA4, 0xC7);
 	k06_write_register(ViPipe, 0xA5, 0xAF);
-	k06_write_register(ViPipe, 0xB7, 0x21);
+	k06_write_register(ViPipe, 0xB7, 0x61);
 	k06_write_register(ViPipe, 0x97, 0x20);
 	k06_write_register(ViPipe, 0x13, 0x81);
 	k06_write_register(ViPipe, 0x96, 0x84);
 	k06_write_register(ViPipe, 0x4A, 0x01);
 	k06_write_register(ViPipe, 0x7E, 0x4C);
 	k06_write_register(ViPipe, 0x50, 0x02);
-	k06_write_register(ViPipe, 0x93, 0xC0);
+	k06_write_register(ViPipe, 0x93, 0x00);
 	k06_write_register(ViPipe, 0xB5, 0x4C);
 	k06_write_register(ViPipe, 0xB1, 0x00);
 	k06_write_register(ViPipe, 0xA1, 0x0F);
@@ -340,10 +350,12 @@ static void k06_linear_1440p25_init(VI_PIPE ViPipe)
 	k06_write_register(ViPipe, 0x1B, 0x4F);
 
 	k06_default_reg_init(ViPipe);
-//	k06_write_register(ViPipe, 0x12, 0x00);
+
 	k06_write_register(ViPipe, 0x12, 0x30);
 	k06_write_register(ViPipe, 0x48, 0x86);
 	k06_write_register(ViPipe, 0x48, 0x06);
+	k06_write_register(ViPipe, 0x00, 0x10);
+
 	printf("ViPipe:%d,===K06 1440P 25fps 10bit LINE Init OK!===\n", ViPipe);
 }
 

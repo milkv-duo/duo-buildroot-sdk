@@ -18,3 +18,5 @@ cscope.*
 ncscope.*
 .svim
 
+__pycache__
+.vscode

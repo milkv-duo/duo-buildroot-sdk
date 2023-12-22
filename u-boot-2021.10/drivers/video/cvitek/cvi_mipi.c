@@ -94,8 +94,7 @@ int mipi_tx_set_combo_dev_cfg(const struct combo_dev_cfg_s *dev_cfg)
 	struct combo_dev_cfg_s dev_cfg_t = *dev_cfg;
 	struct disp_ctrl_gpios ctrl_gpios;
 
-	sclr_disp_set_intf(SCLR_VO_INTF_MIPI);
-
+	dphy_dsi_disable_lanes();
 	for (i = 0; i < LANE_MAX_NUM; i++) {
 		if ((dev_cfg_t.lane_id[i] < 0) || (dev_cfg_t.lane_id[i] >= MIPI_TX_LANE_MAX)) {
 			data_en[i] = false;
@@ -142,6 +141,7 @@ int mipi_tx_set_combo_dev_cfg(const struct combo_dev_cfg_s *dev_cfg)
 	preamble_on = (dev_cfg_t.pixel_clk * bits / lane_num) > 1500000;
 	dphy_dsi_lane_en(true, data_en, preamble_on);
 	dphy_dsi_set_pll(dev_cfg_t.pixel_clk, lane_num, bits);
+	sclr_disp_set_intf(SCLR_VO_INTF_MIPI);
 	sclr_dsi_config(lane_num, dsi_fmt, dev_cfg_t.sync_info.vid_hline_pixels);
 	sclr_disp_set_timing(&timing);
 	sclr_disp_tgen_enable(true);

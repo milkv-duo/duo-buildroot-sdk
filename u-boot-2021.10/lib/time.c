@@ -24,9 +24,12 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#if !CONFIG_IS_ENABLED(TIMER) && CONFIG_SPL
+#define CONFIG_SYS_TIMER_RATE 25000000	// 25M
+#endif
 #ifdef CONFIG_SYS_TIMER_RATE
 /* Returns tick rate in ticks per second */
-ulong notrace get_tbclk(void)
+__weak ulong notrace get_tbclk(void)
 {
 	return CONFIG_SYS_TIMER_RATE;
 }
