@@ -88,6 +88,16 @@ config FB_TFT_ILI9486
 	help
 	  Generic Framebuffer support for ILI9486
 
+config FB_TFT_JD9853
+	tristate "FB driver for the JD9853 LCD Controller"
+	depends on FB_TFT
+	help
+	  This enables generic framebuffer support for the JADARD JD9853
+	  display controller. The controller is intended for small color
+	  displays with a resolution of up to 240x320 pixels.
+
+	  Say Y if you have such a display that utilizes this controller.
+
 config FB_TFT_PCD8544
 	tristate "FB driver for the PCD8544 LCD Controller"
 	depends on FB_TFT

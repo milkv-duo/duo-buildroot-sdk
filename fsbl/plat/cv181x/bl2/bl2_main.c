@@ -4,6 +4,7 @@
 #include <bl2.h>
 #include <string.h>
 #include <delay_timer.h>
+#include <rom_api.h>
 
 #ifdef RTOS_ENABLE_FREERTOS
 int init_comm_info(int ret)
@@ -48,6 +49,12 @@ int dec_verify_image(const void *image, size_t size, size_t dec_skip, struct fip
 void bl2_main(void)
 {
 	enum CHIP_CLK_MODE mode;
+	uint32_t v = p_rom_api_get_boot_src();
+
+	if (v == BOOT_SRC_UART) {
+		console_init(0, PLAT_UART_CLK_IN_HZ, UART_DL_BAUDRATE);
+	}
+
 	ATF_STATE = ATF_STATE_BL2_MAIN;
 	time_records->fsbl_start = read_time_ms();
 

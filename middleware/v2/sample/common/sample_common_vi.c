@@ -147,6 +147,8 @@ CVI_S32 SAMPLE_COMM_VI_ResetSensor(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		devno = pstViInfo->stSnsInfo.MipiDev;
+		if (pstViConfig->astViInfo[i].stPipeInfo.aPipe[0] >= VI_MAX_PHY_DEV_NUM)
+			return CVI_SUCCESS;
 		s32Ret = CVI_MIPI_SetSensorReset(devno, 1);
 		if (s32Ret != CVI_SUCCESS) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "sensor %d reset failed!\n", i);
@@ -166,6 +168,8 @@ CVI_S32 SAMPLE_COMM_VI_ResetMipi(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		devno = pstViInfo->stSnsInfo.MipiDev;
+		if (pstViConfig->astViInfo[i].stPipeInfo.aPipe[0] >= VI_MAX_PHY_DEV_NUM)
+			return CVI_SUCCESS;
 		s32Ret = CVI_MIPI_SetMipiReset(devno, 1);
 		if (s32Ret != CVI_SUCCESS) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "mipi %d reset failed!\n", i);
@@ -185,6 +189,8 @@ CVI_S32 SAMPLE_COMM_VI_UnresetSensor(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		devno = pstViInfo->stSnsInfo.MipiDev;
+		if (pstViConfig->astViInfo[i].stPipeInfo.aPipe[0] >= VI_MAX_PHY_DEV_NUM)
+			return CVI_SUCCESS;
 		s32Ret = CVI_MIPI_SetSensorReset(devno, 0);
 		if (s32Ret != CVI_SUCCESS) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "sensor %d unreset failed!\n", i);
@@ -204,6 +210,8 @@ CVI_S32 SAMPLE_COMM_VI_UnresetMipi(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		devno = pstViInfo->stSnsInfo.MipiDev;
+		if (pstViConfig->astViInfo[i].stPipeInfo.aPipe[0] >= VI_MAX_PHY_DEV_NUM)
+			return CVI_SUCCESS;
 		s32Ret = CVI_MIPI_SetMipiReset(devno, 0);
 		if (s32Ret != CVI_SUCCESS) {
 			SAMPLE_PRT("mipi %d unreset failed!\n", i);
@@ -251,6 +259,8 @@ CVI_S32 SAMPLE_COMM_VI_EnableSensorClock(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		devno = pstViInfo->stSnsInfo.MipiDev;
+		if (pstViConfig->astViInfo[i].stPipeInfo.aPipe[0] >= VI_MAX_PHY_DEV_NUM)
+			return CVI_SUCCESS;
 		s32Ret = CVI_MIPI_SetSensorClock(devno, 1);
 		if (s32Ret != CVI_SUCCESS) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "sensor %d clock enable failed!\n", i);
@@ -433,6 +443,7 @@ CVI_S32 SAMPLE_COMM_VI_StartSensor(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		pstViInfo = &pstViConfig->astViInfo[i];
 		ViPipe = pstViInfo->stPipeInfo.aPipe[0];
+
 		u32SnsId = pstViInfo->stSnsInfo.s32SnsId;
 		s32Ret = SAMPLE_COMM_ISP_SetSnsObj(u32SnsId, pstViInfo->stSnsInfo.enSnsType);
 		if (s32Ret != CVI_SUCCESS) {
@@ -558,6 +569,12 @@ CVI_S32 SAMPLE_COMM_VI_StartDev(SAMPLE_VI_INFO_S *pstViInfo)
 	stViDevAttr.stWDRAttr.enWDRMode = pstViInfo->stDevInfo.enWDRMode;
 	stViDevAttr.snrFps = (CVI_U32)pstPubAttr.f32FrameRate;
 
+	if (pstViInfo->stSnsInfo.u8MuxDev) {
+		stViDevAttr.isMux = true;
+		stViDevAttr.switchGpioPin = pstViInfo->stSnsInfo.s16SwitchGpio;
+		stViDevAttr.switchGPioPol = pstViInfo->stSnsInfo.u8SwitchPol;
+	}
+
 	s32Ret = CVI_VI_SetDevAttr(ViDev, &stViDevAttr);
 	if (s32Ret != CVI_SUCCESS) {
 		CVI_TRACE_LOG(CVI_DBG_ERR, "CVI_VI_SetDevAttr failed with %#x!\n", s32Ret);
@@ -637,6 +654,7 @@ CVI_S32 SAMPLE_COMM_VI_StartViChn(SAMPLE_VI_CONFIG_S *pstViConfig)
 			pstSnsObj   = (ISP_SNS_OBJ_S *)SAMPLE_COMM_ISP_GetSnsObj(u32SnsId);
 
 			SAMPLE_COMM_VI_GetChnAttrBySns(pstViConfig->astViInfo[i].stSnsInfo.enSnsType, &stChnAttr);
+
 			stChnAttr.enDynamicRange = pstViConfig->astViInfo[i].stChnInfo.enDynamicRange;
 			stChnAttr.enVideoFormat  = pstViConfig->astViInfo[i].stChnInfo.enVideoFormat;
 			stChnAttr.enCompressMode = pstViConfig->astViInfo[i].stChnInfo.enCompressMode;
@@ -709,6 +727,7 @@ CVI_S32 SAMPLE_COMM_VI_CreateIsp(SAMPLE_VI_CONFIG_S *pstViConfig)
 
 	CVI_S32 i;
 	CVI_S32 s32ViNum;
+	VI_PIPE ViPipe;
 	CVI_S32 s32Ret = CVI_SUCCESS;
 
 	SAMPLE_VI_INFO_S *pstViInfo = CVI_NULL;
@@ -721,6 +740,7 @@ CVI_S32 SAMPLE_COMM_VI_CreateIsp(SAMPLE_VI_CONFIG_S *pstViConfig)
 	for (i = 0; i < pstViConfig->s32WorkingViNum; i++) {
 		s32ViNum  = pstViConfig->as32WorkingViId[i];
 		pstViInfo = &pstViConfig->astViInfo[s32ViNum];
+		ViPipe = pstViInfo->stPipeInfo.aPipe[0];
 
 		s32Ret = SAMPLE_COMM_VI_StartIsp(pstViInfo);
 		if (s32Ret != CVI_SUCCESS) {
@@ -742,7 +762,7 @@ CVI_S32 SAMPLE_COMM_VI_CreateIsp(SAMPLE_VI_CONFIG_S *pstViConfig)
 		}
 		#endif
 
-		s32Ret = SAMPLE_COMM_ISP_Run(s32ViNum);
+		s32Ret = SAMPLE_COMM_ISP_Run(ViPipe);
 		if (s32Ret != CVI_SUCCESS) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "ISP_Run failed with %#x!\n", s32Ret);
 			return s32Ret;
@@ -1049,6 +1069,10 @@ CVI_S32 SAMPLE_COMM_VI_IniToViCfg(SAMPLE_INI_CFG_S *pstIniCfg, SAMPLE_VI_CONFIG_
 			pstIniCfg->s32SnsI2cAddr[s32WorkSnsId];
 		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.u8HwSync		= pstIniCfg->u8HwSync[s32WorkSnsId];
 		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.u8Orien		= pstIniCfg->u8Orien[s32WorkSnsId];
+		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.u8MuxDev		= pstIniCfg->u8MuxDev[s32WorkSnsId];
+		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.s16SwitchGpio	=
+			pstIniCfg->s16SwitchGpio[s32WorkSnsId];
+		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.u8SwitchPol	= pstIniCfg->u8SwitchPol[s32WorkSnsId];
 		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.as16LaneId[0]	=
 			pstIniCfg->as16LaneId[s32WorkSnsId][0];
 		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.as16LaneId[1]	=
@@ -1071,14 +1095,25 @@ CVI_S32 SAMPLE_COMM_VI_IniToViCfg(SAMPLE_INI_CFG_S *pstIniCfg, SAMPLE_VI_CONFIG_
 		pstViConfig->astViInfo[s32WorkSnsId].stSnsInfo.as8PNSwap[4]	=
 			pstIniCfg->as8PNSwap[s32WorkSnsId][4];
 
-		pstViConfig->astViInfo[s32WorkSnsId].stDevInfo.ViDev		= s32WorkSnsId;
+		if (pstIniCfg->u8MuxDev[s32WorkSnsId] && pstIniCfg->u8AttachDev[s32WorkSnsId] > 0) {
+			pstViConfig->astViInfo[s32WorkSnsId].stDevInfo.ViDev		=
+				pstIniCfg->u8AttachDev[s32WorkSnsId] + VI_MAX_PHY_DEV_NUM - 1;
+			pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[0]	=
+				pstIniCfg->u8AttachDev[s32WorkSnsId] + VI_MAX_PHY_DEV_NUM - 1;
+		} else {
+			pstViConfig->astViInfo[s32WorkSnsId].stDevInfo.ViDev		= s32WorkSnsId;
+			pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[0]	= s32WorkSnsId;
+		}
+
 		pstViConfig->astViInfo[s32WorkSnsId].stDevInfo.enWDRMode	= pstIniCfg->enWDRMode[s32WorkSnsId];
 
 		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.enMastPipeMode = enMastPipeMode;
-		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[0]	= s32WorkSnsId;
+
 		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[1]	= -1;
 		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[2]	= -1;
 		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[3]	= -1;
+		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[4]	= -1;
+		pstViConfig->astViInfo[s32WorkSnsId].stPipeInfo.aPipe[5]	= -1;
 
 		pstViConfig->astViInfo[s32WorkSnsId].stChnInfo.ViChn		= s32WorkSnsId;
 		pstViConfig->astViInfo[s32WorkSnsId].stChnInfo.enPixFormat	= enPixFormat;

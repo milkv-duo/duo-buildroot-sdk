@@ -277,9 +277,17 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x0103, 0x01);
 	SC5336_2l_write_register(ViPipe, 0x36e9, 0x80);
 	SC5336_2l_write_register(ViPipe, 0x37f9, 0x80);
-	SC5336_2l_write_register(ViPipe, 0x301f, 0x03);
-	SC5336_2l_write_register(ViPipe, 0x3207, 0x5b);
-	SC5336_2l_write_register(ViPipe, 0x320b, 0x52);
+
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		// 2880 * 1618
+		SC5336_2l_write_register(ViPipe, 0x301f, 0x03);
+		SC5336_2l_write_register(ViPipe, 0x3207, 0x5b);
+		SC5336_2l_write_register(ViPipe, 0x320b, 0x52);
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		// 2880 * 1620
+		SC5336_2l_write_register(ViPipe, 0x301f, 0x01);
+	}
+
 	SC5336_2l_write_register(ViPipe, 0x320e, 0x07);
 	SC5336_2l_write_register(ViPipe, 0x320f, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x3213, 0x04);
@@ -306,11 +314,12 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x3334, 0x40);
 	SC5336_2l_write_register(ViPipe, 0x3356, 0x10);
 	SC5336_2l_write_register(ViPipe, 0x3364, 0x5e);
+	SC5336_2l_write_register(ViPipe, 0x338f, 0x80);
 	SC5336_2l_write_register(ViPipe, 0x3390, 0x09);
 	SC5336_2l_write_register(ViPipe, 0x3391, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x3392, 0x0f);
 	SC5336_2l_write_register(ViPipe, 0x3393, 0x10);
-	SC5336_2l_write_register(ViPipe, 0x3394, 0x18);
+	SC5336_2l_write_register(ViPipe, 0x3394, 0x16);
 	SC5336_2l_write_register(ViPipe, 0x3395, 0x98);
 	SC5336_2l_write_register(ViPipe, 0x3396, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x3397, 0x09);
@@ -320,32 +329,35 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x339b, 0x60);
 	SC5336_2l_write_register(ViPipe, 0x339c, 0xff);
 	SC5336_2l_write_register(ViPipe, 0x33ad, 0x0c);
-	SC5336_2l_write_register(ViPipe, 0x33ae, 0x68);
-	SC5336_2l_write_register(ViPipe, 0x33b2, 0x48);
-	SC5336_2l_write_register(ViPipe, 0x33b3, 0x28);
+	SC5336_2l_write_register(ViPipe, 0x33ae, 0x5c);
+	SC5336_2l_write_register(ViPipe, 0x33af, 0x52);
+	SC5336_2l_write_register(ViPipe, 0x33b1, 0xa0);
+	SC5336_2l_write_register(ViPipe, 0x33b2, 0x38);
+	SC5336_2l_write_register(ViPipe, 0x33b3, 0x18);
 	SC5336_2l_write_register(ViPipe, 0x33f8, 0x00);
-	SC5336_2l_write_register(ViPipe, 0x33f9, 0x70);
+	SC5336_2l_write_register(ViPipe, 0x33f9, 0x60);
 	SC5336_2l_write_register(ViPipe, 0x33fa, 0x00);
-	SC5336_2l_write_register(ViPipe, 0x33fb, 0x90);
+	SC5336_2l_write_register(ViPipe, 0x33fb, 0x80);
 	SC5336_2l_write_register(ViPipe, 0x33fc, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x33fd, 0x1f);
 	SC5336_2l_write_register(ViPipe, 0x349f, 0x03);
 	SC5336_2l_write_register(ViPipe, 0x34a6, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x34a7, 0x1f);
-	SC5336_2l_write_register(ViPipe, 0x34a8, 0x18);
+	SC5336_2l_write_register(ViPipe, 0x34a8, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x34a9, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x34aa, 0x00);
-	SC5336_2l_write_register(ViPipe, 0x34ab, 0xe0);
-	SC5336_2l_write_register(ViPipe, 0x34ac, 0x01);
-	SC5336_2l_write_register(ViPipe, 0x34ad, 0x00);
-	SC5336_2l_write_register(ViPipe, 0x34f8, 0x1f);
+	SC5336_2l_write_register(ViPipe, 0x34ab, 0xd0);
+	SC5336_2l_write_register(ViPipe, 0x34ac, 0x00);
+	SC5336_2l_write_register(ViPipe, 0x34ad, 0xf0);
+	SC5336_2l_write_register(ViPipe, 0x34f8, 0x3f);
 	SC5336_2l_write_register(ViPipe, 0x34f9, 0x08);
 	SC5336_2l_write_register(ViPipe, 0x3630, 0xc0);
 	SC5336_2l_write_register(ViPipe, 0x3631, 0x83);
 	SC5336_2l_write_register(ViPipe, 0x3632, 0x54);
 	SC5336_2l_write_register(ViPipe, 0x3633, 0x33);
+	SC5336_2l_write_register(ViPipe, 0x3638, 0xcf);
 	SC5336_2l_write_register(ViPipe, 0x363f, 0xc0);
-	SC5336_2l_write_register(ViPipe, 0x3641, 0x20);
+	SC5336_2l_write_register(ViPipe, 0x3641, 0x38);
 	SC5336_2l_write_register(ViPipe, 0x3670, 0x56);
 	SC5336_2l_write_register(ViPipe, 0x3674, 0xc0);
 	SC5336_2l_write_register(ViPipe, 0x3675, 0xa0);
@@ -359,13 +371,13 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x367f, 0x0f);
 	SC5336_2l_write_register(ViPipe, 0x3696, 0x23);
 	SC5336_2l_write_register(ViPipe, 0x3697, 0x33);
-	SC5336_2l_write_register(ViPipe, 0x3698, 0x43);
+	SC5336_2l_write_register(ViPipe, 0x3698, 0x34);
 	SC5336_2l_write_register(ViPipe, 0x36a0, 0x09);
 	SC5336_2l_write_register(ViPipe, 0x36a1, 0x0f);
-	SC5336_2l_write_register(ViPipe, 0x36b0, 0x88);
-	SC5336_2l_write_register(ViPipe, 0x36b1, 0x92);
-	SC5336_2l_write_register(ViPipe, 0x36b2, 0xa4);
-	SC5336_2l_write_register(ViPipe, 0x36b3, 0xc7);
+	SC5336_2l_write_register(ViPipe, 0x36b0, 0x85);
+	SC5336_2l_write_register(ViPipe, 0x36b1, 0x8a);
+	SC5336_2l_write_register(ViPipe, 0x36b2, 0x95);
+	SC5336_2l_write_register(ViPipe, 0x36b3, 0xa6);
 	SC5336_2l_write_register(ViPipe, 0x36b4, 0x09);
 	SC5336_2l_write_register(ViPipe, 0x36b5, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x36b6, 0x0f);
@@ -377,11 +389,12 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 	SC5336_2l_write_register(ViPipe, 0x3725, 0xb4);
 	SC5336_2l_write_register(ViPipe, 0x3727, 0x14);
 	SC5336_2l_write_register(ViPipe, 0x3771, 0x89);
-	SC5336_2l_write_register(ViPipe, 0x3772, 0x85);
+	SC5336_2l_write_register(ViPipe, 0x3772, 0x89);
 	SC5336_2l_write_register(ViPipe, 0x3773, 0xc5);
 	SC5336_2l_write_register(ViPipe, 0x377a, 0x0b);
 	SC5336_2l_write_register(ViPipe, 0x377b, 0x1f);
 	SC5336_2l_write_register(ViPipe, 0x37fa, 0x0c);
+	SC5336_2l_write_register(ViPipe, 0x3900, 0x0d);
 	SC5336_2l_write_register(ViPipe, 0x3901, 0x00);
 	SC5336_2l_write_register(ViPipe, 0x3904, 0x04);
 	SC5336_2l_write_register(ViPipe, 0x3905, 0x8c);
@@ -462,5 +475,9 @@ static void SC5336_2l_linear_1620p30_init(VI_PIPE ViPipe)
 
 	SC5336_2l_write_register(ViPipe, 0x0100, 0x01);
 
-	printf("ViPipe:%d,===SC5336_2L 1620P 30fps 10bit LINE Init OK!===\n", ViPipe);
+	if (0x00 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		printf("ViPipe:%d,===SC5336_2L 1618P 30fps 10bit LINE Init OK!===\n", ViPipe);
+	} else if (0x03 == SC5336_2l_read_register(ViPipe, 0x3040)) {
+		printf("ViPipe:%d,===SC5336_2L 1620P 30fps 10bit LINE Init OK!===\n", ViPipe);
+	}
 }

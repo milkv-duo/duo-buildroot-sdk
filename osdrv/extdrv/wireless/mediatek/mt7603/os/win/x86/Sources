@@ -1,0 +1,26 @@
+TARGETNAME=MT7603EQ
+TARGETTYPE=DRIVER
+MSC_OPTIMIZATION=/Od /Oi
+TARGETPATH=OBJ
+#BROWSER_INFO=1
+
+TARGETPATH=.
+INCLUDES= $(BASEDIR)\inc;
+
+C_DEFINES=$(C_DEFINES) -DSNIFF \
+                       -DAUTO_RESPONDER \
+                       -DRTMP_PCI_SUPPORT \
+
+
+SOURCES=Main.c \
+	Eeprom.c \
+	Dma.c \
+	TxRx.c \
+	ComPort.c \
+	crc32.c \
+	Power.c \
+	HwHalProcess.c \
+	Hal.c\
+	QA.rc \
+	
+	

@@ -1,0 +1,72 @@
+/*
+ ***************************************************************************
+ * Ralink Tech Inc.
+ * 4F, No. 2 Technology 5th Rd.
+ * Science-based Industrial Park
+ * Hsin-chu, Taiwan, R.O.C.
+ *
+ * Copyright (C) 2002-2013 Ralink Technology Corporation. All Rights Reserved.
+ *
+ * All rights reserved. Ralink's source code is an unpublished work and the
+ * use of a copyright notice does not imply otherwise. This source code
+ * contains confidential trade secret material of Ralink Tech. Any attemp
+ * or participation in deciphering, decoding, reverse engineering or in any
+ * way altering the source code is stricitly prohibited, unless the prior
+ * written consent of Ralink Technology, Inc. is obtained.
+ ***************************************************************************
+
+	Abstract:
+	
+    Internal resource file for filters
+    
+	Revision History:
+	
+    Who         When          What
+    --------    ----------    ----------------------------------------------
+*/
+
+#include <windows.h>
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_DRV
+#define VER_FILESUBTYPE             VFT2_DRV_NETWORK
+#define VER_FILEDESCRIPTION_STR     "MTK WiFi PCI/PCIe QA Driver"
+
+#ifdef _WIN64
+#ifdef _USB
+#define VER_INTERNALNAME_STR        "MT7603UQx.SYS"
+#define VER_ORIGINALFILENAME_STR    "MT7603UQx.SYS"
+#else
+#define VER_INTERNALNAME_STR        "MT7603EQx.SYS"
+#define VER_ORIGINALFILENAME_STR    "MT7603EQx.SYS"
+#endif
+#else
+#ifdef _USB
+#define VER_INTERNALNAME_STR        "MT7603UQ.SYS"
+#define VER_ORIGINALFILENAME_STR    "MT7603UQ.SYS"
+#else
+#define VER_INTERNALNAME_STR        "MT7603EQ.SYS"
+#define VER_ORIGINALFILENAME_STR    "MT7603EQ.SYS"
+#endif
+#endif
+
+#define VER_FILEVERSION             0,00,00,0049
+#define VER_FILEVERSION_STR         "0.00.00.0049"
+
+#undef VER_PRODUCTVERSION
+#define VER_PRODUCTVERSION          VER_FILEVERSION
+
+#undef VER_PRODUCTVERSION_STR
+#define VER_PRODUCTVERSION_STR      VER_FILEVERSION_STR
+
+#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2002-2013 Ralink Technology Corporation. All Rights Reserved." 
+#ifdef VER_COMPANYNAME_STR
+#undef VER_COMPANYNAME_STR
+#define VER_COMPANYNAME_STR         "Mediatek Technology, Corp."
+#endif
+
+#undef VER_PRODUCTNAME_STR
+#define VER_PRODUCTNAME_STR         "Mediatek QA Wireless Adapters"
+
+#include "common.ver"
+

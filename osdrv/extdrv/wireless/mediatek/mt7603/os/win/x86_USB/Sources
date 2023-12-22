@@ -1,0 +1,46 @@
+TARGETNAME=MT7603UQ
+TARGETTYPE=DRIVER
+DDKROOT=$(_NTDRIVE)$(_NTROOT)#werner add
+MSC_OPTIMIZATION=/Od /Oi
+C_DEFINES=$(C_DEFINES) -DSNIFF \
+                       -DAUTO_RESPONDER \
+                       -D_USB \
+                       -D_MT7603_FPGA \
+
+TARGETPATH=OBJ
+INCLUDES= $(BASEDIR)\inc;
+
+DRIVERTYPE=WDM
+
+#BROWSER_INFO=1
+
+
+TARGETLIBS= $(DDK_LIB_PATH)\Wmilib.lib \
+            $(DDK_LIB_PATH)\usbd.lib
+	  
+	   
+#TARGETPATH=.
+
+
+
+ 
+
+SOURCES=..\Main.c \
+	..\Eeprom.c \
+	..\Dma.c \
+	..\TxRx.c \
+	..\ComPort.c \
+	..\crc32.c \
+	..\Power.c \
+	..\HwHalProcess.c \
+	..\bulkpnp.c \
+	..\bulkdev.c \
+	..\bulkrwr.c \
+	..\bulkpwr.c \
+	..\bulkwmi.c \
+	..\QaUsb.c \
+	..\Hal.c \
+	..\QA.rc \
+
+
+

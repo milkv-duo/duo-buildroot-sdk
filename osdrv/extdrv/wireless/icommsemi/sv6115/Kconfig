@@ -1,0 +1,5 @@
+config SV6115
+	tristate "ICOMMSEMI SV6115 USB WiFi"
+	---help---
+		Enable iComm-semi SV6115 WLAN kernel driver.
+

@@ -78,6 +78,10 @@ static const struct flash_info cvitek_parts[] = {
 			SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP | SECT_4K |
 			SPI_NOR_4B_OPCODES)
 		.fixups = &sr_bit1_qe_fixups },
+	{ "XM25QH256B", INFO(0x206019, 0x0, 64 * 1024, 512,
+			SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP | SECT_4K |
+			SPI_NOR_4B_OPCODES)
+		.fixups = &sr1_bit6_qe_fixups },
 	{ "MT25QL256A",  INFO6(0x20ba19, 0x104400, 64 * 1024,  512,
 			SECT_4K | USE_FSR | SPI_NOR_DUAL_READ |
 			SPI_NOR_QUAD_OP | SPI_NOR_4B_OPCODES | SPI_NOR_HAS_FIX_DUMMY)
@@ -163,6 +167,9 @@ static const struct flash_info cvitek_parts[] = {
 	{ "FM25W128A", INFO(0xA12818, 0x0, 64 * 1024, 256,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
 		.fixups = &sr_bit1_qe_fixups },
+	{ "BY25Q64ES", INFO(0x684017, 0x0, 64 * 1024, 128,
+			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
+		.fixups = &sr_bit1_qe_fixups },
 	{ "BY25Q128AS", INFO(0x684018, 0x0, 64 * 1024, 256,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
 		.fixups = &sr_bit1_qe_fixups },
@@ -171,6 +178,9 @@ static const struct flash_info cvitek_parts[] = {
 			SPI_NOR_4B_OPCODES)
 		.fixups = &sr_bit1_qe_fixups },
 	{ "PY25Q128HA", INFO(0x852018, 0x0, 64 * 1024, 256,
+			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
+		.fixups = &sr_bit1_qe_fixups },
+	{ "PY25Q64HA", INFO(0x852017, 0x0, 64 * 1024, 128,
 			SECT_4K | SPI_NOR_DUAL_READ | SPI_NOR_QUAD_OP)
 		.fixups = &sr_bit1_qe_fixups },
 	{ "P25Q64SH", INFO(0x856017, 0x0, 64 * 1024, 128,

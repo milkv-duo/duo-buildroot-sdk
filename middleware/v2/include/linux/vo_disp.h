@@ -80,6 +80,7 @@ enum sclr_top_vo_bt_mux {
 	SCLR_VO_MUX_BT_DATA15,
 	SCLR_VO_MUX_TG_HS_TILE = 30,
 	SCLR_VO_MUX_TG_VS_TILE,
+	SCLR_VO_MUX_BT_CLK,
 	SCLR_VO_BT_MUX_MAX,
 };
 

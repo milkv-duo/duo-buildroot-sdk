@@ -33,7 +33,7 @@ static void *g_ISPDHandle;
 #endif
 
 static pthread_t g_IspPid[VI_MAX_DEV_NUM];
-static CVI_U32 g_au32IspSnsId[ISP_MAX_DEV_NUM] = { 0, 1, 2};
+static CVI_U32 g_au32IspSnsId[ISP_MAX_DEV_NUM] = { 0, 1, 2, 4, 5};
 
 SAMPLE_SNS_TYPE_E g_enSnsType[VI_MAX_DEV_NUM] = {
 	SONY_IMX327_MIPI_2M_30FPS_12BIT,
@@ -328,6 +328,7 @@ CVI_S32 SAMPLE_COMM_ISP_PatchSnsObj(CVI_U32 u32SnsId, SAMPLE_SENSOR_INFO_S *pstS
 	unsigned int i;
 
 	if (pstSnsObj == CVI_NULL) {
+		CVI_TRACE_LOG(CVI_DBG_ERR, "fail to find pstSnsObj\n");
 		return CVI_FAILURE;
 	}
 
@@ -481,7 +482,7 @@ CVI_S32 SAMPLE_COMM_ISP_Sensor_Regiter_callback(ISP_DEV IspDev, CVI_U32 u32SnsId
 	}
 	pstInitAttr->enSnsBdgMuxMode = SAMPLE_COMM_ISP_GetSnsBdgMode(enSnsType);
 	if (pstSnsObj->pfnSetInit) {
-		s32Ret = pstSnsObj->pfnSetInit(u32SnsId, pstInitAttr);
+		s32Ret = pstSnsObj->pfnSetInit(IspDev, pstInitAttr);
 		if (s32Ret < 0) {
 			CVI_TRACE_LOG(CVI_DBG_ERR, "pfnSetInit error id: %d s32Ret %d\n", IspDev, s32Ret);
 			return CVI_FAILURE;
@@ -490,7 +491,7 @@ CVI_S32 SAMPLE_COMM_ISP_Sensor_Regiter_callback(ISP_DEV IspDev, CVI_U32 u32SnsId
 	/* set i2c bus info */
 	if (SNSBUS_VLD(s32BusId))
 		unSnsrBusInfo.s8I2cDev = (CVI_S8)s32BusId;
-	s32Ret = pstSnsObj->pfnSetBusInfo(u32SnsId, unSnsrBusInfo);
+	s32Ret = pstSnsObj->pfnSetBusInfo(IspDev, unSnsrBusInfo);
 	if (s32Ret < 0) {
 		CVI_TRACE_LOG(CVI_DBG_ERR, "pfnSetBusInfo error id: %d s32Ret %d\n", IspDev, s32Ret);
 		return CVI_FAILURE;

@@ -1,7 +1,0 @@
-{
-    "ddr_cfg_list": [
-        "ddr3_4g_1866_x16",
-        "ddr3_4g_1600_x16"
-    ],
-    "board_information": "SPINAND 256MB + DDR3 16bit 512MB"
-}

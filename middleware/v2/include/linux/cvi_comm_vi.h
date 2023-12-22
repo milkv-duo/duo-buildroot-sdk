@@ -358,6 +358,12 @@ typedef struct _VI_DEV_ATTR_S {
 	CVI_U32 chn_num; /* R; total chnannels sended from dev */
 
 	CVI_U32 snrFps; /* R; snr init fps from isp pub attr */
+
+	CVI_BOOL isMux; /* multi sensor use same dev*/
+
+	CVI_U32 switchGpioPin; /*switch pin*/
+
+	CVI_U8 switchGPioPol; /*switch pol*/
 } VI_DEV_ATTR_S;
 
 /* Information of pipe binded to device */

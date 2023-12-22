@@ -1,0 +1,9 @@
+#
+# Touchscreen driver configuration
+#
+
+config TOUCHSCREEN_TSGSL
+	tristate "betterlife tp"
+	default m
+	---help-- -
+	betterlife fingerprint.

@@ -453,19 +453,6 @@ static int do_load_serial_bin(struct cmd_tbl *cmdtp, int flag, int argc,
 			load_baudrate = current_baudrate;
 	}
 
-	if (load_baudrate != current_baudrate) {
-		printf("## Switch baudrate to %d bps and press ENTER ...\n",
-			load_baudrate);
-		udelay(50000);
-		gd->baudrate = load_baudrate;
-		serial_setbrg();
-		udelay(50000);
-		for (;;) {
-			if (getchar() == '\r')
-				break;
-		}
-	}
-
 	if (strcmp(argv[0],"loady")==0) {
 		printf("## Ready for binary (ymodem) download "
 			"to 0x%08lX at %d bps...\n",
@@ -497,18 +484,6 @@ static int do_load_serial_bin(struct cmd_tbl *cmdtp, int flag, int argc,
 		} else {
 			printf("## Start Addr      = 0x%08lX\n", addr);
 			image_load_addr = addr;
-		}
-	}
-	if (load_baudrate != current_baudrate) {
-		printf("## Switch baudrate to %d bps and press ESC ...\n",
-			current_baudrate);
-		udelay(50000);
-		gd->baudrate = current_baudrate;
-		serial_setbrg();
-		udelay(50000);
-		for (;;) {
-			if (getchar() == 0x1B) /* ESC */
-				break;
 		}
 	}
 

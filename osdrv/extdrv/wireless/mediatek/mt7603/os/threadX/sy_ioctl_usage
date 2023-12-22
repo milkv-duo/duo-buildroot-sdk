@@ -1,0 +1,96 @@
+Prototype:
+sy commond.subcommand arg=number
+
+command.subcommand
+net.set_wifi_mac 
+
+	-wifi_mode
+ 	"adhoc"
+ 	"infrastructure"
+
+	-wifi_encryption
+	 "none"
+	 "wep64"
+	 "wep128"
+	 "wpapsk_tkip"
+	 "wpapsk_aes"
+	 "wpa2psk_tkip"
+	 "wpa2psk_aes"
+
+	-wifi_authentication
+	 "open"
+	 "sharedkey"
+
+	-wifi_channel
+	 channel_number
+
+	-wifi_SSID
+	 "SSID"
+
+	-wifi_defaultKey
+	 "0/1/2/3"
+
+	-wifi_key0
+	 "key"
+
+	-wifi_key1
+	 "key"
+	 
+	-wifi_key2
+	 "key"
+
+	-wifi_key3
+	 "key"
+
+	-wifi_passphrase
+	 "key"
+
+	-wifi_region_domain
+	 "fcc"
+	 "ic"
+	 "etsi"
+	 "spain"
+	 "france"
+	 "mkk"
+	 "mkk1"
+	 "israel"
+	 
+	-wifi_radio_enabled
+	 "disabled"
+	 "enabled"
+
+	-wifi_wps_mode
+	 "pin"
+	 "push_button"
+
+	-wifi_wps_pin
+	 "pin_code"
+
+	-wifi_mac_addr
+	 0x0017c4c4aa1a
+
+command.subcommand
+net.set_wifi_tcpip
+
+	-source_ip
+	 "none"
+	 "static"
+	 "autoip"
+	 "dhcp"
+
+	-addr_Ip
+	 0xc0a80069
+
+	-addr_Subnet
+
+	-addr_Gateway
+
+	-addr_DNS1
+
+	-addr_DNS2
+
+	-addr_DomainName
+
+	-addr_AutoIp_Start
+
+	-addr_AutoIp_End

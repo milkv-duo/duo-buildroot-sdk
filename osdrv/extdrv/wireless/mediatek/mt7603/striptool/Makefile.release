@@ -1,0 +1,68 @@
+ifeq ($(TARGET),LINUX)
+include $(RT28xx_DIR)/os/linux/config.mk
+endif
+
+ifeq ($(TARGET),ECOS)
+include $(RT28xx_DIR)/os/ecos/config.mk
+endif
+
+PARSER_CFLAGS:= -DNEGATIVE_LIST
+CFLAGS = $(WFLAGS) -DCHIPSET_$(MODULE) -DRELEASE_$(RELEASE) -DMODE_$(RT28xx_MODE) -DPLATFORM_$(PLATFORM) -D$(TARGET)
+
+ifeq ($(OSABL),YES)
+	CFLAGS += -DOS_ABL_SUPPORT
+endif
+
+ifeq ($(PLATFORM),BL2348)
+	CFLAGS += -DPLATFORM_BL2348
+endif
+
+ifeq ($(PLATFORM),BLUBB)
+	CFLAGS += -DPLATFORM_BL2348
+endif
+
+ifeq ($(HAS_BGFP_SUPPORT),y)
+	CFLAGS += -DBG_FT_SUPPORT
+endif
+
+ifeq ($(CHIPSET),RBUS)
+CFLAGS += -DRT305x\
+		  -DRT2860\
+		  -DRT2880\
+		  -DRT2883\
+		  -DRT3050\
+		  -DRT3052\
+		  -DRT3350\
+		  -DRT3352\
+		  -DRT5350\
+		  -DRT3883\
+		  -DRT6352\
+		  -DRTMP_MAC_PCI\
+		  -DRTMP_PCI_SUPPORT\
+		  -DRTMP_RBUS_SUPPORT\
+		  -DRTMP_RF_RW_SUPPORT
+endif
+
+release: parser
+	rm -Rf ../$(RELEASE)
+#	gcc $(CFLAGS) -o striptool.out striptool.c
+	gcc $(CFLAGS) -I$(RT28xx_DIR)/striptool -o striptool.out striptool.c striptool_module.c striptool_util.c striptool_netif.c striptool_cmm.c
+
+parser: lex.yy.o y.tab.o
+	gcc lex.yy.o y.tab.o -o parser
+
+lex.yy.o: lex.yy.c y.tab.h
+	gcc -c $< $(PARSER_CFLAGS)
+
+lex.yy.c: parser.l
+	flex $< 
+
+y.tab.h: parser.y
+	yacc -dv $<  
+
+y.tab.o: y.tab.c
+	gcc -c $< $(PARSER_CFLAGS)
+
+clean:
+	rm -f parser y.tab.c y.tab.h *.o *.output parser.config
+	

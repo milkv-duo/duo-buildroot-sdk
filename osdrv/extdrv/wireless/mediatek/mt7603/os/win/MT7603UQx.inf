@@ -1,0 +1,161 @@
+;****************************************************************************************
+;
+; Q7603Ux.inf
+;
+;   This installation script supports XP & later for the
+;   Ralink UsbDumpr_MT7603 series Wireless LAN Card.
+;
+;   Copyright (c)2002 ~ 2012, Ralink Technology Corp., All Rights Reserved
+;   All Rights Reserved.
+;   Developed by RaLink Technology, Corp. -- http://www.ralinktech.com
+;
+;****************************************************************************************
+
+[Version]
+DriverVer=03/09/2014, 0.00.00.0049
+Signature="$Chicago$"
+Compatible=1
+Class=Net
+ClassGUID={4d36e972-e325-11ce-bfc1-08002be10318}
+Provider=%Provider%
+CatalogFile=MT7603UQx.CAT            ;;for WHQL certified
+
+
+[ControlFlags]
+
+;***********Ralink 802.11b board  ***********
+
+
+[Manufacturer]
+%V_Provider%=Adapters, NTamd64
+
+
+[Adapters.NTamd64]
+; DisplayName                Section                DeviceID
+; -----------                -------                --------
+%UsbDumpr_MT7603.DeviceDesc%   =UsbDumpr_MT7603.ndi,      USB\VID_0E8D&PID_7603&MI_02
+%UsbDumpr_MT7603.DeviceDesc%   =UsbDumpr_MT7603.ndi,      USB\VID_0E8D&PID_7603
+%UsbDumpr_MT7603.DeviceDesc%   =UsbDumpr_MT7603.ndi,      USB\VID_0E8D&PID_7606
+%UsbDumpr_MT7603.DeviceDesc%   =UsbDumpr_MT7603.ndi,      USB\VID_0E8D&PID_7636
+;*******************************************************************************************
+; Windows 9X specific entries
+;*******************************************************************************************
+
+[UsbDumpr_MT7603.ndi]
+AddReg=Common.reg, UsbDumpr_MT7603.ndi.reg
+CopyFiles=win9x.CopyFiles
+
+
+;*******************************************************************************************
+; NT specific entries
+;*******************************************************************************************
+
+[UsbDumpr_MT7603.ndi.NT]
+AddReg=Common.reg, UsbDumpr_MT7603.ndi.NT.reg
+Characteristics=0x84              ; NCF_REMOVABLE | NCF_HAS_UI | NCF_PHYSICAL
+BusType=5
+CopyFiles=NT.CopyFiles
+
+; NT services sections
+[UsbDumpr_MT7603.ndi.NT.Services]
+AddService=UsbDumpr_MT7603, 2, UsbDumpr_MT7603.Service, common.EventLog
+
+
+[UsbDumpr_MT7603.ndi.reg]
+HKR, ,                            NTMPDriver,      0, MT7603UQx.sys
+HKR, Ndi,                         DeviceID,        0, "USB\VID_0E8D&PID_7603&MI_02"
+
+HKR, ,                            RunningWin9X,    0, "1"
+HKR, ,                            DevLoader,       0, *ndis
+HKR, ,                            DeviceVxDs,      0, MT7603UQx.sys
+HKR, ,                            EnumPropPages,   0, "netdi.dll,EnumPropPages"
+
+;
+; NDIS Info
+;
+HKR, NDIS,                        LogDriverName,   0, "UsbDumpr_MT7603"
+HKR, NDIS,                        MajorNdisVersion,1, 03
+HKR, NDIS,                        MinorNdisVersion,1, 0A
+
+HKR, ,                            BusType,         0, 5
+HKR, NDI,                         CardType,        0, "PCI"
+
+;
+; Interfaces
+;
+HKR, Ndi\Interfaces,              DefUpper,        0, "ndis3"
+HKR, Ndi\Interfaces,              DefLower,        0, "ethernet"
+HKR, Ndi\Interfaces,              UpperRange,      0, "ndis3"
+HKR, Ndi\Interfaces,              LowerRange,      0, "ethernet"
+
+;
+; Install sections
+;HKR,Ndi\Install,ndis3,,"UsbDumpr_MT7603.install"
+
+
+[win9x.CopyFiles]
+MT7603UQx.sys ; Win9x Installation
+
+;*******************************************************************************************
+; common regs for NT and W9x
+;*******************************************************************************************
+HKR,"Parameters","MaximumTransferSize",0x10001,4096
+HKR,"Parameters","DebugLevel",0x10001,2
+HKR,"Parameters","BulkUsbEnable",0x10001,1
+
+
+;*******************************************************************************************
+; DestinationDirs
+;*******************************************************************************************
+
+[DestinationDirs]
+NT.CopyFiles=12    ; system32\drivers subdirectory on NT
+win9x.CopyFiles=11    ; system32 subdirectory on win9x
+
+[NT.CopyFiles]
+MT7603UQx.sys ; NT Installation
+
+[SourceDisksNames]
+1=%INSTALL_DISK_STR%,,,
+
+[SourceDisksFiles] 
+MT7603UQx.sys=1
+
+
+;*******************************************************************************************
+; NT specific
+;*******************************************************************************************
+
+[UsbDumpr_MT7603.ndi.NT.reg]
+HKR, Ndi,                         Service,         0, "UsbDumpr_MT7603"
+HKR, Ndi\Interfaces,              UpperRange,      0, "ndis5"
+HKR, Ndi\Interfaces,              LowerRange,      0, "ethernet"
+
+[UsbDumpr_MT7603.Service]
+DisplayName=%UsbDumpr_MT7603.Service.DispName%
+ServiceType=1                	;%SERVICE_KERNEL_DRIVER%
+StartType=3                	;%SERVICE_AUTO_START%
+ErrorControl=1                	;%SERVICE_ERROR_NORMAL%
+ServiceBinary=%12%\MT7603UQx.sys
+LoadOrderGroup=NDIS
+
+[common.EventLog]
+AddReg=common.AddEventLog.reg
+
+[common.AddEventLog.reg]
+HKR, , EventMessageFile, 0x00020000,"%%SystemRoot%%\System32\netevent.dll,%%SystemRoot%%\System32\drivers\MT7603UQx.sys"
+HKR, , TypesSupported,   0x00010001, 7
+
+
+;*******************************************************************************************
+; Strings
+;*******************************************************************************************
+
+[strings]
+Provider=			"Ralink"
+V_Provider=			"Ralink Technology Corp."
+
+UsbDumpr_MT7603.DeviceDesc=             "MT7603 QATest USB WDM Driver"
+
+UsbDumpr_MT7603.Service.DispName=	"MT7603 QATest USB WDM Driver Service"
+INSTALL_DISK_STR=		"MT7603 QATest Wireless LAN Installation Disk"

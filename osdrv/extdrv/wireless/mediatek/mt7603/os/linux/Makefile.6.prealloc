@@ -1,0 +1,7 @@
+include $(RT28xx_DIR)/os/linux/config.mk
+
+MOD_NAME = mtprealloc
+
+obj-m := $(MOD_NAME).o
+$(MOD_NAME)-objs := prealloc.o
+

@@ -419,7 +419,7 @@ typedef enum _ISP_CTRL_CMD_E {
 
 
 #define AWB_DBG_VER	(11)
-#define AWB_SENSOR_NUM (2)
+#define AWB_SENSOR_NUM (VI_MAX_PIPE_NUM)
 #define AWB_DBG_W	(64)
 #define AWB_DBG_H	(32)
 #define AWB_SHIFT_REGION_NUM	(4)

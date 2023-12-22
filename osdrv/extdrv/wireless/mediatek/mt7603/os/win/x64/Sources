@@ -1,0 +1,22 @@
+TARGETNAME=MT62EQx
+TARGETTYPE=DRIVER
+TARGETPATH=OBJ
+BROWSER_INFO=1
+
+TARGETPATH=.
+INCLUDES= $(BASEDIR)\inc;
+
+C_DEFINES=$(C_DEFINES) -DSNIFF \
+                       -DAUTO_RESPONDER \
+
+SOURCES=Main.cpp \
+	Eeprom.cpp \
+	Dma.cpp \
+	TxRx.cpp \
+	ComPort.cpp \
+	crc32.cpp \
+	Power.cpp \
+	HwHalProcess.cpp \
+	QA.rc \
+	
+	

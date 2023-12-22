@@ -11,7 +11,7 @@
 #include <linux/mtd/rawnand.h>
 #include <linux/mtd/partitions.h>
 #include <linux/reset.h>
-
+#include <linux/jiffies.h>
 #include "cvsnfc_common.h"
 #include "cvsnfc_spi_ids.h"
 #include "cvsnfc.h"
@@ -463,8 +463,10 @@ static void cvsnfc_cmd_ctrl(struct nand_chip *chip, int dat, unsigned int ctrl)
 static int cvsnfc_waitfunc(struct nand_chip *chip)
 {
 	unsigned int regval;
-	unsigned int deadline = 0;
 	struct cvsnfc_host *host = nand_get_controller_data(chip);
+	unsigned long start_time = jiffies;
+	/* 4ms */
+	unsigned long max_erase_time = 4 * 3;
 
 	pr_debug("=>%s\n", __func__);
 
@@ -474,9 +476,7 @@ static int cvsnfc_waitfunc(struct nand_chip *chip)
 		if (!(regval & STATUS_OIP_MASK))
 			return NAND_STATUS_READY;
 
-		udelay(1);
-		/* maybe need to sure */
-	} while (deadline++ < (40 << 5));
+	} while (jiffies_to_msecs(jiffies - start_time) < max_erase_time);
 
 	pr_err("%s timeout.\n", __func__);
 
@@ -487,15 +487,16 @@ static int cvsnfc_waitfunc(struct nand_chip *chip)
 static int cvsnfc_dev_ready(struct nand_chip *chip)
 {
 	unsigned int regval;
-	unsigned int deadline = 0;
 	struct cvsnfc_host *host = chip->priv;
+	unsigned long start_time = jiffies;
+	/* 4ms */
+	unsigned long max_erase_time = 4 * 3;
 
 	do {
 		spi_feature_op(host, GET_OP, STATUS_ADDR, &regval);
 		if (!(regval & STATUS_OIP_MASK))
 			return 1;
-		udelay(1);
-	} while (deadline++ < (40 << 5));
+	} while (jiffies_to_msecs(jiffies - start_time) < max_erase_time);
 
 	pr_err("%s timeout.\n", __func__);
 
@@ -785,14 +786,14 @@ static int parse_status_info(struct cvsnfc_host *host)
 
 	/* read SR */
 	spi_feature_op(host, GET_OP, ecc_info->ecc_sr_addr, &ecc_status0);
-	if (((ecc_status0 & 0x30) >> 4) == 0)
-		return 0;
-
-	if (((ecc_status0 & 0x30) >> 4) == ecc_info->uncorr_val)
-		return -EBADMSG;
-
 	mask = GENMASK(ecc_info->ecc_bits - 1, 0);
 	status = (ecc_status0 >> ecc_info->ecc_bit_shift) & mask;
+
+	if (status == 0)
+		return 0;
+
+	if (status == ecc_info->uncorr_val)
+		return -EBADMSG;
 
 	if (ecc_info->ecc_sr_addr && !ecc_info->read_ecc_opcode && !ecc_info->ecc_mbf_addr) {
 		if (ecc_info->remap) {
@@ -819,7 +820,7 @@ static int parse_status_info(struct cvsnfc_host *host)
 		spi_nand_read_eccsr(host, ecc_info->read_ecc_opcode, &ecc_status0);
 		corr_bit = (ecc_status0 >> ecc_info->ecc_bit_shift) & mask;
 	}
-	pr_info("ECC CORR, correct bits %u\n", corr_bit);
+	//pr_info("ECC CORR, correct bits %u\n", corr_bit);
 	return corr_bit;
 }
 
@@ -871,15 +872,7 @@ RETRY_READ_CMD:
 	}
 
 	ret = parse_status_info(host);
-	if (ret < 0) {
-		mtd->ecc_stats.failed++;
-		pr_info("%s caddr 0x%x, r_raddr 0x%x, len %d\n", __func__, col_addr, r_col_addr, len);
-	} else {
-		mtd->ecc_stats.corrected += ret;
-		max_bitflips = max_t(unsigned int, max_bitflips, ret);
-	}
-
-	return max_bitflips;
+	return ret;
 }
 
 	__attribute__((unused))

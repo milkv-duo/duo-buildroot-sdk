@@ -17,6 +17,7 @@ NAME =
 MAKEFLAGS += -rR
 
 # Determine target architecture for the sandbox
+-include  ${BUILD_PATH}/.config
 include include/host_arch.h
 ifeq ("", "$(CROSS_COMPILE)")
   MK_ARCH="${shell uname -m}"
@@ -430,6 +431,11 @@ KBUILD_CFLAGS	+= -fshort-wchar -fno-strict-aliasing
 KBUILD_CFLAGS	+= -Werror
 KBUILD_AFLAGS   := -D__ASSEMBLY__
 KBUILD_LDFLAGS  :=
+
+
+ifdef CONFIG_ENABLE_ALIOS_UPDATE
+KBUILD_CFLAGS += -DCONFIG_ENABLE_ALIOS_UPDATE
+endif
 
 ifeq ($(cc-name),clang)
 ifneq ($(CROSS_COMPILE),)

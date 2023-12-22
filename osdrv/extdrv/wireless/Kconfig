@@ -1,0 +1,9 @@
+#
+# Wireless LAN device configuration
+#
+
+source "osdrv/extdrv/wireless/realtek/Kconfig"
+source "osdrv/extdrv/wireless/bcmdhd/Kconfig"
+source "osdrv/extdrv/wireless/mediatek/Kconfig"
+source "osdrv/extdrv/wireless/icommsemi/Kconfig"
+

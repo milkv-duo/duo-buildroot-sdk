@@ -1,0 +1,47 @@
+How to flash tron image?
+
+	flash D:\code_dev\tronfirmware_20091215\firmware\tronm.rbn 0 0(first time) (the image must not broken)
+
+How to turn on printerless mechanism?
+
+	>tinytcl exec_cmd
+	# nvram set_cache module=me name=NoMechMode value=19
+	# nvram store_object module=me name=NoMechMode
+	# exit
+	>restart
+
+In develop stage, If you change new code, you must use
+
+	loadfw D:\code_dev\tronfirmware_20091215\firmware\tronm.bin to make sure image works well into DRAM, 
+	then if it is OK, you can use below commands to flash image
+
+	flash D:\code_dev\tronfirmware_20091215\firmware\tronm.rbn if only change driver and app, 
+
+	flash D:\code_dev\tronfirmware_20091215\firmware\tronm.rbn 0 0 if you also want to update NVRAM 
+
+How to set up printer in PC?
+	- Install Kodak AIO software
+	- Download kodak driver named V6.0.1.0.zip on directory /project code/MJ_Jan15 from ftp server
+	- Need to add a Kodak printer through “Add Printer Wizard’,below are kodak instuction 
+
+	  From the Printers folder, run the 'Add Printer' wizard.  Click 'Next' 
+	  Select 'Local printer attached to this computer'.  Make sure 'Automatically detect....' is not checked.  
+	  Click 'Next' Select 'Create a new port' - type of port is 'Standard TCP/IP Port'.  Click 'Next' 
+	  From the 'Welcome to the Add Standard TCP/IP Printer Port Wizard' screen, click 'next'. 
+	  In the first box (Printer Name or IP Address), enter the IP address of the printer you noted from above 
+	  (NOTE: the port name should be IP_xxx.xxx.xxx.xxx - where the xxx.xxx.xxx.xxx is the IP address typed in).  
+      Click 'Next' 
+
+	  At this point, you should ge a screen that says 'Additional Port Information Required'.  
+	  The device could not be identified. 
+	  Select 'Standard' - 'Generic Network Card'  (These should be the default values.)   Click 'next'.  
+      Then click 'Finish' 
+
+	  It should now show the 'Add Printer Wizard' screen again, and look for the print driver.  Click 'Have Disk', 
+	  and browse to the '*inf' file in the V6.0.1.0\MultiLanguage. folder that was extracted from the .zip file.   
+
+	  From there, continue installing the print driver as normal, and when you print, 
+	  select the 'Kodak ESP 5 Prototype AiO' printer..... 
+
+	  If you send a print job to the printer (make sure the NoMechMode field is still set to 19 == 0x13), 
+	  and the screen changes to 'printing', 

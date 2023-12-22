@@ -2754,6 +2754,10 @@ static int spi_nor_init_params(struct spi_nor *nor,
 		case SNOR_MFR_JUYANG:
 		case SNOR_MFR_ZBIT:
 		case SNOR_MFR_XMC:
+			if (info->id[1] == 0x60) {
+				params->quad_enable = quad_enable_SR_bit6;
+				break;
+			}
 		case SNOR_MFR_XTX:
 		case SNOR_MFR_FM:
 		case SNOR_MFR_SPANSION:
