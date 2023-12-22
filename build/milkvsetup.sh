@@ -279,6 +279,12 @@ function build_middleware()
 
   # add sdk version
   echo "SDK_VERSION=${SDK_VER}" > "$SYSTEM_OUT_DIR"/sdk-release
+  if [ ! -z "${MV_BOARD// }" ]; then
+    echo "board=${MV_BOARD}" >> "$SYSTEM_OUT_DIR"/sdk-release
+    echo "branch=$(git rev-parse --abbrev-ref HEAD)" >> "$SYSTEM_OUT_DIR"/sdk-release
+    echo "commit=$(git rev-parse --short HEAD)" >> "$SYSTEM_OUT_DIR"/sdk-release
+    echo "time=$(date +"%Y-%m-%d-%H:%M:%S")" >> "$SYSTEM_OUT_DIR"/sdk-release
+  fi
 )}
 
 
