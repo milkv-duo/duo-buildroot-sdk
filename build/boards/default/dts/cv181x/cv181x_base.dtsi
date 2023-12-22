@@ -844,7 +844,7 @@
 				<&clk CV181X_CLK_33K_USB>,
 				<&clk CV181X_CLK_12M_USB>;
 		clock-names = "clk_axi", "clk_apb", "clk_125m", "clk_33k", "clk_12m";
-		vbus-gpio = <&portb 6 0>;
+		//vbus-gpio = <&portb 6 0>;
 		status = "okay";
 	};
 
