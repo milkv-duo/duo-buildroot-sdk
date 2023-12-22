@@ -13,7 +13,7 @@
 };
 
 &dac{
-	mute-gpio-r = <&porte 2 GPIO_ACTIVE_LOW>;
+	mute-gpio-r = <&porte 1 GPIO_ACTIVE_LOW>;
 };
 
 &spi0 {

@@ -1,0 +1,4 @@
+<physical_partition type="sd">
+    <partition label="BOOT" size_in_kb="262144" readonly="false" file="boot.sd"/>
+    <partition label="ROOTFS" size_in_kb="262144" readonly="false" file="rootfs.sd" />
+</physical_partition>
