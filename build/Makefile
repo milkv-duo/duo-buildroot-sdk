@@ -577,7 +577,7 @@ endif
 
 # copy milkv overlay files
 ifeq ($(MV_VENDOR), milkv)
-	${Q}cp -arf $(TOP_DIR)/$(MV_VENDOR)/overlay/* $(BR_ROOTFS_DIR)/
+	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/overlay/* $(BR_ROOTFS_DIR)/
 endif
 # strip
 	${Q}find $(BR_ROOTFS_DIR) -name "*.ko" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-unneeded {} \;
@@ -621,7 +621,7 @@ else
 	${Q}ln -s $(OUTPUT_DIR)/rootfs $(OUTPUT_DIR)/fs
 endif
 ifeq ($(MV_VENDOR), milkv)
-	$(TOP_DIR)/$(MV_VENDOR)/gen_burn_image_sd.sh $(OUTPUT_DIR)
+	$(TOP_DIR)/device/gen_burn_image_sd.sh $(OUTPUT_DIR)
 else
 	$(COMMON_TOOLS_PATH)/sd_tools/sd_gen_burn_image.sh $(OUTPUT_DIR)
 endif

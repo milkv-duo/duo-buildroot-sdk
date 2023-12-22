@@ -4,9 +4,12 @@ MILKV_BOARD_ARRAY=
 MILKV_BOARD_ARRAY_LEN=
 MILKV_BOARD=
 MILKV_BOARD_CONFIG=
+MILKV_IMAGE_CONFIG=
+MILKV_DEFAULT_BOARD=milkv-duo
 
-MILKV_BOARD_DIR=milkv
-
+TOP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+#echo "TOP_DIR: ${TOP_DIR}"
+cd ${TOP_DIR}
 
 function print_info()
 {
@@ -53,22 +56,39 @@ function get_toolchain()
 
 function get_available_board()
 {
-  MILKV_BOARD_ARRAY=( $(cd ${MILKV_BOARD_DIR}/; ls boardconfig*.sh | sort | awk -F"[-.]" -v OFS='-' '{print $2, $3}') )
+  MILKV_BOARD_ARRAY=( $(find device -mindepth 1 -maxdepth 1 -type d -print ! -name "." | awk -F/ '{ print $NF }' | sort) )
   #echo ${MILKV_BOARD_ARRAY[@]}
 
   MILKV_BOARD_ARRAY_LEN=${#MILKV_BOARD_ARRAY[@]}
   if [ $MILKV_BOARD_ARRAY_LEN -eq 0 ]; then
-    echo "No available board config"
+    echo "No available config"
     exit 1
   fi
 
   #echo ${MILKV_BOARD_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
 }
 
-function choose_milkv_board()
+function choose_board()
 {
-  # TODO
-  echo "choose"
+  echo "Select a target to build:"
+
+  echo ${MILKV_BOARD_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
+
+  local index
+  read -p "Which would you like: " index
+
+  if [[ -z $index ]]; then
+    echo "Nothing selected."
+    exit 0
+  fi
+
+  if [[ -n $index && $index =~ ^[0-9]+$ && $index -ge 1 && $index -le $MILKV_BOARD_ARRAY_LEN ]]; then
+    MILKV_BOARD="${MILKV_BOARD_ARRAY[$((index - 1))]}"
+    #echo "index: $index, Board: $MILKV_BOARD"
+  else
+    print_err "Invalid input!"
+    exit 1
+  fi
 }
 
 function prepare_env()
@@ -81,7 +101,7 @@ function prepare_env()
   echo "OUTPUT_DIR: ${OUTPUT_DIR}"  # @build/milkvsetup.sh
 }
 
-function milkv_duo_build()
+function milkv_build()
 {
   # clean old img
   old_image_count=`ls ${OUTPUT_DIR}/*.img* | wc -l`
@@ -101,7 +121,7 @@ function milkv_duo_build()
   fi
 }
 
-function milkv_duo_pack()
+function milkv_pack()
 {
   pack_sd_image
 
@@ -134,31 +154,42 @@ function milkv_duo_pack()
   fi
 }
 
-get_toolchain
+function build_info()
+{
+  print_info "Target Board: ${MILKV_BOARD}"
+  print_info "Target Board Config: ${MILKV_BOARD_CONFIG}"
+  print_info "Target Image Config: ${MILKV_IMAGE_CONFIG}"
+}
 
 get_available_board
 
-if [ $MILKV_BOARD_ARRAY_LEN -eq 1 ]; then
-  # Only one board
-  print_info "Ready to build: ${MILKV_BOARD_ARRAY[0]}"
-  MILKV_BOARD=${MILKV_BOARD_ARRAY[0]}
-else
-  # no arg
-  if [ $# -lt 1 ]; then
-    choose_milkv_board || exit 0
-  fi
+function build_usage()
+{
+  echo "Usage:"
+  echo "${BASH_SOURCE[0]}              - Show this menu"
+  echo "${BASH_SOURCE[0]} lunch        - Select a board to build"
+  echo "${BASH_SOURCE[0]} [board]      - Build [board] directly, supported boards as follows:"
 
-  # with board name
-  if [ $# -ge 1 ]; then
+  for board in "${MILKV_BOARD_ARRAY[@]}"; do
+    print_info "$board"
+  done
+}
+
+if [ $# -ge 1 ]; then
+  if [ "$1" = "lunch" ]; then
+    choose_board || exit 0
+  else
     if [[ ${MILKV_BOARD_ARRAY[@]} =~ (^|[[:space:]])"${1}"($|[[:space:]]) ]]; then
       MILKV_BOARD=${1}
-      echo "$MILKV_BOARD"
+      #echo "$MILKV_BOARD"
     else
       print_err "${1} not supported!"
       echo "Available boards: [ ${MILKV_BOARD_ARRAY[@]} ]"
       exit 1
     fi
   fi
+else
+  build_usage && exit 0
 fi
 
 if [ -z "${MILKV_BOARD// }" ]; then
@@ -166,17 +197,26 @@ if [ -z "${MILKV_BOARD// }" ]; then
   exit 1
 fi
 
-export MILKV_BOARD="${MILKV_BOARD}"
-
-MILKV_BOARD_CONFIG=${MILKV_BOARD_DIR}/boardconfig-${MILKV_BOARD}.sh
+MILKV_BOARD_CONFIG=device/${MILKV_BOARD}/boardconfig.sh
+MILKV_IMAGE_CONFIG=device/${MILKV_BOARD}/genimage.cfg
 
 if [ ! -f ${MILKV_BOARD_CONFIG} ]; then
   print_err "${MILKV_BOARD_CONFIG} not found!"
   exit 1
 fi
 
+if [ ! -f ${MILKV_IMAGE_CONFIG} ]; then
+  print_err "${MILKV_IMAGE_CONFIG} not found!"
+  exit 1
+fi
+
+get_toolchain
+
+build_info
+
+export MILKV_BOARD="${MILKV_BOARD}"
+
 prepare_env
 
-milkv_duo_build
-milkv_duo_pack
-
+milkv_build
+milkv_pack

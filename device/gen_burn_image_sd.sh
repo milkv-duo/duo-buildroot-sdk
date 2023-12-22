@@ -34,11 +34,11 @@ pushd ${output_dir}
 
 [ -d tmp ] && rm -rf tmp
 
-genimage --config ${TOP_DIR}/milkv/genimage-${MILKV_BOARD}.cfg --rootpath fs/ --inputpath ${PWD} --outputpath ${PWD}
+genimage --config ${TOP_DIR}/device/${MV_BOARD}/genimage.cfg --rootpath fs/ --inputpath ${PWD} --outputpath ${PWD}
 if [ $? -eq 0 ]; then
-    echo "gnimage for ${MILKV_BOARD} success!"
+    echo "gnimage for ${MV_BOARD} success!"
 else
-    echo "gnimage for ${MILKV_BOARD} failed!"
+    echo "gnimage for ${MV_BOARD} failed!"
 fi
 
 popd
