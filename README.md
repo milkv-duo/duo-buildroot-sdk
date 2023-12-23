@@ -13,9 +13,9 @@ Milk-V Duo is an ultra-compact embedded development platform based on the CV1800
 
 # SDK Directory Structure
 
-```text
+```
 ├── build               // compilation scripts and board configs
-├── build_milkv.sh      // one-click compilation script
+├── build.sh            // one-click compilation script
 ├── buildroot-2021.05   // buildroot source code
 ├── freertos            // freertos system
 ├── fsbl                // fsbl firmware in prebuilt form
@@ -31,6 +31,9 @@ Milk-V Duo is an ultra-compact embedded development platform based on the CV1800
 ```
 
 # Quick Start
+
+> [!TIP]
+> For the compilation and use methods of the SDK, you can also go to our [official documentation](https://milkv.io/docs/duo/getting-started/buildroot-sdk) for better information and eading experience. In addition, our official documentation website is also open source. If you are interested in enriching the content of the documentation or translating it into other languages, you can go to [this repository](https://github.com/milk-v/milkv.io/) submit your PR, and we will give out exquisite gifts to contributors from time to time.
 
 Prepare the Compilation Environment. Using a local Ubuntu system, the officially supported compilation environment is `Ubuntu Jammy 22.04.x amd64` only!
 
@@ -56,14 +59,44 @@ git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
 
 ### <1>. One-click Compilation
 
-- Execute the one-click compilation script `build_milkv.sh`:
-
-```
+Execute one-click compilation script `build.sh`：
+```bash
 cd duo-buildroot-sdk/
-./build_milkv.sh
+./build.sh
+```
+You will see tips on how to use the compiled script:
+```bash
+# ./build.sh
+Usage:
+./build.sh              - Show this menu
+./build.sh lunch        - Select a board to build
+./build.sh [board]      - Build [board] directly, supported boards asfollows:
+milkv-duo
+milkv-duo-python
+milkv-duo256m
+milkv-duo256m-python
+```
+Listed at the bottom is the list of currently supported target versions. Those with the `python` suffix include the python, pip, and pinpong libraries.
+
+As shown in the prompt, there are two ways to compile the target version.
+
+The first method is to execute `./build.sh lunch` to bring up the interactive menu, select the version number to be compiled, and press Enter:
+```bash
+# ./build.sh lunch
+Select a target to build:
+1. milkv-duo
+2. milkv-duo-python
+3. milkv-duo256m
+4. milkv-duo256m-python
+Which would you like:
 ```
 
-- After a successful compilation, you can find the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
+The second method is to put the name of the target version after the script and compile it directly. For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+```bash
+# ./build.sh milkv-duo-python
+```
+
+After a successful compilation, you can find the generated SD card burning image `milkv-duo-python-*-*.img` in the `out` directory.
 
 *Note: The first compilation will automatically download the required toolchain, which is approximately 840MB in size. Once downloaded, it will be automatically extracted to the `host-tools` directory in the SDK directory. For subsequent compilations, if the `host-tools` directory is detected, the download will not be performed again*.
 
@@ -71,15 +104,31 @@ cd duo-buildroot-sdk/
 
 If you have not executed the one-click compilation script, you need to manually download the toolchain [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz) and extract it to the SDK root directory:
 
-```
+```bash
 tar -xf host-tools.tar.gz -C /your/sdk/path/
 ```
 
-Then enter the following commands sequentially:
+Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
+```
+milkv-duo               cv1800b_milkv_duo_sd
+milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo256m           cv1812cp_milkv_duo256m_sd
+milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+```
 
 ```bash
-export MILKV_BOARD=milkv-duo
-source milkv/boardconfig-milkv-duo.sh
+source device/[board]/boardconfig.sh
+
+source build/milkvsetup.sh
+defconfig [config]
+clean_all
+build_all
+pack_sd_image
+```
+
+For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+```bash
+source device/milkv-duo-python/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
@@ -88,7 +137,11 @@ build_all
 pack_sd_image
 ```
 
-Location of the generated image: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`.
+Generated firmware location:
+```
+Duo:      install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo256M:  install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+```
 
 ## 2. Compiled using Docker
 
@@ -98,19 +151,19 @@ We put the SDK source code on the Linux host system and call the Docker image en
 
 ### Pull SDK code on Linux host
 
-```
+```bash
 git clone https://github.com/milkv-duo/duo-buildroot-sdk.git --depth=1
 ```
 
 ### Enter the SDK code directory
 
-```
+```bash
 cd duo-buildroot-sdk
 ```
 
 ### Pull the Docker image and run
 
-```
+```bash
 docker run -itd --name duodocker -v $(pwd):/home/work milkvtech/milkv-duo:latest /bin/bash
 ```
 
@@ -121,7 +174,7 @@ Description of some parameters in the command:
 - `milkvtech/milkv-duo:latest` The Docker image provided by Milk-V will be automatically downloaded from hub.docker.com for the first time.
 
 After Docker runs successfully, you can use the `docker ps -a` command to view the running status:
-```
+```bash
 $ docker ps -a
 CONTAINER ID   IMAGE                        COMMAND       CREATED       STATUS       PORTS     NAMES
 8edea33c2239   milkvtech/milkv-duo:latest   "/bin/bash"   2 hours ago   Up 2 hours             duodocker
@@ -129,37 +182,74 @@ CONTAINER ID   IMAGE                        COMMAND       CREATED       STATUS  
 
 ### <1>. One-click compilation using Docker
 
+```bash
+docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh [board]"
 ```
-docker exec duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build_milkv.sh"
+
+Note that the `./build.sh [board]` at the end of the command is the same as the previous usage in the one-click compilation instructions in Ubuntu 22.04. Use `./build.sh` can see how to use the command, use `./ build.sh lunch` can bring up the interactive selection menu, use `./build.sh [board]` to directly compile the target version, `[board]` can be replaced with:
 ```
+milkv-duo
+milkv-duo-python
+milkv-duo256m
+milkv-duo256m-python
+```
+*Versions with `python` suffix include python, pip, pinpong libraries*
 
 Description of some parameters in the command:
 - `duodocker` The name of the running Docker must be consistent with the name set in the previous step.
 - `"*"` In quotes is the shell command to be run in the Docker image.
 - `cd /home/work` Switch to the /home/work directory. Since this directory has been bound to the host's code directory during runtime, the /home/work directory in Docker is the source code directory of the SDK.
 - `cat /etc/issue` Displays the version number of the image used by Docker. It is currently Ubuntu 22.04.3 LTS and is used for debugging.
-- `./build_milkv.sh` Execute one-click compilation script.
+- `./build.sh [board]` Execute one-click compilation script.
 
-After successful compilation, you can see the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
+For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+```bash
+docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo-python"
+```
+
+After successful compilation, you can see the generated SD card burning image `[board]-*-*.img` in the `out` directory.
 
 ### <2>. Compile step by step using Docker
+
+If you have not executed the one-click compilation script, you need to manually download the toolchain [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz) and extract it to the SDK root directory:
+
+```bash
+tar -xf host-tools.tar.gz -C /your/sdk/path/
+```
 
 Step-by-step compilation requires logging into Docker to operate. Use the command `docker ps -a` to view and record the ID number of the container, such as 8edea33c2239.
 
 Enter Docker:
-```
+```bash
 docker exec -it 8edea33c2239 /bin/bash
 ```
 
 Enter the code directory bound in Docker：
-```
+```bash
 root@8edea33c2239:/# cd /home/work/
 ```
 
-Compile step by step：
+Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
+```
+milkv-duo               cv1800b_milkv_duo_sd
+milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo256m           cv1812cp_milkv_duo256m_sd
+milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+```
+
 ```bash
-export MILKV_BOARD=milkv-duo
-source milkv/boardconfig-milkv-duo.sh
+source device/[board]/boardconfig.sh
+
+source build/milkvsetup.sh
+defconfig [config]
+clean_all
+build_all
+pack_sd_image
+```
+
+For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+```bash
+source device/milkv-duo-python/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
@@ -168,10 +258,16 @@ build_all
 pack_sd_image
 ```
 
+Generated firmware location:
+```
+Duo:      install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo256M:  install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+```
+
 Generated firmware location: `install/soc_cv1800b_milkv_duo_sd/milkv-duo.img`.
 
 After compilation is completed, you can use the `exit` command to exit the Docker environment:
-```
+```bash
 root@8edea33c2239:/home/work# exit
 ```
 The generated firmware can also be seen in the host code directory.
@@ -179,12 +275,12 @@ The generated firmware can also be seen in the host code directory.
 ### Stop Docker
 
 After compilation is completed, if the above Docker running environment is no longer needed, you can stop it first and then delete it:
-```
+```bash
 docker stop 8edea33c2239
 docker rm 8edea33c2239
 ```
 
-## Other compilation considerations
+## 3. Other compilation considerations
 
 If you want to try to compile this SDK in an environment other than the above two environments, the following are things you may need to pay attention to, for reference only.
 
@@ -230,7 +326,7 @@ To solve this problem you need to change the `/etc/wsl.conf` file and add the fo
 appendWindowsPath = false
 ```
 
-After that, you need to reboot the WSL with `wsl.exe --reboot`. Then you able to run the `./build_milkv.sh` script or the `build_all` line in the step-by-step compilation method.
+After that, you need to reboot the WSL with `wsl.exe --reboot`. Then you able to run the `./build.sh` script or the `build_all` line in the step-by-step compilation method.
 To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true. To reboot the WSL, can you use the Windows PowerShell command `wsl.exe --shutdown` then `wsl.exe`, after that the Windows environment variables become avaliable again in $PATH.
 
 ## SD card burning
@@ -238,7 +334,7 @@ To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true.
 > Note: Writing the image to the microSD card will erase the existing data on the card. Remember to back up important data before burning!!!
 - To write the generated image to a microSD card on Windows, you can use tools like `balenaEtcher`, `Rufus`, or `Win32 Disk Imager`.
 - To write the generated image to a microSD card on Linux, use the `dd` command. **Please make sure to carefully confirm that the `of` device `/dev/sdX` corresponds to the microSD card you want to burn**:
-  ```
+  ```bash
   sudo dd if=milkv-duo-*-*.img of=/dev/sdX
   ```
 
@@ -257,7 +353,7 @@ To rollback this change in `/etc/wsl.conf` file set `appendWindowsPath` as true.
 
 The username and password for logging into the Duo terminal are as follows:
 
-```text
+```
 root
 milkv
 ```
@@ -293,8 +389,7 @@ then reboot the board.
 Enable the 4 USB ports on the IO-Board:
 
 ```bash
-rm /mnt/system/usb.sh
-ln -s /mnt/system/usb-host.sh /mnt/system/usb.sh
+ln -sf /mnt/system/usb-host.sh /mnt/system/usb.sh
 sync
 ```
 
@@ -324,8 +419,7 @@ umount /mnt/udisk
 To restore the functionality of the USB network (RNDIS) when not using the IO-Board, you can follow these steps:
 
 ```bash
-rm /mnt/system/usb.sh
-ln -s /mnt/system/usb-rndis.sh /mnt/system/usb.sh
+ln -sf /mnt/system/usb-rndis.sh /mnt/system/usb.sh
 sync
 ```
 
@@ -335,7 +429,7 @@ then reboot the board.
 
 1. Why is only a single core being displayed?
 
-   The CV1800B chip adopts a dual-core design. Currently, the Linux system runs on one of the cores, while the other core is used for running a real-time system. The SDK for this core has not been released yet and will be updated in the future.
+   The CV1800B chip adopts a dual-core design. Currently, the Linux system runs on one of the cores, while the other core is used for running a real-time system. For the use of this core, please see [official documentation](https://milkv.io/docs/duo/getting-started/rtoscore).
 
 2. Why does it only show 28M when viewing the RAM?
  
