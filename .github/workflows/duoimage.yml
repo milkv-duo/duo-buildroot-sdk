@@ -11,7 +11,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build with build_milkv.sh
+    name: Build with build.sh
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -26,12 +26,12 @@ jobs:
       run: |
         if [ "$(dpkg -s libssl1.1 | grep 'Status:')" != "Status: install ok installed" ]; then wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb ; sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb ; fi
 
-    - name: Run build_milkv.sh
+    - name: Run build.sh
       id: compile
       run: |
         echo $PWD
         echo $GITHUB_WORKSPACE
-        bash ./build_milkv.sh
+        bash ./build.sh milkv-duo-python
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
@@ -43,17 +43,17 @@ jobs:
     - name: Check Image Path
       id: imgpath
       run: |
-        echo "path=$(ls ${{ github.workspace }}/out/milkv-duo-*-*.img)" >> "$GITHUB_OUTPUT"
+        echo "path=$(ls ${{ github.workspace }}/out/*.img)" >> "$GITHUB_OUTPUT"
 
     - name: Generate Hash
       working-directory: ${{ github.workspace }}/out
       run: |
-        echo "$(sha256sum milkv-duo-*-*.img)" >> milk-v.hash
+        echo "$(sha256sum *.img)" >> milk-v.hash
 
     - name: Upload Image
       uses: actions/upload-artifact@main
       with:
-        name: milkv-duo-img-${{ github.run_id }}
+        name: milkv-duo-python-${{ github.run_id }}
         path: |
           ${{ steps.imgpath.outputs.path }}
           ${{ github.workspace }}/out/milk-v.hash
