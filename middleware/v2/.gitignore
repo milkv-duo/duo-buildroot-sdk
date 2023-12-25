@@ -20,6 +20,7 @@ sample/audio/sample_audio_nr
 sample/audio/sample_audio_resample
 sample/audio/sample_audio_transcode
 sample/audio/sample_audio_rtos
+sample/chipid/chipid
 sample/cipher/sample_cipher
 sample/cvg/sample_cvg
 sample/mipi_tx/sample_dsi
