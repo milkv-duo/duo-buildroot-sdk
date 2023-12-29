@@ -562,16 +562,7 @@ br-rootfs-prepare:export CROSS_COMPILE_KERNEL=$(patsubst "%",%,$(CONFIG_CROSS_CO
 br-rootfs-prepare:export CROSS_COMPILE_SDK=$(patsubst "%",%,$(CONFIG_CROSS_COMPILE_SDK))
 br-rootfs-prepare:
 	$(call print_target)
-ifneq ($(STORAGE_TYPE), sd)
-	${Q}cp -r ${RAMDISK_PATH}/rootfs/buildroot_fs/arm/* $(BR_ROOTFS_DIR)
-	$(call TARGET_PACKAGE_INSTALL_BR_ROOTFS)
-	${Q}mkdir -p $(BR_ROOTFS_DIR)/etc/init.d/
-	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/create_automount.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc/init.d/
-	# Generate /etc/fw_env.config
-	# ${Q}mkdir -p $(BR_ROOTFS_DIR)/etc
-	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/mkcvipart.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc --fw_env
-endif
-# copy ko and mmf libs
+	# copy ko and mmf libs
 	${Q}mkdir -p $(BR_ROOTFS_DIR)/mnt/system
 	${Q}cp -arf ${SYSTEM_OUT_DIR}/* $(BR_ROOTFS_DIR)/mnt/system/
 
@@ -579,7 +570,7 @@ endif
 ifeq ($(MV_VENDOR), milkv)
 	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/overlay/* $(BR_ROOTFS_DIR)/
 endif
-# strip
+	# strip
 	${Q}find $(BR_ROOTFS_DIR) -name "*.ko" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-unneeded {} \;
 	${Q}find $(BR_ROOTFS_DIR) -name "*.so*" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-all {} \;
 	${Q}find $(BR_ROOTFS_DIR) -executable -type f ! -name "*.sh" ! -path "*etc*" ! -path "*.ko" -printf 'striping %p\n' -exec $(CROSS_COMPILE_SDK)strip --strip-all {} 2>/dev/null \;
@@ -592,7 +583,7 @@ br-rootfs-pack:
 	${Q}$(MAKE) -C $(BR_DIR) $(BR_DEFCONFIG) BR2_TOOLCHAIN_EXTERNAL_PATH=$(CROSS_COMPILE_PATH)
 	${Q}$(MAKE) -j${NPROC} -C $(BR_DIR)
 	# ${Q}rm -rf $(BR_ROOTFS_DIR)/*
-# copy rootfs to rawimg dir
+	# copy rootfs to rawimg dir
 	${Q}cp $(TARGET_OUTPUT_DIR)/images/rootfs.ext4 $(OUTPUT_DIR)/rawimages/rootfs_ext4.$(STORAGE_TYPE)
 	$(call raw2cimg ,rootfs_ext4.$(STORAGE_TYPE))
 

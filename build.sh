@@ -121,7 +121,7 @@ function milkv_build()
   fi
 }
 
-function milkv_pack()
+function milkv_pack_sd()
 {
   pack_sd_image
 
@@ -151,6 +151,13 @@ function milkv_pack()
   else
     print_err "Create sd img failed!"
     exit 1
+  fi
+}
+
+function milkv_pack()
+{
+  if [ "${STORAGE_TYPE}" == "sd" ]; then
+    milkv_pack_sd
   fi
 }
 
