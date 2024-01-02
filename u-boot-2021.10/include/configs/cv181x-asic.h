@@ -210,7 +210,7 @@
 		#else
 			#define ROOTARGS "ubi.mtd=ROOTFS ubi.block=0,0"
 		#endif /* CONFIG_SKIP_RAMDISK */
-	#elif defined(CONFIG_SD_BOOT)
+	#elif defined(CONFIG_SD_BOOT) || defined(CONFIG_EMMC_SUPPORT)
 		#define ROOTARGS "root=" ROOTFS_DEV " rootwait rw"
 	#else
 		#define ROOTARGS "rootfstype=squashfs rootwait ro root=" ROOTFS_DEV

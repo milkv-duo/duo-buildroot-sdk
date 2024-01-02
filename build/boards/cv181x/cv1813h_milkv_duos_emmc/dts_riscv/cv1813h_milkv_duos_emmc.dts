@@ -1,0 +1,27 @@
+/dts-v1/;
+#include "cv181x_base_riscv.dtsi"
+#include "cv181x_asic_bga.dtsi"
+#include "cv181x_asic_emmc.dtsi"
+#include "cv181x_default_memmap.dtsi"
+
+&mipi_rx{
+	snsr-reset = <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>, <&porta 2 GPIO_ACTIVE_LOW>;
+};
+
+&dac{
+	/delete-property/ mute-gpio-l;
+	/delete-property/ mute-gpio-r;
+};
+
+&i2c0 {
+	status = "disabled";
+};
+
+&i2c1 {
+	status = "okay";
+};
+
+/ {
+
+};
+
