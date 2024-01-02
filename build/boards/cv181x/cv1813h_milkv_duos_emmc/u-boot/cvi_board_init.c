@@ -12,5 +12,8 @@ int cvi_board_init(void)
 	PINMUX_CONFIG(VIVO_D1, IIC4_SCL);
 	PINMUX_CONFIG(VIVO_D0, IIC4_SDA);
 
+	// USB
+	PINMUX_CONFIG(USB_VBUS_EN, XGPIOB_5);
+
 	return 0;
 }

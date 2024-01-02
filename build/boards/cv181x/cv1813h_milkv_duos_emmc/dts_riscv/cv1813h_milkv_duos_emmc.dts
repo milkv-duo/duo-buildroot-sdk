@@ -21,6 +21,10 @@
 	status = "okay";
 };
 
+&usb {
+	vbus-gpio = <&portb 6 0>;
+};
+
 / {
 
 };
