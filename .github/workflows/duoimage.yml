@@ -31,7 +31,7 @@ jobs:
       run: |
         echo $PWD
         echo $GITHUB_WORKSPACE
-        bash ./build.sh milkv-duo-python
+        bash ./build.sh milkv-duo
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
@@ -53,7 +53,7 @@ jobs:
     - name: Upload Image
       uses: actions/upload-artifact@main
       with:
-        name: milkv-duo-python-${{ github.run_id }}
+        name: milkv-duo-${{ github.run_id }}
         path: |
           ${{ steps.imgpath.outputs.path }}
           ${{ github.workspace }}/out/milk-v.hash
