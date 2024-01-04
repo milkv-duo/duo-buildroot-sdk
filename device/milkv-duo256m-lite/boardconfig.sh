@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export MV_BOARD=milkv-duo256m-python
+export MV_BOARD=milkv-duo256m-lite
 export MV_BOARD_CPU=cv1812cp
 export MV_VENDOR=milkv
 export MV_BUILD_ENV=milkvsetup.sh
