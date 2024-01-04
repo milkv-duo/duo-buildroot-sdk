@@ -23,7 +23,7 @@ Milk-V DuoはCV1800Bをベースにした超小型の組み込みプラットフ
 ├── isp_tuning          // カメラ効果パラメータ
 ├── linux_5.10          // Linuxカーネル
 ├── middleware          // 自家製マルチメディアフレームワーク
-├── milkv               // Milk-Vのコンフィグレーションファイル
+├── device              // Milk-Vのコンフィグレーションファイル
 ├── opensbi             // opensbiライブラリ
 ├── out                 // 完成したSDカード用イメージはここに出てきます
 ├── ramdisk             // 完成済みramsidk
@@ -72,11 +72,11 @@ Usage:
 ./build.sh lunch        - Select a board to build
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-Listed at the bottom is the list of currently supported target versions. Those with the `python` suffix include the python, pip, and pinpong libraries.
+Listed at the bottom is the list of currently supported target versions. Those with the `lite` suffix is a simplified version and does not include libraries and application packages such as python, pip, pinpong, etc.
 
 As shown in the prompt, there are two ways to compile the target version.
 
@@ -85,18 +85,18 @@ The first method is to execute `./build.sh lunch` to bring up the interactive me
 # ./build.sh lunch
 Select a target to build:
 1. milkv-duo
-2. milkv-duo-python
+2. milkv-duo-lite
 3. milkv-duo256m
-4. milkv-duo256m-python
+4. milkv-duo256m-lite
 Which would you like:
 ```
 
-The second method is to put the name of the target version after the script and compile it directly. For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+The second method is to put the name of the target version after the script and compile it directly. For example, if you need to compile the image of `milkv-duo`, the command is as follows:
 ```bash
-# ./build.sh milkv-duo-python
+# ./build.sh milkv-duo
 ```
 
-正常にコンパイルされるとSDカード用イメージ`milkv-duo-python-*-*.img`が`out`ディレクトリの中に出てきます。
+正常にコンパイルされるとSDカード用イメージ`milkv-duo-*-*.img`が`out`ディレクトリの中に出てきます。
 
 *注意：最初のコンパイル時に必要なツールチェーン(およそ840MB)が自動でダウンロードされます。一度ダウンロードされると`host-tools`内に自動で展開されます。以後のコンパイルでは`host-tools`ディレクトリがある場合再びダウンロードはされません。*
 
@@ -111,9 +111,9 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -126,9 +126,9 @@ build_all
 pack_sd_image
 ```
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the step-by-step compilation command is as follows:
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
@@ -189,11 +189,11 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 Note that the `./build.sh [board]` at the end of the command is the same as the previous usage in the one-click compilation instructions in Ubuntu 22.04. Use `./build.sh` can see how to use the command, use `./ build.sh lunch` can bring up the interactive selection menu, use `./build.sh [board]` to directly compile the target version, `[board]` can be replaced with:
 ```
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-*Versions with `python` suffix include python, pip, pinpong libraries*
+*Versions with the `lite` suffix is a simplified version and does not include libraries and application packages such as python, pip, pinpong, etc.*
 
 コマンド中のパラメータについて:
 - `duodocker` 実行中のDockerの名前です。先程設定したものと同じである必要があります。
@@ -202,9 +202,9 @@ milkv-duo256m-python
 - `cat /etc/issue` Dockerで実行されているイメージのバージョンを表示します。これはいまのところ「Ubuntu 22.04.3 LTS」で、デバッグに使われます。
 - `./build.sh [board]` 自動コンパイルスクリプトを実行します。
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the command is as follows:
 ```bash
-docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo-python"
+docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo"
 ```
 
 コンパイルが成功すると、`out`ディレクトリの中に`milkv-duo-*-*.img`が出てきます。
@@ -232,9 +232,9 @@ root@8edea33c2239:/# cd /home/work/
 Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -247,9 +247,9 @@ build_all
 pack_sd_image
 ```
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the step-by-step compilation command is as follows:
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd

@@ -23,7 +23,7 @@ Milk-V Duo 是一个基于 CV1800B 芯片的超紧凑嵌入式开发平台。它
 ├── isp_tuning          // 图像效果调试参数存放路径
 ├── linux_5.10          // 开源 linux 内核
 ├── middleware          // 自研多媒体框架，包含 so 与 ko
-├── milkv               // 存放 Milk-V Duo 相关配置及脚本文件的目录
+├── device              // 存放 Milk-V Duo 相关配置及脚本文件的目录
 ├── opensbi             // 开源 opensbi 库
 ├── out                 // Milk-V Duo 最终生成的 SD 卡烧录镜像所在目录
 ├── ramdisk             // 存放最小文件系统的 prebuilt 目录
@@ -70,11 +70,11 @@ Usage:
 ./build.sh lunch        - Select a board to build
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-最下边列出的是当前支持的目标版本列表，带 `python` 后缀的包含 python，pip, pinpong库。
+最下边列出的是当前支持的目标版本列表，带 `lite` 后缀的为精简版，不包含 python，pip, pinpong 等库和应用包。
 
 如提示中所示，有两种方法来编译目录版本。
 
@@ -83,18 +83,18 @@ milkv-duo256m-python
 # ./build.sh lunch
 Select a target to build:
 1. milkv-duo
-2. milkv-duo-python
+2. milkv-duo-lite
 3. milkv-duo256m
-4. milkv-duo256m-python
+4. milkv-duo256m-lite
 Which would you like:
 ```
 
-第二种方法是脚本后面带上目标版本的名字，直接一键编译，比如需要编译 Duo 带 python 和 pinpong 库的的镜像，命令如下:
+第二种方法是脚本后面带上目标版本的名字，比如要编译 `milkv-duo` 的镜像:
 ```bash
-# ./build.sh milkv-duo-python
+# ./build.sh milkv-duo
 ```
 
-编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-python-*-*.img`
+编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`
 
 *注: 第一次编译会自动下载所需的工具链，大小为 840M 左右，下载完会自动解压到 SDK 目录下的 `host-tools` 目录，下次编译时检测到已存在 `host-tools` 目录，就不会再次下载了*
 
@@ -109,9 +109,9 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -124,9 +124,9 @@ build_all
 pack_sd_image
 ```
 
-比如需要编译 Duo 带 python 和 pinpong 库的的镜像，分步编译命令如下：
+比如需要编译 `milkv-duo` 的镜像，分步编译命令如下：
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
@@ -187,11 +187,11 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 注意命令最后的 `./build.sh [board]` 和前面在 Ubuntu 22.04 中一键编译说明中的用法是一样的，直接 `./build.sh` 可以查看命令的使用方法，用 `./build.sh lunch` 可以调出交互选择菜单，用 `./build.sh [board]` 可以直接编译目标版本，`[board]` 可以替换为:
 ```
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-*带 `python` 后缀的版本包含 python，pip, pinpong 库*
+*带 `lite` 后缀的版本为精简版，不包含 python，pip, pinpong 等库和应用包*
 
 命令中部分参数说明:
 - `duodocker` 运行的 Docker 名字, 与上一步中设置的名字要保持一致
@@ -200,9 +200,9 @@ milkv-duo256m-python
 - `cat /etc/issue` 显示 Docker 使用的镜像的版本号，目前是 Ubuntu 22.04.3 LTS，调试用
 - `./build.sh [board]` 执行一键编译脚本
 
-比如需要编译 Duo 带 python 和 pinpong 库的的镜像，编译命令如下:
+比如需要编译 `milkv-duo` 的镜像，编译命令如下:
 ```bash
-docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo-python"
+docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo"
 ```
 
 编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `[board]-*-*.img`
@@ -230,9 +230,9 @@ root@8edea33c2239:/# cd /home/work/
 再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -245,9 +245,9 @@ build_all
 pack_sd_image
 ```
 
-比如需要编译 Duo 带 python, pip 和 pinpong 库的的镜像，分步编译命令如下：
+比如需要编译 `milkv-duo` 的镜像，分步编译命令如下：
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd

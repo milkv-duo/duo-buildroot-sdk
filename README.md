@@ -23,7 +23,7 @@ Milk-V Duo is an ultra-compact embedded development platform based on the CV1800
 ├── isp_tuning          // camera effect parameters
 ├── linux_5.10          // linux kernel
 ├── middleware          // self-developed multimedia framework
-├── milkv               // configuration files for milkv
+├── device              // configuration files for milkv
 ├── opensbi             // opensbi library
 ├── out                 // final image for SD card
 ├── ramdisk             // prebuilt ramdisk
@@ -72,11 +72,11 @@ Usage:
 ./build.sh lunch        - Select a board to build
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-Listed at the bottom is the list of currently supported target versions. Those with the `python` suffix include the python, pip, and pinpong libraries.
+Listed at the bottom is the list of currently supported target versions. Those with the `lite` suffix is a simplified version and does not include libraries and application packages such as python, pip, pinpong, etc.
 
 As shown in the prompt, there are two ways to compile the target version.
 
@@ -85,18 +85,18 @@ The first method is to execute `./build.sh lunch` to bring up the interactive me
 # ./build.sh lunch
 Select a target to build:
 1. milkv-duo
-2. milkv-duo-python
+2. milkv-duo-lite
 3. milkv-duo256m
-4. milkv-duo256m-python
+4. milkv-duo256m-lite
 Which would you like:
 ```
 
-The second method is to put the name of the target version after the script and compile it directly. For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+The second method is to put the name of the target version after the script and compile it directly. For example, if you need to compile the image of `milkv-duo`, the command is as follows:
 ```bash
-# ./build.sh milkv-duo-python
+# ./build.sh milkv-duo
 ```
 
-After a successful compilation, you can find the generated SD card burning image `milkv-duo-python-*-*.img` in the `out` directory.
+After a successful compilation, you can find the generated SD card burning image `milkv-duo-*-*.img` in the `out` directory.
 
 *Note: The first compilation will automatically download the required toolchain, which is approximately 840MB in size. Once downloaded, it will be automatically extracted to the `host-tools` directory in the SDK directory. For subsequent compilations, if the `host-tools` directory is detected, the download will not be performed again*.
 
@@ -111,9 +111,9 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -126,9 +126,9 @@ build_all
 pack_sd_image
 ```
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the step-by-step compilation command is as follows:
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
@@ -189,11 +189,11 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 Note that the `./build.sh [board]` at the end of the command is the same as the previous usage in the one-click compilation instructions in Ubuntu 22.04. Use `./build.sh` can see how to use the command, use `./ build.sh lunch` can bring up the interactive selection menu, use `./build.sh [board]` to directly compile the target version, `[board]` can be replaced with:
 ```
 milkv-duo
-milkv-duo-python
+milkv-duo-lite
 milkv-duo256m
-milkv-duo256m-python
+milkv-duo256m-lite
 ```
-*Versions with `python` suffix include python, pip, pinpong libraries*
+*Versions with the `lite` suffix is a simplified version and does not include libraries and application packages such as python, pip, pinpong, etc.*
 
 Description of some parameters in the command:
 - `duodocker` The name of the running Docker must be consistent with the name set in the previous step.
@@ -202,9 +202,9 @@ Description of some parameters in the command:
 - `cat /etc/issue` Displays the version number of the image used by Docker. It is currently Ubuntu 22.04.3 LTS and is used for debugging.
 - `./build.sh [board]` Execute one-click compilation script.
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the command is as follows:
 ```bash
-docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo-python"
+docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./build.sh milkv-duo"
 ```
 
 After successful compilation, you can see the generated SD card burning image `[board]-*-*.img` in the `out` directory.
@@ -232,9 +232,9 @@ root@8edea33c2239:/# cd /home/work/
 Then enter the following commands in sequence to complete the step-by-step compilation. Replace `[board]` and `[config]` in the command with the version that needs to be compiled. The currently supported `board` and corresponding `config` are as follows:
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-python        cv1800b_milkv_duo_sd
+milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-python    cv1812cp_milkv_duo256m_sd
+milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -247,9 +247,9 @@ build_all
 pack_sd_image
 ```
 
-For example, if you need to compile a Duo image with python and pinpong libraries, the step-by-step compilation command is as follows:
+For example, if you need to compile the image of `milkv-duo`, the step-by-step compilation command is as follows:
 ```bash
-source device/milkv-duo-python/boardconfig.sh
+source device/milkv-duo/boardconfig.sh
 
 source build/milkvsetup.sh
 defconfig cv1800b_milkv_duo_sd
