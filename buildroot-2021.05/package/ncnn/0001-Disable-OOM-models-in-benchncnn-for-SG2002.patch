@@ -1,0 +1,61 @@
+From 6086a0293ae37579f02b8daf4da72cdc5d5b5278 Mon Sep 17 00:00:00 2001
+From: FantasyGmm <16450052+FantasyGmm@users.noreply.github.com>
+Date: Fri, 5 Jan 2024 02:07:25 +0000
+Subject: [PATCH] Disable OOM models in benchncnn for SG2002
+
+---
+ benchmark/benchncnn.cpp | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/benchmark/benchncnn.cpp b/benchmark/benchncnn.cpp
+index 067415a..dc643c1 100644
+--- a/benchmark/benchncnn.cpp
++++ b/benchmark/benchncnn.cpp
+@@ -431,19 +431,19 @@ int main(int argc, char** argv)
+ 
+         benchmark("googlenet_int8", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("resnet18", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("resnet18", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("resnet18_int8", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("resnet18_int8", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("alexnet", ncnn::Mat(227, 227, 3), opt);
++//        benchmark("alexnet", ncnn::Mat(227, 227, 3), opt);
+ 
+-        benchmark("vgg16", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("vgg16", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("vgg16_int8", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("vgg16_int8", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("resnet50", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("resnet50", ncnn::Mat(224, 224, 3), opt);
+ 
+-        benchmark("resnet50_int8", ncnn::Mat(224, 224, 3), opt);
++//        benchmark("resnet50_int8", ncnn::Mat(224, 224, 3), opt);
+ 
+         benchmark("squeezenet_ssd", ncnn::Mat(300, 300, 3), opt);
+ 
+@@ -457,7 +457,7 @@ int main(int argc, char** argv)
+ 
+         benchmark("mobilenetv2_yolov3", ncnn::Mat(352, 352, 3), opt);
+ 
+-        benchmark("yolov4-tiny", ncnn::Mat(416, 416, 3), opt);
++//        benchmark("yolov4-tiny", ncnn::Mat(416, 416, 3), opt);
+ 
+         benchmark("nanodet_m", ncnn::Mat(320, 320, 3), opt);
+ 
+@@ -465,7 +465,7 @@ int main(int argc, char** argv)
+ 
+         benchmark("yolo-fastestv2", ncnn::Mat(352, 352, 3), opt);
+ 
+-        benchmark("vision_transformer", ncnn::Mat(384, 384, 3), opt);
++//        benchmark("vision_transformer", ncnn::Mat(384, 384, 3), opt);
+ 
+         benchmark("FastestDet", ncnn::Mat(352, 352, 3), opt);
+     }
+-- 
+2.25.1
+

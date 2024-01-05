@@ -2529,4 +2529,9 @@ menu "Text editors and viewers"
 	source "package/vim/Config.in"
 endmenu
 
+menu "Custom Package"
+	source "package/ncnn/Config.in"
+	source "package/cmatrix/Config.in"
+endmenu
+
 endmenu
