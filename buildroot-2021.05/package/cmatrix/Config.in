@@ -1,0 +1,8 @@
+config BR2_PACKAGE_CMATRIX
+	bool "cmatrix"
+	depends on BR2_USE_WCHAR # ncurses wchar
+	select BR2_PACKAGE_NCURSES
+	select BR2_PACKAGE_NCURSES_WCHAR
+	default n
+	help
+	  Terminal based "The Matrix" like implementation

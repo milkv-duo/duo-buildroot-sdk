@@ -1,0 +1,20 @@
+menuconfig BR2_PACKAGE_NCNN
+	bool "ncnn"
+	help
+	  ncnn is a high-performance neural network inference framework optimized for the mobile platform
+
+	  https://github.com/Tencent/ncnn
+
+if BR2_PACKAGE_NCNN
+
+config BR2_PACKAGE_NCNN_BENCH
+	bool "Enable benchncnn"
+	help
+		copy benchncnn to target
+
+config BR2_PACKAGE_NCNN_EXAMPLE
+	bool "Enable ncnn example"
+	help
+		copy ncnn example to target
+
+endif

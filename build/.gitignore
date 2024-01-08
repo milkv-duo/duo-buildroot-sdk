@@ -4,6 +4,7 @@
 config.cmake
 *.pyc
 .config.old
+br.log
 
 
 # ignore dirs
