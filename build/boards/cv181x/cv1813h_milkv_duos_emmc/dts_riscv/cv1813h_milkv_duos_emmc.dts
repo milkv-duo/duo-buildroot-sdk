@@ -25,6 +25,12 @@
 	vbus-gpio = <&portb 6 0>;
 };
 
+&wifisd {
+	status = "okay";
+	min-frequency = <400000>;
+	max-frequency = <50000000>;
+};
+
 / {
 
 };

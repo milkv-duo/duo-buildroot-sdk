@@ -15,5 +15,8 @@ int cvi_board_init(void)
 	// USB
 	PINMUX_CONFIG(USB_VBUS_EN, XGPIOB_5);
 
+	// WIFI/BT
+	PINMUX_CONFIG(CLK32K, PWR_GPIO_10);
+
 	return 0;
 }
