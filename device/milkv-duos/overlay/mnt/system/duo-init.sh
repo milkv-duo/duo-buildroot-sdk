@@ -27,3 +27,7 @@ insmod /mnt/system/ko/aic8800_fdrv.ko
 
 # insmod pwm module
 insmod /mnt/system/ko/cv181x_pwm.ko
+
+# Camera2
+camera2_rst=484
+set_gpio ${camera2_rst} 1
