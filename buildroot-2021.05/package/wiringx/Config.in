@@ -1,4 +1,0 @@
-config BR2_PACKAGE_WIRINGX
-    bool "wiringX"
-    help
-      wiringX
