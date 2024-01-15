@@ -18,7 +18,7 @@ function _build_default_env()
 
 function gettop()
 {
-  local TOPFILE=build/cvisetup.sh
+  local TOPFILE=build/milkvsetup.sh
   if [ -n "$TOP" -a -f "$TOP/$TOPFILE" ] ; then
     # The following circumlocution ensures we remove symlinks from TOP.
     (cd "$TOP"; PWD= /bin/pwd)

@@ -71,6 +71,7 @@ Usage:
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
@@ -84,8 +85,10 @@ milkv-duo256m-lite
 Select a target to build:
 1. milkv-duo
 2. milkv-duo-lite
-3. milkv-duo256m
-4. milkv-duo256m-lite
+3. milkv-duo-spinor
+4. milkv-duo256m
+5. milkv-duo256m-lite
+6. milkv-duos
 Which would you like:
 ```
 
@@ -110,6 +113,7 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -231,6 +235,7 @@ root@8edea33c2239:/# cd /home/work/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
