@@ -569,6 +569,8 @@ br-rootfs-prepare:
 # copy milkv overlay files
 ifeq ($(MV_VENDOR), milkv)
 	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/overlay/* $(BR_ROOTFS_DIR)/
+	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/br_overlay/* $(BR_ROOTFS_DIR)/
+	${Q}rm -rf $(BR_OVERLAY_DIR)
 endif
 	# strip
 	${Q}find $(BR_ROOTFS_DIR) -name "*.ko" -type f -printf 'striping %p\n' -exec $(CROSS_COMPILE_KERNEL)strip --strip-unneeded {} \;
@@ -583,6 +585,7 @@ br-rootfs-pack:
 	${Q}$(MAKE) -C $(BR_DIR) $(BR_DEFCONFIG) BR2_TOOLCHAIN_EXTERNAL_PATH=$(CROSS_COMPILE_PATH)
 	${Q}$(BR_DIR)/utils/brmake -j${NPROC} -C $(BR_DIR)
 	# ${Q}rm -rf $(BR_ROOTFS_DIR)/*
+	${Q}rm -rf $(BR_MV_VENDOR_DIR)
 	# copy rootfs to rawimg dir
 	${Q}cp $(TARGET_OUTPUT_DIR)/images/rootfs.ext4 $(OUTPUT_DIR)/rawimages/rootfs_ext4.$(STORAGE_TYPE)
 	$(call raw2cimg ,rootfs_ext4.$(STORAGE_TYPE))
