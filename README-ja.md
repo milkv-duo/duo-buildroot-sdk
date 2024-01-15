@@ -73,6 +73,7 @@ Usage:
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
@@ -86,8 +87,10 @@ The first method is to execute `./build.sh lunch` to bring up the interactive me
 Select a target to build:
 1. milkv-duo
 2. milkv-duo-lite
-3. milkv-duo256m
-4. milkv-duo256m-lite
+3. milkv-duo-spinor
+4. milkv-duo256m
+5. milkv-duo256m-lite
+6. milkv-duos
 Which would you like:
 ```
 
@@ -112,6 +115,7 @@ Then enter the following commands in sequence to complete the step-by-step compi
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -190,6 +194,7 @@ Note that the `./build.sh [board]` at the end of the command is the same as the 
 ```
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
@@ -233,6 +238,7 @@ Then enter the following commands in sequence to complete the step-by-step compi
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```

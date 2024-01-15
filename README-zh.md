@@ -192,6 +192,7 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 ```
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
