@@ -566,6 +566,7 @@ function cvi_setup_env()
   export BR_OVERLAY_DIR=${BR_DIR}/board/${MV_VENDOR}/${MV_BOARD}/overlay
   export BR_DEFCONFIG=${BR_BOARD}_defconfig
   export BR_ROOTFS_DIR="$OUTPUT_DIR"/tmp-rootfs
+  export BR_MV_VENDOR_DIR=${BR_DIR}/board/${MV_VENDOR}
 }
 
 cvi_print_env()
