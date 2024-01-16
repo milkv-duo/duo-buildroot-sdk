@@ -529,19 +529,19 @@ function cvi_setup_env()
   # envs setup for specific ${SDK_VER}
   envs_sdk_ver
 
-  if [ "${STORAGE_TYPE}" == "spinand" ]; then
-    PAGE_SUFFIX=2k
-    if [ ${NANDFLASH_PAGESIZE} == 4096 ]; then
-      PAGE_SUFFIX=4k
-    fi
+#  if [ "${STORAGE_TYPE}" == "spinand" ]; then
+#    PAGE_SUFFIX=2k
+#    if [ ${NANDFLASH_PAGESIZE} == 4096 ]; then
+#      PAGE_SUFFIX=4k
+#    fi
 
-    if [[ "$ENABLE_ALIOS" != "y" ]]; then
-      pushd "$BUILD_PATH"/boards/"${CHIP_ARCH,,}"/"$PROJECT_FULLNAME"/partition/
-      ln -fs ../../../default/partition/partition_spinand_page_"$PAGE_SUFFIX".xml \
-        partition_"$STORAGE_TYPE".xml
-      popd
-    fi
-  fi
+#    if [[ "$ENABLE_ALIOS" != "y" ]]; then
+#      pushd "$BUILD_PATH"/boards/"${CHIP_ARCH,,}"/"$PROJECT_FULLNAME"/partition/
+#      ln -fs ../../../default/partition/partition_spinand_page_"$PAGE_SUFFIX".xml \
+#        partition_"$STORAGE_TYPE".xml
+#      popd
+#    fi
+#  fi
 
   # configure flash partition table
   if [ -z "${STORAGE_TYPE}" ]; then

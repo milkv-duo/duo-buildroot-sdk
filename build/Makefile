@@ -589,6 +589,14 @@ endif
 	${Q}mkdir -p $(BR_OVERLAY_DIR)
 	${Q}cp -arf $(BR_ROOTFS_DIR)/* $(BR_OVERLAY_DIR)
 
+	# create partition mounting points and move sytems to read-write partitions
+ifeq ($(STORAGE_TYPE), spinand)
+	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/cfg
+	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/data
+	${Q}mkdir -p $(OUTPUT_DIR)/system
+	${Q}cp -arf $(BR_OVERLAY_DIR)/mnt/system/* $(OUTPUT_DIR)/system
+endif
+
 br-rootfs-pack:export TARGET_OUTPUT_DIR=$(BR_DIR)/output/$(BR_BOARD)
 br-rootfs-pack:
 	$(call print_target)
@@ -597,7 +605,7 @@ br-rootfs-pack:
 	# ${Q}rm -rf $(BR_ROOTFS_DIR)/*
 	${Q}rm -rf $(BR_MV_VENDOR_DIR)
 	# copy rootfs to rawimg dir
-ifeq ($(STORAGE_TYPE),spinand)
+ifeq ($(STORAGE_TYPE), spinand)
 	${Q}python3 $(COMMON_TOOLS_PATH)/spinand_tool/mkubiimg.py --ubionly $(FLASH_PARTITION_XML) ROOTFS $(TARGET_OUTPUT_DIR)/images/rootfs.squashfs $(OUTPUT_DIR)/rawimages/rootfs.spinand -b $(CONFIG_NANDFLASH_BLOCKSIZE) -p $(CONFIG_NANDFLASH_PAGESIZE)
 	$(call raw2cimg ,rootfs.$(STORAGE_TYPE))
 else ifeq ($(STORAGE_TYPE), spinor)

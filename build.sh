@@ -168,13 +168,15 @@ function milkv_pack_nor_nand()
 	mkdir -p out/$nor_out_name
   
 	if [ "${STORAGE_TYPE}" == "spinor" ]; then
-		mv ${OUTPUT_DIR}/fip.bin out/$nor_out_name
-		mv ${OUTPUT_DIR}/*.spinor out/$nor_out_name 		
+		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		cp ${OUTPUT_DIR}/*.spinor out/$nor_out_name 		
 	else
-		mv ${OUTPUT_DIR}/fip.bin out/$nor_out_name
-		mv ${OUTPUT_DIR}/*.spinand out/$nor_out_name 	
+		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		cp ${OUTPUT_DIR}/*.spinand out/$nor_out_name 	
 	fi
-
+	
+	touch ${OUTPUT_DIR}/how_to_download.txt
+	echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-bOOT." >> out/$nor_out_name/how_to_download.txt
     print_info "Create spinor img successful: ${nor_out_name}"
   else
     print_err "Create spinor img failed!"
