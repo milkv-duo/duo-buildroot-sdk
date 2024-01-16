@@ -71,10 +71,12 @@ Usage:
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinand
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
-最下边列出的是当前支持的目标版本列表，带 `lite` 后缀的为精简版，不包含 python，pip, pinpong 等库和应用包。
+最下边列出的是当前支持的目标版本列表，带 `lite` 后缀的为精简版，不包含 python，pip, pinpong 等库和应用包。带`spinor`或者`spinand` 后缀的为基于IOB板载NOR FLASH或者NAND FLASH的版本。
 
 如提示中所示，有两种方法来编译目录版本。
 
@@ -84,8 +86,11 @@ milkv-duo256m-lite
 Select a target to build:
 1. milkv-duo
 2. milkv-duo-lite
-3. milkv-duo256m
-4. milkv-duo256m-lite
+3. milkv-duo-spinand
+4. milkv-duo-spinor
+5. milkv-duo256m
+6. milkv-duo256m-lite
+7. milkv-duos
 Which would you like:
 ```
 
@@ -94,7 +99,7 @@ Which would you like:
 # ./build.sh milkv-duo
 ```
 
-编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`
+编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`，或者NOR FLASH/NAND FLASH 的烧录文件目录`milkv-duo-*-*`。
 
 *注: 第一次编译会自动下载所需的工具链，大小为 840M 左右，下载完会自动解压到 SDK 目录下的 `host-tools` 目录，下次编译时检测到已存在 `host-tools` 目录，就不会再次下载了*
 
@@ -110,6 +115,8 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinand		cv1800b_milkv_duo_spinand
+milkv-duo-spinor		cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -137,8 +144,10 @@ pack_sd_image
 
 生成的固件位置：
 ```
-Duo:      install/soc_cv1800b_milkv_duo_sd/[board].img
-Duo256M:  install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+Duo:      	install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo(nor): 	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo(nand):	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+Duo256M:  	install/soc_cv1812cp_milkv_duo256m_sd/[board].img
 ```
 
 ## 二、使用 Docker 编译
@@ -188,6 +197,8 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 ```
 milkv-duo
 milkv-duo-lite
+milkv-duo-spinand
+milkv-duo-spinor
 milkv-duo256m
 milkv-duo256m-lite
 ```
@@ -231,6 +242,8 @@ root@8edea33c2239:/# cd /home/work/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
+milkv-duo-spinand		cv1800b_milkv_duo_spinand
+milkv-duo-spinor		cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -259,6 +272,8 @@ pack_sd_image
 生成的固件位置：
 ```
 Duo:      install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo(nor): 	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo(nand):	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
 Duo256M:  install/soc_cv1812cp_milkv_duo256m_sd/[board].img
 ```
 
@@ -332,6 +347,14 @@ appendWindowsPath = false
   ```bash
   sudo dd if=milkv-duo-XXX.img of=/dev/sdX
   ```
+## IOB板FLASH烧录
+
+- 需要IOB板FLASH位置处焊接上NOR或者NAND FLASH(需要用户后期自己动手)
+- 准备一张没有烧录SD镜像的SD卡，将out下`milkv-duo-spinor-*-*`或者`milkv-duo-spinand-*-*`目录下全部文件拷贝至内存卡根目录
+- 将拷贝好镜像的 TF 卡插入 Milk-V Duo 的 TF 卡槽中
+- 接好串口线，可观察刻录进度
+- 开机上电即开始刻录镜像到NOR或者NAND，等待uboot中自动刻录镜像完成
+- 拔掉Milk-V Duo 的 TF 卡槽中的 TF 卡，重新上电即可从NOR或者NAND启动
 
 ## 开机
 
