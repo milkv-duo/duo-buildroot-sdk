@@ -111,6 +111,11 @@ function milkv_build()
     popd
   fi
 
+  # clean nor/nand img
+  if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
+	  rm -rf ${OUTPUT_DIR}/*
+  fi
+   
   clean_all
   build_all
   if [ $? -eq 0 ]; then
@@ -154,10 +159,35 @@ function milkv_pack_sd()
   fi
 }
 
+function milkv_pack_nor_nand()
+{
+  [ ! -d out ] && mkdir out
+	
+  if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
+	nor_out_name=${MILKV_BOARD}-`date +%Y%m%d-%H%M`
+	mkdir -p out/$nor_out_name
+  
+	if [ "${STORAGE_TYPE}" == "spinor" ]; then
+		mv ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		mv ${OUTPUT_DIR}/*.spinor out/$nor_out_name 		
+	else
+		mv ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		mv ${OUTPUT_DIR}/*.spinand out/$nor_out_name 	
+	fi
+
+    print_info "Create spinor img successful: ${nor_out_name}"
+  else
+    print_err "Create spinor img failed!"
+    exit 1
+  fi
+}
+
 function milkv_pack()
 {
   if [ "${STORAGE_TYPE}" == "sd" ]; then
     milkv_pack_sd
+  else
+    milkv_pack_nor_nand
   fi
 }
 
