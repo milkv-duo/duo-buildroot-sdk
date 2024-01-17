@@ -1,0 +1,6 @@
+{
+    "ddr_cfg_list": [
+        "ddr2_1333_x16"
+    ],
+    "board_information": "C906B + SPINOR 32MB + QFN SIP 64MB"
+}

@@ -1,0 +1,39 @@
+/dts-v1/;
+#include "cv180x_base_riscv.dtsi"
+#include "cv180x_asic_qfn.dtsi"
+#include "cv180x_asic_spinand.dtsi"
+#include "cv180x_default_memmap.dtsi"
+
+&mipi_rx{
+	snsr-reset = <&portc 8 GPIO_ACTIVE_LOW>, <&portc 8 GPIO_ACTIVE_LOW>, <&portc 8 GPIO_ACTIVE_LOW>;
+};
+
+&spi0 {
+        status = "okay";
+        flash@0 {
+                compatible = "winbond,w25n01", "spi-nand";
+                reg = <0>;
+        };
+};
+
+
+&spi2 {
+	status = "okay";
+
+	spidev@0 {
+		status = "okay";
+	};
+};
+
+&uart4 {
+	status = "okay";
+};
+
+&i2c1 {
+       status = "okay";
+       clock-frequency = <100000>;
+};
+
+/ {
+
+};

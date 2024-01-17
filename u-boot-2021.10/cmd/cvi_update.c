@@ -86,7 +86,8 @@ int _prgImage(char *file, uint32_t chunk_header_size, char *file_name)
 #elif defined(CONFIG_SPI_FLASH)
 	if (update_magic == SD_UPDATE_MAGIC && (!strcmp(file_name, "fip_spl.bin")
 		|| !strcmp(file_name, "fip.bin")
-		|| !strcmp(file_name, "boot.spinor"))) {
+		|| !strcmp(file_name, "boot.spinor")
+		|| !strcmp(file_name, "rootfs.spinor"))) {
 		snprintf(cmd, 255, "sf update %p 0x%x 0x%x",
 			 (void *)file + chunk_header_size, offset, size);
 	} else {

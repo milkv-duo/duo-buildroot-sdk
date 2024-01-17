@@ -562,11 +562,21 @@ br-rootfs-prepare:export CROSS_COMPILE_KERNEL=$(patsubst "%",%,$(CONFIG_CROSS_CO
 br-rootfs-prepare:export CROSS_COMPILE_SDK=$(patsubst "%",%,$(CONFIG_CROSS_COMPILE_SDK))
 br-rootfs-prepare:
 	$(call print_target)
+ifneq ($(STORAGE_TYPE), sd)
+	#${Q}cp -r ${RAMDISK_PATH}/rootfs/buildroot_fs/arm/* $(BR_ROOTFS_DIR)
+	$(call TARGET_PACKAGE_INSTALL_BR_ROOTFS)
+	${Q}mkdir -p $(BR_ROOTFS_DIR)/etc/init.d/
+	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/create_automount.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc/init.d/
+	# Generate /etc/fw_env.config
+	# ${Q}mkdir -p $(BR_ROOTFS_DIR)/etc
+	${Q}python3 $(COMMON_TOOLS_PATH)/image_tool/mkcvipart.py $(FLASH_PARTITION_XML) $(BR_ROOTFS_DIR)/etc --fw_env
+endif
+
 	# copy ko and mmf libs
 	${Q}mkdir -p $(BR_ROOTFS_DIR)/mnt/system
 	${Q}cp -arf ${SYSTEM_OUT_DIR}/* $(BR_ROOTFS_DIR)/mnt/system/
 
-# copy milkv overlay files
+	# copy milkv overlay files
 ifeq ($(MV_VENDOR), milkv)
 	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/overlay/* $(BR_ROOTFS_DIR)/
 	${Q}cp -arf $(TOP_DIR)/device/$(MV_BOARD)/br_overlay/* $(BR_ROOTFS_DIR)/
@@ -579,6 +589,14 @@ endif
 	${Q}mkdir -p $(BR_OVERLAY_DIR)
 	${Q}cp -arf $(BR_ROOTFS_DIR)/* $(BR_OVERLAY_DIR)
 
+	# create partition mounting points and move sytems to read-write partitions
+ifeq ($(STORAGE_TYPE), spinand)
+	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/cfg
+	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/data
+	${Q}mkdir -p $(OUTPUT_DIR)/system
+	${Q}cp -arf $(BR_OVERLAY_DIR)/mnt/system/* $(OUTPUT_DIR)/system
+endif
+
 br-rootfs-pack:export TARGET_OUTPUT_DIR=$(BR_DIR)/output/$(BR_BOARD)
 br-rootfs-pack:
 	$(call print_target)
@@ -587,8 +605,16 @@ br-rootfs-pack:
 	# ${Q}rm -rf $(BR_ROOTFS_DIR)/*
 	${Q}rm -rf $(BR_MV_VENDOR_DIR)
 	# copy rootfs to rawimg dir
+ifeq ($(STORAGE_TYPE), spinand)
+	${Q}python3 $(COMMON_TOOLS_PATH)/spinand_tool/mkubiimg.py --ubionly $(FLASH_PARTITION_XML) ROOTFS $(TARGET_OUTPUT_DIR)/images/rootfs.squashfs $(OUTPUT_DIR)/rawimages/rootfs.spinand -b $(CONFIG_NANDFLASH_BLOCKSIZE) -p $(CONFIG_NANDFLASH_PAGESIZE)
+	$(call raw2cimg ,rootfs.$(STORAGE_TYPE))
+else ifeq ($(STORAGE_TYPE), spinor)
+	${Q}cp $(TARGET_OUTPUT_DIR)/images/rootfs.squashfs $(OUTPUT_DIR)/rawimages/rootfs.$(STORAGE_TYPE)
+	$(call raw2cimg ,rootfs.$(STORAGE_TYPE))
+else
 	${Q}cp $(TARGET_OUTPUT_DIR)/images/rootfs.ext4 $(OUTPUT_DIR)/rawimages/rootfs_ext4.$(STORAGE_TYPE)
 	$(call raw2cimg ,rootfs_ext4.$(STORAGE_TYPE))
+endif	
 
 ifeq ($(CONFIG_BUILDROOT_FS),y)
 rootfs:br-rootfs-prepare

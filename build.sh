@@ -111,6 +111,11 @@ function milkv_build()
     popd
   fi
 
+  # clean nor/nand img
+  if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
+	  rm -rf ${OUTPUT_DIR}/*
+  fi
+   
   clean_all
   build_all
   if [ $? -eq 0 ]; then
@@ -154,10 +159,37 @@ function milkv_pack_sd()
   fi
 }
 
+function milkv_pack_nor_nand()
+{
+  [ ! -d out ] && mkdir out
+	
+  if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
+	nor_out_name=${MILKV_BOARD}-`date +%Y%m%d-%H%M`
+	mkdir -p out/$nor_out_name
+  
+	if [ "${STORAGE_TYPE}" == "spinor" ]; then
+		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		cp ${OUTPUT_DIR}/*.spinor out/$nor_out_name 		
+	else
+		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
+		cp ${OUTPUT_DIR}/*.spinand out/$nor_out_name 	
+	fi
+	
+	touch ${OUTPUT_DIR}/how_to_download.txt
+	echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-bOOT." >> out/$nor_out_name/how_to_download.txt
+    print_info "Create spinor img successful: ${nor_out_name}"
+  else
+    print_err "Create spinor img failed!"
+    exit 1
+  fi
+}
+
 function milkv_pack()
 {
   if [ "${STORAGE_TYPE}" == "sd" ]; then
     milkv_pack_sd
+  else
+    milkv_pack_nor_nand
   fi
 }
 
