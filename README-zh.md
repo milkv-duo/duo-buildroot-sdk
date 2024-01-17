@@ -115,8 +115,8 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
-milkv-duo-spinand		cv1800b_milkv_duo_spinand
-milkv-duo-spinor		cv1800b_milkv_duo_spinor
+milkv-duo-spinand       cv1800b_milkv_duo_spinand
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -242,8 +242,8 @@ root@8edea33c2239:/# cd /home/work/
 ```
 milkv-duo               cv1800b_milkv_duo_sd
 milkv-duo-lite          cv1800b_milkv_duo_sd
-milkv-duo-spinand		cv1800b_milkv_duo_spinand
-milkv-duo-spinor		cv1800b_milkv_duo_spinor
+milkv-duo-spinand       cv1800b_milkv_duo_spinand
+milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
 milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
@@ -271,10 +271,10 @@ pack_sd_image
 
 生成的固件位置：
 ```
-Duo:      install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo:      	install/soc_cv1800b_milkv_duo_sd/[board].img
 Duo(nor): 	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
 Duo(nand):	install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
-Duo256M:  install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+Duo256M:  	install/soc_cv1812cp_milkv_duo256m_sd/[board].img
 ```
 
 编译完成后可以用 `exit` 命令退出 Docker 环境：
