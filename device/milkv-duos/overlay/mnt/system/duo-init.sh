@@ -25,8 +25,14 @@ insmod /mnt/system/ko/aic8800_bsp.ko
 sleep 0.5
 insmod /mnt/system/ko/aic8800_fdrv.ko
 
-# insmod pwm module
+# Insmod PWM Module
 insmod /mnt/system/ko/cv181x_pwm.ko
+
+# Init Zram
+insmod /mnt/system/ko/zram.ko
+echo "128M" | tee /sys/block/zram0/disksize
+/sbin/mkswap /dev/zram0
+/sbin/swapon /dev/zram0
 
 # Camera2
 camera2_rst=484
