@@ -27,8 +27,12 @@
 
 &wifisd {
 	status = "okay";
+	cap-sd-highspeed;
+	sd-uhs-sdr25;
+	sd-uhs-ddr50;
+	sd-uhs-sdr104;
 	min-frequency = <400000>;
-	max-frequency = <50000000>;
+	max-frequency = <100000000>;
 };
 
 / {
