@@ -111,7 +111,7 @@ function milkv_build()
     popd
   fi
 
-  # clean nor/nand img
+  # clean emmc/nor/nand img
   if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
 	  rm -rf ${OUTPUT_DIR}/*
   fi
@@ -132,29 +132,30 @@ function milkv_pack_sd()
 
   [ ! -d out ] && mkdir out
 
-  image_count=`ls ${OUTPUT_DIR}/*.img | wc -l`
-  if [ ${image_count} -ge 0 ]; then
-    mv ${OUTPUT_DIR}/*.img out/
+  img_in="${OUTPUT_DIR}/${MILKV_BOARD}.img"
+  img_out="${MILKV_BOARD}-sd-`date +%Y%m%d-%H%M`.img"
 
-    # rename milkv-duo.img file with time
-    pushd out
-    for img in *.img
-    do
-      if [ "${img}" == "${MILKV_BOARD}.img" ]; then
-        mv $img ${MILKV_BOARD}-`date +%Y%m%d-%H%M`.img
-      fi
-    done
-    popd
-
-    # show latest img
-    latest_img=`ls -t out/*.img | head -n1`
-    if [ -z "${latest_img// }" ]; then
-      print_err "Gen image failed!"
-    else
-      print_info "Gen image successful: ${latest_img}"
-    fi
+  if [ -f "${img_in}" ]; then
+    mv ${img_in} out/${img_out}
+    print_info "Create SD image successful: out/${img_out}"
   else
-    print_err "Create sd img failed!"
+    print_err "Create SD image failed!"
+    exit 1
+  fi
+}
+
+function milkv_pack_emmc()
+{
+  [ ! -d out ] && mkdir out
+
+  img_in="${OUTPUT_DIR}/upgrade.zip"
+  img_out="${MILKV_BOARD}-emmc-`date +%Y%m%d-%H%M`.zip"
+
+  if [ -f "${img_in}" ]; then
+    mv ${img_in} out/${img_out}
+    print_info "Create eMMC image successful: out/${img_out}"
+  else
+    print_err "Create eMMC image failed!"
     exit 1
   fi
 }
@@ -188,6 +189,8 @@ function milkv_pack()
 {
   if [ "${STORAGE_TYPE}" == "sd" ]; then
     milkv_pack_sd
+  elif [ "${STORAGE_TYPE}" == "emmc" ]; then
+    milkv_pack_emmc
   else
     milkv_pack_nor_nand
   fi
