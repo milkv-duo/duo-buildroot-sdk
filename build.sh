@@ -165,22 +165,22 @@ function milkv_pack_nor_nand()
   [ ! -d out ] && mkdir out
 	
   if [ -f "${OUTPUT_DIR}/upgrade.zip" ]; then
-	nor_out_name=${MILKV_BOARD}-`date +%Y%m%d-%H%M`
-	mkdir -p out/$nor_out_name
+	img_out_patch=${MILKV_BOARD}-`date +%Y%m%d-%H%M`
+	mkdir -p out/$img_out_patch
   
 	if [ "${STORAGE_TYPE}" == "spinor" ]; then
-		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
-		cp ${OUTPUT_DIR}/*.spinor out/$nor_out_name 		
+		cp ${OUTPUT_DIR}/fip.bin out/$img_out_patch
+		cp ${OUTPUT_DIR}/*.spinor out/$img_out_patch 		
 	else
-		cp ${OUTPUT_DIR}/fip.bin out/$nor_out_name
-		cp ${OUTPUT_DIR}/*.spinand out/$nor_out_name 	
+		cp ${OUTPUT_DIR}/fip.bin out/$img_out_patch
+		cp ${OUTPUT_DIR}/*.spinand out/$img_out_patch 	
 	fi
 	
 	touch ${OUTPUT_DIR}/how_to_download.txt
-	echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-bOOT." >> out/$nor_out_name/how_to_download.txt
-    print_info "Create spinor img successful: ${nor_out_name}"
+	echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-boot." >> out/$img_out_patch/how_to_download.txt
+    print_info "Create spinor/nand img successful: ${img_out_patch}"
   else
-    print_err "Create spinor img failed!"
+    print_err "Create spinor/nand img failed!"
     exit 1
   fi
 }
