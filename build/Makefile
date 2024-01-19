@@ -562,7 +562,7 @@ br-rootfs-prepare:export CROSS_COMPILE_KERNEL=$(patsubst "%",%,$(CONFIG_CROSS_CO
 br-rootfs-prepare:export CROSS_COMPILE_SDK=$(patsubst "%",%,$(CONFIG_CROSS_COMPILE_SDK))
 br-rootfs-prepare:
 	$(call print_target)
-ifneq ($(STORAGE_TYPE), sd)
+ifeq ($(STORAGE_TYPE),$(filter $(STORAGE_TYPE),spinor spinand))
 	#${Q}cp -r ${RAMDISK_PATH}/rootfs/buildroot_fs/arm/* $(BR_ROOTFS_DIR)
 	$(call TARGET_PACKAGE_INSTALL_BR_ROOTFS)
 	${Q}mkdir -p $(BR_ROOTFS_DIR)/etc/init.d/

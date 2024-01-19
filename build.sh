@@ -99,6 +99,15 @@ function prepare_env()
   defconfig ${MV_BOARD_LINK} > /dev/null 2>&1
 
   echo "OUTPUT_DIR: ${OUTPUT_DIR}"  # @build/milkvsetup.sh
+
+  if [ "${STORAGE_TYPE}" == "sd" ]; then
+    MILKV_IMAGE_CONFIG=device/${MILKV_BOARD}/genimage.cfg
+
+    if [ ! -f ${MILKV_IMAGE_CONFIG} ]; then
+      print_err "${MILKV_IMAGE_CONFIG} not found!"
+      exit 1
+    fi
+  fi
 }
 
 function milkv_build()
@@ -133,7 +142,7 @@ function milkv_pack_sd()
   [ ! -d out ] && mkdir out
 
   img_in="${OUTPUT_DIR}/${MILKV_BOARD}.img"
-  img_out="${MILKV_BOARD}-sd-`date +%Y%m%d-%H%M`.img"
+  img_out="${MILKV_BOARD}-`date +%Y%m%d-%H%M`.img"
 
   if [ -f "${img_in}" ]; then
     mv ${img_in} out/${img_out}
@@ -149,7 +158,7 @@ function milkv_pack_emmc()
   [ ! -d out ] && mkdir out
 
   img_in="${OUTPUT_DIR}/upgrade.zip"
-  img_out="${MILKV_BOARD}-emmc-`date +%Y%m%d-%H%M`.zip"
+  img_out="${MILKV_BOARD}-`date +%Y%m%d-%H%M`.zip"
 
   if [ -f "${img_in}" ]; then
     mv ${img_in} out/${img_out}
@@ -199,8 +208,11 @@ function milkv_pack()
 function build_info()
 {
   print_info "Target Board: ${MILKV_BOARD}"
+  print_info "Target Board Storage: ${STORAGE_TYPE}"
   print_info "Target Board Config: ${MILKV_BOARD_CONFIG}"
-  print_info "Target Image Config: ${MILKV_IMAGE_CONFIG}"
+  if [ "${STORAGE_TYPE}" == "sd" ]; then
+    print_info "Target Image Config: ${MILKV_IMAGE_CONFIG}"
+  fi
 }
 
 get_available_board
@@ -240,25 +252,19 @@ if [ -z "${MILKV_BOARD// }" ]; then
 fi
 
 MILKV_BOARD_CONFIG=device/${MILKV_BOARD}/boardconfig.sh
-MILKV_IMAGE_CONFIG=device/${MILKV_BOARD}/genimage.cfg
 
 if [ ! -f ${MILKV_BOARD_CONFIG} ]; then
   print_err "${MILKV_BOARD_CONFIG} not found!"
   exit 1
 fi
 
-if [ ! -f ${MILKV_IMAGE_CONFIG} ]; then
-  print_err "${MILKV_IMAGE_CONFIG} not found!"
-  exit 1
-fi
-
 get_toolchain
-
-build_info
 
 export MILKV_BOARD="${MILKV_BOARD}"
 
 prepare_env
+
+build_info
 
 milkv_build
 milkv_pack
