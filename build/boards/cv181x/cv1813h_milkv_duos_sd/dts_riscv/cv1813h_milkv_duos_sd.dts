@@ -35,6 +35,12 @@
 	max-frequency = <187500000>;
 };
 
+&wifi_pin {
+	compatible = "cvitek,wifi-pin";
+	poweron-gpio = <&porta 15 GPIO_ACTIVE_HIGH>;
+	wakeup-gpio = <&porte 7 GPIO_ACTIVE_HIGH>;
+};
+
 &uart4 {
 	status = "okay";
 };

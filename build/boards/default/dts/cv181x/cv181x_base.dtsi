@@ -653,7 +653,7 @@
 		cvi,card_name = "cv182x_internal_PDM";
 	};
 
-	wifi_pin {
+	wifi_pin: wifi_pin {
 		compatible = "cvitek,wifi-pin";
 		poweron-gpio = <&porta 18 GPIO_ACTIVE_HIGH>;
 		wakeup-gpio = <&porte 7 GPIO_ACTIVE_HIGH>;

@@ -17,10 +17,6 @@ function set_gpio()
 	echo ${gpio_val} > ${gpio_path}/value
 }
 
-# WIFI Power ON
-wifi_power=495
-set_gpio ${wifi_power} 1
-
 # Host Wake BT
 host_wake_bt=362
 set_gpio ${host_wake_bt} 1
