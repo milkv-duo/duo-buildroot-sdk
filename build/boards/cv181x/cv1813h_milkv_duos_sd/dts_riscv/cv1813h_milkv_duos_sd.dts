@@ -32,7 +32,7 @@
 	sd-uhs-ddr50;
 	sd-uhs-sdr104;
 	min-frequency = <400000>;
-	max-frequency = <100000000>;
+	max-frequency = <187500000>;
 };
 
 &uart4 {
