@@ -35,6 +35,10 @@
 	max-frequency = <100000000>;
 };
 
+&uart4 {
+	status = "okay";
+};
+
 / {
 
 };

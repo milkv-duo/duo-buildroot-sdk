@@ -21,6 +21,11 @@ function set_gpio()
 wifi_power=495
 set_gpio ${wifi_power} 1
 
+# Host Wake BT
+host_wake_bt=362
+set_gpio ${host_wake_bt} 1
+
+# WIFI/BT Module
 insmod /mnt/system/ko/aic8800_bsp.ko
 sleep 0.5
 insmod /mnt/system/ko/aic8800_fdrv.ko
