@@ -4,7 +4,5 @@
     <partition label="ENV" size_in_kb="128" file="" />
     <partition label="ENV_BAK" size_in_kb="128" file="" />
     <partition label="ROOTFS" size_in_kb="40960" file="rootfs.spinand" />
-    <partition label="SYSTEM" size_in_kb="71680" file="system.spinand" mountpoint="/mnt/system" type="ubifs" />
-    <partition label="CFG" size_in_kb="4096" file="cfg.spinand" mountpoint="/mnt/cfg" type="ubifs" />
-    <partition label="DATA" file="" mountpoint="/mnt/data" type="ubifs" />
+    <partition label="SYSTEM" size_in_kb="81152" file="system.spinand" mountpoint="/mnt/system" type="ubifs" />
 </physical_partition>

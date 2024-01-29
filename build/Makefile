@@ -591,8 +591,8 @@ endif
 
 	# create partition mounting points and move sytems to read-write partitions
 ifeq ($(STORAGE_TYPE), spinand)
-	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/cfg
-	${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/data
+	# ${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/cfg
+	# ${Q}mkdir -p $(BR_OVERLAY_DIR)/mnt/data
 	${Q}mkdir -p $(OUTPUT_DIR)/system
 	${Q}cp -arf $(BR_OVERLAY_DIR)/mnt/system/* $(OUTPUT_DIR)/system
 endif

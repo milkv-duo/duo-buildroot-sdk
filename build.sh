@@ -185,7 +185,6 @@ function milkv_pack_nor_nand()
 		cp ${OUTPUT_DIR}/*.spinand out/$img_out_patch 	
 	fi
 	
-	touch ${OUTPUT_DIR}/how_to_download.txt
 	echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-boot." >> out/$img_out_patch/how_to_download.txt
     print_info "Create spinor/nand img successful: ${img_out_patch}"
   else
