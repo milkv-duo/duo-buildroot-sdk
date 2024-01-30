@@ -1,8 +1,0 @@
-{
-    "model": "../cvi_models/retinaface_mnet0.25_342_608.cvimodel",
-    "video-src-info": [{
-        "chn": 0,
-        "venc-bind-vpss": false,
-        "enable-retinaface": true
-    }]
-}
