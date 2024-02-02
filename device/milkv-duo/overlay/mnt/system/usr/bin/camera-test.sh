@@ -1,5 +1,6 @@
 #!/bin/sh
 
-cd /mnt/data/camera-test/
+export LD_LIBRARY_PATH=/mnt/system/lib
 
-./CviIspTool.sh 64M
+sample_vi_fd /mnt/cvimodel/scrfd_480_270_int8.cvimodel
+
