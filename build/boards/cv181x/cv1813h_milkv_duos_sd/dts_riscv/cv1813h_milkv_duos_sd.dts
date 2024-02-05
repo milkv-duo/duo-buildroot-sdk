@@ -46,6 +46,6 @@
 };
 
 / {
-
+	model = "Milk-V DuoS";
 };
 
