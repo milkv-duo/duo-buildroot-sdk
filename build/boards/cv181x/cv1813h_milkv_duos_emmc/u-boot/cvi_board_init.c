@@ -1,3 +1,9 @@
+static void set_rtc_register_for_power(void)
+{
+	printf("set_rtc_register_for_power\n");
+	mmio_write_32(0x050260D0, 0x7);
+}
+
 int cvi_board_init(void)
 {
 	// Camera
@@ -34,5 +40,8 @@ int cvi_board_init(void)
 	PINMUX_CONFIG(PWR_WAKEUP0, EPHY_LNK_LED);
 	PINMUX_CONFIG(PWR_BUTTON1, EPHY_SPD_LED);
 
+	set_rtc_register_for_power();
+
 	return 0;
 }
+
