@@ -473,6 +473,7 @@ BR2_TARGET_ROOTFS_EXT2_EXTRA_BLOCKS=0
 
 BR2_PACKAGE_SPIDEV_TEST=y
 BR2_PACKAGE_STRACE=y
+BR2_PACKAGE_STRESS_NG=y
 
 #
 # NetworkManager needs udev /dev management and a glibc toolchain w/ headers >= 3.2, dynamic library, wchar, threads
