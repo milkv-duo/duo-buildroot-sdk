@@ -390,6 +390,7 @@ BR2_PACKAGE_UTIL_LINUX_LIBBLKID=y
 # BR2_PACKAGE_UTIL_LINUX_LIBMOUNT is not set
 # BR2_PACKAGE_UTIL_LINUX_LIBSMARTCOLS is not set
 BR2_PACKAGE_UTIL_LINUX_LIBUUID=y
+BR2_PACKAGE_UTIL_LINUX_BINARIES=y
 
 #
 # su needs a uClibc or glibc toolchain w/ wchar, locale, dynamic library
