@@ -279,7 +279,7 @@ BR2_PACKAGE_SKELETON_INIT_SYSV=y
 # dt needs a glibc or uClibc toolchain w/ threads
 #
 # BR2_PACKAGE_DUMA is not set
-# BR2_PACKAGE_FIO is not set
+BR2_PACKAGE_FIO=y
 BR2_PACKAGE_GDB_ARCH_SUPPORTS=y
 BR2_PACKAGE_GDB=y
 # BR2_PACKAGE_IOZONE is not set
