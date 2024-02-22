@@ -17,6 +17,10 @@ function set_gpio()
 	echo ${gpio_val} > ${gpio_path}/value
 }
 
+# Hardware V1.1
+gpio_b17=465
+set_gpio ${gpio_b17} 0
+
 # Host Wake BT
 host_wake_bt=362
 set_gpio ${host_wake_bt} 1
