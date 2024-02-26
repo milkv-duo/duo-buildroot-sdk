@@ -9,7 +9,11 @@ struct of_phandle_args;
 struct reserved_mem_ops;
 
 struct reserved_mem {
+#if defined(CONFIG_ARCH_CVITEK) && !defined(CONFIG_CVITEK_REMOTEPROC)
 	char				name[8];
+#else
+	char				*name;
+#endif
 	unsigned long			fdt_node;
 	unsigned long			phandle;
 	const struct reserved_mem_ops	*ops;

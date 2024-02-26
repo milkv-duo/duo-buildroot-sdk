@@ -69,7 +69,11 @@ void __init fdt_reserved_mem_save_node(unsigned long node, const char *uname,
 	}
 
 	rmem->fdt_node = node;
+#if defined(CONFIG_ARCH_CVITEK) && !defined(CONFIG_CVITEK_REMOTEPROC)
 	strncpy(rmem->name, uname, 8);
+#else
+	rmem->name = uname;
+#endif
 	rmem->base = base;
 	rmem->size = size;
 

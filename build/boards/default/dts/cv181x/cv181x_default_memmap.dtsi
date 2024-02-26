@@ -21,5 +21,18 @@
 			compatible = "ion-region";
 			size = <0x0 CVIMMAP_ION_SIZE>;
 		};
+
+		c906l: rtos_dram@CVIMMAP_FREERTOS_ADDR {
+			reg = <0x0 CVIMMAP_FREERTOS_ADDR 0x0 CVIMMAP_FREERTOS_SIZE>;
+			no-map;
+		};
+	};
+
+	c906l_rproc: c906l_rproc@0 {
+		compatible = "cvitek,cv18xx-c906l-rproc";
+		memory-region = <&c906l>;
+		core-name = "cv18xx-c906l";
+		firmware-name = "cvirtos.elf";
+		status = "okay";
 	};
 };
