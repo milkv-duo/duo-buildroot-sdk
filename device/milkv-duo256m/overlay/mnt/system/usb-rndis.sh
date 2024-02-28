@@ -20,4 +20,9 @@ sleep 2
 mkdir -p /lib/firmware
 if test -e /usr/bin/burnd; then
   burnd &
+  if test -e /lib/firmware/arduino.elf; then
+    sleep 2
+    echo stop  > /sys/class/remoteproc/remoteproc0/state
+    echo start > /sys/class/remoteproc/remoteproc0/state
+  fi
 fi
