@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <linux/clk.h>
+#include <linux/delay.h>
 #include <linux/dma-mapping.h>
 #include <linux/err.h>
 #include <linux/interrupt.h>
@@ -58,6 +59,8 @@ static int cvitek_rproc_start(struct rproc *rproc)
 	void __iomem *clk_reset = ioremap(SEC_CLK_ADDR, 4);
 
 	clrbits_32(clk_reset, 1 << 6);
+
+	udelay(10);
 
 	setbits_32(clk_reset, 1 << 6);
 
