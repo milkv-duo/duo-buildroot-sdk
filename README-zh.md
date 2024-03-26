@@ -70,13 +70,11 @@ Usage:
 ./build.sh lunch        - Select a board to build
 ./build.sh [board]      - Build [board] directly, supported boards asfollows:
 milkv-duo
-milkv-duo-lite
 milkv-duo-spinand
 milkv-duo-spinor
 milkv-duo256m
-milkv-duo256m-lite
 ```
-最下边列出的是当前支持的目标版本列表，带 `lite` 后缀的为精简版，不包含 python，pip, pinpong 等库和应用包。带`spinor`或者`spinand` 后缀的为基于IOB板载NOR FLASH或者NAND FLASH的版本。
+最下边列出的是当前支持的目标版本列表。带 `spinor` 或者 `spinand` 后缀的为基于 IOB 板载 NOR FLASH 或者 NAND FLASH 的版本。
 
 如提示中所示，有两种方法来编译目录版本。
 
@@ -85,12 +83,9 @@ milkv-duo256m-lite
 # ./build.sh lunch
 Select a target to build:
 1. milkv-duo
-2. milkv-duo-lite
-3. milkv-duo-spinand
-4. milkv-duo-spinor
-5. milkv-duo256m
-6. milkv-duo256m-lite
-7. milkv-duos
+2. milkv-duo-spinand
+3. milkv-duo-spinor
+4. milkv-duo256m
 Which would you like:
 ```
 
@@ -114,11 +109,9 @@ tar -xf host-tools.tar.gz -C /your/sdk/path/
 再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo-spinand       cv1800b_milkv_duo_spinand
 milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
@@ -196,13 +189,10 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 注意命令最后的 `./build.sh [board]` 和前面在 Ubuntu 22.04 中一键编译说明中的用法是一样的，直接 `./build.sh` 可以查看命令的使用方法，用 `./build.sh lunch` 可以调出交互选择菜单，用 `./build.sh [board]` 可以直接编译目标版本，`[board]` 可以替换为:
 ```
 milkv-duo
-milkv-duo-lite
 milkv-duo-spinand
 milkv-duo-spinor
 milkv-duo256m
-milkv-duo256m-lite
 ```
-*带 `lite` 后缀的版本为精简版，不包含 python，pip, pinpong 等库和应用包*
 
 命令中部分参数说明:
 - `duodocker` 运行的 Docker 名字, 与上一步中设置的名字要保持一致
@@ -241,11 +231,9 @@ root@8edea33c2239:/# cd /home/work/
 再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
 ```
 milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-lite          cv1800b_milkv_duo_sd
 milkv-duo-spinand       cv1800b_milkv_duo_spinand
 milkv-duo-spinor        cv1800b_milkv_duo_spinor
 milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-lite      cv1812cp_milkv_duo256m_sd
 ```
 
 ```bash
