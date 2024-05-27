@@ -197,10 +197,6 @@ void sys_pll_od(void)
 	// set mpll = 1050MHz
 	mmio_write_32(0x03002908, 0x05548101);
 
-	// set clk_sel_23: [23] clk_sel for clk_c906_0 = 1 (DIV_IN0_SRC_MUX)
-	// set clk_sel_24: [24] clk_sel for clk_c906_1 = 1 (DIV_IN0_SRC_MUX)
-	mmio_write_32(0x03002020, 0x01800000);
-
 	// set div, src_mux of clk_c906_0: [20:16]div_factor=1, [9:8]clk_src = 3 (mpll), 1050/1 = 1050MHz
 	mmio_write_32(0x03002130, 0x00010309);
 
@@ -209,9 +205,6 @@ void sys_pll_od(void)
 #else
 	// set mpll = 1000MHz
 	mmio_write_32(0x03002908, 0x05508101);
-
-	// set clk_sel_0: [0] clk_sel for clk_a53 = 1 (DIV_IN0_SRC_MUX)
-	mmio_write_32(0x03002020, 0x00000001);
 
 	// set div, src_mux of clk_a53: [20:16]div_factor=1, [9:8]clk_src = 3 (mpll)
 	mmio_write_32(0x03002040, 0x00010309);
@@ -250,6 +243,15 @@ void sys_pll_od(void)
 
 	//wait for pll stable
 	udelay(200);
+
+#ifdef __riscv
+	// set clk_sel_23: [23] clk_sel for clk_c906_0 = 1 (DIV_IN0_SRC_MUX)
+	// set clk_sel_24: [24] clk_sel for clk_c906_1 = 1 (DIV_IN0_SRC_MUX)
+	mmio_write_32(0x03002020, 0x01800000);
+#else
+	// set clk_sel_0: [0] clk_sel for clk_a53 = 1 (DIV_IN0_SRC_MUX)
+	mmio_write_32(0x03002020, 0x00000001);
+#endif
 
 	// switch clock to PLL from xtal except clk_axi4 & clk_spi_nand
 	byp0_value &= (1 << 8 | //clk_spi_nand
@@ -317,10 +319,6 @@ void sys_pll_nd(void)
 	// set mpll = 850MHz
 	mmio_write_32(0x03002908, 0x00448101);
 
-	// set clk_sel_23: [23] clk_sel for clk_c906_0 = 1 (DIV_IN0_SRC_MUX)
-	// set clk_sel_24: [24] clk_sel for clk_c906_1 = 1 (DIV_IN0_SRC_MUX)
-	mmio_write_32(0x03002020, 0x01800000);
-
 	// set div, src_mux of clk_c906_0: [20:16]div_factor=1, [9:8]clk_src = 3 (mpll), 850/1 = 850MHz
 	mmio_write_32(0x03002130, 0x00010309);
 
@@ -329,9 +327,6 @@ void sys_pll_nd(void)
 #else
 	// set mpll = 800MHz
 	mmio_write_32(0x03002908, 0x00408101);
-
-	// set clk_sel_0: [0] clk_sel for clk_a53 = 1 (DIV_IN0_SRC_MUX)
-	mmio_write_32(0x03002020, 0x00000001);
 
 	// set div, src_mux of clk_a53: [20:16]div_factor=1, [9:8]clk_src = 3 (mpll)
 	mmio_write_32(0x03002040, 0x00010309);
@@ -370,6 +365,15 @@ void sys_pll_nd(void)
 
 	//wait for pll stable
 	udelay(200);
+
+#ifdef __riscv
+	// set clk_sel_23: [23] clk_sel for clk_c906_0 = 1 (DIV_IN0_SRC_MUX)
+	// set clk_sel_24: [24] clk_sel for clk_c906_1 = 1 (DIV_IN0_SRC_MUX)
+	mmio_write_32(0x03002020, 0x01800000);
+#else
+	// set clk_sel_0: [0] clk_sel for clk_a53 = 1 (DIV_IN0_SRC_MUX)
+	mmio_write_32(0x03002020, 0x00000001);
+#endif
 
 	// switch clock to PLL from xtal except clk_axi4 & clk_spi_nand
 	byp0_value &= (1 << 8 | //clk_spi_nand
