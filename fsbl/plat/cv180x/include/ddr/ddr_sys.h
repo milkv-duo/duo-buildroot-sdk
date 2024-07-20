@@ -60,10 +60,10 @@ enum train_mode {
 #define ddr_sram_wr32(a, b)	mmio_wr32(a, b)
 #define ddr_debug_wr32(b)
 
-//#define uartlog(...) tf_printf(MSG_NOTICE "U: " __VA_ARGS__)
-//#define KC_MSG(...) tf_printf(MSG_NOTICE "[KC_DBG] " __VA_ARGS__)
-//#define KC_MSG_TR(...) tf_printf(MSG_NOTICE "[KC_DBG_training]" __VA_ARGS__)
-//#define TJ_MSG(...) tf_printf(MSG_NOTICE "[TJ Info] : " __VA_ARGS__)
+// #define uartlog(...) tf_printf(MSG_NOTICE "U: " __VA_ARGS__)
+// #define KC_MSG(...) tf_printf(MSG_NOTICE "[KC_DBG] " __VA_ARGS__)
+// #define KC_MSG_TR(...) tf_printf(MSG_NOTICE "[KC_DBG_training]" __VA_ARGS__)
+// #define TJ_MSG(...) tf_printf(MSG_NOTICE "[TJ Info] : " __VA_ARGS__)
 
 #define uartlog(...)
 #define KC_MSG(...)

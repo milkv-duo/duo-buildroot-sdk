@@ -27,6 +27,7 @@ BL2_SOURCES += \
 	plat/${CHIP_ARCH}/ddr/ddr_pkg_info.c \
 	plat/${CHIP_ARCH}/ddr/ddr_sys_bring_up.c \
 	plat/${CHIP_ARCH}/ddr/ddr_sys.c \
+	plat/${CHIP_ARCH}/ddr/ddr_suspend.c \
 	plat/${CHIP_ARCH}/ddr/phy_pll_init.c \
 	plat/${CHIP_ARCH}/ddr/cvx16_pinmux.c \
 	plat/${CHIP_ARCH}/ddr/cvx16_dram_cap_check.c \

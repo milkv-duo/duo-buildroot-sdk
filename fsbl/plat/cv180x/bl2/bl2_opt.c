@@ -11,6 +11,8 @@
 #include <rom_api.h>
 #include <bl2.h>
 #include <ddr.h>
+#include <ddr_sys.h>
+#include <rtc.h>
 #include <string.h>
 #include <decompress.h>
 #include <delay_timer.h>
@@ -19,6 +21,7 @@
 
 struct _time_records *time_records = (void *)TIME_RECORDS_ADDR;
 struct fip_param1 *fip_param1 = (void *)PARAM1_BASE;
+enum CHIP_CLK_MODE chip_clk_mode = CLK_ND;
 static struct fip_param2 fip_param2 __aligned(BLOCK_SIZE);
 static union {
 	struct ddr_param ddr_param;
@@ -427,6 +430,64 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 	return 0;
 }
 
+#ifndef NO_DDR_CFG //for fpga
+static void *get_warmboot_entry(void)
+{
+	/*
+	 * "FSM state change to ST_ON from the state
+	 * 4'h0 = state changed from ST_OFF to ST_ON
+	 * 4'h3 = state changed to ST_PWR_CYC or ST_WARM_RESET then back to ST_ON
+	 * 4'h9 = state changed from ST_SUSP to ST_ON
+	 */
+#define WANTED_STATE 0x9
+
+	NOTICE("\nREG_RTC_ST_ON_REASON=0x%x\n", mmio_read_32(REG_RTC_ST_ON_REASON));
+	NOTICE("\nRTC_SRAM_FLAG_ADDR%x=0x%x\n", RTC_SRAM_FLAG_ADDR, mmio_read_32(RTC_SRAM_FLAG_ADDR));
+	/* Check if RTC state changed from ST_SUSP */
+	if ((mmio_read_32(REG_RTC_ST_ON_REASON) & 0xF) == WANTED_STATE)
+		return (void *)(uintptr_t)mmio_read_32(RTC_SRAM_FLAG_ADDR);
+
+	return 0;
+}
+#endif
+void rtc_set_ddr_pwrok(void)
+{
+	mmio_setbits_32(REG_RTC_BASE + RTC_PG_REG, 0x00000001);
+}
+
+void rtc_set_rmio_pwrok(void)
+{
+	mmio_setbits_32(REG_RTC_BASE + RTC_PG_REG, 0x00000002);
+}
+
+#ifndef NO_DDR_CFG //for fpga
+static void ddr_resume(void)
+{
+	rtc_set_ddr_pwrok();
+	rtc_set_rmio_pwrok();
+	ddr_sys_resume();
+}
+
+void jump_to_warmboot_entry(void)
+{
+	void (*warmboot_entry)() = get_warmboot_entry();
+
+	// treat next reset as normal boot
+	mmio_write_64(RTC_SRAM_FLAG_ADDR, 0);
+	if (warmboot_entry) {
+		INFO("WE=0x%lx\n", (uintptr_t)warmboot_entry);
+
+		NOTICE("ddr resume...\n");
+		ddr_resume();
+		NOTICE("ddr resume end\n");
+
+		sys_pll_init();
+		sys_switch_all_to_pll();
+
+		warmboot_entry();
+	}
+}
+#endif
 int load_rest(void)
 {
 	int retry = 0;

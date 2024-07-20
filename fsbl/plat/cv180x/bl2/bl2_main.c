@@ -93,7 +93,11 @@ void bl2_main(void)
 	switch_rtc_mode_1st_stage();
 
 	set_rtc_en_registers();
-
+#ifdef CONFIG_PM_SLEEP
+#ifndef NO_DDR_CFG //for fpga
+	jump_to_warmboot_entry();
+#endif
+#endif
 	load_ddr();
 #ifdef OD_CLK_SEL
 	load_rest_od_sel();

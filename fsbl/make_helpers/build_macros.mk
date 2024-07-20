@@ -273,7 +273,7 @@ $(DUMP): $(ELF)
 
 $(BIN): $(ELF)
 	@echo "  BIN     $$@"
-	$$(Q)$$(OC) -O binary $$< $$@
+	$$(Q)$$(OC) -O binary -R .suspend_sect $$< $$@
 	@${ECHO_BLANK_LINE}
 	@echo "Built $$@ successfully"
 	@${ECHO_BLANK_LINE}

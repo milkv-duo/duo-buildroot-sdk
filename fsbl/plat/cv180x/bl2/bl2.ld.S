@@ -17,6 +17,8 @@ ENTRY(bl2_entrypoint)
 
 MEMORY {
     RAM (rwx): ORIGIN = BL2_BASE, LENGTH = BL2_SIZE
+
+    SRAM (rwx): ORIGIN = TPU_SRAM_BASE, LENGTH = TPU_SRAM_SIZE
 }
 
 SECTIONS
@@ -80,5 +82,17 @@ SECTIONS
 
     ASSERT(. <= (BL2_BASE + BL2_SIZE), "BL2 image has exceeded its limit.")
 
+  .suspend_sect :
+  {
+    . = ALIGN(8);
+    __suspend_sect_start = .;
+    KEEP(*(.suspend_entry))
+    KEEP(*(.suspend_func))
+    . = ALIGN(8);
+    __suspend_data_start = .;
+    KEEP(*(.suspend_data))
+    . = ALIGN(8);
+    __suspend_sect_end = .;
+  } > SRAM
     #include <rom_api_refer.h>
 }

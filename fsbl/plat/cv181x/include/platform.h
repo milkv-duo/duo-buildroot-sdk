@@ -124,6 +124,7 @@ void sys_switch_all_to_pll(void);
 void lock_efuse_chipsn(void);
 int load_ddr(void);
 int load_rest(enum CHIP_CLK_MODE mode);
+void jump_to_warmboot_entry(enum CHIP_CLK_MODE mode);
 
 #endif /* __ASSEMBLY__ */
 

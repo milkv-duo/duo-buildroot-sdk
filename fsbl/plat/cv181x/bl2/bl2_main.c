@@ -101,8 +101,6 @@ void bl2_main(void)
 
 	set_rtc_en_registers();
 
-	load_ddr();
-
 #ifdef OD_CLK_SEL
 	mode = CLK_OD;
 #else
@@ -112,6 +110,14 @@ void bl2_main(void)
 	mode = CLK_ND;
 #endif
 #endif
+
+#ifdef CONFIG_PM_SLEEP
+#ifndef NO_DDR_CFG //for fpga
+	jump_to_warmboot_entry(mode);
+#endif
+#endif
+	load_ddr();
+
 	load_rest(mode);
 	NOTICE("BL2 end.\n");
 

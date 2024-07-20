@@ -430,6 +430,9 @@ void sys_pll_init(enum CHIP_CLK_MODE mode)
 
 void switch_rtc_mode_1st_stage(void)
 {
+#ifdef CONFIG_PM_SLEEP
+	return;
+#endif
 	uint32_t read_data;
 	uint32_t write_data;
 	uint32_t rtc_mode;

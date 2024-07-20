@@ -7,5 +7,4 @@ struct ddr_param {
 
 int ddr_init(const struct ddr_param *ddr_param);
 
-
 #endif /* __DDR_H__ */
