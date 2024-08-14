@@ -23,6 +23,7 @@ ${BUILD_PLAT}:
 
 gen-chip-conf:
 	$(print_target)
+	${Q}mkdir -p '${BUILD_PLAT}'
 	${Q}./plat/${CHIP_ARCH}/chip_conf.py ${CHIP_CONF_PATH}
 
 macro_to_env = ${NM} '${BLMACROS_ELF}' | awk '/DEF_${1}/ { rc = 1; print "${1}=0x" $$1 } END { exit !rc }' >> ${BUILD_PLAT}/blmacros.env
