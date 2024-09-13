@@ -224,7 +224,9 @@ void ddr_sys_bring_up(void)
 	uartlog("phy_init !\n");
 	phy_init();
 #endif
-
+	#ifdef ENABLE_FASTBOOT0
+	mmio_wr32(0x080000a4, 0x02620504);
+	#endif
 	cvx16_setting_check();
 	KC_MSG("cvx16_setting_check  finish\n");
 

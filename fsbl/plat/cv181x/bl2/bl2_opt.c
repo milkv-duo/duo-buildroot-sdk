@@ -18,6 +18,10 @@
 #include <delay_timer.h>
 #include <security/security.h>
 
+uint64_t load_addr = 0x0c000;
+uint64_t run_addr   = 0x8000C000;
+uint64_t reading_size = 0x020000;
+
 struct _time_records *time_records = (void *)TIME_RECORDS_ADDR;
 struct fip_param1 *fip_param1 = (void *)PARAM1_BASE;
 enum CHIP_CLK_MODE chip_clk_mode = CLK_ND;
@@ -399,6 +403,48 @@ static void *get_warmboot_entry(void)
 	return 0;
 }
 #endif
+
+int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
+{
+	void *image_buf;
+	int ret = -1;
+	#ifdef BOOT_SPINOR
+	load_addr = 0x0c000;
+	#endif
+
+	#ifdef BOOT_EMMC
+	load_addr = 0x00000;
+	#endif
+
+	#ifdef BOOT_SPINAND
+	load_addr = 0x280000;
+	#endif
+	uint64_t loadaddr_alios = load_addr;
+	uint64_t runaddr_alios  = run_addr;
+	uint64_t size_alios     = reading_size;
+
+	image_buf = (void *)runaddr_alios;
+	NOTICE("loadaddr_alios:0x%lx runaddr_alios:0x%lx.\n", loadaddr_alios, runaddr_alios);
+
+	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
+	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
+	if (security_is_tee_enabled()) {
+		ret = dec_verify_image(image_buf, fip_param2.alios_boot_size, 0, fip_param1);
+		if (ret < 0) {
+			ERROR("verify alios boot0 failed (%d)\n", ret);
+			return ret;
+		}
+	}
+
+	sys_switch_all_to_pll();
+
+	*loader_2nd_entry = run_addr;
+
+	return 0;
+}
+
+
+
 void rtc_set_ddr_pwrok(void)
 {
 	mmio_setbits_32(REG_RTC_BASE + RTC_PG_REG, 0x00000001);
@@ -446,7 +492,7 @@ int load_rest(enum CHIP_CLK_MODE mode)
 
 	// Init sys PLL and switch clocks to PLL
 	sys_pll_init(mode);
-
+#ifndef ENABLE_BOOT0
 retry_from_flash:
 	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {
 		if (load_blcp_2nd(retry) < 0)
@@ -480,6 +526,20 @@ retry_from_flash:
 	console_flush();
 
 	switch_rtc_mode_2nd_stage();
+#else
+	#ifdef ENABLE_FASTBOOT0
+	mmio_write_32(0x030020B8, 0x00030009);
+	#endif
+	if (load_loader_2nd_alios(retry, &loader_2nd_entry) < 0)
+		return -1;
+	#ifdef ENABLE_FASTBOOT0
+	mmio_write_32(0x030020B8, 0x00050009);
+	#endif
+	sync_cache();
+
+	switch_rtc_mode_2nd_stage();
+	monitor_entry = run_addr;
+#endif
 
 	if (monitor_entry) {
 		NOTICE("Jump to monitor at 0x%lx.\n", monitor_entry);

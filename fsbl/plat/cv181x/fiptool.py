@@ -203,8 +203,9 @@ class FIP:
             Entry.make("LOADER_2ND_LOADADDR", 4, int),
             Entry.make("LOADER_2ND_RESERVED1", 4, int),
             Entry.make("LOADER_2ND_RESERVED2", 4, int),
-            # Reserved
-            Entry.make("RESERVED_LAST", 4096 - 16 * 5, bytes),
+            # alios bl
+            Entry.make("ALIOS_BOOT_SIZE", 4, int),
+            Entry.make("RESERVED_LAST", 4096 - 16 * 5 - 4, bytes),
         ]
     )
 
@@ -226,6 +227,13 @@ class FIP:
             Entry.make("RUNADDR", 8, int),
             Entry.make("RESERVED1", 4, int),
             Entry.make("RESERVED2", 4, int),
+        ]
+    )
+
+    alios_bl = OrderedDict(
+        [
+            Entry.make("BOOT", None, bytes),
+            Entry.make("PRIM", None, bytes),
         ]
     )
 
