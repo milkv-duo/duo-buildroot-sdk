@@ -443,7 +443,7 @@ static void *get_warmboot_entry(void)
 	 * 4'h3 = state changed to ST_PWR_CYC or ST_WARM_RESET then back to ST_ON
 	 * 4'h9 = state changed from ST_SUSP to ST_ON
 	 */
-#define WANTED_STATE 0x9
+#define WANTED_STATE SYS_RESUME
 
 	NOTICE("\nREG_RTC_ST_ON_REASON=0x%x\n", mmio_read_32(REG_RTC_ST_ON_REASON));
 	NOTICE("\nRTC_SRAM_FLAG_ADDR%x=0x%x\n", RTC_SRAM_FLAG_ADDR, mmio_read_32(RTC_SRAM_FLAG_ADDR));

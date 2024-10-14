@@ -39,6 +39,16 @@
 #define RTC_INFO2 (REG_RTC_BASE + 0x24)
 #define RTC_INFO3 (REG_RTC_BASE + 0x28)
 
+/*
+ * "FSM state change to ST_ON from the state
+ * 4'h0 = state changed from ST_OFF to ST_ON
+ * 4'h3 = state changed to ST_PWR_CYC or ST_WARM_RESET then back to ST_ON
+ * 4'h9 = state changed from ST_SUSP to ST_ON
+ */
+#define COLD_BOOT 0x0
+#define WARM_BOOT 0x3
+#define SYS_RESUME 0x9
+
 #define CVI_SAPD_FLAG 0x53415044
 #define MCU_FLAG 0x8051
 

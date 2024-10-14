@@ -192,8 +192,8 @@ endif
 $(eval $(call add_define,FSBL_SECURE_BOOT_SUPPORT))
 $(eval $(call add_define, USB_DL_BY_FSBL))
 
-ifeq ($(KERNEL_SUSPEND),y)
-$(eval $(call add_define,CONFIG_PM_SLEEP))
+ifeq ($(SUSPEND),y)
+$(eval $(call add_define,CONFIG_SUSPEND))
 endif
 
 ################################################################################

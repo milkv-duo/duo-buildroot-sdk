@@ -13,6 +13,7 @@
 // #include "regconfig.h"
 #include "rtc.h"
 #include "cvx16_dram_cap_check.h"
+#include <platform_def.h>
 #ifdef DDR2_3
 #include <ddr3_1866_init.h>
 #include <ddr2_1333_init.h>
@@ -310,13 +311,14 @@ SUSPEND_DATA struct reg save_phy_regs[] = {
 	{0xb4c + PHYD_BASE_ADDR, 0x0},
 	{0xb50 + PHYD_BASE_ADDR, 0x0},
 	{0xb54 + PHYD_BASE_ADDR, 0x0},
+	{REG_GP_REG3, 0x0}, //reserve for chipid suspend resume
 	{0xDEADBEEF, 0xDEADBEEF},
 };
 
-void cvx16_ddr_phyd_save_sus_res(uint32_t RTC_SRAM_BASE)
+void cvx16_ddr_phyd_save_sus_res(uint32_t rtc_sram_base)
 {
-	// struct reg *psave_phy_regs = (struct reg *)RTC_SRAM_BASE;
-	uintptr_t temp = RTC_SRAM_BASE;
+	// struct reg *psave_phy_regs = (struct reg *)rtc_sram_base;
+	uintptr_t temp = rtc_sram_base;
 	struct reg *psave_phy_regs = (struct reg *)temp;
 	int i;
 
@@ -343,15 +345,11 @@ void rtc_req_suspend(void)
 	/* Enable power suspend wakeup source mask */
 	mmio_write_32(REG_RTC_BASE + 0x3C, 0x1); // 1 = select prdata from 32K domain
 	mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0_UNLOCKKEY, 0xAB18);
-	if (mmio_read_32(RTC_INFO0) != MCU_FLAG)
-		mmio_write_32(REG_RTC_BASE + RTC_EN_PWR_WAKEUP, 0x3F);
-	else
-		mmio_write_32(REG_RTC_BASE + RTC_EN_PWR_WAKEUP, 0x0);
 	mmio_write_32(REG_RTC_BASE + RTC_EN_SUSPEND_REQ, 0x01);
 	while (mmio_read_32(REG_RTC_BASE + RTC_EN_SUSPEND_REQ) != 0x01)
 		;
 	while (1) {
-		/* Send suspend request to RTC */
+		/* Send suspend request to RTC*/
 		mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0, 0x00800080);
 		mdelay(1);
 	}

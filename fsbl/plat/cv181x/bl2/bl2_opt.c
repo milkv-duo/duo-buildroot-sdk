@@ -24,7 +24,6 @@ uint64_t reading_size = 0x020000;
 
 struct _time_records *time_records = (void *)TIME_RECORDS_ADDR;
 struct fip_param1 *fip_param1 = (void *)PARAM1_BASE;
-enum CHIP_CLK_MODE chip_clk_mode = CLK_ND;
 static struct fip_param2 fip_param2 __aligned(BLOCK_SIZE);
 static union {
 	struct ddr_param ddr_param;
@@ -383,115 +382,14 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 	return 0;
 }
 
-#ifndef NO_DDR_CFG //for fpga
-static void *get_warmboot_entry(void)
-{
-	/*
-	 * "FSM state change to ST_ON from the state
-	 * 4'h0 = state changed from ST_OFF to ST_ON
-	 * 4'h3 = state changed to ST_PWR_CYC or ST_WARM_RESET then back to ST_ON
-	 * 4'h9 = state changed from ST_SUSP to ST_ON
-	 */
-#define WANTED_STATE 0x9
-
-	NOTICE("\nREG_RTC_ST_ON_REASON=0x%x\n", mmio_read_32(REG_RTC_ST_ON_REASON));
-	NOTICE("\nRTC_SRAM_FLAG_ADDR%x=0x%x\n", RTC_SRAM_FLAG_ADDR, mmio_read_32(RTC_SRAM_FLAG_ADDR));
-	/* Check if RTC state changed from ST_SUSP */
-	if ((mmio_read_32(REG_RTC_ST_ON_REASON) & 0xF) == WANTED_STATE)
-		return (void *)(uintptr_t)mmio_read_32(RTC_SRAM_FLAG_ADDR);
-
-	return 0;
-}
-#endif
-
-int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
-{
-	void *image_buf;
-	int ret = -1;
-	#ifdef BOOT_SPINOR
-	load_addr = 0x0c000;
-	#endif
-
-	#ifdef BOOT_EMMC
-	load_addr = 0x00000;
-	#endif
-
-	#ifdef BOOT_SPINAND
-	load_addr = 0x280000;
-	#endif
-	uint64_t loadaddr_alios = load_addr;
-	uint64_t runaddr_alios  = run_addr;
-	uint64_t size_alios     = reading_size;
-
-	image_buf = (void *)runaddr_alios;
-	NOTICE("loadaddr_alios:0x%lx runaddr_alios:0x%lx.\n", loadaddr_alios, runaddr_alios);
-
-	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
-	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
-	if (security_is_tee_enabled()) {
-		ret = dec_verify_image(image_buf, fip_param2.alios_boot_size, 0, fip_param1);
-		if (ret < 0) {
-			ERROR("verify alios boot0 failed (%d)\n", ret);
-			return ret;
-		}
-	}
-
-	sys_switch_all_to_pll();
-
-	*loader_2nd_entry = run_addr;
-
-	return 0;
-}
-
-
-
-void rtc_set_ddr_pwrok(void)
-{
-	mmio_setbits_32(REG_RTC_BASE + RTC_PG_REG, 0x00000001);
-}
-
-void rtc_set_rmio_pwrok(void)
-{
-	mmio_setbits_32(REG_RTC_BASE + RTC_PG_REG, 0x00000002);
-}
-
-#ifndef NO_DDR_CFG //for fpga
-static void ddr_resume(void)
-{
-	rtc_set_ddr_pwrok();
-	rtc_set_rmio_pwrok();
-	ddr_sys_resume();
-}
-
-void jump_to_warmboot_entry(enum CHIP_CLK_MODE mode)
-{
-	void (*warmboot_entry)() = get_warmboot_entry();
-
-	// treat next reset as normal boot
-	mmio_write_64(RTC_SRAM_FLAG_ADDR, 0);
-	if (warmboot_entry) {
-		INFO("WE=0x%lx\n", (uintptr_t)warmboot_entry);
-
-		NOTICE("ddr resume...\n");
-		ddr_resume();
-		NOTICE("ddr resume end\n");
-
-		sys_pll_init(mode);
-		sys_switch_all_to_pll();
-
-		warmboot_entry();
-	}
-}
-#endif
-
-int load_rest(enum CHIP_CLK_MODE mode)
+int load_rest(void)
 {
 	int retry = 0;
 	uint64_t monitor_entry = 0;
 	uint64_t loader_2nd_entry = 0;
 
 	// Init sys PLL and switch clocks to PLL
-	sys_pll_init(mode);
+	sys_pll_init();
 #ifndef ENABLE_BOOT0
 retry_from_flash:
 	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {

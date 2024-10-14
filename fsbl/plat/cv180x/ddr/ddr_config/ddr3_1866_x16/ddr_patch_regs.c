@@ -86,13 +86,13 @@ struct regpatch ddr_patch_regs[] = {
 	{0x08000b00, 0xFFFFFFFF, 0x05030703},
 	{0x08000b04, 0xFFFFFFFF, 0x03030403},
 	// BYTE0  DQ8 deskew [6:0] neg DQS  [15:8]  ;  pos DQS  [23:16]
-	{0x08000b08, 0xFFFFFFFF, 0x002e3b03},
+	{0x08000b08, 0xFFFFFFFF, 0x00323603},
 
 	// BYTE1 RX DQ deskew
 	{0x08000b30, 0xFFFFFFFF, 0x07030204},
 	{0x08000b34, 0xFFFFFFFF, 0x03030403},
 	// BYTE1  DQ8 deskew [6:0] neg DQS  [15:8]  ;  pos DQS  [23:16]
-	{0x08000b38, 0xFFFFFFFF, 0x002e3d04},
+	{0x08000b38, 0xFFFFFFFF, 0x00323604},
 #if 0
 	//Read gate TX dline + shift
 	// BYTE0

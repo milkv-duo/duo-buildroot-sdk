@@ -118,13 +118,13 @@ void set_rtc_en_registers(void);
 
 void apply_analog_trimming_data(void);
 
-void sys_pll_init(enum CHIP_CLK_MODE mode);
+void sys_pll_init(void);
 void sys_switch_all_to_pll(void);
 
 void lock_efuse_chipsn(void);
 int load_ddr(void);
-int load_rest(enum CHIP_CLK_MODE mode);
-void jump_to_warmboot_entry(enum CHIP_CLK_MODE mode);
+int load_rest(void);
+void jump_to_warmboot_entry(void);
 
 #endif /* __ASSEMBLY__ */
 

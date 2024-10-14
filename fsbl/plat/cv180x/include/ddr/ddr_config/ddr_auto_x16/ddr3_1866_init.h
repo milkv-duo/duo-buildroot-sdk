@@ -457,7 +457,7 @@ extern uint32_t ddr_data_rate;
 	// f0_param_phya_reg_rx_byte0_sel_odt_reg_mode:[6:6]=0b1
 	// f0_param_phya_reg_rx_byte1_odt_reg:[12:8]=0b00000
 	// f0_param_phya_reg_rx_byte1_sel_odt_reg_mode:[14:14]=0b1
-#define  DDR_PHY_REG_64_F0_DATA  0b00000000000001000001000000000001
+#define  DDR_PHY_REG_64_F0_DATA  0b00000000000001000000000000000001
 	// f0_param_phya_reg_rx_byte0_en_lsmode:[0:0]=0b1
 	// f0_param_phya_reg_rx_byte0_hystr:[5:4]=0b00
 	// f0_param_phya_reg_rx_byte0_sel_dqs_rec_vref_mode:[8:8]=0b0
@@ -467,7 +467,7 @@ extern uint32_t ddr_data_rate;
 	// f0_param_phya_reg_rx_byte0_force_en_lvstl_odt:[16:16]=0b0
 	// f0_param_phya_reg_rx_byte0_en_trig_lvl_rangex2:[18:18]=0b1
 	// f0_param_phya_reg_rx_byte0_trig_lvl_en_free_offset:[20:20]=0b0
-#define  DDR_PHY_REG_65_F0_DATA  0b00000000000100000000000000000000
+#define  DDR_PHY_REG_65_F0_DATA  0b00000000000000000000000000000000
 	// f0_param_phya_reg_tx_byte0_drvn_de_dq:[1:0]=0b00
 	// f0_param_phya_reg_tx_byte0_drvp_de_dq:[5:4]=0b00
 	// f0_param_phya_reg_tx_byte0_drvn_de_dqs:[9:8]=0b00
@@ -501,7 +501,7 @@ extern uint32_t ddr_data_rate;
 	// f0_param_phyd_reg_byte0_dqsp_offset:[27:24]=0b0000
 #define  DDR_PHY_REG_72_F0_DATA  0b00000000000000000000000000000011
 	// f0_param_phyd_tx_byte0_tx_oenz_extend:[2:0]=0b011
-#define  DDR_PHY_REG_80_F0_DATA  0b00000000000001000001000000000001
+#define  DDR_PHY_REG_80_F0_DATA  0b00000000000001000000000000000001
 	// f0_param_phya_reg_rx_byte1_en_lsmode:[0:0]=0b1
 	// f0_param_phya_reg_rx_byte1_hystr:[5:4]=0b00
 	// f0_param_phya_reg_rx_byte1_sel_dqs_rec_vref_mode:[8:8]=0b0
@@ -511,7 +511,7 @@ extern uint32_t ddr_data_rate;
 	// f0_param_phya_reg_rx_byte1_force_en_lvstl_odt:[16:16]=0b0
 	// f0_param_phya_reg_rx_byte1_en_trig_lvl_rangex2:[18:18]=0b1
 	// f0_param_phya_reg_rx_byte1_trig_lvl_en_free_offset:[20:20]=0b0
-#define  DDR_PHY_REG_81_F0_DATA  0b00000000000100000000000000000000
+#define  DDR_PHY_REG_81_F0_DATA  0b00000000000000000000000000000000
 	// f0_param_phya_reg_tx_byte1_drvn_de_dq:[1:0]=0b00
 	// f0_param_phya_reg_tx_byte1_drvp_de_dq:[5:4]=0b00
 	// f0_param_phya_reg_tx_byte1_drvn_de_dqs:[9:8]=0b00
