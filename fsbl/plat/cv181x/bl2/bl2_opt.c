@@ -382,6 +382,45 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 	return 0;
 }
 
+int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
+{
+	void *image_buf;
+	int ret = -1;
+	#ifdef BOOT_SPINOR
+	load_addr = 0x0c000;
+	#endif
+
+	#ifdef BOOT_EMMC
+	load_addr = 0x00000;
+	#endif
+
+	#ifdef BOOT_SPINAND
+	load_addr = 0x280000;
+	#endif
+	uint64_t loadaddr_alios = load_addr;
+	uint64_t runaddr_alios  = run_addr;
+	uint64_t size_alios     = reading_size;
+
+	image_buf = (void *)runaddr_alios;
+	NOTICE("loadaddr_alios:0x%lx runaddr_alios:0x%lx.\n", loadaddr_alios, runaddr_alios);
+
+	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
+	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
+	if (security_is_tee_enabled()) {
+		ret = dec_verify_image(image_buf, fip_param2.alios_boot_size, 0, fip_param1);
+		if (ret < 0) {
+			ERROR("verify alios boot0 failed (%d)\n", ret);
+			return ret;
+		}
+	}
+
+	sys_switch_all_to_pll();
+
+	*loader_2nd_entry = run_addr;
+
+	return 0;
+}
+
 int load_rest(void)
 {
 	int retry = 0;
