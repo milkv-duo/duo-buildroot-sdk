@@ -316,7 +316,11 @@ void ddrc_init(void)
 		mmio_wr32(0x08004000 + 0x6c, 0x00000003);
 		// PATCH5.vpr_fix:0:1:=0x1
 		// PATCH5.vpw_fix:1:1:=0x1
-		mmio_wr32(0x08004000 + 0x148, 0x979C0000);
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2)
+			mmio_wr32(0x08004000 + 0x148, 0x989D0000);
+		else
+			mmio_wr32(0x08004000 + 0x148, 0x979C0000);
+
 		// PATCH4.t_phyd_rden:16:6=0x0
 		// PATCH4.phyd_rd_clk_stop:23:1=0x0
 		// PATCH4.t_phyd_wren:24:6=0x0
@@ -328,7 +332,11 @@ void ddrc_init(void)
 		mmio_wr32(0x08004000 + 0x38, 0x00020000);
 		mmio_wr32(0x08004000 + 0x50, 0x00201070);
 		mmio_wr32(0x08004000 + 0x60, 0x00000000);
-		mmio_wr32(0x08004000 + 0x64, 0x0051002C);
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2)
+			mmio_wr32(0x08004000 + 0x64, 0x00510023);
+		else
+			mmio_wr32(0x08004000 + 0x64, 0x0051002C);
+
 	#ifdef DDR_INIT_SPEED_UP
 		mmio_wr32(0x08004000 + 0xd0, 0x00010002);
 		mmio_wr32(0x08004000 + 0xd4, 0x00000000);
@@ -336,17 +344,33 @@ void ddrc_init(void)
 		mmio_wr32(0x08004000 + 0xd0, 0x00010043);
 		mmio_wr32(0x08004000 + 0xd4, 0x00000000);
 	#endif
-		mmio_wr32(0x08004000 + 0xdc, 0x03730040);
-		mmio_wr32(0x08004000 + 0xe0, 0x00800000);
-		mmio_wr32(0x08004000 + 0x100, 0x0A011610);
-		mmio_wr32(0x08004000 + 0x104, 0x00030414);
-		mmio_wr32(0x08004000 + 0x108, 0x03040408);
-		mmio_wr32(0x08004000 + 0x10c, 0x00003004);
-		mmio_wr32(0x08004000 + 0x110, 0x05020406);
-		mmio_wr32(0x08004000 + 0x114, 0x01010303);
-		mmio_wr32(0x08004000 + 0x120, 0x00000503);
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2) {
+			mmio_wr32(0x08004000 + 0xdc, 0x03030040);
+			mmio_wr32(0x08004000 + 0xe0, 0x00800000);
+			mmio_wr32(0x08004000 + 0x100, 0x0B01160F);
+			mmio_wr32(0x08004000 + 0x104, 0x00020414);
+			mmio_wr32(0x08004000 + 0x108, 0x04050409);
+			mmio_wr32(0x08004000 + 0x10c, 0x00001004);
+			mmio_wr32(0x08004000 + 0x110, 0x05020405);
+			mmio_wr32(0x08004000 + 0x114, 0x01010202);
+			mmio_wr32(0x08004000 + 0x120, 0x00000503);
+		} else {
+			mmio_wr32(0x08004000 + 0xdc, 0x03730040);
+			mmio_wr32(0x08004000 + 0xe0, 0x00800000);
+			mmio_wr32(0x08004000 + 0x100, 0x0A011610);
+			mmio_wr32(0x08004000 + 0x104, 0x00030414);
+			mmio_wr32(0x08004000 + 0x108, 0x03040408);
+			mmio_wr32(0x08004000 + 0x10c, 0x00003004);
+			mmio_wr32(0x08004000 + 0x110, 0x05020406);
+			mmio_wr32(0x08004000 + 0x114, 0x01010303);
+			mmio_wr32(0x08004000 + 0x120, 0x00000503);
+		}
 		// phyd related
-		mmio_wr32(0x08004000 + 0x190, 0x04858302);
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2)
+			mmio_wr32(0x08004000 + 0x190, 0x04878304);
+		else
+			mmio_wr32(0x08004000 + 0x190, 0x04858302);
+
 		// DFITMG0.dfi_t_ctrl_delay:24:5:=0x4
 		// DFITMG0.dfi_rddata_use_dfi_phy_clk:23:1:=0x1
 		// DFITMG0.dfi_t_rddata_en:16:7:=0xa
@@ -380,20 +404,39 @@ void ddrc_init(void)
 		// address map, auto gen.
 		// support from 0.5Gb to 4Gb
 		// R[17:13]B[2]R[12:0]B[1:0]C[9:0]
-		mmio_wr32(0x08004000 + 0x200, 0x00001F1F);
-		mmio_wr32(0x08004000 + 0x204, 0x00140707);
-		mmio_wr32(0x08004000 + 0x208, 0x00000000);
-		mmio_wr32(0x08004000 + 0x20c, 0x1F000000);
-		mmio_wr32(0x08004000 + 0x210, 0x00001F1F);
-		mmio_wr32(0x08004000 + 0x214, 0x050F0505);
-		mmio_wr32(0x08004000 + 0x218, 0x06060605);
-		mmio_wr32(0x08004000 + 0x21c, 0x00000606);
-		mmio_wr32(0x08004000 + 0x220, 0x00003F3F);
-		mmio_wr32(0x08004000 + 0x224, 0x05050505);
-		mmio_wr32(0x08004000 + 0x228, 0x05050505);
-		mmio_wr32(0x08004000 + 0x22c, 0x001F1F05);
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2) {
+			mmio_wr32(0x08004000 + 0x200, 0x00001F1F);
+			mmio_wr32(0x08004000 + 0x204, 0x00141414);
+			mmio_wr32(0x08004000 + 0x208, 0x00000000);
+			mmio_wr32(0x08004000 + 0x20c, 0x1F000000);
+			mmio_wr32(0x08004000 + 0x210, 0x00001F1F);
+			mmio_wr32(0x08004000 + 0x214, 0x030F0303);
+			mmio_wr32(0x08004000 + 0x218, 0x06060603);
+			mmio_wr32(0x08004000 + 0x21c, 0x00000606);
+			mmio_wr32(0x08004000 + 0x220, 0x00003F3F);
+			mmio_wr32(0x08004000 + 0x224, 0x03030303);
+			mmio_wr32(0x08004000 + 0x228, 0x03030303);
+			mmio_wr32(0x08004000 + 0x22c, 0x001F1F03);
+		} else {
+			mmio_wr32(0x08004000 + 0x200, 0x00001F1F);
+			mmio_wr32(0x08004000 + 0x204, 0x00140707);
+			mmio_wr32(0x08004000 + 0x208, 0x00000000);
+			mmio_wr32(0x08004000 + 0x20c, 0x1F000000);
+			mmio_wr32(0x08004000 + 0x210, 0x00001F1F);
+			mmio_wr32(0x08004000 + 0x214, 0x050F0505);
+			mmio_wr32(0x08004000 + 0x218, 0x06060605);
+			mmio_wr32(0x08004000 + 0x21c, 0x00000606);
+			mmio_wr32(0x08004000 + 0x220, 0x00003F3F);
+			mmio_wr32(0x08004000 + 0x224, 0x05050505);
+			mmio_wr32(0x08004000 + 0x228, 0x05050505);
+			mmio_wr32(0x08004000 + 0x22c, 0x001F1F05);
+		}
 		// auto gen.
-		mmio_wr32(0x08004000 + 0x240, 0x07010708);  //TBD
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2)
+			mmio_wr32(0x08004000 + 0x240, 0x07030710);
+		else
+			mmio_wr32(0x08004000 + 0x240, 0x07010708);  //TBD
+
 		mmio_wr32(0x08004000 + 0x244, 0x00000000);
 		mmio_wr32(0x08004000 + 0x250, 0x00003F85);
 		// SCHED.opt_vprw_sch:31:1:=0x0
@@ -639,32 +682,62 @@ void ctrl_init_update_by_dram_size(uint8_t dram_cap_in_mbyte)
 		dram_cap_in_mbyte_per_dev = dram_cap_in_mbyte;
 		dram_cap_in_mbyte_per_dev >>= (1 - get_bits_from_value(rddata, 13, 12)); // change sys cap to x16 cap
 		dram_cap_in_mbyte_per_dev >>= (2 - get_bits_from_value(rddata, 31, 30)); // change x16 cap to device cap
-		switch (dram_cap_in_mbyte_per_dev) {
-		case 5:
-			mmio_wr32(0x08004000 + 0x64, 0x00510019);
-			mmio_wr32(0x08004000 + 0x100, 0x0B011610);
-			mmio_wr32(0x08004000 + 0x120, 0x00000502);
-			break;
-		case 6:
-			mmio_wr32(0x08004000 + 0x64, 0x0051002C);
-			mmio_wr32(0x08004000 + 0x100, 0x0A011610);
-			mmio_wr32(0x08004000 + 0x120, 0x00000503);
-			break;
-		case 7:
-			mmio_wr32(0x08004000 + 0x64, 0x0051002B);
-			mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
-			mmio_wr32(0x08004000 + 0x120, 0x00000503);
-			break;
-		case 8:
-			mmio_wr32(0x08004000 + 0x64, 0x00510041);
-			mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
-			mmio_wr32(0x08004000 + 0x120, 0x00000504);
-			break;
-		case 9:
-			mmio_wr32(0x08004000 + 0x64, 0x0051006E);
-			mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
-			mmio_wr32(0x08004000 + 0x120, 0x00000505);
-			break;
+		if (get_ddr_vendor() == DDR_VENDOR_ETRON_512M_DDR2) {
+			switch (dram_cap_in_mbyte_per_dev) {
+			case 5:
+				mmio_wr32(0x08004000 + 0x64, 0x00510019);
+				mmio_wr32(0x08004000 + 0x100, 0x0B01160F);
+				mmio_wr32(0x08004000 + 0x120, 0x00000502);
+				break;
+			case 6:
+				mmio_wr32(0x08004000 + 0x64, 0x00510023);
+				mmio_wr32(0x08004000 + 0x100, 0x0B01160F);
+				mmio_wr32(0x08004000 + 0x120, 0x00000503);
+				break;
+			case 7:
+				mmio_wr32(0x08004000 + 0x64, 0x0051002B);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F160F);
+				mmio_wr32(0x08004000 + 0x120, 0x00000503);
+				break;
+			case 8:
+				mmio_wr32(0x08004000 + 0x64, 0x00510041);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F160F);
+				mmio_wr32(0x08004000 + 0x120, 0x00000504);
+				break;
+			case 9:
+				mmio_wr32(0x08004000 + 0x64, 0x0051006E);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F160F);
+				mmio_wr32(0x08004000 + 0x120, 0x00000505);
+				break;
+			}
+		} else {
+			switch (dram_cap_in_mbyte_per_dev) {
+			case 5:
+				mmio_wr32(0x08004000 + 0x64, 0x00510019);
+				mmio_wr32(0x08004000 + 0x100, 0x0B011610);
+				mmio_wr32(0x08004000 + 0x120, 0x00000502);
+				break;
+			case 6:
+				mmio_wr32(0x08004000 + 0x64, 0x0051002C);
+				mmio_wr32(0x08004000 + 0x100, 0x0A011610);
+				mmio_wr32(0x08004000 + 0x120, 0x00000503);
+				break;
+			case 7:
+				mmio_wr32(0x08004000 + 0x64, 0x0051002B);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
+				mmio_wr32(0x08004000 + 0x120, 0x00000503);
+				break;
+			case 8:
+				mmio_wr32(0x08004000 + 0x64, 0x00510041);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
+				mmio_wr32(0x08004000 + 0x120, 0x00000504);
+				break;
+			case 9:
+				mmio_wr32(0x08004000 + 0x64, 0x0051006E);
+				mmio_wr32(0x08004000 + 0x100, 0x0B0F1610);
+				mmio_wr32(0x08004000 + 0x120, 0x00000505);
+				break;
+			}
 		}
 
 		switch (dram_cap_in_mbyte_per_dev) {

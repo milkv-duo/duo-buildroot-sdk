@@ -5,6 +5,8 @@
 #include <string.h>
 #include <delay_timer.h>
 
+enum CHIP_CLK_MODE chip_clk_mode = CLK_ND;
+
 #ifdef RTOS_ENABLE_FREERTOS
 int init_comm_info(int ret)
 {
@@ -93,17 +95,24 @@ void bl2_main(void)
 	switch_rtc_mode_1st_stage();
 
 	set_rtc_en_registers();
+
+#ifdef OD_CLK_SEL
+	chip_clk_mode = CLK_OD;
+#else
+#ifdef VC_CLK_OVERDRIVE
+	chip_clk_mode = CLK_VC_OD;
+#endif
+#endif
+
 #ifdef CONFIG_SUSPEND
 #ifndef NO_DDR_CFG //for fpga
 	jump_to_warmboot_entry();
 #endif
 #endif
+
 	load_ddr();
-#ifdef OD_CLK_SEL
-	load_rest_od_sel();
-#else
+
 	load_rest();
-#endif
 
 	NOTICE("BL2 end.\n");
 

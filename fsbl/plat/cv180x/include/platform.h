@@ -131,7 +131,6 @@ void sys_switch_all_to_pll(void);
 void lock_efuse_chipsn(void);
 int load_ddr(void);
 int load_rest(void);
-int load_rest_od_sel(void);
 void jump_to_warmboot_entry(void);
 
 #endif /* __ASSEMBLY__ */

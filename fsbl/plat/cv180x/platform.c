@@ -13,6 +13,8 @@
 #include "ddr_pkg_info.h"
 #include "rtc.h"
 
+extern enum CHIP_CLK_MODE chip_clk_mode;
+
 void panic_handler(void)
 {
 	void *ra;
@@ -110,6 +112,9 @@ void setup_dl_flag(void)
 
 void config_core_power(uint32_t low_period)
 {
+	if (PKG_QFN68 == get_pkg())
+		return;
+
 	/*
 	 * low_period = 0x42; // 0.90V
 	 * low_period = 0x48; // 0.93V
@@ -134,7 +139,6 @@ void sys_switch_all_to_pll(void)
 	mmio_write_32(0x03002034, 0x0); // REG_CLK_BYPASS_SEL1_REG
 }
 
-// #ifdef OD_CLK_SEL
 void sys_pll_od(void)
 {
 	// OD clk setting
@@ -260,9 +264,8 @@ void sys_pll_od(void)
 	mmio_write_32(0x03002030, byp0_value); // REG_CLK_BYPASS_SEL0_REG
 	mmio_write_32(0x03002034, 0x0); // REG_CLK_BYPASS_SEL1_REG
 }
-// #endif
 
-void sys_pll_nd(void)
+void sys_pll_nd(int vc_overdrive)
 {
 	// ND clk setting
 	uint32_t value;
@@ -284,6 +287,11 @@ void sys_pll_nd(void)
 	};
 
 	NOTICE("PLLS.\n");
+
+	if (vc_overdrive) {
+		// set vddc for OD clock
+		config_core_power(0x58); //1.00V
+	}
 
 	// store byp0 value
 	byp0_value = mmio_read_32(0x03002030);
@@ -342,15 +350,26 @@ void sys_pll_nd(void)
 	mmio_write_32(0x03002098, 0x00120009); //clk_sdma_aud0 = APLL(442.368) / 18 = 24.576MHz
 	mmio_write_32(0x03002120, 0x000F0009); //clk_pwm_src = FPLL(1500) / 15 = 100MHz
 	mmio_write_32(0x030020A8, 0x00010009); //clk_uart -> clk_cam0_200 = XTAL(25) / 1 = 25MHz
-	mmio_write_32(0x030020E4, 0x00030109); //clk_axi_video_codec = MIPIPLL(900) / 3 = 300MHz
-	mmio_write_32(0x030020EC, 0x00040309); //clk_vc_src0 = FPLL(1500) / 4 = 375MHz
-	mmio_write_32(0x030020C8, 0x00030009); //clk_axi_vip = MIPIPLL(900) / 3 = 300MHz
-	mmio_write_32(0x030020D0, 0x00060209); //clk_src_vip_sys_0 = DISPPLL(1188) / 6 = 198MHz
-	mmio_write_32(0x030020D8, 0x00060209); //clk_src_vip_sys_1 = DISPPLL(1188) / 6 = 198MHz
-	mmio_write_32(0x03002110, 0x00020209); //clk_src_vip_sys_2 = DISPPLL(1188) / 2 = 594MHz
-	//mmio_write_32(0x03002140, 0x00030009); //clk_src_vip_sys_3 = MIPIPLL(900) / 3 = 300MHz
-	mmio_write_32(0x03002144, 0x00030209); //clk_src_vip_sys_4 = DISPPLL(1188) / 3 = 396MHz
 
+
+	mmio_write_32(0x030020C8, 0x00030009); //clk_axi_vip = MIPIPLL(900) / 3 = 300MHz
+	mmio_write_32(0x03002110, 0x00020209); //clk_src_vip_sys_2 = DISPPLL(1188) / 2 = 594MHz
+
+	if (vc_overdrive) {
+		mmio_write_32(0x030020E4, 0x00030209); //clk_axi_video_codec = CAM1PLL(1080) / 3 = 360MHz
+		mmio_write_32(0x030020EC, 0x00020109); //clk_vc_src0 = MIPIPLL(900) / 2 = 450MHz
+		mmio_write_32(0x030020D0, 0x00060309); //clk_src_vip_sys_0 = FPLL(1500) / 6 = 250MHz
+		mmio_write_32(0x030020D8, 0x00040209); //clk_src_vip_sys_1 = DISPPLL(1188)/ 4 = 297MHz
+		//mmio_write_32(0x03002140, 0x00020009); //clk_src_vip_sys_3 = MIPIPLL(900) / 2 = 450MHz
+		mmio_write_32(0x03002144, 0x00030309); //clk_src_vip_sys_4 = FPLL(1500) / 3 = 500MHz
+	} else {
+		mmio_write_32(0x030020E4, 0x00030109); //clk_axi_video_codec = MIPIPLL(900) / 3 = 300MHz
+		mmio_write_32(0x030020EC, 0x00040309); //clk_vc_src0 = FPLL(1500) / 4 = 375MHz
+		mmio_write_32(0x030020D0, 0x00060209); //clk_src_vip_sys_0 = DISPPLL(1188) / 6 = 198MHz
+		mmio_write_32(0x030020D8, 0x00060209); //clk_src_vip_sys_1 = DISPPLL(1188) / 6 = 198MHz
+		//mmio_write_32(0x03002140, 0x00030009); //clk_src_vip_sys_3 = MIPIPLL(900) / 3 = 300MHz
+		mmio_write_32(0x03002144, 0x00030209); //clk_src_vip_sys_4 = DISPPLL(1188) / 3 = 396MHz
+	}
 	// set hsperi clock to PLL (FPLL) div by 5  = 300MHz
 	mmio_write_32(0x030020B8, 0x00050009); //--> CLK_AXI4
 
@@ -385,26 +404,17 @@ void sys_pll_nd(void)
 
 void sys_pll_init(void)
 {
-	sys_pll_nd();
-	NOTICE("PLLE.\n");
-}
-
-void sys_pll_init_od_sel(void)
-{
-	uint8_t pkg = get_pkg();
-
-	switch (pkg) {
-	case PKG_QFN88:
-		NOTICE("pkg QFN88\n");
+	switch (chip_clk_mode) {
+	case CLK_VC_OD:
+		sys_pll_nd(1);
+		break;
+	case CLK_OD:
 		sys_pll_od();
 		break;
-	case PKG_QFN68:
-		NOTICE("QFN68: OD UNSUPPORTED!\n");
-		sys_pll_nd();
-		break;
+	case CLK_ND:
 	default:
-		NOTICE("unknown pkg=%d\n", pkg);
-		sys_pll_od();
+		sys_pll_nd(0);
+		break;
 	}
 	NOTICE("PLLE.\n");
 }

@@ -25,7 +25,6 @@ uint64_t reading_size = 0x020000;
 
 struct _time_records *time_records = (void *)TIME_RECORDS_ADDR;
 struct fip_param1 *fip_param1 = (void *)PARAM1_BASE;
-enum CHIP_CLK_MODE chip_clk_mode = CLK_ND;
 static struct fip_param2 fip_param2 __aligned(BLOCK_SIZE);
 static union {
 	struct ddr_param ddr_param;
@@ -542,73 +541,6 @@ int load_rest(void)
 
 	// Init sys PLL and switch clocks to PLL
 	sys_pll_init();
-#ifndef ENABLE_BOOT0
-retry_from_flash:
-	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {
-		if (load_blcp_2nd(retry) < 0)
-			continue;
-
-		if (load_monitor(retry, &monitor_entry) < 0)
-			continue;
-
-		if (load_loader_2nd(retry, &loader_2nd_entry) < 0)
-			continue;
-
-		break;
-	}
-
-	if (retry >= p_rom_api_get_number_of_retries()) {
-		switch (p_rom_api_get_boot_src()) {
-		case BOOT_SRC_UART:
-		case BOOT_SRC_SD:
-		case BOOT_SRC_USB:
-			WARN("DL cancelled. Load flash. (%d).\n", retry);
-			// Continue to boot from flash if boot from external source
-			p_rom_api_flash_init();
-			goto retry_from_flash;
-		default:
-			ERROR("Failed to load rest (%d).\n", retry);
-			panic_handler();
-		}
-	}
-
-	sync_cache();
-	console_flush();
-
-	switch_rtc_mode_2nd_stage();
-#else
-	#ifdef ENABLE_FASTBOOT0
-	mmio_write_32(0x030020B8, 0x00030009);
-	#endif
-	if (load_loader_2nd_alios(retry, &loader_2nd_entry) < 0)
-		return -1;
-	#ifdef ENABLE_FASTBOOT0
-	mmio_write_32(0x030020B8, 0x00050009);
-	#endif
-	sync_cache();
-
-	switch_rtc_mode_2nd_stage();
-	monitor_entry = run_addr;
-#endif
-	if (monitor_entry) {
-		NOTICE("Jump to monitor at 0x%lx.\n", monitor_entry);
-		jump_to_monitor(monitor_entry, loader_2nd_entry);
-	} else {
-		NOTICE("Jump to loader_2nd at 0x%lx.\n", loader_2nd_entry);
-		jump_to_loader_2nd(loader_2nd_entry);
-	}
-
-	return 0;
-}
-
-int load_rest_od_sel(void)
-{
-	int retry = 0;
-	uint64_t monitor_entry = 0;
-	uint64_t loader_2nd_entry = 0;
-
-	// Init sys PLL and switch clocks to PLL
-	sys_pll_init_od_sel();
 #ifndef ENABLE_BOOT0
 retry_from_flash:
 	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {
