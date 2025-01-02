@@ -426,6 +426,8 @@ choice
 		bool "linux 4.9.38"
 	config KERNEL_SRC_5.10
 		bool "linux 5.10"
+	config KERNEL_SRC_6.12
+		bool "linux 6.12"
 endchoice
 
 config KERNEL_SRC
@@ -433,6 +435,7 @@ config KERNEL_SRC
 	default "linux-linaro-stable" if KERNEL_SRC_4_9
 	default "linux" if KERNEL_SRC_4_19
 	default "linux_5.10" if KERNEL_SRC_5.10
+	default "linux_6.12" if KERNEL_SRC_6.12
 	help
 	  Set kernel source code.
 

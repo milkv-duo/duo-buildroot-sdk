@@ -19,11 +19,14 @@
 #include <linux/io.h>
 #include <linux/platform_device.h>
 #include <linux/async.h>
+#include <linux/version.h>
 
 
 #include <linux/slab.h>
 #include <linux/of_gpio.h>
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 #include <asm-generic/gpio.h>
+#endif
 #include <linux/gpio.h>
 
 //#include <mach/map.h>
@@ -33,7 +36,6 @@
 #include <linux/workqueue.h>
 #include <linux/proc_fs.h>
 #include <linux/input/mt.h>
-#include <linux/version.h>
 
 #include "ts_gsl3692.h"
 
@@ -961,8 +963,12 @@ static void gsl_ts_late_resume(struct early_suspend *h)
 }
 #endif
 
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 static int  gsl_ts_probe(struct i2c_client *client,
 			const struct i2c_device_id *id)
+#else
+static int  gsl_ts_probe(struct i2c_client *client)
+#endif
 {
 	int rc;
 	/*reset and irq */
@@ -1063,7 +1069,11 @@ error_mutex_destroy:
 	return rc;
 }
 
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 static int  gsl_ts_remove(struct i2c_client *client)
+#else
+static void gsl_ts_remove(struct i2c_client *client)
+#endif
 {
 	struct gsl_ts *ts = i2c_get_clientdata(client);
 	pr_info("gsl_ts_remove...\n");
@@ -1080,7 +1090,9 @@ static int  gsl_ts_remove(struct i2c_client *client)
 	kfree(ts->touch_data);
 	kfree(ts);
 
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 	return 0;
+#endif
 }
 
 

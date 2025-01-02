@@ -382,6 +382,14 @@ function olddefconfig()
   _call_kconfig_script "${FUNCNAME[0]}"
 }
 
+function defconfig_choose_version()
+{
+  local kernel_version="CONFIG_KERNEL_SRC_$MILKV_KERNEL_VERSION=y"
+
+  cat ${BUILD_PATH}/boards/${chip_arch}/${board}/${board}_defconfig > ${BUILD_PATH}/boards/${chip_arch}/${board}/.${board}_defconfig_tmp
+  echo $kernel_version >> ${BUILD_PATH}/boards/${chip_arch}/${board}/.${board}_defconfig_tmp
+}
+
 function defconfig()
 {
   local chip_arch
@@ -390,9 +398,11 @@ function defconfig()
   board=$1
   chip_arch=`"${BUILD_PATH}/scripts/boards_scan.py" --get-chip-arch --board_name ${board}`
 
+  defconfig_choose_version
+
   # if input is chip series, then list boards by chip series
   if [ "${chip_arch}" != "" ]; then
-    _call_kconfig_script "${FUNCNAME[0]}" "${BUILD_PATH}/boards/${chip_arch}/${board}/${board}_defconfig"
+    _call_kconfig_script "${FUNCNAME[0]}" "${BUILD_PATH}/boards/${chip_arch}/${board}/.${board}_defconfig_tmp"
   else
     "${BUILD_PATH}/scripts/boards_scan.py" --list-boards ${board}
   fi

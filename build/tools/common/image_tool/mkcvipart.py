@@ -83,7 +83,7 @@ def gen_cvipart_h(output, parser):
                 else:
                     comma = ","
                 of.write("%s(%s)%s" % (part_size, p["label"], comma))
-            of.write("mmcblk0boot0:1M(fip),1M(fip_bak);\"")
+            of.write("mmcblk0boot0:1M(fip),1M(fip_bak)\"")
             of.write("\n")
 
             for i, p in enumerate(parts):

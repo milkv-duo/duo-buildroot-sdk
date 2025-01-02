@@ -19,6 +19,7 @@
  */
 
 #include <linux/irq.h>
+#include <linux/version.h>
 #include "gt9xx.h"
 
 #if GTP_ICS_SLOT_REPORT
@@ -2379,7 +2380,11 @@ Output:
     Executive outcomes.
         0: succeed.
 *******************************************************/
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 static int goodix_ts_probe(struct i2c_client *client, const struct i2c_device_id *id)
+#else
+static int goodix_ts_probe(struct i2c_client *client)
+#endif
 {
     s32 ret = -1;
     struct goodix_ts_data *ts;
@@ -2538,7 +2543,11 @@ Input:
 Output:
     Executive outcomes. 0---succeed.
 *******************************************************/
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
 static int goodix_ts_remove(struct i2c_client *client)
+#else
+static void goodix_ts_remove(struct i2c_client *client)
+#endif
 {
     struct goodix_ts_data *ts = i2c_get_clientdata(client);
 
@@ -2573,7 +2582,9 @@ static int goodix_ts_remove(struct i2c_client *client)
     input_unregister_device(ts->input_dev);
     kfree(ts);
 
+#if LINUX_VERSION_CODE == KERNEL_VERSION(5, 10, 4)
     return 0;
+#endif
 }
 
 
