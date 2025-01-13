@@ -36,6 +36,13 @@ int putchar_l(int c, int level);
 #define MSG_INFO	MSG_SOH "3"
 #define MSG_VERBOSE	MSG_SOH "4"
 
+#ifdef FSBL_FASTBOOT
+#define ERROR(...)
+#define WARN(...)
+#define NOTICE(...)
+#define INFO(...)
+#define VERBOSE(...)
+#else
 #define ERROR(...) tf_printf(MSG_ERROR " E:" __VA_ARGS__)
 #define WARN(...) tf_printf(MSG_WARN " W:" __VA_ARGS__)
 #define NOTICE(...) tf_printf(MSG_NOTICE __VA_ARGS__)
@@ -45,6 +52,7 @@ int putchar_l(int c, int level);
 #define VERBOSE(...) tf_printf(MSG_VERBOSE __VA_ARGS__)
 #else
 #define VERBOSE(...)
+#endif
 #endif
 
 void __dead2 do_panic(void);

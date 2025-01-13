@@ -15,14 +15,15 @@ endif
 fip%: export BLCP_IMG_RUNADDR=0x05200200
 fip%: export BLCP_PARAM_LOADADDR=0
 fip%: export NAND_INFO=00000000
-
-ifeq (${BUILD_FASTBOOT0},y)
+ifeq (${FSBL_FASTBOOT},y)
+$(eval $(call add_define,FSBL_FASTBOOT))
+fip%: export NOR_INFO=01C0080000430000A93B060000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+else ifeq (${BUILD_FASTBOOT0},y)
 $(eval $(call add_define,ENABLE_FASTBOOT0))
 fip%: export NOR_INFO=01C0080000430000A93B060000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 else
 fip%: export NOR_INFO=$(shell printf '%72s' | tr ' ' 'FF')
 endif
-
 fip%: export DDR_PARAM_TEST_PATH = test/cv181x/ddr_param.bin
 
 ${BUILD_PLAT}:
@@ -61,11 +62,7 @@ fip_boot0: fip-dep
 		--CHIP_CONF='${CHIP_CONF_PATH}' \
 		--NOR_INFO='${NOR_INFO}' \
 		--NAND_INFO='${NAND_INFO}'\
-		--BL2='${BUILD_PLAT}/bl2.bin' \
-		--BLCP_IMG_RUNADDR=${BLCP_IMG_RUNADDR} \
-		--BLCP_PARAM_LOADADDR=${BLCP_PARAM_LOADADDR} \
-		--BLCP=${BLCP_PATH} \
-		--DDR_PARAM='${DDR_PARAM_TEST_PATH}'
+		--BL2='${BUILD_PLAT}/bl2.bin'
 	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/boot0')
 	${Q}cp ${BUILD_PLAT}/boot0 ${OUTPUT_DIR}
 
@@ -95,7 +92,6 @@ fip-all: fip-dep
 		--BLCP_IMG_RUNADDR=${BLCP_IMG_RUNADDR} \
 		--BLCP_PARAM_LOADADDR=${BLCP_PARAM_LOADADDR} \
 		--BLCP=${BLCP_PATH} \
-		--DDR_PARAM='${DDR_PARAM_TEST_PATH}' \
 		--BLCP_2ND='${BLCP_2ND_PATH}' \
 		--MONITOR='${MONITOR_PATH}' \
 		--LOADER_2ND='${LOADER_2ND_PATH}' \

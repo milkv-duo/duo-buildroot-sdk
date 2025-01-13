@@ -21,6 +21,28 @@
 #include <ddr_init.h>
 #endif
 
+#define susp_read_csr(reg) ({ unsigned long __tmp; \
+	asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+	__tmp; })
+SUSPEND_DATA uint32_t start, delta, total_delta;
+void susp_udelay(uint32_t delay)
+{
+	start = (uint32_t)(~susp_read_csr(time));
+
+	total_delta = (delay * 25);
+
+	mmio_write_32(REG_GP_REG2, total_delta);
+
+	do {
+		/*
+		 * If the timer value wraps around, the subtraction will
+		 * overflow and it will still give the correct result.
+		 */
+		delta = start - (uint32_t)(~susp_read_csr(time)); /* Decreasing counter */
+
+	} while (delta < total_delta);
+}
+
 void ddr_suspend_entry(void)
 {
 	ddr_sys_suspend_sus_res();
@@ -350,8 +372,8 @@ void rtc_req_suspend(void)
 		;
 	while (1) {
 		/* Send suspend request to RTC*/
+		susp_udelay(1000);
 		mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0, 0x00800080);
-		mdelay(1);
 	}
 }
 #else

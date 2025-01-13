@@ -138,53 +138,17 @@ int load_param2(int retry)
 	return 0;
 }
 
-int load_ddr_param(int retry)
-{
-	uint32_t crc;
-	int ret = -1;
-
-	NOTICE("DPS/0x%x/0x%x.\n", fip_param2.ddr_param_loadaddr, fip_param2.ddr_param_size);
-
-	if (fip_param2.ddr_param_size >= sizeof(sram_union_buf.ddr_param))
-		fip_param2.ddr_param_size = sizeof(sram_union_buf.ddr_param);
-
-#ifdef USB_DL_BY_FSBL
-	if (p_rom_api_get_boot_src() == BOOT_SRC_USB)
-		ret = load_image_by_usb(&sram_union_buf.ddr_param, fip_param2.ddr_param_loadaddr,
-		fip_param2.ddr_param_size,  retry);
-	else
-#endif
-		ret = p_rom_api_load_image(&sram_union_buf.ddr_param, fip_param2.ddr_param_loadaddr,
-		fip_param2.ddr_param_size, retry);
-	if (ret < 0) {
-		return ret;
-	}
-
-	crc = p_rom_api_image_crc(&sram_union_buf.ddr_param, fip_param2.ddr_param_size);
-	if (crc != fip_param2.ddr_param_cksum) {
-		ERROR("ddr_param_cksum (0x%x/0x%x)\n", crc, fip_param2.ddr_param_cksum);
-		return -1;
-	}
-
-	NOTICE("DPE.\n");
-
-	return 0;
-}
-
 int load_ddr(void)
 {
+#ifndef ENABLE_BOOT0
 	int retry = 0;
 
 retry_from_flash:
 	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {
 		if (load_param2(retry) < 0)
 			continue;
-		if (load_ddr_param(retry) < 0)
-			continue;
-
 		break;
 	}
-
 	if (retry >= p_rom_api_get_number_of_retries()) {
 		switch (p_rom_api_get_boot_src()) {
 		case BOOT_SRC_UART:
@@ -195,11 +159,11 @@ retry_from_flash:
 			p_rom_api_flash_init();
 			goto retry_from_flash;
 		default:
-			ERROR("Failed to load DDR param (%d).\n", retry);
+			ERROR("Failed to load param2 (%d).\n", retry);
 			panic_handler();
 		}
 	}
-
+#endif
 	time_records->ddr_init_start = read_time_ms();
 	ddr_init(&sram_union_buf.ddr_param);
 	time_records->ddr_init_end = read_time_ms();
@@ -542,6 +506,9 @@ int load_rest(void)
 	// Init sys PLL and switch clocks to PLL
 	sys_pll_init();
 #ifndef ENABLE_BOOT0
+#ifdef FSBL_FASTBOOT
+	mmio_write_32(0x030020B8, 0x00030009); // improve axi clock from 300m to 500m
+#endif
 retry_from_flash:
 	for (retry = 0; retry < p_rom_api_get_number_of_retries(); retry++) {
 		if (load_blcp_2nd(retry) < 0)
@@ -571,6 +538,9 @@ retry_from_flash:
 		}
 	}
 
+#ifdef FSBL_FASTBOOT
+	mmio_write_32(0x030020B8, 0x00050009); // restore axi clock from 500m to 300m
+#endif
 	sync_cache();
 	console_flush();
 

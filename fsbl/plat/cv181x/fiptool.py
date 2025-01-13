@@ -634,7 +634,7 @@ class FIP:
         fip_bin += b"\0" * PARAM2_SIZE
 
         # Pack body
-        fip_bin = self.pack_ddr_param(fip_bin)
+        # fip_bin = self.pack_ddr_param(fip_bin)
 
         if len(self.body2["BLCP_2ND"].content):
             runaddr = self.param2["BLCP_2ND_RUNADDR"].toint()
@@ -665,8 +665,8 @@ class FIP:
 
     def make(self, args=None):
         fip_bin = self.make_fip1()
-        if len(self.body2["DDR_PARAM"].content):
-            fip_bin = self.append_fip2(fip_bin, args)
+
+        fip_bin = self.append_fip2(fip_bin, args)
 
         logging.info("generated fip_bin is %d bytes", len(fip_bin))
 
@@ -682,7 +682,7 @@ METHODS = {
     "CHIP_CONF": FIP.add_chip_conf,
     "BLCP": FIP.add_blcp,
     "BL2": FIP.add_bl2,
-    "DDR_PARAM": FIP.add_ddr_param,
+    # "DDR_PARAM": FIP.add_ddr_param,
     "BLCP_2ND": FIP.add_blcp_2nd,
     "MONITOR": FIP.add_monitor,
     "LOADER_2ND": FIP.add_loader_2nd,

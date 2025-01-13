@@ -118,7 +118,9 @@ int decompress_lz4(void *dst, size_t *dst_size, const void *src, size_t src_size
 		ERROR("LZ4F_decompress=%lu\n", ret);
 		return -1;
 	}
-
+#ifdef FSBL_FASTBOOT
+	(void)(ret);
+#endif
 	// No need to free.
 	// LZ4F_freeDecompressionContext(dctx);
 

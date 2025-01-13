@@ -1,6 +1,31 @@
+# Ignore miscellaneous files
+*.py[co]
+cscope.*
+*.swp
+*.patch
+*~
+.project
+.cproject
+.vscode/
+
+# Ignore build directory
+build/
+__pycache__/
+
+# GNU GLOBAL files
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+#ignore ctags
+tags
+#ignore vim swap files
+*.swo
+
+# Preserve old SDK build ignores
 *.d
 fip.bin
 build_message.o
 blmacros.dis
 build/cvi_board_memmap.h
-build/

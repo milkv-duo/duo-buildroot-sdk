@@ -704,15 +704,15 @@ void cvx16_bist_wdqlvl_init(uint32_t mode)
 		//        op_code         start              stop        pattern    dq_inv     dm_inv    dq_rotate
 		//        repeat
 		cmd[0] = (1 << 30) | (sram_st << 21) | (511 << 12) | (5 << 9) | (0 << 8) | (0 << 7) | (0 << 4) |
-			 (2 << 0); // W  1~17  prbs  repeat0
+			 (0 << 0); // W  1~17  prbs  repeat0
 		cmd[1] = (2 << 30) | (sram_st << 21) | (511 << 12) | (5 << 9) | (0 << 8) | (0 << 7) | (0 << 4) |
-			 (2 << 0); // R  1~17  prbs  repeat0
+			 (0 << 0); // R  1~17  prbs  repeat0
 		cmd[2] = (1 << 30) | (sram_st << 21) | (sram_sp << 12) | (6 << 9) | (0 << 8) | (0 << 7) | (0 << 4) |
-			 (2 << 0); // W  1~17  sram  repeat0
+			 (0 << 0); // W  1~17  sram  repeat0
 		cmd[3] = (2 << 30) | (sram_st << 21) | (sram_sp << 12) | (6 << 9) | (0 << 8) | (0 << 7) | (0 << 4) |
-			 (2 << 0); // R  1~17  sram  repeat0
+			 (0 << 0); // R  1~17  sram  repeat0
 		//       GOTO      addr_not_reset loop_cnt
-		cmd[4] = (3 << 30) | (0 << 20) | (1 << 0); // GOTO
+		cmd[4] = 0; // GOTO
 		cmd[5] = 0; // NOP
 		#endif
 	} else if (mode == 0x11) { // bist write/read

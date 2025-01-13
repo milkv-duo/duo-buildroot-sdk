@@ -107,6 +107,10 @@ void tf_printf(const char *fmt, ...)
 
 	int level = LOG_LEVEL;
 
+#ifdef FSBL_FASTBOOT
+	return;
+#endif
+
 #if PRINTF_TIMESTAMP
 	const uint32_t ts = read_count_tick();
 #endif

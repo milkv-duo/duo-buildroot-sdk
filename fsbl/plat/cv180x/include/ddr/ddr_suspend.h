@@ -5,6 +5,7 @@
 #define SUSPEND_DATA __section(".suspend_data")
 
 SUSPEND_ENTRY void ddr_suspend_entry(void);
+static SUSPEND_FUNC void susp_udelay(uint32_t delay);
 static SUSPEND_FUNC void ddr_sys_suspend_sus_res(void);
 static SUSPEND_FUNC void cvx16_ddr_phya_pd_sus_res(void);
 static SUSPEND_FUNC void cvx16_ddrc_suspend_sus_res(void);

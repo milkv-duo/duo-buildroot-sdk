@@ -449,12 +449,14 @@ void switch_rtc_mode_2nd_stage(void)
 void set_rtc_en_registers(void)
 {
 	uint32_t write_data;
+#ifndef FSBL_FASTBOOT
 	uint32_t read_data;
 
 	read_data = mmio_read_32(REG_RTC_BASE + RTC_ST_ON_REASON);
 	NOTICE("st_on_reason=%x\n", read_data);
 	read_data = mmio_read_32(REG_RTC_BASE + RTC_ST_OFF_REASON);
 	NOTICE("st_off_reason=%x\n", read_data);
+#endif
 
 	mmio_write_32(REG_RTC_BASE + RTC_EN_SHDN_REQ, 0x01);
 	while (mmio_read_32(REG_RTC_BASE + RTC_EN_SHDN_REQ) != 0x01)
@@ -468,7 +470,12 @@ void set_rtc_en_registers(void)
 	mmio_write_32(REG_RTC_BASE + RTC_EN_WDT_RST_REQ, 0x01);
 	while (mmio_read_32(REG_RTC_BASE + RTC_EN_WDT_RST_REQ) != 0x01)
 		;
-	mmio_setbits_32(REG_RTC_CTRL_BASE + RTC_POR_RST_CTRL, 0X1);
+#ifdef CONFIG_SUSPEND
+	// Set rtcsys_rst_ctrl[24] = 1; bit 24 is reg_rtcsys_reset_en
+	mmio_write_32(REG_RTC_CTRL_BASE + RTC_POR_RST_CTRL, 0X2);
+#else
+	mmio_write_32(REG_RTC_CTRL_BASE + RTC_POR_RST_CTRL, 0X1);
+#endif
 	mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0_UNLOCKKEY, 0xAB18);
 	write_data = mmio_read_32(REG_RTC_CTRL_BASE + RTC_CTRL0);
 	write_data = 0xffff0000 | write_data | (0x1 << 11) | (0x01 << 6);

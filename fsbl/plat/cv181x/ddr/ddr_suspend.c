@@ -21,11 +21,59 @@
 #include <ddr_init.h>
 #endif
 
+#ifdef AARCH64
+SUSPEND_DATA uint32_t start, delta, total_delta;
+//arm use CNTPCT_EL0 to get tick
+void susp_udelay(uint32_t delay)
+{
+	start = (uint32_t)~read_cntpct_el0();
+
+	total_delta = (delay * 25);
+
+	// Trig simulation bench to increse cntpct_el0
+	mmio_write_32(REG_GP_REG2, total_delta);
+
+	do {
+		/*
+		 * If the timer value wraps around, the subtraction will
+		 * overflow and it will still give the correct result.
+		 */
+		delta = start - (uint32_t)~read_cntpct_el0(); /* Decreasing counter */
+
+	} while (delta < total_delta);	
+}
+#else //RISCV
+#define susp_read_csr(reg) ({ unsigned long __tmp; \
+	asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+	__tmp; })
+SUSPEND_DATA uint32_t start, delta, total_delta;
+void susp_udelay(uint32_t delay)
+{
+	start = (uint32_t)(~susp_read_csr(time));
+
+	total_delta = (delay * 25);
+
+	mmio_write_32(REG_GP_REG2, total_delta);
+
+	do {
+		/*
+		 * If the timer value wraps around, the subtraction will
+		 * overflow and it will still give the correct result.
+		 */
+		delta = start - (uint32_t)(~susp_read_csr(time)); /* Decreasing counter */
+
+	} while (delta < total_delta);
+}
+#endif //end AARCH64
+
+
 void ddr_suspend_entry(void)
 {
 	ddr_sys_suspend_sus_res();
 	rtc_clr_ddr_pwrok();
 	rtc_clr_rmio_pwrok();
+	/*Warning: DO NOT use any functions or varibales beyond SUSPEND section 
+	* after DDR enter self refresh.*/
 #ifndef SUSPEND_USE_WDG_RST
 	rtc_req_suspend();
 #else
@@ -350,8 +398,8 @@ void rtc_req_suspend(void)
 		;
 	while (1) {
 		/* Send suspend request to RTC and wait it stable*/
+		susp_udelay(1000);
 		mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0, 0x00800080);
-		mdelay(1);
 	}
 }
 #else
