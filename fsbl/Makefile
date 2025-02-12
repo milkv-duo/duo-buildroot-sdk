@@ -144,6 +144,15 @@ include lib/cpu/${BOOT_CPU}/cpu.mk
 INCLUDES += -Ibuild
 INCLUDES += -Iinclude/cpu
 
+ifeq (${STORAGE_TYPE},spinand)
+$(eval $(call add_define,BOOT_FROM_NAND))
+endif
+ifeq (${STORAGE_TYPE},emmc)
+$(eval $(call add_define,BOOT_FROM_EMMC))
+endif
+ifeq (${STORAGE_TYPE},spinor)
+$(eval $(call add_define,BOOT_FROM_NOR))
+endif
 ################################################################################
 # Build options checks
 ################################################################################

@@ -38,6 +38,7 @@ INCLUDES += \
 	${CPU_INCLUDES} \
 	-Iplat/ \
 	-Iplat/${CHIP_ARCH}/include/uart \
+	-Iplat/${CHIP_ARCH}/include/emmc \
 	-Iplat/${CHIP_ARCH}/include \
 	-Iplat/${CHIP_ARCH}/include/${BOOT_CPU} \
 	-Ilib/utils \
@@ -62,6 +63,8 @@ DECOMPRESSION_SOURCES = \
 BL2_SRCS = \
 	${BL_COMMON_SOURCES} \
 	plat/${CHIP_ARCH}/bl2/bl2_opt.c \
+	plat/${CHIP_ARCH}/emmc/emmc.c \
+	plat/${CHIP_ARCH}/emmc/cv_emmc.c \
 	lib/utils/decompress.c \
 	${DECOMPRESSION_SOURCES}
 

@@ -217,7 +217,7 @@ void sys_pll_od(void)
 
 	mmio_write_32(0x03002048, 0x00030009); //clk_cpu_axi0 = FPLL(1500) / 3
 	mmio_write_32(0x03002054, 0x00020009); //clk_tpu = TPLL(1400) / 2 = 700MHz
-	mmio_write_32(0x03002064, 0x00080009); //clk_emmc = FPLL(1500) / 8 = 187.5MHz
+	mmio_write_32(0x03002064, 0x00040009); //clk_emmc = FPLL(1500) / 4 = 375MHz
 	mmio_write_32(0x03002088, 0x00080009); //clk_spi_nand = FPLL(1500) / 8 = 187.5MHz
 	mmio_write_32(0x03002098, 0x00200009); //clk_sdma_aud0 = APLL(786.432) / 32 = 24.576MHz
 	mmio_write_32(0x03002120, 0x000F0009); //clk_pwm_src = FPLL(1500) / 15 = 100MHz
@@ -356,7 +356,7 @@ void sys_pll_nd(int vc_overdrive)
 #endif
 
 	mmio_write_32(0x03002048, 0x00030009); //clk_cpu_axi0 = FPLL(1500) / 3
-	mmio_write_32(0x03002064, 0x00080009); //clk_emmc = FPLL(1500) / 8 = 187.5MHz
+	mmio_write_32(0x03002064, 0x00040009); //clk_emmc = FPLL(1500) / 4 = 375MHz
 	mmio_write_32(0x03002088, 0x00080009); //clk_spi_nand = FPLL(1500) / 8 = 187.5MHz
 	mmio_write_32(0x03002098, 0x00120009); //clk_sdma_aud0 = APLL(442.368) / 18 = 24.576MHz
 	mmio_write_32(0x03002120, 0x000F0009); //clk_pwm_src = FPLL(1500) / 15 = 100MHz

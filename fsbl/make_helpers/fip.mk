@@ -26,6 +26,9 @@ fip%: export NOR_INFO=$(shell printf '%72s' | tr ' ' 'FF')
 endif
 fip%: export DDR_PARAM_TEST_PATH = test/cv181x/ddr_param.bin
 
+ifeq (${CONFIG_ENABLE_EMMC_HW_RESET_QFN},y)
+$(eval $(call add_define,CONFIG_ENABLE_EMMC_HW_RESET_QFN))
+endif
 ${BUILD_PLAT}:
 	@mkdir -p '${BUILD_PLAT}'
 

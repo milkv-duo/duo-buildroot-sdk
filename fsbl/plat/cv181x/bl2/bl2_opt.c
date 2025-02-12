@@ -17,6 +17,7 @@
 #include <decompress.h>
 #include <delay_timer.h>
 #include <security/security.h>
+#include <emmc/emmc.h>
 
 uint64_t load_addr = 0x0c000;
 uint64_t run_addr   = 0x8000C000;
@@ -147,6 +148,44 @@ retry_from_flash:
 	return 0;
 }
 
+static int emmc_read_fip_bl2(uint32_t offset, uint32_t size, uintptr_t buf)
+{
+	int lba = 0;
+
+	if (((offset & EMMC_BLOCK_MASK) != 0) || ((buf & EMMC_BLOCK_MASK) != 0) || ((size & EMMC_BLOCK_MASK) != 0))
+		return -22;
+
+	lba = offset / EMMC_BLOCK_SIZE;
+
+	// INFO("%s offset %x,lba %d, size %d, dst buf 0x%lx\n", __func__, offset, lba, size, buf);
+
+	if (size != emmc_partition_read_blocks(EMMC_PARTITION_BOOT1, lba, buf, size))
+		return -5;
+
+	return 0;
+}
+
+static int load_data_from_storage(void *buffer, uint32_t offset, uint32_t size, int retry)
+{
+	static int is_get_boot_src;
+	static int boot_src;
+
+	if (!is_get_boot_src) {
+		boot_src = p_rom_api_get_boot_src();
+		is_get_boot_src = 1;
+
+		/* reinit eMMC */
+		if (boot_src == BOOT_SRC_EMMC)
+			bm_emmc_init();
+	}
+
+	//use BL2 eMMC driver to load image
+	if (boot_src == BOOT_SRC_EMMC)
+		return emmc_read_fip_bl2(offset, size, (uintptr_t)buffer);
+	else
+		return p_rom_api_load_image(buffer, offset, size, retry);
+}
+
 int load_blcp_2nd(int retry)
 {
 	uint32_t crc, rtos_base;
@@ -173,7 +212,7 @@ int load_blcp_2nd(int retry)
 		panic_handler();
 	}
 
-	ret = p_rom_api_load_image((void *)(uintptr_t)fip_param2.blcp_2nd_runaddr, fip_param2.blcp_2nd_loadaddr,
+	ret = load_data_from_storage((void *)(uintptr_t)fip_param2.blcp_2nd_runaddr, fip_param2.blcp_2nd_loadaddr,
 				   fip_param2.blcp_2nd_size, retry);
 	if (ret < 0) {
 		return ret;
@@ -231,7 +270,7 @@ int load_monitor(int retry, uint64_t *monitor_entry)
 		panic_handler();
 	}
 
-	ret = p_rom_api_load_image((void *)(uintptr_t)fip_param2.monitor_runaddr, fip_param2.monitor_loadaddr,
+	ret = load_data_from_storage((void *)(uintptr_t)fip_param2.monitor_runaddr, fip_param2.monitor_loadaddr,
 				   fip_param2.monitor_size, retry);
 	if (ret < 0) {
 		return ret;
@@ -271,7 +310,7 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 
 	NOTICE("L2/0x%x.\n", fip_param2.loader_2nd_loadaddr);
 
-	ret = p_rom_api_load_image(loader_2nd_header, fip_param2.loader_2nd_loadaddr, BLOCK_SIZE, retry);
+	ret = load_data_from_storage(loader_2nd_header, fip_param2.loader_2nd_loadaddr, BLOCK_SIZE, retry);
 	if (ret < 0) {
 		return -1;
 	}
