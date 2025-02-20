@@ -6,6 +6,8 @@ MILKV_BOARD=
 MILKV_BOARD_CONFIG=
 MILKV_IMAGE_CONFIG=
 MILKV_DEFAULT_BOARD=milkv-duo
+MILKV_KERNEL_VERSION="5.10"
+export MILKV_KERNEL_VERSION
 
 TOP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 #echo "TOP_DIR: ${TOP_DIR}"
@@ -88,6 +90,38 @@ function choose_board()
   else
     print_err "Invalid input!"
     exit 1
+  fi
+}
+
+function choose_kernel()
+{
+  local FITED_BOARD_ARRAY=("milkv-duos-emmc" "milkv-duos-sd")
+
+  if [[ ! " ${FITED_BOARD_ARRAY[@]} " =~ " ${MILKV_BOARD} " ]]; then
+    print_info "Current target only supports kernel 5.10"
+    MILKV_KERNEL_VERSION="5.10"
+    return  # 直接退出当前函数或脚本
+  fi
+
+  print_info "Select a kernel version to build:"
+
+  echo "1. linux 5.10"
+  echo "2. linux 6.12"
+
+  local index
+  read -p "Which would you like: " index
+
+  if [[ -z $index ]]; then
+    print_info "Default kernel version: $MILKV_KERNEL_VERSION"
+  else
+    if [[ $index -eq 1 ]]; then
+      MILKV_KERNEL_VERSION="5.10"
+  elif [[ $index -eq 2 ]]; then
+      MILKV_KERNEL_VERSION="6.12"
+    else
+      print_err "Invalid input!"
+      exit 1
+    fi
   fi
 }
 
@@ -249,6 +283,8 @@ if [ -z "${MILKV_BOARD// }" ]; then
   print_err "No board specified!"
   exit 1
 fi
+
+choose_kernel
 
 MILKV_BOARD_CONFIG=device/${MILKV_BOARD}/boardconfig.sh
 

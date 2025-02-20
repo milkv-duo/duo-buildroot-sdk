@@ -224,7 +224,7 @@ u-boot-clean:
 ################################################################################
 # configure kernel defconfig
 ifeq ($(CONFIG_BUILD_FOR_DEBUG),y)
-KERNEL_CONFIG_NAME := ${BRAND}_${PROJECT_FULLNAME}_defconfig
+KERNEL_CONFIG_NAME := ${BRAND}_${PROJECT_FULLNAME}_defconfig_$(MILKV_KERNEL_VERSION)
 else
 KERNEL_CONFIG_NAME := ${BRAND}_${PROJECT_FULLNAME}_rls_defconfig
 endif
@@ -316,6 +316,13 @@ DTS_DEFATUL_PATHS := \
 DTS_DEFATUL_PATHS := $(wildcard ${DTS_DEFATUL_PATHS})
 
 kernel-dts: memory-map
+ifeq ($(strip $(MILKV_KERNEL_VERSION)), 6.12)
+kernel-dts: ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}
+	$(call print_target)
+	${Q}ln -snrf ${CVI_BOARD_MEMMAP_H_PATH} ${KERNEL_PATH}/scripts/dtc/include-prefixes/
+	${Q}$(MAKE) -j${NPROC} -C ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER} dtbs
+	${Q}cp ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/arch/${ARCH}/boot/dts/sophgo/*.dtb ${RAMDISK_PATH}/${RAMDISK_OUTPUT_FOLDER}
+else
 kernel-dts: ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}
 	$(call print_target)
 	${Q}ln -snrf ${CVI_BOARD_MEMMAP_H_PATH} ${KERNEL_PATH}/scripts/dtc/include-prefixes/
@@ -326,6 +333,7 @@ kernel-dts: ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}
 		-exec ln -sf {} ${KERNEL_PATH}/arch/${ARCH}/boot/dts/${BRAND}/ \;
 	${Q}$(MAKE) -j${NPROC} -C ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER} dtbs
 	${Q}cp ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/arch/${ARCH}/boot/dts/${BRAND}/*.dtb ${RAMDISK_PATH}/${RAMDISK_OUTPUT_FOLDER}
+endif
 
 kernel: $(OUTPUT_DIR)/rootfs
 kernel: kernel-build

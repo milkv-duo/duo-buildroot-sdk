@@ -1,0 +1,4 @@
+[submodule "linux_6.12"]
+	path = linux_6.12
+	url = https://github.com/Troyself/milkv-duo
+	branch = duo/v6.12
