@@ -28,7 +28,6 @@ unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)]
 EXPORT_SYMBOL(empty_zero_page);
 
 extern char _start[];
-#define DTB_EARLY_BASE_VA      PGDIR_SIZE
 void *dtb_early_va __initdata;
 uintptr_t dtb_early_pa __initdata;
 
@@ -195,16 +194,44 @@ void __init setup_bootmem(void)
 	setup_initrd();
 #endif /* CONFIG_BLK_DEV_INITRD */
 
-	/*
-	 * Avoid using early_init_fdt_reserve_self() since __pa() does
-	 * not work for DTB pointers that are fixmap addresses
-	 */
-	memblock_reserve(dtb_early_pa, fdt_totalsize(dtb_early_va));
-
 	if (firmware_size > PAGE_SIZE && firmware_size < LOAD_OFFSET)
 		memblock_reserve(__pa(PAGE_OFFSET), firmware_size);
 	else
 		memblock_reserve(__pa(PAGE_OFFSET), LOAD_OFFSET);
+
+	/*
+	 * No allocation should be done before reserving the memory as defined
+	 * in the device tree, otherwise the allocation could end up in a
+	 * reserved region.
+	 */
+	early_init_fdt_scan_reserved_mem();
+
+	/*
+	 * If DTB is built in, no need to reserve its memblock.
+	 * Otherwise, do reserve it but avoid using
+	 * early_init_fdt_reserve_self() since __pa() does
+	 * not work for DTB pointers that are fixmap addresses
+	 */
+	if (!IS_ENABLED(CONFIG_BUILTIN_DTB)) {
+		/*
+		 * In case the DTB is not located in a memory region we won't
+		 * be able to locate it later on via the linear mapping and
+		 * get a segfault when accessing it via __va(dtb_early_pa).
+		 * To avoid this situation copy DTB to a memory region.
+		 * Note that memblock_phys_alloc will also reserve DTB region.
+		 */
+		if (!memblock_is_memory(dtb_early_pa)) {
+			size_t fdt_size = fdt_totalsize(dtb_early_va);
+			phys_addr_t new_dtb_early_pa = memblock_phys_alloc(fdt_size, PAGE_SIZE);
+			void *new_dtb_early_va = early_memremap(new_dtb_early_pa, fdt_size);
+
+			memcpy(new_dtb_early_va, dtb_early_va, fdt_size);
+			early_memunmap(new_dtb_early_va, fdt_size);
+			dtb_early_pa = new_dtb_early_pa;
+		} else
+			memblock_reserve(dtb_early_pa, fdt_totalsize(dtb_early_va));
+	}
+
 
 	memblock_allow_resize();
 	memblock_dump_all();
@@ -305,7 +332,6 @@ pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
 #define NUM_EARLY_PMDS		(1UL + MAX_EARLY_MAPPING_SIZE / PGDIR_SIZE)
 #endif
 pmd_t early_pmd[PTRS_PER_PMD * NUM_EARLY_PMDS] __initdata __aligned(PAGE_SIZE);
-pmd_t early_dtb_pmd[PTRS_PER_PMD] __initdata __aligned(PAGE_SIZE);
 
 static pmd_t *__init get_pmd_virt_early(phys_addr_t pa)
 {
@@ -503,26 +529,32 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
 				   load_pa + (va - PAGE_OFFSET),
 				   map_size, PAGE_KERNEL_EXEC);
 
-#ifndef __PAGETABLE_PMD_FOLDED
-	/* Setup early PMD for DTB */
-	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA,
-			   (uintptr_t)early_dtb_pmd, PGDIR_SIZE, PAGE_TABLE);
-	/* Create two consecutive PMD mappings for FDT early scan */
 	pa = dtb_pa & ~(PMD_SIZE - 1);
-	create_pmd_mapping(early_dtb_pmd, DTB_EARLY_BASE_VA,
-			   pa, PMD_SIZE, PAGE_KERNEL);
-	create_pmd_mapping(early_dtb_pmd, DTB_EARLY_BASE_VA + PMD_SIZE,
-			   pa + PMD_SIZE, PMD_SIZE, PAGE_KERNEL);
-	dtb_early_va = (void *)DTB_EARLY_BASE_VA + (dtb_pa & (PMD_SIZE - 1));
+#ifndef CONFIG_BUILTIN_DTB
+	/* Make sure the fdt fixmap address is always aligned on PMD size */
+	BUILD_BUG_ON(FIX_FDT % (PMD_SIZE / PAGE_SIZE));
+	/* In 32-bit only, the fdt lies in its own PGD */
+	if (!IS_ENABLED(CONFIG_64BIT)) {
+		create_pgd_mapping(early_pg_dir, __fix_to_virt(FIX_FDT),
+				   pa, MAX_FDT_SIZE, PAGE_KERNEL);
+	} else {
+		create_pmd_mapping(fixmap_pmd, __fix_to_virt(FIX_FDT),
+				   pa, PMD_SIZE, PAGE_KERNEL);
+		create_pmd_mapping(fixmap_pmd, __fix_to_virt(FIX_FDT) + PMD_SIZE,
+				   pa + PMD_SIZE, PMD_SIZE, PAGE_KERNEL);
+	}
+
+	dtb_early_va = (void *)__fix_to_virt(FIX_FDT) + (dtb_pa & (PMD_SIZE - 1));
 #else
-	/* Create two consecutive PGD mappings for FDT early scan */
-	pa = dtb_pa & ~(PGDIR_SIZE - 1);
-	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA,
-			   pa, PGDIR_SIZE, PAGE_KERNEL);
-	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA + PGDIR_SIZE,
-			   pa + PGDIR_SIZE, PGDIR_SIZE, PAGE_KERNEL);
-	dtb_early_va = (void *)DTB_EARLY_BASE_VA + (dtb_pa & (PGDIR_SIZE - 1));
+	/*
+	 * For 64-bit kernel, __va can't be used since it would return a linear
+	 * mapping address whereas dtb_early_va will be used before
+	 * setup_vm_final installs the linear mapping. For 32-bit kernel, as the
+	 * kernel is mapped in the linear mapping, that makes no difference.
+	 */
+	dtb_early_va = kernel_mapping_pa_to_va(XIP_FIXUP(dtb_pa));
 #endif
+
 	dtb_early_pa = dtb_pa;
 
 	/*
