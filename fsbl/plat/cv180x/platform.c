@@ -98,6 +98,9 @@ void setup_dl_flag(void)
 	uint32_t v = p_rom_api_get_boot_src();
 
 	switch (v) {
+	case BOOT_SRC_UART:
+		mmio_write_32(BOOT_SOURCE_FLAG_ADDR, MAGIC_NUM_UART_DL);
+		break;
 	case BOOT_SRC_SD:
 		mmio_write_32(BOOT_SOURCE_FLAG_ADDR, MAGIC_NUM_SD_DL);
 		break;

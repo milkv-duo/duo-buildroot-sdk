@@ -235,11 +235,19 @@ int load_blcp_2nd(int retry)
 	rtos_base = mmio_read_32(AXI_SRAM_RTOS_BASE);
 	init_comm_info(0);
 
-	time_records->release_blcp_2nd = read_time_ms();
-	if (rtos_base == CVI_RTOS_MAGIC_CODE) {
-		mmio_write_32(AXI_SRAM_RTOS_BASE, fip_param2.blcp_2nd_runaddr);
-	} else {
-		reset_c906l(fip_param2.blcp_2nd_runaddr);
+	switch (p_rom_api_get_boot_src()) {
+		case BOOT_SRC_UART:
+		// case BOOT_SRC_SD:
+		// case BOOT_SRC_USB:
+			break;
+
+		default:
+			time_records->release_blcp_2nd = read_time_ms();
+			if (rtos_base == CVI_RTOS_MAGIC_CODE) {
+				mmio_write_32(AXI_SRAM_RTOS_BASE, fip_param2.blcp_2nd_runaddr);
+			} else {
+				reset_c906l(fip_param2.blcp_2nd_runaddr);
+			}
 	}
 
 	NOTICE("C2E.\n");
