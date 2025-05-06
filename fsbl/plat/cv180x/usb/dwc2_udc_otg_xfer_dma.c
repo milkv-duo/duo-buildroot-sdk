@@ -1135,14 +1135,26 @@ static int dwc2_udc_get_status(struct dwc2_udc *dev,
 	// DWC2_CacheFlush((unsigned long) dev->usb_ctrl, ROUND(sizeof(g_status), CONFIG_SYS_CACHELINE_SIZE));
 	// flush_dcache_range((unsigned long)dev->usb_ctrl, ROUND(sizeof(g_status), CONFIG_SYS_CACHELINE_SIZE));
 
+#ifdef DWC2_DMA_EN
 	DWC2_UncachedWrite32(dev->usb_ctrl_dma_addr, &reg->in_endp[EP0_CON].diepdma);
 	DWC2_UncachedWrite32(DIEPT_SIZ_PKT_CNT(1) | DIEPT_SIZ_XFER_SIZE(2),
-	       &reg->in_endp[EP0_CON].dieptsiz);
+		&reg->in_endp[EP0_CON].dieptsiz);
 
 	ep_ctrl = DWC2_UncachedRead32(&reg->in_endp[EP0_CON].diepctl);
 	ep_ctrl &= ~(1 << 30);
 	DWC2_UncachedWrite32(ep_ctrl|DEPCTL_EPENA|DEPCTL_CNAK,
-	       &reg->in_endp[EP0_CON].diepctl);
+		&reg->in_endp[EP0_CON].diepctl);
+#else
+	DWC2_UncachedWrite32(DIEPT_SIZ_PKT_CNT(1) | DIEPT_SIZ_XFER_SIZE(2),
+		&reg->in_endp[EP0_CON].dieptsiz);
+
+	ep_ctrl = DWC2_UncachedRead32(&reg->in_endp[EP0_CON].diepctl);
+	ep_ctrl |= (DEPCTL_EPENA|DEPCTL_CNAK);
+	DWC2_UncachedWrite32(ep_ctrl, &reg->in_endp[EP0_CON].diepctl);
+
+	dwc2_ep_fifo_write(dev, ep_num, (uint8_t *)dev->usb_ctrl, sizeof(g_status));
+	DWC2_UncachedWrite32(1UL << (ep_num & 0x0f), &reg->diepempmsk);
+#endif
 	dev->ep0state = WAIT_FOR_NULL_COMPLETE;
 
 	return 0;
