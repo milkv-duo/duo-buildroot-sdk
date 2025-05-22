@@ -5,6 +5,8 @@ out/
 host-tools
 host-tools/
 
+device/target
+
 *~
 *.swp
 *.swo

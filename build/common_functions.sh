@@ -20,6 +20,11 @@ function print_notice()
   printf "\e[1;34;47m %s \e[0m\n" "$1"
 }
 
+function print_info()
+{
+  printf "\e[1;32m%s\e[0m\n" "$1"
+}
+
 # $1 : The path for removing files
 function remove_unused_files()
 {

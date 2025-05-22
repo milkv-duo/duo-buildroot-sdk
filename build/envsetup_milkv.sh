@@ -1,4 +1,12 @@
 #!/bin/bash
+
+MILKV_BOARD_ARRAY=
+MILKV_BOARD_ARRAY_LEN=
+
+MILKV_BOARD=
+MILKV_BOARD_CONFIG=
+MILKV_IMAGE_CONFIG=
+
 function _build_default_env()
 {
   # Please keep these default value!!!
@@ -33,7 +41,7 @@ function gettop()
       T=
       while [ \( ! \( -f $TOPFILE \) \) -a \( $PWD != "/" \) ]; do
         \cd ..
-	T=$(PWD= /bin/pwd -P)
+        T=$(PWD= /bin/pwd -P)
       done
       \cd "$HERE"
       if [ -f "$T/$TOPFILE" ]; then
@@ -54,7 +62,7 @@ function build_fsbl()
   _build_uboot_env
   _build_opensbi_env
   cd "$BUILD_PATH" || return
-  make fsbl-build
+  make fsbl-build || return "$?"
 )}
 
 function clean_fsbl()
@@ -75,7 +83,7 @@ function build_atf()
   print_notice "Run ${FUNCNAME[0]}() function"
   _build_atf_env
   cd "$BUILD_PATH" || return
-  make arm-trusted-firmware
+  make arm-trusted-firmware || return "$?"
 )}
 
 function clean_atf()
@@ -101,14 +109,14 @@ function build_fip_pre()
   print_notice "Run ${FUNCNAME[0]}() function"
   _build_uboot_env
   cd "$BUILD_PATH" || return
-  make fip-pre-merge
+  make fip-pre-merge || return "$?"
 )}
 
 function build_rtos()
 {(
   print_notice "Run ${FUNCNAME[0]}() function"
   cd "$BUILD_PATH" || return
-  make rtos
+  make rtos || return "$?"
 )}
 
 function clean_rtos()
@@ -155,7 +163,7 @@ function build_uboot_env_tools()
   print_notice "Run ${FUNCNAME[0]}() function"
   _build_uboot_env
   cd "$BUILD_PATH" || return
-  make u-boot-env-tools
+  make u-boot-env-tools || return "$?"
 )}
 
 function clean_uboot()
@@ -213,7 +221,7 @@ function build_bld()
 {(
   print_notice "Run ${FUNCNAME[0]}() function"
   cd "$BUILD_PATH" || return
-  make bld
+  make bld || return "$?"
 )}
 
 function clean_bld()
@@ -234,7 +242,7 @@ function build_middleware()
   _build_middleware_env
   cd "$BUILD_PATH" || return
 
-  make "$ROOTFS_DIR"
+  make "$ROOTFS_DIR" || return "$?"
 
   mkdir -p "$SYSTEM_OUT_DIR"/usr/bin
   mkdir -p "$SYSTEM_OUT_DIR"/lib
@@ -288,7 +296,6 @@ function build_middleware()
   fi
 )}
 
-
 function clean_middleware()
 {
   print_notice "Run ${FUNCNAME[0]}() function "
@@ -305,7 +312,7 @@ function build_osdrv()
   print_notice "Run ${FUNCNAME[0]}() ${1} function"
 
   cd "$BUILD_PATH" || return
-  make "$ROOTFS_DIR"
+  make "$ROOTFS_DIR" || return "$?"
 
   local osdrv_target="$1"
   if [ -z "$osdrv_target" ]; then
@@ -558,6 +565,7 @@ function cvi_setup_env()
   export SYSTEM_OUT_DIR
   export CROSS_COMPILE_PATH
   # buildroot config
+
   if [ -z "${MV_BOARD// }" ]; then
     print_error "No MV_BOARD specified!"
     return 1
@@ -627,6 +635,121 @@ function print_usage()
   printf "  -------------------------------------------------------------------------------------------------------\n"
 }
 
+
+function get_available_board()
+{
+  if [ -z "${TOP_DIR// }" ]; then
+    print_error "TOP_DIR not specified!"
+    return 1
+  fi
+
+  MILKV_BOARD_ARRAY=( $(find "${TOP_DIR}/device" -mindepth 1 -maxdepth 1 -type d -not -name 'common' -print ! -name "." | awk -F/ '{ print $NF }' | sort -t '-' -k2,2) )
+  #echo ${MILKV_BOARD_ARRAY[@]}
+
+  MILKV_BOARD_ARRAY_LEN=${#MILKV_BOARD_ARRAY[@]}
+  if [ $MILKV_BOARD_ARRAY_LEN -eq 0 ]; then
+    echo "No available config"
+    return 1
+  fi
+
+  #echo ${MILKV_BOARD_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
+}
+
+function choose_board()
+{
+  echo "Select a target to build:"
+
+  echo ${MILKV_BOARD_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
+
+  local index
+  read -p "Which would you like: " index
+
+  if [[ -z $index ]]; then
+    echo "Nothing selected."
+    return 1
+  fi
+
+  if [[ -n $index && $index =~ ^[0-9]+$ && $index -ge 1 && $index -le $MILKV_BOARD_ARRAY_LEN ]]; then
+    MILKV_BOARD="${MILKV_BOARD_ARRAY[$((index - 1))]}"
+    #echo "index: $index, Board: $MILKV_BOARD"
+  else
+    print_error "Invalid input!"
+    return 1
+  fi
+}
+
+function check_board()
+{
+  local board_name="target"
+  local board_target="${TOP_DIR}/device/${board_name}"
+
+  if [ $# -ge 1 ]; then
+    local force_target="${1}"
+    local force_path="${TOP_DIR}/device/${force_target}"
+    #echo "force_path: $force_path"
+    if [ -d "${force_path}" ]; then
+      ln -sfn "${TOP_DIR}/device/${force_target}" "${board_target}" || return $?
+    else
+      print_error "${force_path} not found!"
+      return 1
+    fi
+  fi
+
+  if [ ! -e "$board_target" ] || [ "$ARGS" == "lunch" ]; then
+    get_available_board || return $?
+    choose_board || return $?
+    ln -sfn "${TOP_DIR}/device/${MILKV_BOARD}" "${board_target}" || return $?
+  elif [ -L "$board_target" ] && [ -e "$board_target" ]; then
+    MILKV_BOARD=$(basename "$(readlink "$board_target")")
+    #echo "The link points to: $MILKV_BOARD"
+  else
+    echo "$board_target is invalid!"
+    return 1
+  fi
+
+  # MV_BOARD, MV_VENDOR, MV_BUILD_ENV, MV_BOARD_LINK
+  MILKV_BOARD_CONFIG=${board_target}/boardconfig.sh
+  if [ ! -f ${MILKV_BOARD_CONFIG} ]; then
+    print_error "${MILKV_BOARD_CONFIG} not found!"
+    return 1
+  fi
+  source ${MILKV_BOARD_CONFIG}
+
+  defconfig ${MV_BOARD_LINK} > /dev/null 2>&1 || return $?
+
+  if [ "${STORAGE_TYPE}" == "sd" ]; then
+    MILKV_IMAGE_CONFIG=${board_target}/genimage.cfg
+
+    if [ ! -f ${MILKV_IMAGE_CONFIG} ]; then
+      print_error "${MILKV_IMAGE_CONFIG} not found!"
+      return 1
+    fi
+  fi
+}
+
+function build_info()
+{
+  export MILKV_BOARD_ARRAY=${MILKV_BOARD_ARRAY}
+  export MILKV_BOARD=${MILKV_BOARD}
+  export MILKV_BOARD_CONFIG=${MILKV_BOARD_CONFIG}
+
+  print_info "Target Board: ${MILKV_BOARD}"
+  print_info "Target Board Storage: ${STORAGE_TYPE}"
+  print_info "Target Board Config: ${MILKV_BOARD_CONFIG}"
+  if [ "${STORAGE_TYPE}" == "sd" ]; then
+    export MILKV_IMAGE_CONFIG=${MILKV_IMAGE_CONFIG}
+    print_info "Target Image Config: ${MILKV_IMAGE_CONFIG}"
+  fi
+  print_info "Build tdl-sdk: ${TPU_REL}"
+
+  if [ -z "${OUTPUT_DIR// }" ]; then
+    print_error "OUTPUT_DIR is not assigned, please check!"
+    return 1
+  else
+    print_info "Output dir: ${OUTPUT_DIR}"
+  fi
+}
+
 TOP_DIR=$(gettop)
 BUILD_PATH="$TOP_DIR/build"
 export TOP_DIR BUILD_PATH
@@ -638,4 +761,19 @@ export TOP_DIR BUILD_PATH
 # shellcheck source=./common_functions.sh
 source "$TOP_DIR/build/common_functions.sh"
 
-print_usage
+#print_usage
+
+ARGS=$1
+
+if [ "$ARGS" == "list" ]; then
+  get_available_board || return $?
+elif [ "$ARGS" == "lunch" ]; then
+  check_board || return $?
+  build_info || return $?
+elif [ $# -ge 1 ]; then
+  check_board "$ARGS" || return $?
+  build_info || return $?
+else
+  check_board || return $?
+  build_info || return $?
+fi
