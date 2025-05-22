@@ -64,7 +64,7 @@ cd duo-buildroot-sdk/
 ```
 会看到编译脚本的使用方法提示：
 ```bash
-# ./build.sh
+$ ./build.sh
 ./build.sh              - Show this menu
 ./build.sh lunch        - Select a board to build
 ./build.sh [board]      - Build [board] directly, supported boards as follows:
@@ -84,7 +84,7 @@ milkv-duos-sd
 
 第一种方法是执行 `./build.sh lunch` 调出交互菜单，选择要编译的版本序号，回车：
 ```bash
-# ./build.sh lunch
+$ ./build.sh lunch
 Select a target to build:
 1. milkv-duo
 2. milkv-duo-spinand
@@ -100,7 +100,7 @@ Which would you like:
 
 第二种方法是脚本后面带上目标版本的名字，比如要编译 `milkv-duo` 的镜像:
 ```bash
-# ./build.sh milkv-duo
+$ ./build.sh milkv-duo
 ```
 
 编译成功后可以在 `out` 目录下看到生成的SD卡烧录镜像 `milkv-duo-*-*.img`，或者NOR FLASH/NAND FLASH 的烧录文件目录`milkv-duo-*-*`。
@@ -109,38 +109,61 @@ Which would you like:
 
 ### 2、分步编译
 
-如果未执行过一键编译脚本，需要先手动下载工具链 [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)，并解压到 SDK 根目录：
+如果未执行过一键编译脚本，需要先手动下载工具链 [host-tools](https://github.com/milkv-duo/host-tools.git)，再拷贝或移动到 SDK 根目录：
 
 ```bash
-tar -xf host-tools.tar.gz -C /your/sdk/path/
+git clone https://github.com/milkv-duo/host-tools.git
+cp -a host-tools duo-buildroot-sdk/
 ```
 
-再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
-```
-milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-spinand       cv1800b_milkv_duo_spinand
-milkv-duo-spinor        cv1800b_milkv_duo_spinor
-milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-spinand   cv1812cp_milkv_duo256m_spinand
-milkv-duo256m-spinor    cv1812cp_milkv_duo256m_spinor
-```
-
+加载环境：
 ```bash
-source device/[board]/boardconfig.sh
-
 source build/envsetup_milkv.sh
-defconfig [config]
+```
+如果是第一次编译，会提示选择要编译的目标：
+```bash
+Select a target to build:
+1. milkv-duo
+2. milkv-duo-spinand
+3. milkv-duo-spinor
+4. milkv-duo256m
+5. milkv-duo256m-spinand
+6. milkv-duo256m-spinor
+7. milkv-duos-emmc
+8. milkv-duos-sd
+Which would you like:
+```
+
+选择对应的数字后，回车，成功加载环境变量后，会显示一些当前目标的信息，比如：
+```bash
+Target Board: milkv-duo-sd
+Target Board Storage: sd
+Target Board Config: /build/duo-release/github/device/target/boardconfig.sh
+Target Image Config: /build/duo-release/github/device/target/genimage.cfg
+Build tdl-sdk: 0
+Output dir: /build/duo-release/github/install/soc_cv1800b_milkv_duo_sd
+```
+
+环境加载完成后，会在 `device` 目录下创建一个名为 `target` 的链接，链接到编译目标目录，下次再 source 环境时，检测到该 `target` 链接存在时，就不会再提示选择目标了。如果需要更换编译目标，可以加 `lunch` 参数重新调出交互菜单进行选择：
+```bash
+source build/envsetup_milkv.sh lunch
+```
+
+加载环境成功后，再依次输入如下命令完成分步编译：
+```bash
 clean_all
 build_all
+```
+
+如果编译的是 SD 卡镜像，还需要再执行如下命令生成 `img` 镜像：
+```bash
 pack_sd_image
 ```
 
-比如需要编译 `milkv-duo` 的镜像，分步编译命令如下：
+比如需要编译 `milkv-duos-sd` 的镜像，分步编译命令如下：
 ```bash
-source device/milkv-duo/boardconfig.sh
+source build/envsetup_milkv.sh milkv-duos-sd
 
-source build/envsetup_milkv.sh
-defconfig cv1800b_milkv_duo_sd
 clean_all
 build_all
 pack_sd_image
@@ -148,13 +171,25 @@ pack_sd_image
 
 生成的固件位置：
 ```
-Duo:      		install/soc_cv1800b_milkv_duo_sd/[board].img
-Duo(nor): 		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
-Duo(nand):		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
-Duo256M:  		install/soc_cv1812cp_milkv_duo256m_sd/[board].img
-Duo256M(nor): 		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
-Duo256M(nand):		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+Duo:            install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo(nor):       install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo(nand):      install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+Duo256M:        install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+Duo256M(nor):   install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo256M(nand):  install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+DuoS(SD):       install/soc_cv1813h_milkv_duos_sd/[board].img
+DuoS(eMMC):     install/soc_cv1813h_milkv_duos_emmc/upgrade.zip
 ```
+
+注意，SD 卡镜像为 `*.img`，eMMC镜像为 `upgrade.zip`。
+
+> [!TIP]
+> 除了使用 `build_all` 进行完整编译之外，还可以单独编译某个模块，一般来说都是先执行 `clean_xxx` 清理中间文件后，再执行 `build_xxx` 重新编译。支持的模块，可以输入 `clean_` 或者 `build_` 后，双击 `tab` 键查看。以下列出一些常用的模块编译方法：
+> - fsbl: `clean_fsbl`，`build_fsbl`
+> - uboot: `clean_uboot`，`build_uboot`
+> - kernel: `clean_kernel`，`build_kernel`
+> - osdrv: `clean_osdrv`，`build_osdrv`
+> - middleware: `clean_middleware`，`build_middleware`
 
 ## 二、使用 Docker 编译
 
@@ -227,13 +262,21 @@ docker exec -it duodocker /bin/bash -c "cd /home/work && cat /etc/issue && ./bui
 
 ### 2. 使用 Docker 分步编译
 
-如果未执行过一键编译脚本，需要先手动下载工具链 [host-tools](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)，并解压到 SDK 根目录：
+如果未执行过一键编译脚本，需要先手动下载工具链 [host-tools](https://github.com/milkv-duo/host-tools.git)，再拷贝或移动到 SDK 根目录：
 
 ```bash
-tar -xf host-tools.tar.gz -C /your/sdk/path/
+git clone https://github.com/milkv-duo/host-tools.git
+cp -a host-tools duo-buildroot-sdk/
 ```
 
-分步编译需要登陆到 Docker 中进行操作，用命令 `docker ps -a` 查看并记录容器的 ID 号，比如 8edea33c2239。
+分步编译需要登陆到 Docker 中进行操作，用命令 `docker ps -a` 查看并记录容器的 ID 号，比如 `8edea33c2239`。
+
+如果 `duodocker` 未在列表中，可能是容器已停止，需要先将其重新运行后，再查看窗口的 ID 号：
+```bash
+cd duo-buildroot-sdk/
+docker run --privileged -itd --name duodocker -v $(pwd):/home/work milkvtech/milkv-duo:latest /bin/bash
+docker ps -a
+```
 
 登陆到 Docker 中:
 ```bash
@@ -245,32 +288,54 @@ docker exec -it 8edea33c2239 /bin/bash
 root@8edea33c2239:/# cd /home/work/
 ```
 
-再依次输入如下命令完成分步编译，命令中的 `[board]` 和 `[config]` 替换为需要编译的版本，当前支持的 `board` 和对应的 `config` 如下：
-```
-milkv-duo               cv1800b_milkv_duo_sd
-milkv-duo-spinand       cv1800b_milkv_duo_spinand
-milkv-duo-spinor        cv1800b_milkv_duo_spinor
-milkv-duo256m           cv1812cp_milkv_duo256m_sd
-milkv-duo256m-spinand   cv1812cp_milkv_duo256m_spinand
-milkv-duo256m-spinor    cv1812cp_milkv_duo256m_spinor
-```
-
+加载环境：
 ```bash
-source device/[board]/boardconfig.sh
-
 source build/envsetup_milkv.sh
-defconfig [config]
+```
+如果是第一次编译，会提示选择要编译的目标：
+```bash
+Select a target to build:
+1. milkv-duo
+2. milkv-duo-spinand
+3. milkv-duo-spinor
+4. milkv-duo256m
+5. milkv-duo256m-spinand
+6. milkv-duo256m-spinor
+7. milkv-duos-emmc
+8. milkv-duos-sd
+Which would you like:
+```
+
+选择对应的数字后，回车，成功加载环境变量后，会显示一些当前目标的信息，比如：
+```bash
+Target Board: milkv-duo-sd
+Target Board Storage: sd
+Target Board Config: /build/duo-release/github/device/target/boardconfig.sh
+Target Image Config: /build/duo-release/github/device/target/genimage.cfg
+Build tdl-sdk: 0
+Output dir: /build/duo-release/github/install/soc_cv1800b_milkv_duo_sd
+```
+
+环境加载完成后，会在 `device` 目录下创建一个名为 `target` 的链接，链接到编译目标目录，下次再 source 环境时，检测到该 `target` 链接存在时，就不会再提示选择目标了。如果需要更换编译目标，可以加 `lunch` 参数重新调出交互菜单进行选择：
+```bash
+source build/envsetup_milkv.sh lunch
+```
+
+加载环境成功后，再依次输入如下命令完成分步编译：
+```bash
 clean_all
 build_all
+```
+
+如果编译的是 SD 卡镜像，还需要再执行如下命令生成 `img` 镜像：
+```bash
 pack_sd_image
 ```
 
-比如需要编译 `milkv-duo` 的镜像，分步编译命令如下：
+比如需要编译 `milkv-duos-sd` 的镜像，分步编译命令如下：
 ```bash
-source device/milkv-duo/boardconfig.sh
+source build/envsetup_milkv.sh milkv-duos-sd
 
-source build/envsetup_milkv.sh
-defconfig cv1800b_milkv_duo_sd
 clean_all
 build_all
 pack_sd_image
@@ -278,13 +343,25 @@ pack_sd_image
 
 生成的固件位置：
 ```
-Duo:      		install/soc_cv1800b_milkv_duo_sd/[board].img
-Duo(nor): 		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
-Duo(nand):		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
-Duo256M:  		install/soc_cv1812cp_milkv_duo256m_sd/[board].img
-Duo256M(nor): 		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
-Duo256M(nand):		install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+Duo:            install/soc_cv1800b_milkv_duo_sd/[board].img
+Duo(nor):       install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo(nand):      install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+Duo256M:        install/soc_cv1812cp_milkv_duo256m_sd/[board].img
+Duo256M(nor):   install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinor、rootfs.spinor
+Duo256M(nand):  install/soc_cv1800b_milkv_duo_sd/fip.bin、boot.spinand、rootfs.spinand、system.spinand、cfg.spinand
+DuoS(SD):       install/soc_cv1813h_milkv_duos_sd/[board].img
+DuoS(eMMC):     install/soc_cv1813h_milkv_duos_emmc/upgrade.zip
 ```
+
+注意，SD 卡镜像为 `*.img`，eMMC镜像为 `upgrade.zip`。
+
+> [!TIP]
+> 除了使用 `build_all` 进行完整编译之外，还可以单独编译某个模块，一般来说都是先执行 `clean_xxx` 清理中间文件后，再执行 `build_xxx` 重新编译。支持的模块，可以输入 `clean_` 或者 `build_` 后，双击 `tab` 键查看。以下列出一些常用的模块编译方法：
+> - fsbl: `clean_fsbl`，`build_fsbl`
+> - uboot: `clean_uboot`，`build_uboot`
+> - kernel: `clean_kernel`，`build_kernel`
+> - osdrv: `clean_osdrv`，`build_osdrv`
+> - middleware: `clean_middleware`，`build_middleware`
 
 编译完成后可以用 `exit` 命令退出 Docker 环境：
 ```bash
