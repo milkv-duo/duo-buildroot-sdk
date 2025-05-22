@@ -98,7 +98,7 @@ function prepare_env()
   source build/${MV_BUILD_ENV} > /dev/null 2>&1
   defconfig ${MV_BOARD_LINK} > /dev/null 2>&1
 
-  echo "OUTPUT_DIR: ${OUTPUT_DIR}"  # @build/milkvsetup.sh
+  echo "OUTPUT_DIR: ${OUTPUT_DIR}"  # @build/envsetup_milkv.sh
 
   if [ "${STORAGE_TYPE}" == "sd" ]; then
     MILKV_IMAGE_CONFIG=device/${MILKV_BOARD}/genimage.cfg
