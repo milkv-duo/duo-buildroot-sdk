@@ -203,9 +203,14 @@ class FIP:
             Entry.make("LOADER_2ND_LOADADDR", 4, int),
             Entry.make("LOADER_2ND_RESERVED1", 4, int),
             Entry.make("LOADER_2ND_RESERVED2", 4, int),
+            # u-boot_B
+            Entry.make("LOADER_2ND_B_RESERVED0", 4, int),
+            Entry.make("LOADER_2ND_B_LOADADDR", 4, int),
+            Entry.make("LOADER_2ND_B_SIZE", 4, int),
+            Entry.make("LOADER_2ND_B_RESERVED2", 4, int),
             # alios bl
             Entry.make("ALIOS_BOOT_SIZE", 4, int),
-            Entry.make("RESERVED_LAST", 4096 - 16 * 5 - 4, bytes),
+            Entry.make("RESERVED_LAST", 4096 - 16 * 6 - 4, bytes),
         ]
     )
 
@@ -215,6 +220,7 @@ class FIP:
             Entry.make("BLCP_2ND", None, bytes),
             Entry.make("MONITOR", None, bytes),
             Entry.make("LOADER_2ND", None, bytes),
+            Entry.make("LOADER_2ND_B", None, bytes),
         ]
     )
 
@@ -600,6 +606,15 @@ class FIP:
 
         self.body2["LOADER_2ND"].content = self.pad(hdr + body, IMAGE_ALIGN)
 
+    def add_loader_2nd_b(self, args):
+        if args.LOADER_2ND_B == "":
+            return
+        with open(args.LOADER_2ND_B, "rb") as fp:
+            loader_2nd_b = fp.read()
+
+        logging.debug("loader_2nd_b=%#x bytes", len(loader_2nd_b))
+        self.body2["LOADER_2ND_B"].content = loader_2nd_b
+
     def pack_loader_2nd(self, fip_bin):
         logging.debug("pack_loader_2nd:")
         if not len(self.body2["LOADER_2ND"].content):
@@ -614,6 +629,23 @@ class FIP:
 
         # Append LOADER_2ND to body2
         return fip_bin + self.body2["LOADER_2ND"].content
+
+    def pack_loader_2nd_b(self, fip_bin):
+        logging.debug("pack_loader_2nd_b:")
+        if not len(self.body2["LOADER_2ND_B"].content):
+            return
+
+        fip_bin = self.pad(fip_bin, IMAGE_ALIGN)
+
+        # Append LOADER_2ND_B to body2
+        loader_2nd_b = self.pad(self.body2["LOADER_2ND_B"].content, IMAGE_ALIGN)
+
+        logging.debug("pack_loader_2nd_b:LOADER_2ND_B_LOADADDR=%d, LOADER_2ND_B_SIZE=%d ", len(fip_bin), len(loader_2nd_b))
+
+        self.param2["LOADER_2ND_B_LOADADDR"].content = len(fip_bin)
+        self.param2["LOADER_2ND_B_SIZE"].content = len(loader_2nd_b)
+
+        return fip_bin + loader_2nd_b
 
     def insert_param1(self, fip_bin, name, value):
         fip_bin = bytearray(fip_bin)
@@ -651,6 +683,9 @@ class FIP:
         if len(self.body2["LOADER_2ND"].content):
             fip_bin = self.pack_loader_2nd(fip_bin)
 
+        if len(self.body2["LOADER_2ND_B"].content):
+            fip_bin = self.pack_loader_2nd_b(fip_bin)
+
         # Pack param2_bin
         param2_bin = b"".join((entry.content for entry in self.param2.values()))
         self.param2["PARAM2_CKSUM"].content = self.image_crc(param2_bin[self.param2["PARAM2_CKSUM"].end :])
@@ -686,6 +721,7 @@ METHODS = {
     "BLCP_2ND": FIP.add_blcp_2nd,
     "MONITOR": FIP.add_monitor,
     "LOADER_2ND": FIP.add_loader_2nd,
+    "LOADER_2ND_B": FIP.add_loader_2nd_b,
 }
 
 

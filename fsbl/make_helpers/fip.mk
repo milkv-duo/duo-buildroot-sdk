@@ -12,6 +12,12 @@ else ifeq (${BOOT_CPU},riscv)
 MONITOR_PATH = ../opensbi/build/platform/generic/firmware/fw_dynamic.bin
 endif
 
+ifeq (${ENABLE_BURN_BUTTON},y)
+LOADER_2ND_PATH_B=${UBOOT_PATH}/${UBOOT_OUTPUT_FOLDER}/u-boot-raw.bin
+else
+LOADER_2ND_PATH_B=
+endif
+
 fip%: export BLCP_IMG_RUNADDR=0x05200200
 fip%: export BLCP_PARAM_LOADADDR=0
 fip%: export NAND_INFO=00000000
@@ -25,6 +31,10 @@ else
 fip%: export NOR_INFO=$(shell printf '%72s' | tr ' ' 'FF')
 endif
 fip%: export DDR_PARAM_TEST_PATH = test/cv181x/ddr_param.bin
+
+# Defaults for keys dir and fipsign script
+FIPSIGN_SCRIPT ?= ./plat/${CHIP_ARCH}/fipsign.py
+FSBL_KEYS_DIR ?= ./plat/keys
 
 ifeq (${CONFIG_ENABLE_EMMC_HW_RESET_QFN},y)
 $(eval $(call add_define,CONFIG_ENABLE_EMMC_HW_RESET_QFN))
@@ -65,7 +75,8 @@ fip_boot0: fip-dep
 		--CHIP_CONF='${CHIP_CONF_PATH}' \
 		--NOR_INFO='${NOR_INFO}' \
 		--NAND_INFO='${NAND_INFO}'\
-		--BL2='${BUILD_PLAT}/bl2.bin'
+		--BL2='${BUILD_PLAT}/bl2.bin'\
+		--LOADER_2ND_B='${LOADER_2ND_PATH_B}'
 	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/boot0')
 	${Q}cp ${BUILD_PLAT}/boot0 ${OUTPUT_DIR}
 
@@ -98,5 +109,58 @@ fip-all: fip-dep
 		--BLCP_2ND='${BLCP_2ND_PATH}' \
 		--MONITOR='${MONITOR_PATH}' \
 		--LOADER_2ND='${LOADER_2ND_PATH}' \
+		--compress='${FIP_COMPRESS}'\
+		--LOADER_2ND_B='${LOADER_2ND_PATH_B}'
+	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/fip.bin')
 		--compress='${FIP_COMPRESS}'
 	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/fip.bin')
+
+ifeq (${FSBL_SECURE_BOOT_SUPPORT},1)
+.PHONY: fip-sign fip-sign-enc boot0-sign boot0-sign-enc
+ifeq (${BUILD_BOOT0},y)
+fip:boot0-sign boot0-sign-enc
+boot0-sign: fip_boot0
+	$(print_target)
+	${Q}echo "  [SIGN] boot0 -> boot0_signed"
+	${Q}python3 ${FIPSIGN_SCRIPT} sign \
+		--root-priv='${FSBL_KEYS_DIR}/rsa_hash0.pem' \
+		--bl-priv='${FSBL_KEYS_DIR}/bl_priv.pem' \
+		'${BUILD_PLAT}/boot0' \
+		'${BUILD_PLAT}/boot0_signed'
+	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/boot0_signed')
+boot0-sign-enc: fip_boot0
+	$(print_target)
+	${Q}echo "  [SIGN-ENC] boot0 -> boot0_signed_enc"
+	${Q}python3 ${FIPSIGN_SCRIPT} sign-enc \
+		--root-priv='${FSBL_KEYS_DIR}/rsa_hash0.pem' \
+		--bl-priv='${FSBL_KEYS_DIR}/bl_priv.pem' \
+		--ldr-ek='${FSBL_KEYS_DIR}/root_ek.key' \
+		--bl-ek='${FSBL_KEYS_DIR}/bl_ek.key' \
+		'${BUILD_PLAT}/boot0' \
+		'${BUILD_PLAT}/boot0_signed_enc'
+	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/boot0_signed')
+else
+fip:fip-sign fip-sign-enc
+fip-sign: fip-all
+	$(print_target)
+	${Q}echo "  [SIGN] fip.bin -> fip_signed.bin"
+	${Q}python3 ${FIPSIGN_SCRIPT} sign \
+		--root-priv='${FSBL_KEYS_DIR}/rsa_hash0.pem' \
+		--bl-priv='${FSBL_KEYS_DIR}/bl_priv.pem' \
+		'${BUILD_PLAT}/fip.bin' \
+		'${BUILD_PLAT}/fip_signed.bin'
+	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/fip_signed.bin')
+
+fip-sign-enc: fip-all
+	$(print_target)
+	${Q}echo "  [SIGN-ENC] fip.bin -> fip_signed_enc.bin"
+	${Q}python3 ${FIPSIGN_SCRIPT} sign-enc \
+		--root-priv='${FSBL_KEYS_DIR}/rsa_hash0.pem' \
+		--bl-priv='${FSBL_KEYS_DIR}/bl_priv.pem' \
+		--ldr-ek='${FSBL_KEYS_DIR}/root_ek.key' \
+		--bl-ek='${FSBL_KEYS_DIR}/bl_ek.key' \
+		'${BUILD_PLAT}/fip.bin' \
+		'${BUILD_PLAT}/fip_signed_enc.bin'
+	${Q}echo "  [LS] " $$(ls -l '${BUILD_PLAT}/fip_signed_enc.bin')
+endif
+endif

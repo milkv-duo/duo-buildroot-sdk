@@ -198,6 +198,12 @@ ifeq ($(OD_CLK_SEL),y)
 $(eval $(call add_define,OD_CLK_SEL))
 endif
 
+ifeq ($(ENABLE_BURN_BUTTON),y)
+$(eval $(call add_define,ENABLE_BURN_BUTTON))
+$(eval $(call add_define_val,GPIO_GRP,${GPIO_GRP}))
+$(eval $(call add_define_val,GPIO_PIN,${GPIO_PIN}))
+endif
+
 $(eval $(call add_define,FSBL_SECURE_BOOT_SUPPORT))
 $(eval $(call add_define, USB_DL_BY_FSBL))
 

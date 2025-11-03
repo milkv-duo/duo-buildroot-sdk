@@ -304,6 +304,58 @@ int load_monitor(int retry, uint64_t *monitor_entry)
 	return 0;
 }
 
+#ifdef ENABLE_BURN_BUTTON
+
+int button_usb_down_pressed(void)
+{
+	// Modify the GPIO configuration as needed!!!!!!!!!
+	uint8_t gpio_grp = GPIO_GRP, gpio_pin = GPIO_PIN; // XGPIOB[3];
+	NOTICE("gpio_grp = %d gpio_pin = %d\n", gpio_grp, gpio_pin);
+
+	// gpio base addr: gpioa, gpiob, gpioc, gpiod, pwr_gpio;
+	uint32_t gpio_base[5] = { 0x03020000, 0x03021000, 0x03022000, 0x03023000, 0x05021000 };
+	uint32_t gpio_direction_addr = gpio_base[gpio_grp] + 0x4;
+	uint32_t gpio_value_addr = gpio_base[gpio_grp] + 0x50;
+	uint32_t val = 0x1;
+
+	/* pinmux config */
+	// mmio_write_32(0x03001098, 0x3);
+
+	/* open internel pull up */
+	// mmio_write_32(0x05027020, 0x44);
+
+	/* gpio input mode */
+	val = mmio_read_32(gpio_direction_addr) & (~(1 << gpio_pin));
+	mmio_write_32(gpio_direction_addr, val);
+
+	/* gpio debouncing */
+	val = (mmio_read_32(gpio_value_addr) >> gpio_pin) & 0x1;
+	NOTICE("key value = %u (key down should be 0)\n", val);
+	if (!val) {
+		mdelay(10);
+		val = (mmio_read_32(gpio_value_addr) >> gpio_pin) & 0x1;
+		NOTICE("repeat key value = %u (key down should be 0)\n", val);
+		return !val;
+	}
+	return 0; // pressed:1 unpressed:0
+}
+
+int load_uboot(void *image_buf, int retry)
+{
+	int ret = -1;
+	int reading_size = 0;
+
+	reading_size = ROUND_UP(fip_param2.loader_2nd_b_size, BLOCK_SIZE);
+	NOTICE("reading_size:%x, addr:=0x%x\n", reading_size, fip_param2.loader_2nd_b_loadaddr);
+	ret = load_data_from_storage(image_buf, fip_param2.loader_2nd_b_loadaddr, reading_size, retry);
+	if (ret < 0) {
+		return -1;
+	}
+	return 0;
+}
+
+#endif
+
 int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 {
 	struct loader_2nd_header *loader_2nd_header = &sram_union_buf.loader_2nd_header;
@@ -328,6 +380,18 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 	NOTICE("L2/0x%x/0x%x/0x%lx/0x%x/0x%x\n", loader_2nd_header->magic, loader_2nd_header->cksum,
 	       loader_2nd_header->runaddr, loader_2nd_header->size, reading_size);
 
+#ifdef ENABLE_BURN_BUTTON
+	if (button_usb_down_pressed()) {
+		NOTICE("usb_down button pressed.\n");
+		mmio_write_32(BOOT_SOURCE_FLAG_ADDR, MAGIC_NUM_USB_DL);
+		loader_2nd_header->runaddr = CONFIG_SYS_TEXT_BASE;
+		ret = load_uboot((void *)loader_2nd_header->runaddr, retry);
+		if (ret < 0) {
+			return -1;
+		}
+		goto done;
+	}
+#endif
 	switch (loader_2nd_header->magic) {
 	case LOADER_2ND_MAGIC_LZMA:
 		comp_type = COMP_LZMA;
@@ -388,7 +452,9 @@ int load_loader_2nd(int retry, uint64_t *loader_2nd_entry)
 
 		reading_size = dst_size;
 	}
-
+#ifdef ENABLE_BURN_BUTTON
+done:
+#endif
 	flush_dcache_range(loader_2nd_header->runaddr, reading_size);
 	time_records->fsbl_decomp_end = read_time_ms();
 	NOTICE("Loader_2nd loaded.\n");
@@ -423,7 +489,7 @@ int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
 	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
 	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
 	if (security_is_tee_enabled()) {
-		ret = dec_verify_image(image_buf, fip_param2.alios_boot_size, 0, fip_param1);
+		ret = dec_verify_image(image_buf,size_alios, 0, fip_param1);
 		if (ret < 0) {
 			ERROR("verify alios boot0 failed (%d)\n", ret);
 			return ret;
