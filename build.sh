@@ -31,9 +31,9 @@ function milkv_build()
   clean_all
   build_all
   if [ $? -eq 0 ]; then
-    print_info "Build board ${MILKV_BOARD} success!"
+    show_info "Build board ${MILKV_BOARD} success!"
   else
-    print_err "Build board ${MILKV_BOARD} failed!"
+    show_err "Build board ${MILKV_BOARD} failed!"
     exit 1
   fi
 }
@@ -49,9 +49,9 @@ function milkv_pack_sd()
 
   if [ -f "${img_in}" ]; then
     mv ${img_in} out/${img_out}
-    print_info "Create SD image successful: out/${img_out}"
+    show_info "Create SD image successful: out/${img_out}"
   else
-    print_err "Create SD image failed!"
+    show_err "Create SD image failed!"
     exit 1
   fi
 }
@@ -65,9 +65,9 @@ function milkv_pack_emmc()
 
   if [ -f "${img_in}" ]; then
     mv ${img_in} out/${img_out}
-    print_info "Create eMMC image successful: out/${img_out}"
+    show_info "Create eMMC image successful: out/${img_out}"
   else
-    print_err "Create eMMC image failed!"
+    show_err "Create eMMC image failed!"
     exit 1
   fi
 }
@@ -89,9 +89,9 @@ function milkv_pack_nor_nand()
     fi
 
     echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-boot." >> out/$img_out_patch/how_to_download.txt
-    print_info "Create spinor/nand img successful: ${img_out_patch}"
+    show_info "Create spinor/nand img successful: ${img_out_patch}"
   else
-    print_err "Create spinor/nand img failed!"
+    show_err "Create spinor/nand img failed!"
     exit 1
   fi
 }
@@ -110,7 +110,7 @@ function milkv_pack()
 function list_boards()
 {
   for board in "${MILKV_BOARD_ARRAY[@]}"; do
-    print_info "$board"
+    show_info "$board"
   done
 }
 
