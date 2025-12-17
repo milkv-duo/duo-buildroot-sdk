@@ -149,7 +149,7 @@ void sys_pll_od(void)
 	uint32_t byp0_value;
 
 	uint32_t pll_syn_set[] = {
-		614400000, // set apll synthesizer  98.304 M
+		614440960, // set apll synthesizer  98.304 M
 		610080582, // set disp synthesizer  99 M
 		610080582, // set cam0 synthesizer  99 M
 		//586388132, // set cam1 synthesizer  103 M
@@ -275,7 +275,7 @@ void sys_pll_nd(int vc_overdrive)
 	uint32_t byp0_value;
 
 	uint32_t pll_syn_set[] = {
-		614400000, // set apll synthesizer  98.304 M
+		614440960, // set apll synthesizer  98.304 M
 		610080582, // set disp synthesizer  99 M
 		610080582, // set cam0 synthesizer  99 M
 		615164587, // set cam1 synthesizer  98.18181818 M
