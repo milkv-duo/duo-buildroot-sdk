@@ -3,12 +3,12 @@
 TOP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 cd ${TOP_DIR}
 
-function show_info()
+function print_info()
 {
   printf "\e[1;94m%s\e[0m\n" "$1"
 }
 
-function show_err()
+function print_error()
 {
   printf "\e[1;31mError: %s\e[0m\n" "$1"
 }
@@ -33,7 +33,7 @@ function milkv_build()
   if [ $? -eq 0 ]; then
     print_info "Build board ${MILKV_BOARD} success!"
   else
-    print_err "Build board ${MILKV_BOARD} failed!"
+    print_error "Build board ${MILKV_BOARD} failed!"
     exit 1
   fi
 }
@@ -51,7 +51,7 @@ function milkv_pack_sd()
     mv ${img_in} out/${img_out}
     print_info "Create SD image successful: out/${img_out}"
   else
-    print_err "Create SD image failed!"
+    print_erro "Create SD image failed!"
     exit 1
   fi
 }
@@ -67,7 +67,7 @@ function milkv_pack_emmc()
     mv ${img_in} out/${img_out}
     print_info "Create eMMC image successful: out/${img_out}"
   else
-    print_err "Create eMMC image failed!"
+    print_erro "Create eMMC image failed!"
     exit 1
   fi
 }
@@ -91,7 +91,7 @@ function milkv_pack_nor_nand()
     echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-boot." >> out/$img_out_patch/how_to_download.txt
     print_info "Create spinor/nand img successful: ${img_out_patch}"
   else
-    print_err "Create spinor/nand img failed!"
+    print_erro "Create spinor/nand img failed!"
     exit 1
   fi
 }
@@ -117,14 +117,14 @@ function list_boards()
 function get_toolchain()
 {
   if [ ! -d host-tools ]; then
-    show_info "Toolchain does not exist, download it now..."
+    print_info "Toolchain does not exist, download it now..."
 
     toolchain_url="https://github.com/milkv-duo/host-tools.git"
     echo "toolchain_url: ${toolchain_url}"
 
     git clone ${toolchain_url}
     if [ $? -ne 0 ]; then
-      show_err "Failed to download ${toolchain_url} !"
+      show_error "Failed to download ${toolchain_url} !"
       exit 1
     fi
   fi
@@ -149,7 +149,7 @@ if [ $# -ge 1 ]; then
       check_board ${1} || exit $?
       build_info || exit $?
     else
-      show_err "${1} not supported!"
+      print_error "${1} not supported!"
       echo "Available boards:"
       list_boards
       exit $?
