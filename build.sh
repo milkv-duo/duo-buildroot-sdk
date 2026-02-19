@@ -51,7 +51,7 @@ function milkv_pack_sd()
     mv ${img_in} out/${img_out}
     print_info "Create SD image successful: out/${img_out}"
   else
-    print_erro "Create SD image failed!"
+    print_error "Create SD image failed!"
     exit 1
   fi
 }
@@ -67,7 +67,7 @@ function milkv_pack_emmc()
     mv ${img_in} out/${img_out}
     print_info "Create eMMC image successful: out/${img_out}"
   else
-    print_erro "Create eMMC image failed!"
+    print_error "Create eMMC image failed!"
     exit 1
   fi
 }
@@ -91,7 +91,7 @@ function milkv_pack_nor_nand()
     echo "Copy all to a blank tf card, power on and automatically download firmware to NOR or NAND in U-boot." >> out/$img_out_patch/how_to_download.txt
     print_info "Create spinor/nand img successful: ${img_out_patch}"
   else
-    print_erro "Create spinor/nand img failed!"
+    print_error "Create spinor/nand img failed!"
     exit 1
   fi
 }
@@ -124,7 +124,7 @@ function get_toolchain()
 
     git clone ${toolchain_url}
     if [ $? -ne 0 ]; then
-      show_error "Failed to download ${toolchain_url} !"
+      print_error "Failed to download ${toolchain_url} !"
       exit 1
     fi
   fi
