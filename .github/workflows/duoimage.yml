@@ -1,4 +1,4 @@
-name: Bulid Milk-V Duo Image
+name: Build Milk-V Duo Image
 
 on:
   push:
