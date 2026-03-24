@@ -69,6 +69,8 @@ void ddrc_init(void)
 	#endif
 		mmio_wr32(0x08004000 + 0xe4, 0x000B03BF);
 		mmio_wr32(0x08004000 + 0x100, 0x0E111F10);
+          	if (get_ddr_vendor() == DDR_VENDOR_ETRON_1G)
+			mmio_wr32(0x08004000 + 0x100, mmio_rd32(0x08004000 + 0x100) + 0x3000000);
 		mmio_wr32(0x08004000 + 0x104, 0x00030417);
 		mmio_wr32(0x08004000 + 0x108, 0x0507060A);
 		mmio_wr32(0x08004000 + 0x10c, 0x00002007);
@@ -145,6 +147,8 @@ void ddrc_init(void)
 		// SCHED.prefer_write:1:1:=0x0
 		// SCHED.dis_opt_wrecc_collision_flush:0:1:=0x1
 		mmio_wr32(0x08004000 + 0x254, 0x00000000);
+          	if (get_ddr_vendor() == DDR_VENDOR_ETRON_1G)
+			mmio_wr32(0x08004000 + 0x254, 0x40);
 		// SCHED1.page_hit_limit_rd:28:3:=0x0
 		// SCHED1.page_hit_limit_wr:24:3:=0x0
 		// SCHED1.visible_window_limit_rd:20:3:=0x0

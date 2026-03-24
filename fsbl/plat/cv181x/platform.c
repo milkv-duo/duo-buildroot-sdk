@@ -507,7 +507,7 @@ void switch_rtc_mode_1st_stage(void)
 		NOTICE("return %s %dwarmboot_entry\n",__func__,__LINE__);
 		return;
 	}
-		
+
 #endif
 
 #ifdef CONFIG_SUSPEND
@@ -550,6 +550,7 @@ void switch_rtc_mode_1st_stage(void)
 	// reg_clk32k_cg_en = rtc_ctrl0[11] -> 1
 	write_data = 0x0C000000 | (read_data & 0xffffffff) | (0x1 << 11);
 	mmio_write_32(REG_RTC_CTRL_BASE + RTC_CTRL0, write_data); //rtc_ctrl0
+	NOTICE("Switch RTC mode to xtal32k\n");
 }
 
 void switch_rtc_mode_2nd_stage(void)

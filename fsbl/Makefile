@@ -211,6 +211,9 @@ ifeq ($(SUSPEND),y)
 $(eval $(call add_define,CONFIG_SUSPEND))
 endif
 
+ifeq (${SWITCH_32K_XTAL},y)
+$(eval $(call add_define,SWITCH_32K_XTAL))
+endif
 ################################################################################
 # Build targets
 ################################################################################

@@ -97,7 +97,9 @@ void bl2_main(void)
 
 	setup_dl_flag();
 
+#ifdef SWITCH_32K_XTAL
 	switch_rtc_mode_1st_stage();
+#endif
 
 	set_rtc_en_registers();
 

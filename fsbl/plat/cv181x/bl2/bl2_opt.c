@@ -550,7 +550,7 @@ retry_from_flash:
 	sync_cache();
 	console_flush();
 
-	switch_rtc_mode_2nd_stage();
+	// switch_rtc_mode_2nd_stage();
 #else
 	#ifdef ENABLE_FASTBOOT0
 	mmio_write_32(0x030020B8, 0x00030009);
@@ -562,7 +562,7 @@ retry_from_flash:
 	#endif
 	sync_cache();
 
-	switch_rtc_mode_2nd_stage();
+	// switch_rtc_mode_2nd_stage();
 	monitor_entry = run_addr;
 #endif
 

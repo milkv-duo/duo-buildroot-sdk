@@ -269,7 +269,7 @@ static int bm_emmc_set_ext_csd(unsigned int index, unsigned int value)
 
 int bm_emmc_set_clk(int clk)
 {
-	int base, div;
+	int base, div, div_high, div_low;
 
 	if (clk <= 0) {
 		ERROR("%s clk: %d is invalid\n", __func__, clk);
@@ -279,13 +279,13 @@ int bm_emmc_set_clk(int clk)
 	if (bm_params.clk_rate <= clk) {
 		div = 0;
 	} else {
-		for (div = 0x1; div < 0xFF; div++) {
+		for (div = 0x1; div <= 0x3FF; div++) {
 			if (bm_params.clk_rate / (2 * div) <= clk)
 				break;
 		}
 	}
 
-	if (div > 0xFF) {
+	if (div > 0x3FF) {
 		ERROR("%s div: 0x%x is invalid\n", __func__, div);
 		return -EINVAL;
 	}
@@ -294,12 +294,15 @@ int bm_emmc_set_clk(int clk)
 	if (mmio_read_16(base + SDHCI_HOST_CONTROL2) & 1 << 15) {
 		INFO("Use SDCLK Preset Value\n");
 	} else {
-		INFO("Set SDCLK by driver. (Source, Target, div, Actual) = (%d, %d, %d, %d)\n", bm_params.clk_rate, clk,
-		     div, bm_params.clk_rate / (2 * div));
+		INFO("Set SDCLK by driver. (Source, Target, div, Actual) = (%d, %d, %d, %d)\n",
+			bm_params.clk_rate, clk, div, bm_params.clk_rate / (2 * div));
+
+		div_high = (div >> 8) & 0x3;
+		div_low = div & 0xFF;
 		mmio_write_16(base + SDHCI_CLK_CTRL,
 			      mmio_read_16(base + SDHCI_CLK_CTRL) & ~0x9); // disable INTERNAL_CLK_EN and PLL_ENABLE
 		mmio_write_16(base + SDHCI_CLK_CTRL,
-			      (mmio_read_16(base + SDHCI_CLK_CTRL) & 0xDF) | div << 8); // set clk div
+    		(mmio_read_16(base + SDHCI_CLK_CTRL) & 0x3F) | (div_low << 8) | (div_high << 6)); // set clk div, div[8:9] -> reg[6:7], div[0:7] -> reg[8:15]
 		mmio_write_16(base + SDHCI_CLK_CTRL,
 			      mmio_read_16(base + SDHCI_CLK_CTRL) | 0x1); // set INTERNAL_CLK_EN
 		udelay(150);
@@ -334,6 +337,8 @@ static void bm_emmc_hw_init(void)
 	mmio_write_8(base + SDHCI_TOUT_CTRL, 0xe); // for TMCLK 50Khz
 	mmio_setbits_16(base + SDHCI_HOST_CONTROL2, 1 << 11); // set cmd23 support
 	mmio_setbits_16(vendor_base + VENDOR_EMMC_CTRL, 0x1);
+
+	mmio_clrbits_16(base + SDHCI_CLK_CTRL, (0x1 << 5));
 
 	// set clk.Toshiba/Scandisk eMMC don't support 400khz.
 	bm_emmc_set_clk(EMMC_INIT_FREQ);
