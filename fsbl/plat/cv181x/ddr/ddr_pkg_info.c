@@ -63,6 +63,26 @@ void read_ddr_pkg_info(void)
 		ddr_capacity = DDR_CAPACITY_512M;
 		pkg = PKG_QFN;
 		break;
+	case 0x8: //QFN9x9, SIP 1Gb DDR3
+		ddr_vendor = DDR_VENDOR_UNILC_N25_1G;
+		ddr_capacity = DDR_CAPACITY_1G;
+		pkg = PKG_QFN;
+		break;
+	case 0x9: //QFN9x9, SIP 2Gb DDR3
+		ddr_vendor = DDR_VENDOR_UNILC_N21_2G;
+		ddr_capacity = DDR_CAPACITY_2G;
+		pkg = PKG_QFN;
+		break;
+	case 0xA: //QFN9x9, SIP 2Gb DDR3
+		ddr_vendor = DDR_VENDOR_ESMT_N21_2G;
+		ddr_capacity = DDR_CAPACITY_2G;
+		pkg = PKG_QFN;
+		break;
+	case 0xB:
+		ddr_vendor = DDR_VENDOR_ESMT_2G;
+		ddr_capacity = DDR_CAPACITY_2G;
+		pkg = PKG_BGA;
+		break;
 	default:
 		NOTICE("unknown pkg_type=0x%x\n", pkg_type);
 	}
@@ -77,6 +97,11 @@ void read_ddr_pkg_info(void)
 		ddr_type = DDR_TYPE_DDR2;
 		ddr_data_rate = 1333;
 		break;
+	case DDR_VENDOR_UNILC_N25_512M_DDR2:
+		NOTICE("DDR2");
+		ddr_type = DDR_TYPE_DDR2;
+		ddr_data_rate = 1333;
+		break;
 	case DDR_VENDOR_NY_4G:
 	case DDR_VENDOR_NY_2G:
 	case DDR_VENDOR_ESMT_1G:
@@ -85,6 +110,31 @@ void read_ddr_pkg_info(void)
 	case DDR_VENDOR_PM_2G:
 	case DDR_VENDOR_PM_1G:
 	case DDR_VENDOR_ESMT_N25_1G:
+		NOTICE("DDR3");
+		ddr_type = DDR_TYPE_DDR3;
+		ddr_data_rate = 1866;
+		break;
+	case DDR_VENDOR_NY_N20_1G:
+		NOTICE("DDR3");
+		ddr_type = DDR_TYPE_DDR3;
+		ddr_data_rate = 1866;
+		break;
+	case DDR_VENDOR_UNILC_N25_1G:
+		NOTICE("DDR3");
+		ddr_type = DDR_TYPE_DDR3;
+		ddr_data_rate = 1866;
+		break;
+	case DDR_VENDOR_UNILC_N21_2G:
+		NOTICE("DDR3");
+		ddr_type = DDR_TYPE_DDR3;
+		ddr_data_rate = 1866;
+		break;
+	case DDR_VENDOR_ESMT_N21_2G:
+		NOTICE("DDR3");
+		ddr_type = DDR_TYPE_DDR3;
+		ddr_data_rate = 1866;
+		break;
+	case DDR_VENDOR_ESMT_N19_4G:
 		NOTICE("DDR3");
 		ddr_type = DDR_TYPE_DDR3;
 		ddr_data_rate = 1866;
