@@ -7,7 +7,7 @@
 
 //regpatch_ddr2_1333_x16_qfn.c
 
-struct regpatch ddr_patch_regs[] = {
+static struct regpatch _ddr_patch_regs_sip[] = {
 	// tune damp //////
 	{0x08000150, 0xFFFFFFFF, 0x00000005},
 
@@ -106,4 +106,11 @@ struct regpatch ddr_patch_regs[] = {
 	{0x08000934, 0xFFFFFFFF, 0x04000400},
 };
 
-uint32_t ddr_patch_regs_count = ARRAY_SIZE(ddr_patch_regs);
+struct regpatch *ddr_patch_regs;
+uint32_t ddr_patch_regs_count;
+
+void ddr_patch_regs_init(void)
+{
+	ddr_patch_regs = _ddr_patch_regs_sip;
+	ddr_patch_regs_count = ARRAY_SIZE(_ddr_patch_regs_sip);
+}

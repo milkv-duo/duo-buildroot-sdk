@@ -219,6 +219,36 @@ void cvx16_pinmux(void)
 		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x63410725);
 		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000008);
 		break;
+	case DDR_EXTERN_DDR2:
+		// external ddr2
+		mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x0C060B08);
+		mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x03000709);
+		mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x11040A02);
+		mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x01160005);
+		mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x00101314);
+		mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x00000012);
+		mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
+		mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
+		mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x68502143);
+		mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000007);
+		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x02768143);
+		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000005);
+		break;
+	case DDR_EXTERN_DDR3:
+		// external ddr3
+		mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x0D080212);
+		mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x00040709);
+		mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x0E0B1506);
+		mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x030A0C05);
+		mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x14101613);
+		mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x000F1101);
+		mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
+		mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
+		mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x38754062);
+		mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000001);
+		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x62475103);
+		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000008);
+		break;
 	}
 
 #ifdef ETRON_DDR2_512

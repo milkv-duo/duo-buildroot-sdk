@@ -309,6 +309,26 @@ void ctrl_init_update_by_dram_size(uint8_t dram_cap_in_mbyte)
 {
 	uint8_t dram_cap_in_mbyte_per_dev;
 
+	// Print capacity for external DDR after training
+	if (get_ddr_vendor() == DDR_EXTERN_DDR2 || get_ddr_vendor() == DDR_EXTERN_DDR3) {
+		switch (dram_cap_in_mbyte) {
+		case 6:
+			NOTICE("External DDR capacity: 512M\n");
+			break;
+		case 7:
+			NOTICE("External DDR capacity: 1G\n");
+			break;
+		case 8:
+			NOTICE("External DDR capacity: 2G\n");
+			break;
+		case 9:
+			NOTICE("External DDR capacity: 4G\n");
+			break;
+		default:
+			NOTICE("External DDR capacity: Unknown, %u\n", dram_cap_in_mbyte);
+		}
+	}
+
 	rddata = mmio_rd32(0x08004000 + 0x0);
 	dram_cap_in_mbyte_per_dev = dram_cap_in_mbyte;
 	dram_cap_in_mbyte_per_dev >>= (1 - get_bits_from_value(rddata, 13, 12)); // change sys cap to x16 cap

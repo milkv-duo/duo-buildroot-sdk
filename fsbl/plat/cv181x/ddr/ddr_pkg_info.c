@@ -23,68 +23,81 @@ void read_ddr_pkg_info(void)
 	NOTICE("FTSN4=0x%08x\n", mmio_read_32(0x03050110));
 #endif // DBG_SHMOO || DBG_SHMOO_CA || DBG_SHMOO_CS
 
-	pkg_type = FIELD_GET(conf_info, 30, 28);
-	NOTICE("pkg_type=%x\n", pkg_type);
-
-	switch (pkg_type) {
-	case 0x0: //BGA 10x10, SIP 2Gb DDR3
-		ddr_vendor = DDR_VENDOR_NY_2G;
-		ddr_capacity = DDR_CAPACITY_2G;
-		pkg = PKG_BGA;
-		break;
-	case 0x1: //BGA 10x10, SIP 4Gb DDR3
-		ddr_vendor = DDR_VENDOR_NY_4G;
-		ddr_capacity = DDR_CAPACITY_4G;
-		pkg = PKG_BGA;
-		break;
-	case 0x2: //BGA 10x10, SIP 1Gb DDR3
-		ddr_vendor = DDR_VENDOR_ESMT_1G;
-		ddr_capacity = DDR_CAPACITY_1G;
-		pkg = PKG_BGA;
-		break;
-	case 0x4: //2nd src need to read from efuse
-		NOTICE("2nd\n");
-		ddr_vendor = FIELD_GET(efuse_leakage, 25, 21);
-		ddr_capacity = FIELD_GET(efuse_leakage, 28, 26);
+	/* External DDR detection (independent of pkg_type):
+	 * capacity == 0 in efuse indicates no SIP DDR is present.
+	 * DDR2/DDR3 cannot be distinguished at this point,
+	 * default to DDR3 since there is no DDR2 requirement.
+	 */
+	if (FIELD_GET(efuse_leakage, 28, 26) == DDR_CAPACITY_UNKNOWN) {
+		NOTICE("External DDR3 detected\n");
 		pkg = FIELD_GET(efuse_leakage, 31, 29);
-		break;
-	case 0x5: //QFN9x9, SIP 2Gb DDR3
-		ddr_vendor = DDR_VENDOR_NY_2G;
-		ddr_capacity = DDR_CAPACITY_2G;
-		pkg = PKG_QFN;
-		break;
-	case 0x6: //QFN9x9, SIP 1Gb DDR3
-		ddr_vendor = DDR_VENDOR_ESMT_1G;
-		ddr_capacity = DDR_CAPACITY_1G;
-		pkg = PKG_QFN;
-		break;
-	case 0x7: //QFN9x9, SIP 512Mb DDR2
-		ddr_vendor = DDR_VENDOR_ESMT_512M_DDR2;
-		ddr_capacity = DDR_CAPACITY_512M;
-		pkg = PKG_QFN;
-		break;
-	case 0x8: //QFN9x9, SIP 1Gb DDR3
-		ddr_vendor = DDR_VENDOR_UNILC_N25_1G;
-		ddr_capacity = DDR_CAPACITY_1G;
-		pkg = PKG_QFN;
-		break;
-	case 0x9: //QFN9x9, SIP 2Gb DDR3
-		ddr_vendor = DDR_VENDOR_UNILC_N21_2G;
-		ddr_capacity = DDR_CAPACITY_2G;
-		pkg = PKG_QFN;
-		break;
-	case 0xA: //QFN9x9, SIP 2Gb DDR3
-		ddr_vendor = DDR_VENDOR_ESMT_N21_2G;
-		ddr_capacity = DDR_CAPACITY_2G;
-		pkg = PKG_QFN;
-		break;
-	case 0xB:
-		ddr_vendor = DDR_VENDOR_ESMT_2G;
-		ddr_capacity = DDR_CAPACITY_2G;
-		pkg = PKG_BGA;
-		break;
-	default:
-		NOTICE("unknown pkg_type=0x%x\n", pkg_type);
+		ddr_vendor = DDR_EXTERN_DDR3;
+		ddr_capacity = DDR_CAPACITY_UNKNOWN;
+	} else {
+
+		pkg_type = FIELD_GET(conf_info, 30, 28);
+		NOTICE("pkg_type=%x\n", pkg_type);
+
+		switch (pkg_type) {
+		case 0x0: //BGA 10x10, SIP 2Gb DDR3
+			ddr_vendor = DDR_VENDOR_NY_2G;
+			ddr_capacity = DDR_CAPACITY_2G;
+			pkg = PKG_BGA;
+			break;
+		case 0x1: //BGA 10x10, SIP 4Gb DDR3
+			ddr_vendor = DDR_VENDOR_NY_4G;
+			ddr_capacity = DDR_CAPACITY_4G;
+			pkg = PKG_BGA;
+			break;
+		case 0x2: //BGA 10x10, SIP 1Gb DDR3
+			ddr_vendor = DDR_VENDOR_ESMT_1G;
+			ddr_capacity = DDR_CAPACITY_1G;
+			pkg = PKG_BGA;
+			break;
+		case 0x4: //2nd src need to read from efuse
+			NOTICE("2nd\n");
+			ddr_vendor = FIELD_GET(efuse_leakage, 25, 21);
+			ddr_capacity = FIELD_GET(efuse_leakage, 28, 26);
+			pkg = FIELD_GET(efuse_leakage, 31, 29);
+			break;
+		case 0x5: //QFN9x9, SIP 2Gb DDR3
+			ddr_vendor = DDR_VENDOR_NY_2G;
+			ddr_capacity = DDR_CAPACITY_2G;
+			pkg = PKG_QFN;
+			break;
+		case 0x6: //QFN9x9, SIP 1Gb DDR3
+			ddr_vendor = DDR_VENDOR_ESMT_1G;
+			ddr_capacity = DDR_CAPACITY_1G;
+			pkg = PKG_QFN;
+			break;
+		case 0x7: //QFN9x9, SIP 512Mb DDR2
+			ddr_vendor = DDR_VENDOR_ESMT_512M_DDR2;
+			ddr_capacity = DDR_CAPACITY_512M;
+			pkg = PKG_QFN;
+			break;
+		case 0x8: //QFN9x9, SIP 1Gb DDR3
+			ddr_vendor = DDR_VENDOR_UNILC_N25_1G;
+			ddr_capacity = DDR_CAPACITY_1G;
+			pkg = PKG_QFN;
+			break;
+		case 0x9: //QFN9x9, SIP 2Gb DDR3
+			ddr_vendor = DDR_VENDOR_UNILC_N21_2G;
+			ddr_capacity = DDR_CAPACITY_2G;
+			pkg = PKG_QFN;
+			break;
+		case 0xA: //QFN9x9, SIP 2Gb DDR3
+			ddr_vendor = DDR_VENDOR_ESMT_N21_2G;
+			ddr_capacity = DDR_CAPACITY_2G;
+			pkg = PKG_QFN;
+			break;
+		case 0xB:
+			ddr_vendor = DDR_VENDOR_ESMT_2G;
+			ddr_capacity = DDR_CAPACITY_2G;
+			pkg = PKG_BGA;
+			break;
+		default:
+			NOTICE("unknown pkg_type=0x%x\n", pkg_type);
+		}
 	}
 
 	NOTICE("D%x_%x_%x\n", pkg, ddr_capacity, ddr_vendor);
@@ -93,11 +106,8 @@ void read_ddr_pkg_info(void)
 	switch (ddr_vendor) {
 	case DDR_VENDOR_ESMT_512M_DDR2:
 	case DDR_VENDOR_ETRON_512M_DDR2:
-		NOTICE("DDR2");
-		ddr_type = DDR_TYPE_DDR2;
-		ddr_data_rate = 1333;
-		break;
 	case DDR_VENDOR_UNILC_N25_512M_DDR2:
+	case DDR_EXTERN_DDR2:
 		NOTICE("DDR2");
 		ddr_type = DDR_TYPE_DDR2;
 		ddr_data_rate = 1333;
@@ -110,40 +120,24 @@ void read_ddr_pkg_info(void)
 	case DDR_VENDOR_PM_2G:
 	case DDR_VENDOR_PM_1G:
 	case DDR_VENDOR_ESMT_N25_1G:
-		NOTICE("DDR3");
-		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
-		break;
 	case DDR_VENDOR_NY_N20_1G:
-		NOTICE("DDR3");
-		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
-		break;
 	case DDR_VENDOR_UNILC_N25_1G:
-		NOTICE("DDR3");
-		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
-		break;
 	case DDR_VENDOR_UNILC_N21_2G:
-		NOTICE("DDR3");
-		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
-		break;
 	case DDR_VENDOR_ESMT_N21_2G:
-		NOTICE("DDR3");
-		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
-		break;
 	case DDR_VENDOR_ESMT_N19_4G:
+	case DDR_EXTERN_DDR3:
 		NOTICE("DDR3");
 		ddr_type = DDR_TYPE_DDR3;
-		ddr_data_rate = 1866;
+		// ddr_data_rate = 800;
+		// ddr_data_rate = 1333;
+		// ddr_data_rate = 1600;
 		break;
 	default:
 		NOTICE("unknown vendor=%d", ddr_vendor);
 		ddr_type = DDR_TYPE_UNKNOWN;
 	}
 
+	chip_id = 0x0;
 	switch (ddr_capacity) {
 	case DDR_CAPACITY_512M:
 		NOTICE("-512M");
@@ -162,8 +156,10 @@ void read_ddr_pkg_info(void)
 		chip_id = 0x1813f;
 		break;
 	default:
-		NOTICE("-unknown capacity=%d", ddr_capacity);
-		chip_id = 0x0;
+		if (ddr_vendor != DDR_EXTERN_DDR2 && ddr_vendor != DDR_EXTERN_DDR3) {
+			NOTICE("-unknown capacity=%d", ddr_capacity);
+			chip_id = 0x0;
+		}
 	}
 	mmio_write_32(REG_GP_REG3, chip_id);
 
@@ -175,7 +171,7 @@ void read_ddr_pkg_info(void)
 		NOTICE("-BGA\n");
 		break;
 	default:
-		NOTICE("-unknown pkg=%d", pkg);
+		NOTICE("-unknown pkg=%d\n", pkg);
 	}
 }
 
