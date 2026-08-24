@@ -25,13 +25,19 @@ void read_ddr_pkg_info(void)
 
 	/* External DDR detection (independent of pkg_type):
 	 * capacity == 0 in efuse indicates no SIP DDR is present.
-	 * DDR2/DDR3 cannot be distinguished at this point,
-	 * default to DDR3 since there is no DDR2 requirement.
+	 * Use build-time DDR type (DDR2/DDR3 macro) to decide whether
+	 * this board is wired for external DDR2 or DDR3, since efuse
+	 * does not carry this information. This also selects the right
+	 * PHYD pinmux in cvx16_pinmux.c.
 	 */
 	if (FIELD_GET(efuse_leakage, 28, 26) == DDR_CAPACITY_UNKNOWN) {
-		NOTICE("External DDR3 detected\n");
+		NOTICE("External DDR detected\n");
 		pkg = FIELD_GET(efuse_leakage, 31, 29);
+#if defined(DDR2)
+		ddr_vendor = DDR_EXTERN_DDR2;
+#else
 		ddr_vendor = DDR_EXTERN_DDR3;
+#endif
 		ddr_capacity = DDR_CAPACITY_UNKNOWN;
 	} else {
 
@@ -128,9 +134,7 @@ void read_ddr_pkg_info(void)
 	case DDR_EXTERN_DDR3:
 		NOTICE("DDR3");
 		ddr_type = DDR_TYPE_DDR3;
-		// ddr_data_rate = 800;
-		// ddr_data_rate = 1333;
-		// ddr_data_rate = 1600;
+		// ddr_data_rate = 1866;
 		break;
 	default:
 		NOTICE("unknown vendor=%d", ddr_vendor);
@@ -156,7 +160,10 @@ void read_ddr_pkg_info(void)
 		chip_id = 0x1813f;
 		break;
 	default:
-		if (ddr_vendor != DDR_EXTERN_DDR2 && ddr_vendor != DDR_EXTERN_DDR3) {
+		if (ddr_vendor == DDR_EXTERN_DDR2 || ddr_vendor == DDR_EXTERN_DDR3) {
+			/* external DDR, no SIP DDR: identify as CV1815J */
+			chip_id = 0x1815;
+		} else {
 			NOTICE("-unknown capacity=%d", ddr_capacity);
 			chip_id = 0x0;
 		}

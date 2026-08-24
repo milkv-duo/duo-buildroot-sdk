@@ -47,6 +47,8 @@ ifneq ($(findstring 2133, ${DDR_CFG}),)
     $(eval $(call add_define,_mem_freq_2133))
 else ifneq ($(findstring 1866, ${DDR_CFG}),)
     $(eval $(call add_define,_mem_freq_1866))
+else ifneq ($(findstring 1600, ${DDR_CFG}),)
+    $(eval $(call add_define,_mem_freq_1600))
 else ifneq ($(findstring 1333, ${DDR_CFG}),)
     $(eval $(call add_define,_mem_freq_1333))
 endif
