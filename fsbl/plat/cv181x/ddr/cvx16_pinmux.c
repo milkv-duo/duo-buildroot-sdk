@@ -3,6 +3,40 @@
 #include <ddr_sys.h>
 #include <ddr_pkg_info.h>
 
+static void cvx16_pinmux_esmt_n21_2g_qfn(void)
+{
+	// ESMT_N21_DDR3_2G_QFN88
+	mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x08070D09);
+	mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x0605020B);
+	mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x14040100);
+	mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x1503000C);
+	mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x0A001213);
+	mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x00111016);
+	mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
+	mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
+	mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x82315764);
+	mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000000);
+	mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x67513208);
+	mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000004);
+}
+
+static void cvx16_pinmux_esmt_n21_2g_bga(void)
+{
+	// ESMT_N21_DDR3_2G_BGA
+	mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x08070D09);
+	mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x0605020B);
+	mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x14040100);
+	mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x1503000C);
+	mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x16001213);
+	mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x0011100A);
+	mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
+	mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
+	mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x82315746);
+	mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000000);
+	mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x67513208);
+	mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000004);
+}
+
 void cvx16_pinmux(void)
 {
 	uartlog("%s\n", __func__);
@@ -175,19 +209,14 @@ void cvx16_pinmux(void)
 		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000004);
 		break;
 	case DDR_VENDOR_ESMT_N21_2G:
-		// ESMT_N21_DDR3_2G
-		mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x08070D09);
-		mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x0605020B);
-		mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x14040100);
-		mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x1503000C);
-		mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x16001213);
-		mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x0011100A);
-		mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
-		mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
-		mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x82315746);
-		mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000000);
-		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x67513208);
-		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000004);
+		/* Select by package; unknown packages default to BGA. */
+		if (get_pkg() == PKG_QFN)
+			cvx16_pinmux_esmt_n21_2g_qfn();
+		else if (get_pkg() == PKG_BGA)
+			cvx16_pinmux_esmt_n21_2g_bga();
+		else
+			/* Sample pkg fallback; production should not hit. */
+			cvx16_pinmux_esmt_n21_2g_bga();
 		break;
 	case DDR_VENDOR_ESMT_N19_4G:
 		// ESMT_DDR3_4G_19nm
