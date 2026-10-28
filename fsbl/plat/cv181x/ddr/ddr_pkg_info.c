@@ -124,7 +124,7 @@ void read_ddr_pkg_info(void)
 	case DDR_VENDOR_ETRON_1G:
 	case DDR_VENDOR_ESMT_2G:
 	case DDR_VENDOR_PM_2G:
-	case DDR_VENDOR_PM_1G:
+	case DDR_VENDOR_ETRON_N20_2G:
 	case DDR_VENDOR_ESMT_N25_1G:
 	case DDR_VENDOR_NY_N20_1G:
 	case DDR_VENDOR_UNILC_N25_1G:

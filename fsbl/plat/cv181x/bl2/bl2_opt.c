@@ -18,6 +18,7 @@
 #include <delay_timer.h>
 #include <security/security.h>
 #include <emmc/emmc.h>
+#include <cv_spi_nand.h>
 
 uint64_t load_addr = 0x0c000;
 uint64_t run_addr   = 0x8000C000;
@@ -180,10 +181,11 @@ static int load_data_from_storage(void *buffer, uint32_t offset, uint32_t size, 
 	}
 
 	//use BL2 eMMC driver to load image
-	if (boot_src == BOOT_SRC_EMMC)
+	if (boot_src == BOOT_SRC_EMMC) {
 		return emmc_read_fip_bl2(offset, size, (uintptr_t)buffer);
-	else
+	} else {
 		return p_rom_api_load_image(buffer, offset, size, retry);
+	}
 }
 
 int load_blcp_2nd(int retry)
@@ -486,7 +488,31 @@ int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
 	image_buf = (void *)runaddr_alios;
 	NOTICE("loadaddr_alios:0x%lx runaddr_alios:0x%lx.\n", loadaddr_alios, runaddr_alios);
 
+#ifdef BOOT_SPINAND
+	/* SPI-NAND uses the in-tree raw-read driver: read linearly by physical
+	 * page, bypassing the ROM API FIP (FIPH/fip_vector) scan. The single-image
+	 * RTT boot partition is not in the NAND-FIP layout, so the ROM API returns
+	 * FIP0NC. get_nand_info() self-calibrates the geometry on the first read.
+	 * Compiled only into spinand boot0 images; the full-FIP paths are untouched,
+	 * symmetric with cv180x. */
+	{
+		static int nand_info_ready;
+
+		if (!nand_info_ready) {
+			get_nand_info();
+			nand_info_ready = 1;
+		}
+		ret = cv_spi_nand_read_data(image_buf, loadaddr_alios, size_alios);
+	}
+#else
 	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
+#endif
+	/* Must check the return value: the original code ignored ret and jumped to
+	 * run_addr executing garbage on a failed load, causing a panic. */
+	if (ret < 0) {
+		ERROR("load loader_2nd_alios failed (%d)\n", ret);
+		return ret;
+	}
 	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
 	if (security_is_tee_enabled()) {
 		ret = dec_verify_image(image_buf,size_alios, 0, fip_param1);

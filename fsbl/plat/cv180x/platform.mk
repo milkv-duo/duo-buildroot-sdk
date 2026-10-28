@@ -72,6 +72,7 @@ BL2_SRCS = \
 	${BL_COMMON_SOURCES} \
 	plat/${CHIP_ARCH}/platform_device.c \
 	plat/${CHIP_ARCH}/bl2/bl2_opt.c \
+	plat/${CHIP_ARCH}/bl2/cvi_spinand.c \
 	lib/utils/decompress.c \
 	plat/${CHIP_ARCH}/usb/cps_cvi.c  \
 	plat/${CHIP_ARCH}/usb/usb_tty.c  \

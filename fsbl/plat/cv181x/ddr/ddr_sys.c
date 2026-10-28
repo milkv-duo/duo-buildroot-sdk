@@ -1948,6 +1948,13 @@ void cvx16_INT_ISR_08(void)
 
 	//----------------------------------------------------
 	cvx16_ddr_phy_power_on_seq2();
+	// JESD79-3 requires RESET# to remain low for at least 200us after
+	// VDD is stable. On this platform the RESET# pad is driven low once
+	// the PHY output stage is enabled (power_on_seq1/seq2) and released
+	// only after dfi_init_complete lets the DDRC init FSM run. Holding
+	// 200us here lengthens the RESET# low pulse accordingly (measured
+	// on board: 40us -> 230+us), clearing the spec minimum with margin.
+	udelay(200);
 	cvx16_set_dfi_init_complete();
 }
 

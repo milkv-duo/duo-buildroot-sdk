@@ -219,6 +219,21 @@ void cvx16_pinmux(void)
 		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x63410725);
 		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000008);
 		break;
+	case DDR_VENDOR_ETRON_N20_2G:
+		// Etron_N20_DDR3_2G (ERD3CBA20-HA2133, GELMV QFN88 SIP)
+		mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x08070D09);
+		mmio_write_32(0x0004 + PHYD_BASE_ADDR, 0x06010B02);
+		mmio_write_32(0x0008 + PHYD_BASE_ADDR, 0x0C000405);
+		mmio_write_32(0x000C + PHYD_BASE_ADDR, 0x13151403);
+		mmio_write_32(0x0010 + PHYD_BASE_ADDR, 0x0A001612);
+		mmio_write_32(0x0014 + PHYD_BASE_ADDR, 0x00110010);
+		mmio_write_32(0x0018 + PHYD_BASE_ADDR, 0x00000000);
+		mmio_write_32(0x001C + PHYD_BASE_ADDR, 0x00000100);
+		mmio_write_32(0x0020 + PHYD_BASE_ADDR, 0x20317546);
+		mmio_write_32(0x0024 + PHYD_BASE_ADDR, 0x00000008);
+		mmio_write_32(0x0028 + PHYD_BASE_ADDR, 0x67512308);
+		mmio_write_32(0x002C + PHYD_BASE_ADDR, 0x00000004);
+		break;
 	case DDR_EXTERN_DDR2:
 		// external ddr2
 		mmio_write_32(0x0000 + PHYD_BASE_ADDR, 0x0C060B08);

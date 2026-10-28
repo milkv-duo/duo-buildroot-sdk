@@ -18,6 +18,7 @@
 #include <delay_timer.h>
 #include <security/security.h>
 #include <cv_usb.h>
+#include <cv_spi_nand.h>
 
 uint64_t load_addr = 0x0c000;
 uint64_t run_addr   = 0x8000C000;
@@ -448,7 +449,31 @@ int load_loader_2nd_alios(int retry, uint64_t *loader_2nd_entry)
 	image_buf = (void *)runaddr_alios;
 	NOTICE("loadaddr_alios:0x%lx runaddr_alios:0x%lx.\n", loadaddr_alios, runaddr_alios);
 
+#ifdef BOOT_SPINAND
+	/* SPI-NAND uses the in-tree raw-read driver: read linearly by physical
+	 * page, bypassing the ROM API FIP (FIPH/fip_vector) scan. The single-image
+	 * RTT boot partition is not in the NAND-FIP layout, so the ROM API returns
+	 * FIP0NC. get_nand_info() self-calibrates the geometry on the first read.
+	 * cv180x has no load_data_from_storage aggregator, so branch here by the
+	 * compile-time medium macro. */
+	{
+		static int nand_info_ready;
+
+		if (!nand_info_ready) {
+			get_nand_info();
+			nand_info_ready = 1;
+		}
+		ret = cv_spi_nand_read_data(image_buf, loadaddr_alios, size_alios);
+	}
+#else
 	ret = p_rom_api_load_image(image_buf, loadaddr_alios, size_alios, retry);
+#endif
+	/* Must check the return value: the original code ignored ret and jumped to
+	 * run_addr executing garbage on a failed load, causing a panic. */
+	if (ret < 0) {
+		ERROR("load loader_2nd_alios failed (%d)\n", ret);
+		return ret;
+	}
 	NOTICE("image_buf:0x%lx.\n", *((uint64_t *)runaddr_alios));
 	if (security_is_tee_enabled()) {
 		ret = dec_verify_image(image_buf, fip_param2.alios_boot_size, 0, fip_param1);
