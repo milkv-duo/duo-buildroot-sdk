@@ -5,6 +5,51 @@
 #include <aarch64/bl2_helper.h>
 #include <bl2.h>
 #include <delay_timer.h>
+#include <mmio.h>
+
+#define GICD_BASE 0x01F01000U
+#define GICC_BASE 0x01F02000U
+
+/*
+ * Hand the GIC over to a non-secure single-OS image (RT-Thread et al).
+ *
+ * Scope: AArch64 only — this file is compiled solely for BOOT_CPU=aarch64
+ * (Makefile includes lib/cpu/${BOOT_CPU}/cpu.mk), and the only caller is
+ * jump_to_loader_2nd() below, i.e. the direct-jump path taken when the fip
+ * carries no monitor (load_monitor() leaves monitor_entry at 0). Monitor
+ * flows (dual-OS / BL31) go jump_to_monitor() -> jump_bl31() and never reach
+ * this code, since the monitor reconfigures the GIC itself.
+ *
+ * Why it must happen here, at EL3: GICD_IGROUPR and GICD_NSACR for SGI/PPI
+ * are banked-secure registers. GIC reset state puts every interrupt in
+ * Group0 (secure, FIQ-only), and the NS-side driver (e.g. RT-Thread's
+ * libcpu/aarch64 gic.c, running at EL1) cannot move them to Group1 — its
+ * IGROUPR writes are ignored. Only secure EL3 can do the hand-off, so if it
+ * is skipped the NS image boots with no interrupts at all (no tick).
+ */
+static void gic_secure_init_for_ns_el1(void)
+{
+	unsigned int i;
+
+	mmio_write_32(GICD_BASE + 0x000, 0x0);
+
+	/* Make all SGI/PPI/SPI Group1 so NS EL1 can receive them as IRQ. */
+	for (i = 0; i < 5; i++) {
+		mmio_write_32(GICD_BASE + 0x080 + i * 4, 0xffffffff);
+	}
+
+	/* Let NS access SGI/PPI control where GICv2 security extension enforces it. */
+	mmio_write_32(GICD_BASE + 0x0e00, 0xffffffff); /* NSACR0 */
+
+	mmio_write_32(GICD_BASE + 0x000, 0x3);
+
+	mmio_write_32(GICC_BASE + 0x004, 0xff);
+	mmio_write_32(GICC_BASE + 0x008, 0x7);
+	mmio_write_32(GICC_BASE + 0x000, 0x3);
+
+	__asm__ volatile ("dsb sy; isb" ::: "memory");
+}
+
 
 void switch_el3_to_el2_ns(uintptr_t bl2_entry)
 {
@@ -160,6 +205,8 @@ void switch_el3_to_el2_ns(uintptr_t bl2_entry)
 
 	ATF_STATE = ATF_STATE_BL2_MAIN + 1;
 	time_records->fsbl_exit = read_time_ms();
+
+	gic_secure_init_for_ns_el1();
 
 	call_with_eret(bl2_entry);
 

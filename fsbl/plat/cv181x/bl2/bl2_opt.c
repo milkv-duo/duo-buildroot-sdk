@@ -589,7 +589,16 @@ retry_from_flash:
 	sync_cache();
 
 	// switch_rtc_mode_2nd_stage();
+#ifdef __riscv
+	/*
+	 * RISC-V: jump_to_loader_2nd() is empty; jump_to_monitor() calls the
+	 * image directly in M-mode, which is how the loaded image is started.
+	 * AArch64: leave monitor_entry at 0 so jump_to_loader_2nd() drops to
+	 * EL2-NS. jump_to_monitor() would enter the image at secure EL3 with
+	 * BL31 params, and the image loaded here is not a BL31 monitor.
+	 */
 	monitor_entry = run_addr;
+#endif
 #endif
 
 	if (monitor_entry) {

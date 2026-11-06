@@ -213,7 +213,8 @@ uint32_t ddr_patch_regs_count;
 
 void ddr_patch_regs_init(void)
 {
-	if (get_ddr_vendor() == DDR_EXTERN_DDR3) {
+	if (get_ddr_vendor() == DDR_VENDOR_EXTERN_DDR3_1815J ||
+	    get_ddr_vendor() == DDR_VENDOR_EXTERN_DDR3_1815K) {
 		ddr_patch_regs = _ddr_patch_regs_ext;
 		ddr_patch_regs_count = ARRAY_SIZE(_ddr_patch_regs_ext);
 	} else {

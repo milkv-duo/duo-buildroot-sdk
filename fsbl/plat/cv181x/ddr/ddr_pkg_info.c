@@ -23,22 +23,32 @@ void read_ddr_pkg_info(void)
 	NOTICE("FTSN4=0x%08x\n", mmio_read_32(0x03050110));
 #endif // DBG_SHMOO || DBG_SHMOO_CA || DBG_SHMOO_CS
 
-	/* External DDR detection (independent of pkg_type):
-	 * capacity == 0 in efuse indicates no SIP DDR is present.
-	 * Use build-time DDR type (DDR2/DDR3 macro) to decide whether
-	 * this board is wired for external DDR2 or DDR3, since efuse
-	 * does not carry this information. This also selects the right
-	 * PHYD pinmux in cvx16_pinmux.c.
+	/* External DDR is identified by the package field alone:
+	 * pkg (efuse_leakage[31:29]) = 5 (BGA285, CV1815J) or
+	 * 6 (BGA320, CV1815K/CV1848K). The package is a better
+	 * external-DDR indicator than the efuse capacity field, so
+	 * capacity is not consulted here. Encoding: 1=QFN88, 2=BGA205,
+	 * 3=QFN68, 4=QFN96, 5=BGA285, 6=BGA320, 7=BGA169(CV1904G).
 	 */
-	if (FIELD_GET(efuse_leakage, 28, 26) == DDR_CAPACITY_UNKNOWN) {
+	pkg = FIELD_GET(efuse_leakage, 31, 29);
+	NOTICE("pkg=%x\n", pkg);
+
+	if (pkg == 0x5 || pkg == 0x6) {
 		NOTICE("External DDR detected\n");
-		pkg = FIELD_GET(efuse_leakage, 31, 29);
-#if defined(DDR2)
-		ddr_vendor = DDR_EXTERN_DDR2;
-#else
-		ddr_vendor = DDR_EXTERN_DDR3;
-#endif
 		ddr_capacity = DDR_CAPACITY_UNKNOWN;
+		if (pkg == 0x6) {
+			ddr_vendor = DDR_VENDOR_EXTERN_DDR3_1815K;
+		} else {
+			/* DDR2/DDR3 is a build-time choice: ddr.mk injects
+			 * DDR2/DDR3 from the DDR_CFG directory name, there
+			 * is no runtime DDR2/DDR3 auto-detection.
+			 */
+#if defined(DDR2)
+			ddr_vendor = DDR_VENDOR_EXTERN_DDR2_1815J;
+#else
+			ddr_vendor = DDR_VENDOR_EXTERN_DDR3_1815J;
+#endif
+		}
 	} else {
 
 		pkg_type = FIELD_GET(conf_info, 30, 28);
@@ -113,7 +123,7 @@ void read_ddr_pkg_info(void)
 	case DDR_VENDOR_ESMT_512M_DDR2:
 	case DDR_VENDOR_ETRON_512M_DDR2:
 	case DDR_VENDOR_UNILC_N25_512M_DDR2:
-	case DDR_EXTERN_DDR2:
+	case DDR_VENDOR_EXTERN_DDR2_1815J:
 		NOTICE("DDR2");
 		ddr_type = DDR_TYPE_DDR2;
 		ddr_data_rate = 1333;
@@ -131,7 +141,9 @@ void read_ddr_pkg_info(void)
 	case DDR_VENDOR_UNILC_N21_2G:
 	case DDR_VENDOR_ESMT_N21_2G:
 	case DDR_VENDOR_ESMT_N19_4G:
-	case DDR_EXTERN_DDR3:
+	case DDR_VENDOR_ETRON_N25_2G:
+	case DDR_VENDOR_EXTERN_DDR3_1815J:
+	case DDR_VENDOR_EXTERN_DDR3_1815K:
 		NOTICE("DDR3");
 		ddr_type = DDR_TYPE_DDR3;
 		// ddr_data_rate = 1866;
@@ -160,7 +172,9 @@ void read_ddr_pkg_info(void)
 		chip_id = 0x1813f;
 		break;
 	default:
-		if (ddr_vendor == DDR_EXTERN_DDR2 || ddr_vendor == DDR_EXTERN_DDR3) {
+		if (ddr_vendor == DDR_VENDOR_EXTERN_DDR2_1815J ||
+		    ddr_vendor == DDR_VENDOR_EXTERN_DDR3_1815J ||
+		    ddr_vendor == DDR_VENDOR_EXTERN_DDR3_1815K) {
 			/* external DDR, no SIP DDR: identify as CV1815J */
 			chip_id = 0x1815;
 		} else {
