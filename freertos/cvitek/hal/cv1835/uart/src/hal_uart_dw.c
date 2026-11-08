@@ -46,7 +46,9 @@ void hal_uart_putc(uint8_t ch)
 int hal_uart_getc(void)
 {
 	while (!(uart->lsr & UART_LSR_DR))
-		return (int)uart->rbr;
+		;
+
+	return (int)uart->rbr;
 }
 
 int hal_uart_tstc(void)
